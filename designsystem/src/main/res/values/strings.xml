@@ -1,0 +1,101 @@
+<resources>
+    <string name="rating_reviews_suffix">%1$d Reviews</string>
+    <string name="address_edit">Edit</string>
+    <string name="quantity_label">Quantity</string>
+    <string name="login_required_msg">Login required</string>
+    <string name="login_required_title">Login Required</string>
+    <string name="login_required_btn">Login</string>
+    <string name="profile_cancel">Cancel</string>
+    <string name="stepper_label">Step</string>
+    <string name="app_name">CareNest</string>
+    <string name="currency_egp">EGP</string>
+    <string name="currency_gbp">GBP</string>
+    <string name="currency_jpy">JPY</string>
+    <string name="currency_eur">EUR</string>
+    <string name="currency_usd">USD</string>
+    <string name="connectivity_back_online_banner">Back online</string>
+    <string name="connectivity_offline_banner">Offline</string>
+    <string name="common_leading_icon">Leading Icon</string>
+    <string name="common_trailing_icon">Trailing Icon</string>
+    <string name="common_error_icon">Error Icon</string>
+    <string name="status_verified">Verified</string>
+    <string name="status_pending">Pending</string>
+    <string name="action_view">View</string>
+    <string name="action_edit">Edit</string>
+    <string name="payout_title">Select Payout Method</string>
+    <string name="payout_bank_transfer">Bank Transfer</string>
+    <string name="payout_vodafone_cash">Vodafone Cash</string>
+    <string name="payout_instapay">InstaPay</string>
+    <string name="payout_arrival_bank">Est. arrival: 2–3 business days</string>
+    <string name="payout_arrival_vodafone">Est. arrival: Within 24 hours</string>
+    <string name="payout_arrival_instant">Est. arrival: Instant</string>
+    <string name="payout_fastest">FASTEST</string>
+    <string name="payout_info">Withdrawals may be subject to a small processing fee depending on your bank\'s policy.</string>
+    <string name="action_withdraw">Withdraw</string>
+    <string name="earnings_total_title">Total Earnings (This Month)</string>
+    <string name="earnings_vs_last_month">%1$d%% vs last month</string>
+    <string name="earnings_jobs_suffix">%1$d Jobs</string>
+    <string name="transactions_title">Transaction History</string>
+    <string name="transactions_statement">Statement</string>
+    <string name="transactions_all_services">All Services</string>
+    <string name="transactions_this_month">This Month</string>
+    <string name="transactions_filter">Sort</string>
+    <string name="status_completed">Completed</string>
+    <string name="status_processing">Processing</string>
+    <string name="status_canceled">Canceled</string>
+    <string name="patient_label">Patient: %1$s</string>
+    <string name="ongoing_visit_title">Ongoing Visit</string>
+    <string name="visit_step_arrived">Arrived</string>
+    <string name="visit_step_assessment">Assessment</string>
+    <string name="visit_step_treatment">Treatment in progress</string>
+    <string name="visit_step_summary">Post-Care Summary</string>
+    <string name="elapsed_time_label">ELAPSED TIME</string>
+    <string name="vital_status_label">VITAL STATUS</string>
+    <string name="action_complete_visit">Complete Visit</string>
+    <string name="action_view_checklist">View Clinical Checklist</string>
+
+    <!-- My Bookings screen -->
+    <string name="my_bookings_title">My Bookings</string>
+    <string name="my_bookings_subtitle">Manage your care schedule and history</string>
+    <string name="bookings_tab_upcoming">Upcoming</string>
+    <string name="bookings_tab_ongoing">Ongoing</string>
+    <string name="bookings_tab_completed">Completed</string>
+    <string name="bookings_tab_cancelled">Cancelled</string>
+    <string name="bookings_action_view_details">View Details</string>
+    <string name="bookings_action_download_report">Download Report</string>
+    <string name="bookings_label_active_now">Active Now</string>
+    <string name="bookings_label_cancelled_by">Cancelled by patient</string>
+    <string name="bookings_status_upcoming">Upcoming</string>
+    <string name="bookings_status_ongoing">Ongoing</string>
+    <string name="bookings_status_completed">Completed</string>
+    <string name="bookings_status_cancelled">Cancelled</string>
+
+    <!-- Availability screen -->
+    <string name="availability_title">Availability</string>
+    <string name="availability_accepting_bookings_title">Accepting Bookings</string>
+    <string name="availability_accepting_bookings_subtitle">Manage your current visibility</string>
+    <string name="availability_section_working_days">Working Days</string>
+    <string name="availability_section_working_hours">Working Hours</string>
+    <string name="availability_section_service_areas">Service Areas</string>
+    <string name="availability_section_travel_distance">Travel Distance</string>
+    <string name="availability_day_mon">Mon</string>
+    <string name="availability_day_tue">Tue</string>
+    <string name="availability_day_wed">Wed</string>
+    <string name="availability_day_thu">Thu</string>
+    <string name="availability_day_fri">Fri</string>
+    <string name="availability_day_sat">Sat</string>
+    <string name="availability_day_sun">Sun</string>
+    <string name="availability_label_start_time">Start Time</string>
+    <string name="availability_label_end_time">End Time</string>
+    <string name="availability_hours_applied_note">Applied to all selected working days</string>
+    <string name="availability_add_new_area">Add New Area</string>
+    <string name="availability_distance_unit_miles">miles</string>
+    <string name="availability_distance_max_radius">Maximum radius</string>
+    <string name="availability_distance_min_label">1 mi</string>
+    <string name="availability_distance_max_label">50 mi</string>
+</resources>
+
+
+
+
+
