@@ -11,6 +11,12 @@ composeBom = "2026.02.01"
 appcompat = "1.7.1"
 coil3 = "3.1.0"
 lottieCompose = "6.7.1"
+navigation3 = "1.1.4"
+hilt = "2.60.1"
+androidxHilt = "1.4.0"
+ksp = "2.3.10"
+kotlinSerialization  = "1.8.0"
+kotlinxSerializationPlugin = "2.3.10"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -30,6 +36,7 @@ androidx-compose-material3 = { group = "androidx.compose.material3", name = "mat
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 
 androidx-compose-animation = { group = "androidx.compose.animation", name = "animation" }
+kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinSerialization" }
 
 # Coil
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil3" }
@@ -44,10 +51,23 @@ androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 
+# Navigation
+androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
+androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
+androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycleRuntimeKtx" }
+
+# Hilt DI
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
+androidx-hilt-lifecycle-viewmodel-compose = { module = "androidx.hilt:hilt-lifecycle-viewmodel-compose", version.ref = "androidxHilt" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinxSerializationPlugin" }
 
 [bundles]
 
@@ -68,4 +88,10 @@ coil = [
     "coil-compose",
     "coil-compose-core",
     "coil-network-ktor3",
+]
+
+navigation3 = [
+    "androidx-navigation3-runtime",
+    "androidx-navigation3-ui",
+    "androidx-lifecycle-viewmodel-navigation3",
 ]
