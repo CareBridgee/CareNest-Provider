@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
@@ -20,12 +21,26 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
+    buildFeatures {
+        compose = true
+    }
 }
 
 dependencies {
+
+    implementation(project(":designsystem"))
+
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
     implementation(libs.material)
+
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.bundles.compose)
+
+    // Lifecycle and ViewModel
+    implementation(libs.bundles.lifecycle)
+
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
