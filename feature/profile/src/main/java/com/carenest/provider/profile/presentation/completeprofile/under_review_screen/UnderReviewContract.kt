@@ -5,11 +5,13 @@ sealed interface UnderReviewIntent {
     object OnGoToHomeClick : UnderReviewIntent
     object OnContactSupportClick : UnderReviewIntent
     object OnBackToLoginClick : UnderReviewIntent
+    object OnDashboardClick : UnderReviewIntent
+    object OnCommunityGuidelinesClick : UnderReviewIntent
 }
 
 
 data class UnderReviewState(
-    val underReviewState: ReviewState = ReviewState.UnderReview
+    val underReviewState: ReviewState = ReviewState.Success
 )
 
 enum class ReviewState{
@@ -23,4 +25,6 @@ sealed interface UnderReviewEvent{
     object OnGoToHomeClick : UnderReviewEvent
     object OnContactSupportClick : UnderReviewEvent
     object OnBackToLoginClick : UnderReviewEvent
+    object OnDashboardClick : UnderReviewEvent
+    object OnCommunityGuidelinesClick : UnderReviewEvent
 }
