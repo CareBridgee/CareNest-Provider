@@ -44,7 +44,6 @@ fun ActionSection(
         PrimaryButton(
             caption = stringResource(R.string.go_to_home_view_only),
             onClick = onGoToHomeClick,
-            isDisabled = true,
             modifier = Modifier.fillMaxWidth(),
         )
 
