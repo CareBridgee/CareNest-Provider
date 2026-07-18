@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="splash_brand_name">كيرنست</string>
+    <string name="splash_provider_label">مقدم الخدمة</string>
+    <string name="splash_tagline">نُمكّن مقدمي الرعاية بأدوات احترافية.</string>
+    <string name="splash_initializing">جارٍ تهيئة الجلسة الآمنة…</string>
+    <string name="splash_logo_content_description">شعار كيرنست لمقدم الخدمة</string>
+    <string name="splash_image_content_description">مقدم رعاية صحية يستخدم أدوات رقمية احترافية</string>
+
+    <string name="onboarding_skip">تخطي</string>
+    <string name="onboarding_next">التالي</string>
+    <string name="onboarding_next_step">الخطوة التالية</string>
+    <string name="onboarding_get_started">ابدأ الآن</string>
+    <string name="onboarding_back_to_start">العودة إلى البداية</string>
+    <string name="onboarding_sign_in_prompt">هل أنت بالفعل ضمن الفريق؟</string>
+    <string name="onboarding_sign_in">تسجيل الدخول</string>
+    <string name="onboarding_provider_brand">كيرنست لمقدم الخدمة</string>
+    <string name="onboarding_step_count">الخطوة %1$d من %2$d</string>
+
+    <string name="onboarding_network_title">قدّم الرعاية الصحية في أي مكان</string>
+    <string name="onboarding_network_description">انضم إلى شبكتنا من المتخصصين في الرعاية الصحية وقدّم الرعاية الطبية للمرضى مباشرةً في منازلهم.</string>
+    <string name="onboarding_network_image_description">ممرضة رعاية منزلية محترفة تحمل جهازًا لوحيًا</string>
+
+    <string name="onboarding_visits_title">أدِر الزيارات بكفاءة</string>
+    <string name="onboarding_visits_description">تابع جدولك وانتقل إلى المرضى وسجّل المؤشرات الحيوية بسهولة باستخدام أدواتنا الاحترافية.</string>
+    <string name="onboarding_visits_image_description">ممرضة تراجع المؤشرات الحيوية للمريضة أثناء زيارة منزلية</string>
+    <string name="onboarding_vitals">المؤشرات الحيوية</string>
+    <string name="onboarding_live_map">الخريطة المباشرة</string>
+
+    <string name="onboarding_career_title">طوّر مسيرتك المهنية</string>
+    <string name="onboarding_career_description">حدّد ساعات عملك وتابع أرباحك وابنِ سمعتك المهنية من خلال تقييمات المرضى.</string>
+    <string name="onboarding_career_image_description">ممرضة تراجع جدولها وأرباحها على جهاز لوحي</string>
+    <string name="onboarding_daily_payouts">دفعات يومية</string>
+    <string name="onboarding_expert_badge">شارة خبير</string>
+    <string name="onboarding_custom_shifts">مناوبات مرنة</string>
+</resources>
