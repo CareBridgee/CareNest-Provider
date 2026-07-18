@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,7 +33,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carenest.provider.core.mvi.ObserveEffect
-import com.carenest.provider.designsystem.R as DesignSystemR
 import com.carenest.provider.designsystem.components.button.ButtonIconPosition
 import com.carenest.provider.designsystem.components.button.PrimaryButton
 import com.carenest.provider.designsystem.components.swipingcards.SwipeDirection
@@ -90,6 +88,7 @@ fun OnboardingContent(
             OnboardingTopBar(
                 onSkip = { onIntent(OnboardingIntent.SkipClicked) },
                 isDisabled = state.isCompleting || cardStackState.isAnimating,
+                showSkip = !state.isLastPage,
                 modifier = Modifier.padding(horizontal = OnboardingTokens.horizontalMargin),
             )
         },
@@ -171,34 +170,38 @@ fun OnboardingContent(
 private fun OnboardingTopBar(
     onSkip: () -> Unit,
     isDisabled: Boolean,
+    showSkip: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    Row(
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = Theme.size.componentsNormalHeight),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
     ) {
         BasicText(
             text = stringResource(R.string.onboarding_provider_brand),
+            modifier = Modifier.align(Alignment.CenterStart),
             style = Theme.typography.title.copy(
                 color = Theme.colors.primary,
                 fontWeight = FontWeight.Bold,
             ),
         )
-        TextButton(
-            onClick = onSkip,
-            enabled = !isDisabled,
-            modifier = Modifier.heightIn(min = Theme.size.componentsNormalHeight),
-        ) {
-            BasicText(
-                text = stringResource(R.string.onboarding_skip),
-                style = Theme.typography.body.medium.copy(
-                    color = Theme.colors.primary,
-                    fontWeight = FontWeight.SemiBold,
-                ),
-            )
+        if (showSkip) {
+            TextButton(
+                onClick = onSkip,
+                enabled = !isDisabled,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .heightIn(min = Theme.size.componentsNormalHeight),
+            ) {
+                BasicText(
+                    text = stringResource(R.string.onboarding_skip),
+                    style = Theme.typography.body.medium.copy(
+                        color = Theme.colors.primary,
+                        fontWeight = FontWeight.Normal,
+                    ),
+                )
+            }
         }
     }
 }
@@ -281,7 +284,7 @@ private fun OnboardingBottomActions(
     ) {
         PrimaryButton(
             caption = stringResource(actionLabel),
-            iconPainter = painterResource(DesignSystemR.drawable.ic_arrow),
+            iconPainter = painterResource(R.drawable.onboarding_arrow_forward),
             iconPosition = ButtonIconPosition.End,
             isDisabled = state.isCompleting || isAnimating,
             isLoading = state.isCompleting,
@@ -296,42 +299,6 @@ private fun OnboardingBottomActions(
             },
             modifier = Modifier.fillMaxWidth(),
         )
-
-        SignInAction(
-            onClick = { onIntent(OnboardingIntent.SkipClicked) },
-            isDisabled = state.isCompleting || isAnimating,
-        )
-    }
-}
-
-@Composable
-private fun SignInAction(
-    onClick: () -> Unit,
-    isDisabled: Boolean,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = Theme.size.componentsNormalHeight),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        BasicText(
-            text = stringResource(R.string.onboarding_sign_in_prompt),
-            style = Theme.typography.hint.large.copy(color = Theme.colors.hint),
-        )
-        TextButton(
-            onClick = onClick,
-            enabled = !isDisabled,
-        ) {
-            BasicText(
-                text = stringResource(R.string.onboarding_sign_in),
-                style = Theme.typography.hint.large.copy(
-                    color = Theme.colors.primary,
-                    fontWeight = FontWeight.SemiBold,
-                ),
-            )
-        }
     }
 }
 
