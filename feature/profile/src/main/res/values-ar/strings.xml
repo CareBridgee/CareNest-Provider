@@ -28,4 +28,19 @@
     <string name="account_activated">بمجرد تفعيل حسابك.</string>
     <string name="user_message">نحن نتحقق حاليًا من بياناتك ومؤهلاتك لضمان تقديم أعلى مستوى من الرعاية. تستغرق هذه العملية عادةً</string>
 
+    <!-- Verification Success Screen -->
+    <string name="verified">تم التحقق</string>
+    <string name="approved">تمت الموافقة</string>
+    <string name="congratulations">تهانينا!</string>
+    <string name="account_verified">تم التحقق من حسابك.</string>
+    <string name="network_welcome_message">أنت الآن جزء من شبكة Serene Care. ابدأ في قبول الوظائف لتطوير مسيرتك المهنية وتقديم الرعاية لمن هم في أمس الحاجة إليها.</string>
+    <string name="go_to_home">الذهاب إلى الصفحه الرئيسية</string>
+    <string name="review_community_guidelines">مراجعة إرشادات المجتمع</string>
+    <string name="available_jobs">الوظائف المتاحة</string>
+    <string name="jobs_near_you">24 بالقرب منك</string>
+    <string name="network_perks">مزايا الشبكة</string>
+    <string name="network_rewards">12 مكافأة</string>
+    <string name="start_your_journey">ابدأ رحلتك</string>
+
+
 </resources>
