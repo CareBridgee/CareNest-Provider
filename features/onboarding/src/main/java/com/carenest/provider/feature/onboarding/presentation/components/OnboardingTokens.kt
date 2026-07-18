@@ -38,8 +38,8 @@ internal object OnboardingTokens {
     val progressHeight = 6.dp
     val patternSize = 280.dp
     val compactScreenHeight = 720.dp
-    val illustrationAreaHeight = 244.dp
-    val compactIllustrationAreaHeight = 204.dp
+    val illustrationAreaHeight = 280.dp
+    val compactIllustrationAreaHeight = 240.dp
     val textContentMinHeight = 176.dp
     val compactTextContentMinHeight = 156.dp
 
