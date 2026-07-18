@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Top Bar -->
+    <string name="app_name">كير كونيكت</string>
+
+    <!-- Screen -->
+    <string name="application_under_review">طلبك قيد المراجعة</string>
+    <string name="verification_message">
+        نقوم حالياً بمراجعة بياناتك والتأكد من مؤهلاتك لضمان تقديم أعلى مستوى من الرعاية. تستغرق هذه العملية عادةً %1$s.
+    </string>
+    <string name="verification_time">أقل من 24 ساعة</string>
+
+    <!-- Status -->
+    <string name="application_received">تم استلام الطلب</string>
+    <string name="background_check">التحقق من البيانات</string>
+    <string name="in_progress">قيد التنفيذ</string>
+    <string name="final_approval">الموافقة النهائية</string>
+    <string name="pending">قيد الانتظار</string>
+
+    <!-- Actions -->
+    <string name="go_to_home_view_only">الانتقال إلى الرئيسية </string>
+    <string name="contact_support">التواصل مع الدعم</string>
+    <string name="back_to_login">العودة إلى تسجيل الدخول</string>
+
+    <!-- Notification -->
+    <string name="notify_email">سنقوم بإخطارك عبر البريد الإلكتروني</string>
+    <string name="account_activated">بمجرد تفعيل حسابك.</string>
+    <string name="user_message">نحن نتحقق حاليًا من بياناتك ومؤهلاتك لضمان تقديم أعلى مستوى من الرعاية. تستغرق هذه العملية عادةً</string>
+
+</resources>

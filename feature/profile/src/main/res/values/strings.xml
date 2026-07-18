@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <!-- Top Bar -->
+    <string name="app_name">CareConnect</string>
+
+    <!-- Screen -->
+    <string name="application_under_review">Application Under Review</string>
+    <string name="verification_message">
+        We are currently verifying your credentials to ensure the highest standard of care. This usually takes %1$s.
+    </string>
+    <string name="verification_time">  less than 24 hours</string>
+
+    <!-- Status -->
+    <string name="application_received">Application Received</string>
+    <string name="background_check">Background Check</string>
+    <string name="in_progress">In Progress</string>
+    <string name="final_approval">Final Approval</string>
+    <string name="pending">Pending</string>
+
+    <!-- Actions -->
+    <string name="go_to_home_view_only">Go to Home </string>
+    <string name="contact_support">Contact Support</string>
+    <string name="back_to_login">Back to Login</string>
+
+    <!-- Notification -->
+    <string name="notify_email">We\'ll notify you via email</string>
+    <string name="account_activated">Once your account is activated.</string>
+    <string name="user_message">We are currently verifying your credentials to ensure the highest standard of care. This usually takes</string>
+
+</resources>
