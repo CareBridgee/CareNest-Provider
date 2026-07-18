@@ -95,34 +95,34 @@ internal fun spTypographyOf(fontFamily: FontFamily): SPTextStyle = SPTextStyle(
             fontWeight = FontWeight.Normal,
             lineHeight = 24.sp
         ),
-        // caption
+        // label-md (used for secondary small text)
         small = TextStyle(
+            fontFamily = fontFamily,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            lineHeight = 20.sp,
+            letterSpacing = 0.05.sp
+        )
+    ),
+    hint = SizedTextStyle(
+        // caption
+        large = TextStyle(
             fontFamily = fontFamily,
             fontSize = 12.sp,
             fontWeight = FontWeight.Normal,
             lineHeight = 16.sp
-        )
-    ),
-    hint = SizedTextStyle(
-        // label-md, softened to Light for hint usage
-        large = TextStyle(
-            fontFamily = fontFamily,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Light,
-            lineHeight = 20.sp,
-            letterSpacing = 0.05.sp
         ),
         medium = TextStyle(
             fontFamily = fontFamily,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Light,
-            lineHeight = 20.sp
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Normal,
+            lineHeight = 16.sp
         ),
         small = TextStyle(
             fontFamily = fontFamily,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Light,
-            lineHeight = 16.sp
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Normal,
+            lineHeight = 14.sp
         )
     )
 )
