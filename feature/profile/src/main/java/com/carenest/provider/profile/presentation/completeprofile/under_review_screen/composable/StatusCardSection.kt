@@ -32,11 +32,11 @@ fun StatusCardSection(modifier: Modifier = Modifier) {
             .fillMaxWidth()
             .clip(Theme.shapes.extraLarge)
             .background(Theme.colors.surface)
-            .border(1.dp, Theme.colors.divider, Theme.shapes.extraLarge)
+            .border(Theme.spacing.extraSmall / 4, Theme.colors.divider, Theme.shapes.extraLarge)
             .padding(Theme.spacing.large)
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(Theme.spacing.medium)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -50,7 +50,7 @@ fun StatusCardSection(modifier: Modifier = Modifier) {
                     Icon(
                         painter = painterResource(id = RD.drawable.ic_pen),
                         contentDescription = null,
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(Theme.size.iconMedium),
                         tint = Theme.colors.primary
                     )
                     Text(
@@ -62,7 +62,7 @@ fun StatusCardSection(modifier: Modifier = Modifier) {
                 Icon(
                     painter = painterResource(id = RD.drawable.ic_green_check),
                     contentDescription = null,
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(Theme.size.iconMedium),
                     tint = Theme.colors.success
                 )
             }
@@ -70,7 +70,7 @@ fun StatusCardSection(modifier: Modifier = Modifier) {
             Spacer(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(1.dp)
+                    .height(Theme.spacing.extraSmall / 4)
                     .background(Theme.colors.divider)
             )
 
@@ -86,7 +86,7 @@ fun StatusCardSection(modifier: Modifier = Modifier) {
                     Icon(
                         painter = painterResource(id = RD.drawable.ic_search),
                         contentDescription = null,
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(Theme.size.iconMedium),
                         tint = Theme.colors.primary
                     )
                     Text(
@@ -112,7 +112,7 @@ fun StatusCardSection(modifier: Modifier = Modifier) {
             Spacer(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(1.dp)
+                    .height(Theme.spacing.extraSmall / 4)
                     .background(Theme.colors.divider)
             )
 
@@ -130,7 +130,7 @@ fun StatusCardSection(modifier: Modifier = Modifier) {
                     Icon(
                         painter = painterResource(id = RD.drawable.ic_correct),
                         contentDescription = null,
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(Theme.size.iconMedium),
                         tint = Theme.colors.hint
                     )
                     Text(

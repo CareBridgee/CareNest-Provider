@@ -35,8 +35,8 @@ fun SPSwitch(
 ) {
     val trackWidth = 52.dp
     val trackHeight = 32.dp
-    val thumbSize = 24.dp
-    val gap = 4.dp
+    val thumbSize = Theme.spacing.large
+    val gap = Theme.spacing.extraSmall
 
     val trackColor by animateColorAsState(
         targetValue = if (checked) Theme.colors.tint else Theme.colors.track,
