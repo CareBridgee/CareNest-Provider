@@ -76,4 +76,52 @@
     <string name="service_physiotherapy">Physiotherapy</string>
     <string name="service_ecg_service">ECG Service</string>
     <string name="service_home_assessment">Home Assessment</string>
+    <!-- Verification Success Screen -->
+    <string name="verified">Verified</string>
+    <string name="approved">Approved</string>
+    <string name="congratulations">Congratulations!</string>
+    <string name="account_verified">Your account has been verified.</string>
+    <string name="network_welcome_message">You are now part of the Serene Care network. Start accepting jobs to grow your career and provide care to those who need it most.</string>
+    <string name="go_to_home">Go to Home</string>
+    <string name="start_your_journey">Start your journey</string>
+    <string name="review_community_guidelines">Review Community Guidelines</string>
+    <string name="available_jobs">Available Jobs</string>
+    <string name="jobs_near_you">24 Near You</string>
+    <string name="network_perks">Network Perks</string>
+    <string name="network_rewards">12 Rewards</string>
+
+
+    <!-- Action Required Screen -->
+    <string name="action_required">Action Required</string>
+    <string name="rejected_license_reason">Your &lt;b>Nursing License&lt;/b> was rejected because the photo was blurry.</string>
+    <string name="ensure_good_lighting">Ensure Good Lighting</string>
+    <string name="good_lighting_desc">Capture your document in a well-lit area without glare or shadows.</string>
+    <string name="stay_in_focus">Stay in Focus</string>
+    <string name="in_focus_desc">Hold your phone steady and make sure all text is sharp and legible.</string>
+    <string name="visible_edges">Visible Edges</string>
+    <string name="visible_edges_desc">Place the document on a flat surface and show all four corners of the card.</string>
+    <string name="upload_again">Upload Again</string>
+    <string name="help_center_tip">Need help? Visit our &lt;b>Help Center&lt;/b> for a step-by-step guide on document verification.</string>
+
+    <!-- Re-upload Document Screen -->
+    <string name="reupload_title_default">Re-upload Document</string>
+    <string name="reupload_title">Re-upload Document</string>
+    <string name="default_rejection_reason">The document was too blurry. Please ensure all text is legible and edges are visible.</string>
+    <string name="document_verification_title">Document Verification</string>
+    <string name="document_verification_step">Step %1$d of %2$d</string>
+    <string name="upload_new_photo">Upload New Photo</string>
+    <string name="upload_file_types">JPG, PNG or PDF (Max 10 MB)</string>
+    <string name="previous_upload_rejected">Previous upload was rejected</string>
+    <string name="update_document">Update Document</string>
+    <string name="cancel">Cancel</string>
+    <string name="capture_tips">Capture Tips</string>
+    <string name="good_lighting">Good Lighting</string>
+    <string name="good_lighting_tip">Ensure the document is well lit and avoid dark environments.</string>
+    <string name="show_edges">Show All Edges</string>
+    <string name="show_edges_tip">Make sure all four corners of the document are clearly visible.</string>
+    <string name="stay_focused">Keep It in Focus</string>
+    <string name="stay_focused_tip">Hold your device steady until the text appears sharp and readable.</string>
+    <string name="flat_surface">Use a Flat Surface</string>
+    <string name="flat_surface_tip">Place the document on a flat, dark surface to improve image quality.</string>
+
 </resources>

@@ -1,6 +1,8 @@
-package com.carenest.provider.feature.onboarding.presentation.onboarding
+package com.carenest.provider.presentation.onboarding
 
 import com.carenest.provider.feature.onboarding.R
+import com.carenest.provider.feature.onboarding.presentation.onboarding.OnboardingPage
+import com.carenest.provider.feature.onboarding.presentation.onboarding.OnboardingPageStyle
 
 val providerOnboardingPages: List<OnboardingPage> = listOf(
     OnboardingPage(

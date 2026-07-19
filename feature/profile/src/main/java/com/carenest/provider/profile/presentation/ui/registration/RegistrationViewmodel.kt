@@ -21,6 +21,11 @@ class RegistrationViewmodel @Inject constructor(
     init {
         updateState {
             copy(
+                stepperState = StepperState(
+                    totalSteps = 4,
+                    remainingSteps = 3,
+                    currentStepTitle = "Personal Info"
+                ),
                 servicesUiState = servicesUiState.copy(
                     availableServices = listOf(
                         // I will remove them once we get a services response from the server, this is for testing only
@@ -86,8 +91,14 @@ class RegistrationViewmodel @Inject constructor(
                 }
                 copy(servicesUiState = servicesUiState.copy(selectedServices = newSelected))
             }
+            is RegistrationIntent.OnCertificationToggle -> updateState {
+                copy(applicationReviewUiState = applicationReviewUiState.copy(isCertified = intent.isCertified))
+            }
             RegistrationIntent.OnContinueClicked -> {
                 sendEffect(RegistrationEffect.NavigateToNextStep)
+            }
+            RegistrationIntent.OnSubmitApplication -> {
+                // Handle application submission
             }
         }
     }

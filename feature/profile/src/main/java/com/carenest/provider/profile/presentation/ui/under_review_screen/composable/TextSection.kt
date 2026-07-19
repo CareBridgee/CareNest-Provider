@@ -14,7 +14,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.dp
+
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.profile.R
 
@@ -23,7 +23,7 @@ fun TextSection(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(Theme.spacing.medium)
     ) {
         Text(
             text = stringResource(R.string.application_under_review),
@@ -43,7 +43,7 @@ fun TextSection(modifier: Modifier = Modifier) {
             style = Theme.typography.body.medium,
             color = Theme.colors.secondaryFont,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier.padding(horizontal = Theme.spacing.medium)
         )
     }
 }

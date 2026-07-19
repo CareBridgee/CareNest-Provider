@@ -22,6 +22,9 @@ data class StepperState(
 data class PersonalInfoState(
     val firstName: String = "",
     val lastName: String = "",
+    val email: String = "",
+    val phoneNumber: String = "",
+    val location: String = "",
     val dateOfBirth: String = "",
     val nationalId: String = "",
     val gender: Gender = Gender.UNKNOWN,
@@ -66,12 +69,23 @@ data class ServicesUiState(
 //endregion
 
 
+//region applicationReview
+
+data class ApplicationReviewUiState(
+    val education: String = "",
+    val isCertified: Boolean = false
+)
+
+//endregion
+
+
 data class RegistrationUiState(
     val isLoading: Boolean = true,
     val stepperState: StepperState = StepperState(),
     val personalInfoState: PersonalInfoState = PersonalInfoState(),
     val verificationDocumentsUiState: VerificationDocumentsUiState = VerificationDocumentsUiState(),
     val servicesUiState: ServicesUiState = ServicesUiState(),
+    val applicationReviewUiState: ApplicationReviewUiState = ApplicationReviewUiState(),
     val errorMessage:String? = null
 ){
     val hasError = errorMessage != null
@@ -101,5 +115,7 @@ sealed interface RegistrationIntent {
     data class OnYearsOfExpChanged(val years: String) : RegistrationIntent
     data class OnPrimarySpecialityChanged(val speciality: String) : RegistrationIntent
     data class OnServiceToggle(val service: ServiceUi) : RegistrationIntent
+    data class OnCertificationToggle(val isCertified: Boolean) : RegistrationIntent
     data object OnContinueClicked : RegistrationIntent
+    data object OnSubmitApplication : RegistrationIntent
 }

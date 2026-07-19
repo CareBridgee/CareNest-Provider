@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import com.carenest.provider.designsystem.theme.Theme
 
 @Composable
 fun PulsingDot(color: Color) {
@@ -32,7 +32,7 @@ fun PulsingDot(color: Color) {
     )
     Box(
         modifier = Modifier
-            .size(8.dp)
+            .size(Theme.spacing.small)
             .alpha(alpha)
             .clip(CircleShape)
             .background(color)

@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.update
 
 interface StateHolder<S> {
     val state: StateFlow<S>
+    val currentState: S
+        get() = state.value
 
 
     fun updateState(transform: S.() -> S)

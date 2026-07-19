@@ -44,6 +44,7 @@ import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.feature.onboarding.R
 import com.carenest.provider.feature.onboarding.presentation.components.OnboardingPageIndicator
 import com.carenest.provider.feature.onboarding.presentation.components.OnboardingTokens
+import com.carenest.provider.presentation.onboarding.providerOnboardingPages
 
 @Composable
 fun OnboardingScreen(

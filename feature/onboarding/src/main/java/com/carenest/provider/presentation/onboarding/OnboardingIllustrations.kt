@@ -31,9 +31,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
+import com.carenest.provider.feature.onboarding.R
 import com.carenest.provider.designsystem.R as DesignSystemR
 import com.carenest.provider.designsystem.theme.Theme
-import com.carenest.provider.feature.onboarding.R
 import com.carenest.provider.feature.onboarding.presentation.components.OnboardingTokens
 
 @Composable

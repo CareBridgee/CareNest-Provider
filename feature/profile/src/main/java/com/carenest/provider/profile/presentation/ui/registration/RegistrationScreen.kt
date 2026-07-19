@@ -19,6 +19,7 @@ import com.carenest.provider.core.mvi.ObserveEffect
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.designsystem.components.stepper.HorizontalStepper
 import com.carenest.provider.designsystem.theme.SpTheme
+import com.carenest.provider.profile.presentation.ui.registration.component.ApplicationReviewComponent
 import com.carenest.provider.profile.presentation.ui.registration.component.PersonalInfoComponent
 import com.carenest.provider.profile.presentation.ui.registration.component.ServicesSelectionComponent
 import com.carenest.provider.profile.presentation.ui.registration.component.VerificationDocumentsComponent
@@ -31,13 +32,13 @@ fun RegistrationScreen(
     registrationViewmodel: RegistrationViewmodel = hiltViewModel()
 ) {
     val state by registrationViewmodel.state.collectAsStateWithLifecycle()
-    val pagerState = rememberPagerState(pageCount = { 3 })
+    val pagerState = rememberPagerState(pageCount = { 4 })
     val scope = rememberCoroutineScope()
 
     ObserveEffect(registrationViewmodel.effect) {
         when (it) {
             RegistrationEffect.NavigateToNextStep -> {
-                if (pagerState.currentPage < 2) {
+                if (pagerState.currentPage < 3) {
                     scope.launch {
                         pagerState.animateScrollToPage(pagerState.currentPage + 1)
                     }
@@ -64,12 +65,13 @@ fun RegistrationContent(
     modifier: Modifier = Modifier,
     state: RegistrationUiState,
     onIntent: (RegistrationIntent) -> Unit,
-    pagerState: PagerState = rememberPagerState(pageCount = { 3 })
+    pagerState: PagerState = rememberPagerState(pageCount = { 4 })
 ) {
+    val scope = rememberCoroutineScope()
     Column(modifier = modifier) {
         HorizontalStepper(
             currentStep = pagerState.currentPage + 1,
-            totalSteps = 3,
+            totalSteps = 4,
             modifier = Modifier.padding(Theme.spacing.medium)
         )
 
@@ -104,6 +106,15 @@ fun RegistrationContent(
                     state = state.servicesUiState,
                     onServiceToggle = { onIntent(RegistrationIntent.OnServiceToggle(it)) },
                     onContinueClick = { onIntent(RegistrationIntent.OnContinueClicked) }
+                )
+                3 -> ApplicationReviewComponent(
+                    state = state,
+                    onEditPersonalInfo = { scope.launch { pagerState.animateScrollToPage(0) } },
+                    onEditProfessionalInfo = { scope.launch { pagerState.animateScrollToPage(1) } },
+                    onEditServices = { scope.launch { pagerState.animateScrollToPage(2) } },
+                    onEditDocuments = { scope.launch { pagerState.animateScrollToPage(1) } },
+                    onCertificationToggle = { onIntent(RegistrationIntent.OnCertificationToggle(it)) },
+                    onSubmitClick = { onIntent(RegistrationIntent.OnSubmitApplication) }
                 )
             }
         }

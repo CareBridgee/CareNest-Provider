@@ -115,7 +115,7 @@ fun IllustrationSection(modifier: Modifier = Modifier) {
                 .size(256.dp)
                 .scale(ringScale1)
                 .alpha(ringAlpha1)
-                .border(1.dp, Theme.colors.primaryVariant.copy(alpha = 0.2f), CircleShape)
+                .border(Theme.spacing.extraSmall / 4, Theme.colors.primaryVariant.copy(alpha = 0.2f), CircleShape)
         )
 
         Box(
@@ -123,7 +123,7 @@ fun IllustrationSection(modifier: Modifier = Modifier) {
                 .size(224.dp)
                 .scale(ringScale2)
                 .alpha(ringAlpha2)
-                .border(1.dp, Theme.colors.primaryVariant.copy(alpha = 0.4f), CircleShape)
+                .border(Theme.spacing.extraSmall / 4, Theme.colors.primaryVariant.copy(alpha = 0.4f), CircleShape)
         )
 
         Box(
@@ -132,12 +132,12 @@ fun IllustrationSection(modifier: Modifier = Modifier) {
                 .offset(y = floatCard.dp)
                 .clip(Theme.shapes.extraLarge)
                 .background(Theme.colors.surface)
-                .border(1.dp, Theme.colors.divider, Theme.shapes.extraLarge)
+                .border(Theme.spacing.extraSmall / 4, Theme.colors.divider, Theme.shapes.extraLarge)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(8.dp)
+                    .height(Theme.spacing.small)
                     .background(Theme.colors.primary)
                     .align(Alignment.TopCenter)
             )
@@ -149,12 +149,12 @@ fun IllustrationSection(modifier: Modifier = Modifier) {
                 Icon(
                     painter = painterResource(id = RD.drawable.ic_check_mark),
                     contentDescription = null,
-                    modifier = Modifier.size(64.dp),
+                    modifier = Modifier.size(Theme.size.large),
                     tint = Theme.colors.primary
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Theme.spacing.medium))
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(Theme.spacing.small),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     BouncingDot(delayMillis = 0, color = Theme.colors.primary)
@@ -167,17 +167,17 @@ fun IllustrationSection(modifier: Modifier = Modifier) {
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .offset(x = 16.dp, y = (-16).dp + floatBadge1.dp)
-                .size(64.dp)
+                .offset(x = Theme.spacing.medium, y = (-Theme.spacing.medium.value).dp + floatBadge1.dp)
+                .size(Theme.size.large)
                 .clip(Theme.shapes.medium)
                 .background(Theme.colors.surface)
-                .border(1.dp, Theme.colors.divider, Theme.shapes.medium),
+                .border(Theme.spacing.extraSmall / 4, Theme.colors.divider, Theme.shapes.medium),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 painter = painterResource(id = RD.drawable.ic_id_card),
                 contentDescription = null,
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(Theme.size.iconMedium),
                 tint = Theme.colors.secondary
             )
         }
@@ -185,17 +185,17 @@ fun IllustrationSection(modifier: Modifier = Modifier) {
         Box(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .offset(x = (-16).dp, y = 16.dp + floatBadge2.dp)
+                .offset(x = (-Theme.spacing.medium.value).dp, y = Theme.spacing.medium.value.dp + floatBadge2.dp)
                 .size(56.dp)
                 .clip(Theme.shapes.medium)
                 .background(Theme.colors.surface)
-                .border(1.dp, Theme.colors.divider, Theme.shapes.medium),
+                .border(Theme.spacing.extraSmall / 4, Theme.colors.divider, Theme.shapes.medium),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 painter = painterResource(id = RD.drawable.ic_person),
                 contentDescription = null,
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(Theme.size.iconMedium),
                 tint = Theme.colors.primary
             )
         }

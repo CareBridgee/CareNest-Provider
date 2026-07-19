@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlinx.serialization)
 }
 
 android {
@@ -29,8 +30,9 @@ android {
 }
 
 dependencies {
-    implementation(project(":core"))
+
     implementation(project(":designsystem"))
+    implementation(project(":core"))
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
@@ -44,6 +46,14 @@ dependencies {
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
+
+    //hilt
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.navigation.compose)
+    ksp(libs.hilt.compiler)
+
+    // Lifecycle and ViewModel
+    implementation(libs.bundles.lifecycle)
 
     // Image loading
     implementation(libs.bundles.coil)

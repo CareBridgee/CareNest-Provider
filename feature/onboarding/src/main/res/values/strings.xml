@@ -38,4 +38,5 @@
     <string name="onboarding_daily_payouts">Daily Payouts</string>
     <string name="onboarding_expert_badge">Expert Badge</string>
     <string name="onboarding_custom_shifts">Custom Shifts</string>
+    <string name="provider_authentication_integration_message">provider_authentication_integration_message</string>
 </resources>

@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.carenest.provider"
+    namespace = "com.carenest.provider.feature.onboarding"
     compileSdk {
         version = release(37) {
             minorApiLevel = 1
