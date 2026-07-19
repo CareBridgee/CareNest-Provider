@@ -1,6 +1,9 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlinx.serialization)
 }
 
 android {
@@ -29,6 +32,7 @@ android {
 dependencies {
 
     implementation(project(":designsystem"))
+    implementation(project(":core"))
 
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
@@ -39,6 +43,10 @@ dependencies {
 
     // Lifecycle and ViewModel
     implementation(libs.bundles.lifecycle)
+
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    ksp(libs.hilt.compiler)
 
 
     testImplementation(libs.junit)
