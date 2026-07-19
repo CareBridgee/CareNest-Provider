@@ -9,7 +9,8 @@ sealed interface UnderReviewIntent {
 
 
 data class UnderReviewState(
-    val underReviewState: ReviewState = ReviewState.UnderReview
+    val underReviewState: ReviewState = ReviewState.Success,
+    val error: String? = null
 )
 
 enum class ReviewState{

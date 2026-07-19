@@ -11,77 +11,124 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
 import com.carenest.provider.designsystem.components.topbar.TopBarLeading
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.profile.R
+import com.carenest.provider.profile.presentation.completeprofile.under_review_screen.composable.ActionRequiredScreenContent
 import com.carenest.provider.profile.presentation.completeprofile.under_review_screen.composable.ActionSection
 import com.carenest.provider.profile.presentation.completeprofile.under_review_screen.composable.IllustrationSection
 import com.carenest.provider.profile.presentation.completeprofile.under_review_screen.composable.StatusCardSection
+import com.carenest.provider.profile.presentation.completeprofile.under_review_screen.composable.SuccessScreenContent
 import com.carenest.provider.profile.presentation.completeprofile.under_review_screen.composable.TextSection
 
 
 @Composable
 fun UnderReviewScreen(
-    modifier: Modifier = Modifier
-){
+    modifier: Modifier = Modifier,
+    viewModel: UnderReviewViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    onBackClick: () -> Unit = {},
+    onGoToHomeClick: () -> Unit = {},
+    onContactSupportClick: () -> Unit = {},
+    onBackToLoginClick: () -> Unit = {},
+    onDashboardClick: () -> Unit = {},
+    onCommunityGuidelinesClick: () -> Unit = {},
+    onUploadAgainClick: () -> Unit = {}
+) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     UnderReviewScreenContent(
-        modifier = modifier,
-        onBackClick = {},
-        onGoToHomeClick = {},
-        onContactSupportClick = {},
-        onBackToLoginClick = {})
+        state = state,
+        onBackClick = onBackClick,
+        onGoToHomeClick = onGoToHomeClick,
+        onContactSupportClick = onContactSupportClick,
+        onBackToLoginClick = onBackToLoginClick,
+        onDashboardClick = onDashboardClick,
+        onCommunityGuidelinesClick = onCommunityGuidelinesClick,
+        onUploadAgainClick = onUploadAgainClick,
+        modifier = modifier
+    )
 }
+
 @Composable
 private fun UnderReviewScreenContent(
+    state: UnderReviewState,
     onBackClick: () -> Unit,
     onGoToHomeClick: () -> Unit,
     onContactSupportClick: () -> Unit,
     onBackToLoginClick: () -> Unit,
+    onDashboardClick: () -> Unit,
+    onCommunityGuidelinesClick: () -> Unit,
+    onUploadAgainClick: () -> Unit,
     modifier: Modifier = Modifier,
     avatarUrl: String? = "https://lh3.googleusercontent.com/aida-public/AB6AXuDoegGFZVcEdHy8-NusuyjiS-d6Mty4Z4EoczLydOs8RCH1zvj5FBvxfwB_Wl2j6kUh7deCM2rssQWpgYWQY6Oav8w0byJe0JalttPlE9e1EXlfaSDxKJKO1R6bKp12FmxlQpg6vVIu_pfxOZ-0ciCgcWtCnUzel2KkM7ZifGFYuxwLYAyu4xZnibHr2zhLco364uLun4eawcpEtsxS9WOY6FoAnls0O2B-56k4HrMkouY0q9fDVSNg"
 ) {
+    val isSuccess = state.underReviewState == ReviewState.Success
+    val isError = state.underReviewState == ReviewState.Error
+
     Scaffold(
-        modifier = modifier.fillMaxSize(), topBar = {
+        modifier = modifier.fillMaxSize(),
+        topBar = {
             CareNestTopBar(
                 title = stringResource(R.string.app_name),
-                leading = TopBarLeading.Back(onBackClick),
+                leading = if (isSuccess) null else TopBarLeading.Back(onBackClick),
                 trailingAvatarUrl = avatarUrl,
                 modifier = Modifier.fillMaxWidth()
             )
-        }, containerColor = Theme.colors.backGround
+        },
+        containerColor = Theme.colors.backGround
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
+            if (isSuccess) {
+                SuccessScreenContent(
+                    onHomeClick = onDashboardClick,
+                    onCommunityGuidelinesClick = onCommunityGuidelinesClick,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            } else if (isError) {
+                ActionRequiredScreenContent(
+                    onUploadAgainClick = onUploadAgainClick,
+                    onContactSupportClick = onContactSupportClick,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    Spacer(modifier = Modifier.height(16.dp))
 
-            IllustrationSection()
+                    IllustrationSection()
 
-            TextSection()
+                    TextSection()
 
-            StatusCardSection()
+                    StatusCardSection()
 
-            Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-            ActionSection(
-                onGoToHomeClick = onGoToHomeClick,
-                onContactSupportClick = onContactSupportClick,
-                onBackToLoginClick = onBackToLoginClick
-            )
+                    ActionSection(
+                        onGoToHomeClick = onGoToHomeClick,
+                        onContactSupportClick = onContactSupportClick,
+                        onBackToLoginClick = onBackToLoginClick
+                    )
+                }
+            }
         }
     }
 }
@@ -92,10 +139,49 @@ private fun UnderReviewScreenContent(
 private fun UnderReviewScreenContentLightPreview() {
     SpTheme(isDarkTheme = false) {
         UnderReviewScreenContent(
+            state = UnderReviewState(underReviewState = ReviewState.UnderReview),
             onBackClick = {},
             onGoToHomeClick = {},
             onContactSupportClick = {},
-            onBackToLoginClick = {})
+            onBackToLoginClick = {},
+            onDashboardClick = {},
+            onCommunityGuidelinesClick = {},
+            onUploadAgainClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun UnderReviewScreenSuccessLightPreview() {
+    SpTheme(isDarkTheme = false) {
+        UnderReviewScreenContent(
+            state = UnderReviewState(underReviewState = ReviewState.Success),
+            onBackClick = {},
+            onGoToHomeClick = {},
+            onContactSupportClick = {},
+            onBackToLoginClick = {},
+            onDashboardClick = {},
+            onCommunityGuidelinesClick = {},
+            onUploadAgainClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun UnderReviewScreenErrorLightPreview() {
+    SpTheme(isDarkTheme = false) {
+        UnderReviewScreenContent(
+            state = UnderReviewState(underReviewState = ReviewState.Error),
+            onBackClick = {},
+            onGoToHomeClick = {},
+            onContactSupportClick = {},
+            onBackToLoginClick = {},
+            onDashboardClick = {},
+            onCommunityGuidelinesClick = {},
+            onUploadAgainClick = {}
+        )
     }
 }
 
@@ -104,9 +190,48 @@ private fun UnderReviewScreenContentLightPreview() {
 private fun UnderReviewScreenContentDarkPreview() {
     SpTheme(isDarkTheme = true) {
         UnderReviewScreenContent(
+            state = UnderReviewState(underReviewState = ReviewState.UnderReview),
             onBackClick = {},
             onGoToHomeClick = {},
             onContactSupportClick = {},
-            onBackToLoginClick = {})
+            onBackToLoginClick = {},
+            onDashboardClick = {},
+            onCommunityGuidelinesClick = {},
+            onUploadAgainClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun UnderReviewScreenSuccessDarkPreview() {
+    SpTheme(isDarkTheme = true) {
+        UnderReviewScreenContent(
+            state = UnderReviewState(underReviewState = ReviewState.Success),
+            onBackClick = {},
+            onGoToHomeClick = {},
+            onContactSupportClick = {},
+            onBackToLoginClick = {},
+            onDashboardClick = {},
+            onCommunityGuidelinesClick = {},
+            onUploadAgainClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun UnderReviewScreenErrorDarkPreview() {
+    SpTheme(isDarkTheme = true) {
+        UnderReviewScreenContent(
+            state = UnderReviewState(underReviewState = ReviewState.Error),
+            onBackClick = {},
+            onGoToHomeClick = {},
+            onContactSupportClick = {},
+            onBackToLoginClick = {},
+            onDashboardClick = {},
+            onCommunityGuidelinesClick = {},
+            onUploadAgainClick = {}
+        )
     }
 }
