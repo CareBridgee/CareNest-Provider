@@ -42,10 +42,6 @@ dependencies {
     implementation(libs.bundles.compose)
     implementation(libs.bundles.coil)
 
-    //hilt
-    implementation(libs.hilt.android)
-    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
-    ksp(libs.hilt.compiler)
 
     // Lifecycle and ViewModel
     implementation(libs.bundles.lifecycle)
