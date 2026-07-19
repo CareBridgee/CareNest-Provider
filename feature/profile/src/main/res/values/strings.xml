@@ -44,4 +44,15 @@
     <string name="network_rewards">12 Rewards</string>
 
 
+    <!-- Action Required Screen -->
+    <string name="action_required">Action Required</string>
+    <string name="rejected_license_reason">Your &lt;b>Nursing License&lt;/b> was rejected because the photo was blurry.</string>
+    <string name="ensure_good_lighting">Ensure Good Lighting</string>
+    <string name="good_lighting_desc">Capture your document in a well-lit area without glare or shadows.</string>
+    <string name="stay_in_focus">Stay in Focus</string>
+    <string name="in_focus_desc">Hold your phone steady and make sure all text is sharp and legible.</string>
+    <string name="visible_edges">Visible Edges</string>
+    <string name="visible_edges_desc">Place the document on a flat surface and show all four corners of the card.</string>
+    <string name="upload_again">Upload Again</string>
+    <string name="help_center_tip">Need help? Visit our &lt;b>Help Center&lt;/b> for a step-by-step guide on document verification.</string>
 </resources>
