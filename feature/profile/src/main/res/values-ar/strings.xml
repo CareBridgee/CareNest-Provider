@@ -53,5 +53,49 @@
     <string name="visible_edges_desc">ضع المستند على سطح مستوٍ واكشف الزوايا الأربع للبطاقة.</string>
     <string name="upload_again">تحميل مرة أخرى</string>
     <string name="help_center_tip">هل تحتاج إلى مساعدة؟ تفضل بزيارة &lt;b>مركز المساعدة&lt;/b> للحصول على دليل خطوة بخطوة حول التحقق من المستندات.</string>
+    
+    <!-- Re-upload Document Screen -->
+    <string name="reupload_title_default">إعادة رفع المستند</string>
+    <string name="reupload_title">إعادة رفع مستند &lt;b>%1$s&lt;/b></string>
+    <string name="default_rejection_reason">كانت صورة المستند غير واضحة. يُرجى التأكد من أن جميع النصوص مقروءة وأن حواف المستند ظاهرة بالكامل.</string>
+
+
+        <!-- Screen -->
+        <string name="document_verification_title">التحقق من المستند</string>
+        <string name="document_verification_step">الخطوة %1$d من %2$d</string>
+
+        <!-- Upload -->
+        <string name="upload_new_photo">رفع صورة جديدة</string>
+        <string name="upload_file_types">JPG أو PNG أو PDF (الحد الأقصى 10 ميجابايت)</string>
+
+        <!-- Rejection -->
+        <string name="previous_upload_rejected">تم رفض المستند الذي تم رفعه سابقًا</string>
+
+        <!-- Actions -->
+        <string name="update_document">تحديث المستند</string>
+        <string name="cancel">إلغاء</string>
+
+        <!-- Capture Tips -->
+        <string name="capture_tips">نصائح لالتقاط الصورة</string>
+
+        <string name="good_lighting">إضاءة جيدة</string>
+        <string name="good_lighting_tip">
+        تأكد من وجود إضاءة كافية وتجنب التصوير في الأماكن المظلمة.
+    </string>
+
+        <string name="show_edges">إظهار جميع الحواف</string>
+        <string name="show_edges_tip">
+        تأكد من ظهور الزوايا الأربع للمستند بالكامل داخل الإطار.
+    </string>
+
+        <string name="stay_focused">صورة واضحة</string>
+        <string name="stay_focused_tip">
+        ثبّت الهاتف حتى تصبح جميع البيانات واضحة وسهلة القراءة.
+    </string>
+
+        <string name="flat_surface">سطح مستوٍ</string>
+        <string name="flat_surface_tip">
+        ضع المستند على سطح مستوٍ وداكن لتحسين جودة الصورة.
+    </string>
 
 </resources>

@@ -55,4 +55,26 @@
     <string name="visible_edges_desc">Place the document on a flat surface and show all four corners of the card.</string>
     <string name="upload_again">Upload Again</string>
     <string name="help_center_tip">Need help? Visit our &lt;b>Help Center&lt;/b> for a step-by-step guide on document verification.</string>
+
+    <!-- Re-upload Document Screen -->
+    <string name="reupload_title_default">Re-upload Document</string>
+    <string name="reupload_title">Re-upload Document</string>
+    <string name="default_rejection_reason">The document was too blurry. Please ensure all text is legible and edges are visible.</string>
+    <string name="document_verification_title">Document Verification</string>
+    <string name="document_verification_step">Step %1$d of %2$d</string>
+    <string name="upload_new_photo">Upload New Photo</string>
+    <string name="upload_file_types">JPG, PNG or PDF (Max 10 MB)</string>
+    <string name="previous_upload_rejected">Previous upload was rejected</string>
+    <string name="update_document">Update Document</string>
+    <string name="cancel">Cancel</string>
+    <string name="capture_tips">Capture Tips</string>
+    <string name="good_lighting">Good Lighting</string>
+    <string name="good_lighting_tip">Ensure the document is well lit and avoid dark environments.</string>
+    <string name="show_edges">Show All Edges</string>
+    <string name="show_edges_tip">Make sure all four corners of the document are clearly visible.</string>
+    <string name="stay_focused">Keep It in Focus</string>
+    <string name="stay_focused_tip">Hold your device steady until the text appears sharp and readable.</string>
+    <string name="flat_surface">Use a Flat Surface</string>
+    <string name="flat_surface_tip">Place the document on a flat, dark surface to improve image quality.</string>
+
 </resources>
