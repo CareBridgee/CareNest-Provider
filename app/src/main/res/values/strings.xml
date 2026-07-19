@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">CareNest-Provider</string>
+    <string name="provider_authentication_integration_message">Provider authentication will be connected here.</string>
 </resources>

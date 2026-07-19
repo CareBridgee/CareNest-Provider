@@ -127,6 +127,9 @@ internal fun spTypographyOf(fontFamily: FontFamily): SPTextStyle = SPTextStyle(
     )
 )
 
+internal fun fontFamilyForLanguage(languageCode: String): FontFamily =
+    if (normalizeLanguageCode(languageCode) == "ar") defaultFontFamily else englishFontFamily
+
 @Composable
 internal fun defaultSPTypographyForLanguage(languageCode: String): SPTextStyle =
-    spTypographyOf(fontFamily = defaultFontFamily)
+    spTypographyOf(fontFamily = fontFamilyForLanguage(languageCode))
