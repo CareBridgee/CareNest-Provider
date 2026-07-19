@@ -1,4 +1,4 @@
-package com.carenest.presentation.ui.auth.login
+package com.carenest.provider.profile.presentation.ui.auth.login
 
 sealed interface LoginIntent {
     data class PhoneNumberChanged(val phone: String) : LoginIntent

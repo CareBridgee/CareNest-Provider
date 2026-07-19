@@ -1,4 +1,4 @@
-package com.carenest.presentation.ui.auth.login.components
+package com.carenest.provider.profile.presentation.ui.auth.login.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,10 +10,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.carenest.designsystem.theme.Theme
-import com.carenest.presentation.R
+import com.carenest.provider.designsystem.theme.Theme
+import com.carenest.provider.profile.R
 
-import com.carenest.presentation.ui.auth.login.Country
+import com.carenest.provider.profile.presentation.ui.auth.login.Country
 
 @Composable
 fun PhoneNumberSection(

@@ -1,4 +1,4 @@
-package com.carenest.presentation.ui.auth.login.components
+package com.carenest.provider.profile.presentation.ui.auth.login.components
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,7 +16,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.carenest.designsystem.theme.Theme
+import com.carenest.provider.designsystem.theme.Theme
 
 @Composable
 fun SquareOptionCard(
@@ -26,7 +26,7 @@ fun SquareOptionCard(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val backgroundColor = if (isSelected) Theme.colors.primary.copy(alpha = 0.05f) else Theme.colors.cardBackground
+    val backgroundColor = if (isSelected) Theme.colors.primary.copy(alpha = 0.05f) else Theme.colors.surface
     val borderColor = if (isSelected) Theme.colors.primary else Color.Transparent
 
     Surface(

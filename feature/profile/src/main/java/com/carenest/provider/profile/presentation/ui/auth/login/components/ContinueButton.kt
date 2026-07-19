@@ -1,4 +1,5 @@
-package com.carenest.presentation.ui.auth.login.components
+package com.carenest.provider.profile.presentation.ui.auth.login.components
+
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -6,8 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.carenest.designsystem.components.button.PrimaryButton
-import com.carenest.presentation.R
+import com.carenest.provider.profile.R
+import com.carenest.provider.designsystem.components.button.PrimaryButton
 
 @Composable
 fun ContinueButton(

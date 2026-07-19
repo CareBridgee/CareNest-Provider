@@ -1,4 +1,4 @@
-package com.carenest.presentation.ui.auth.login.components
+package com.carenest.provider.profile.presentation.ui.auth.login.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.Image
@@ -20,13 +20,13 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.carenest.designsystem.components.button.SocialButton
-import com.carenest.designsystem.theme.SpTheme
-import com.carenest.designsystem.theme.Theme
-import com.carenest.presentation.ui.auth.login.LoginIntent
-import com.carenest.presentation.R
-import com.carenest.designsystem.R as DR
-import com.carenest.presentation.navigation.HideTopBar
+import com.carenest.provider.designsystem.components.button.SecondaryButton
+import com.carenest.provider.designsystem.theme.SpTheme
+import com.carenest.provider.designsystem.theme.Theme
+import com.carenest.provider.profile.presentation.ui.auth.login.LoginIntent
+import com.carenest.provider.profile.R
+import com.carenest.provider.designsystem.R as DR
+// import com.carenest.presentation.navigation.HideTopBar
 
 @Composable
 fun AuthLandingScreen(onEvent: (LoginIntent) -> Unit) {
@@ -35,7 +35,7 @@ fun AuthLandingScreen(onEvent: (LoginIntent) -> Unit) {
             .fillMaxSize()
             .background(Theme.colors.backGround)
     ) {
-        HideTopBar()
+        // HideTopBar()
 
         val primaryColor = Theme.colors.primary
         
@@ -101,24 +101,20 @@ fun AuthLandingScreen(onEvent: (LoginIntent) -> Unit) {
                     .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                SocialButton(
+                SecondaryButton(
                     caption = stringResource(R.string.auth_continue_google),
                     iconPainter = painterResource(id = DR.drawable.ic_google),
                     onClick = { /* Simulated */ },
-                    backgroundColor = Theme.colors.backGround,
-                    contentColor = Theme.colors.primaryFont,
-                    borderColor = Theme.colors.hint.copy(alpha = 0.3f)
+                    modifier = Modifier.fillMaxWidth().height(56.dp)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                SocialButton(
+                SecondaryButton(
                     caption = stringResource(R.string.auth_continue_phone),
                     iconPainter = painterResource(id = DR.drawable.ic_call),
                     onClick = { onEvent(LoginIntent.ContinueWithPhoneClicked) },
-                    backgroundColor = Theme.colors.primary.copy(alpha = 0.08f),
-                    contentColor = Theme.colors.primary,
-                    iconTint = Theme.colors.primary
+                    modifier = Modifier.fillMaxWidth().height(56.dp)
                 )
 
                 Spacer(modifier = Modifier.height(48.dp))

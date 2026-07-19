@@ -1,4 +1,4 @@
-package com.carenest.presentation.ui.auth.otp
+package com.carenest.provider.profile.presentation.ui.auth.otp
 
 sealed interface OtpIntent {
     data class OtpCodeChanged(val otp: String) : OtpIntent

@@ -1,4 +1,4 @@
-package com.carenest.presentation.ui.auth.login.components
+package com.carenest.provider.profile.presentation.ui.auth.login.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -27,7 +27,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.carenest.designsystem.theme.Theme
+import com.carenest.provider.designsystem.theme.Theme
 
 @Composable
 fun OtpMethodCard(

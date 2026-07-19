@@ -1,13 +1,13 @@
-package com.carenest.presentation.ui.auth.login
+package com.carenest.provider.profile.presentation.ui.auth.login
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.carenest.domain.usecase.auth.LoginWithPhoneUseCase
-import com.carenest.presentation.core.mvi.DefaultEffectPublisher
-import com.carenest.presentation.core.mvi.DefaultStateHolder
-import com.carenest.presentation.core.mvi.EffectPublisher
-import com.carenest.presentation.core.mvi.StateHolder
+import com.carenest.provider.profile.domain.usecase.auth.LoginWithPhoneUseCase
+import com.carenest.provider.core.mvi.DefaultEffectPublisher
+import com.carenest.provider.core.mvi.DefaultStateHolder
+import com.carenest.provider.core.mvi.EffectPublisher
+import com.carenest.provider.core.mvi.StateHolder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

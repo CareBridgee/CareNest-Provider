@@ -1,4 +1,4 @@
-package com.carenest.presentation.ui.auth.login.components
+package com.carenest.provider.profile.presentation.ui.auth.login.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -19,9 +19,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.carenest.designsystem.theme.Theme
-import com.carenest.presentation.R
-import com.carenest.designsystem.R as DR
+import com.carenest.provider.designsystem.theme.Theme
+import com.carenest.provider.profile.R
+import com.carenest.provider.designsystem.R as DR
 
 @Composable
 fun SecureCareInfoCard() {

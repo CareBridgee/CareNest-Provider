@@ -1,4 +1,4 @@
-package com.carenest.presentation.ui.auth.login.components
+package com.carenest.provider.profile.presentation.ui.auth.login.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -12,13 +12,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.carenest.presentation.navigation.ScreenTopBar
-import com.carenest.designsystem.theme.SpTheme
-import com.carenest.designsystem.theme.Theme
-import com.carenest.presentation.ui.auth.login.LoginIntent
-import com.carenest.presentation.ui.auth.login.LoginState
-import com.carenest.presentation.ui.auth.login.LoginStep
-import com.carenest.presentation.R
+import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
+import com.carenest.provider.designsystem.components.topbar.TopBarLeading
+import com.carenest.provider.designsystem.theme.SpTheme
+import com.carenest.provider.designsystem.theme.Theme
+import com.carenest.provider.profile.presentation.ui.auth.login.LoginIntent
+import com.carenest.provider.profile.presentation.ui.auth.login.LoginState
+import com.carenest.provider.profile.presentation.ui.auth.login.LoginStep
+import com.carenest.provider.profile.R
 
 @Composable
 fun PhoneInputScreen(state: LoginState, onEvent: (LoginIntent) -> Unit) {
@@ -27,10 +28,9 @@ fun PhoneInputScreen(state: LoginState, onEvent: (LoginIntent) -> Unit) {
             .fillMaxSize()
             .background(Theme.colors.backGround)
     ) {
-        ScreenTopBar(
+        CareNestTopBar(
             title = stringResource(id = R.string.phone_input_topbar_title),
-            showLeadingIcon = true,
-            onLeadingClick = { onEvent(LoginIntent.BackClicked) }
+            leading = TopBarLeading.Back(onBackClick = { onEvent(LoginIntent.BackClicked) })
         )
 
         Column(

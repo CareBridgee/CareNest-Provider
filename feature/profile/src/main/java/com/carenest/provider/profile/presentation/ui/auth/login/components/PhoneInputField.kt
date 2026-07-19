@@ -1,4 +1,4 @@
-package com.carenest.presentation.ui.auth.login.components
+package com.carenest.provider.profile.presentation.ui.auth.login.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,9 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.carenest.designsystem.theme.Theme
-import com.carenest.presentation.ui.auth.login.Country
-import com.carenest.presentation.ui.auth.login.countries
+import com.carenest.provider.designsystem.theme.Theme
+import com.carenest.provider.profile.presentation.ui.auth.login.Country
+import com.carenest.provider.profile.presentation.ui.auth.login.countries
 
 @Composable
 fun PhoneInputField(

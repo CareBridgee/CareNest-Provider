@@ -1,4 +1,4 @@
-package com.carenest.presentation.ui.auth.otp
+package com.carenest.provider.profile.presentation.ui.auth.otp
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -21,30 +21,26 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.carenest.designsystem.components.button.PrimaryButton
-import com.carenest.designsystem.theme.SpTheme
-import com.carenest.designsystem.theme.Theme
-import com.carenest.presentation.R
-import com.carenest.presentation.core.mvi.ObserveEffect
-import com.carenest.presentation.navigation.AppRoute
-import com.carenest.presentation.navigation.ScreenTopBar
-import com.carenest.presentation.ui.auth.login.components.OtpTextField
+import com.carenest.provider.designsystem.components.button.PrimaryButton
+import com.carenest.provider.designsystem.theme.SpTheme
+import com.carenest.provider.designsystem.theme.Theme
+import com.carenest.provider.profile.R
+import com.carenest.provider.core.mvi.ObserveEffect
+import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
+import com.carenest.provider.designsystem.components.topbar.TopBarLeading
+import com.carenest.provider.profile.presentation.ui.auth.login.components.OtpTextField
 
 @Composable
 fun OtpScreen(
-    entry: AppRoute.Otp,
+    phone: String,
     viewModel: OtpViewModel = hiltViewModel(),
     onNavigateToHome: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
 
-    androidx.compose.runtime.LaunchedEffect(entry.phone) {
-        viewModel.onEvent(OtpIntent.PhoneNumberChanged(entry.phone))
-    }
-
-    androidx.compose.runtime.LaunchedEffect(entry.phone) {
-        viewModel.onEvent(OtpIntent.PhoneNumberChanged(entry.phone))
+    androidx.compose.runtime.LaunchedEffect(phone) {
+        viewModel.onEvent(OtpIntent.PhoneNumberChanged(phone))
     }
 
     ObserveEffect(viewModel.effect) { effect ->
@@ -65,10 +61,9 @@ internal fun OtpScreenContent(
     state: OtpState,
     onEvent: (OtpIntent) -> Unit
 ) {
-    ScreenTopBar(
+    CareNestTopBar(
         title = "",
-        showLeadingIcon = true,
-        onLeadingClick = { onEvent(OtpIntent.BackClicked) }
+        leading = TopBarLeading.Back(onBackClick = { onEvent(OtpIntent.BackClicked) })
     )
 
     Column(
