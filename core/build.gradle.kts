@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlinx.serialization)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
@@ -23,11 +24,17 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
+    buildFeatures {
+        compose = true
+    }
 }
 
 dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
+
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.bundles.compose)
 
     //navigation
     implementation(libs.bundles.navigation3)
