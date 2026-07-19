@@ -1,6 +1,6 @@
 package com.carenest.provider.feature.onboarding.data.repository
 
-import com.carenest.provider.feature.onboarding.data.local.OnboardingPreferences
+import com.carenest.provider.data.local.OnboardingPreferences
 import com.carenest.provider.feature.onboarding.domain.repository.OnboardingRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow

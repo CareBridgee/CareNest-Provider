@@ -72,7 +72,6 @@ hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hil
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidxHilt" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
-androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeKtx" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
 
 
@@ -115,4 +114,8 @@ lifecycle = [
     "androidx-lifecycle-runtime-ktx",
     "androidx-lifecycle-runtime-compose",
     "androidx-lifecycle-viewmodel-compose",
+]
+hilt = [
+    "hilt-android",
+    "androidx-hilt-navigation-compose",
 ]

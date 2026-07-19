@@ -1,4 +1,4 @@
-package com.carenest.provider.feature.onboarding.data.local
+package com.carenest.provider.data.local
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -10,6 +10,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlin.text.get
 
 interface OnboardingPreferences {
     val isCompleted: Flow<Boolean>

@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.carenest.provider.feature.onboarding"
+    namespace = "com.carenest.provider"
     compileSdk {
         version = release(37) {
             minorApiLevel = 1
@@ -38,12 +38,12 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.kotlinx.coroutines.core)
 
+    implementation(libs.bundles.navigation3)
     implementation(libs.hilt.android)
-    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
 
     testImplementation(libs.junit)
