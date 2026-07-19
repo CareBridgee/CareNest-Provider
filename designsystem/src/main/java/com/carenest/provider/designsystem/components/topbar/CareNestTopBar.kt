@@ -38,11 +38,14 @@ fun CareNestTopBar(
         modifier = modifier
             .fillMaxWidth()
             .shadow(
-                elevation = 4.dp,
+                elevation = Theme.spacing.extraSmall,
                 clip = false
             )
             .background(Theme.colors.surface)
-            .padding(horizontal = 20.dp, vertical = 12.dp),
+            .padding(
+                horizontal = Theme.spacing.large,
+                vertical = Theme.spacing.small + Theme.spacing.extraSmall
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (leading is TopBarLeading.Back) {
@@ -51,10 +54,10 @@ fun CareNestTopBar(
                 contentDescription = "Back",
                 tint = Theme.colors.primary,
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(Theme.size.iconMedium)
                     .clickable(onClick = leading.onBackClick)
             )
-            Spacer(modifier = Modifier.size(12.dp))
+            Spacer(modifier = Modifier.size(Theme.spacing.small + Theme.spacing.extraSmall))
         }
 
         Text(
@@ -70,9 +73,9 @@ fun CareNestTopBar(
                 model = trailingAvatarUrl,
                 contentDescription = "Profile Avatar",
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(Theme.size.medium)
                     .clip(CircleShape)
-                    .border(1.dp, Theme.colors.onDisable, CircleShape),
+                    .border(Theme.spacing.extraSmall / 4, Theme.colors.onDisable, CircleShape),
                 contentScale = ContentScale.Crop
             )
         }
