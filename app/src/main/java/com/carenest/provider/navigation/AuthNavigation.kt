@@ -4,8 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -15,15 +13,11 @@ import androidx.navigation3.ui.NavDisplay
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.savedstate.compose.serialization.serializers.SnapshotStateListSerializer
 import androidx.savedstate.serialization.SavedStateConfiguration
-import com.carenest.provider.R
 import com.carenest.provider.core.navigation.NavigationConfig
 import com.carenest.provider.core.navigation.goBack
 import com.carenest.provider.core.navigation.navigate
-import com.carenest.provider.core.navigation.replaceWith
-import com.carenest.provider.feature.onboarding.navigation.OnboardingRoute
-import com.carenest.provider.feature.onboarding.navigation.SplashRoute
-import com.carenest.provider.feature.onboarding.presentation.onboarding.OnboardingScreen
-import com.carenest.provider.feature.onboarding.presentation.splash.SplashScreen
+import com.carenest.provider.profile.presentation.ui.auth.login.LoginScreen
+import com.carenest.provider.profile.presentation.ui.auth.otp.OtpScreen
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
@@ -31,62 +25,56 @@ import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 
 @Serializable
-data object ProviderAuthenticationRoute : NavKey
+data object LoginRoute : NavKey
 
-private val appNavigationSerializers = SerializersModule {
+@Serializable
+data class OtpRoute(val phone: String) : NavKey
+
+private val authNavigationSerializers = SerializersModule {
     include(NavigationConfig.serializer)
-
     polymorphic(NavKey::class) {
-        subclass(SplashRoute::class, SplashRoute.serializer())
-        subclass(OnboardingRoute::class, OnboardingRoute.serializer())
-        subclass(ProviderAuthenticationRoute::class, ProviderAuthenticationRoute.serializer())
+        subclass(LoginRoute::class, LoginRoute.serializer())
+        subclass(OtpRoute::class, OtpRoute.serializer())
     }
 }
 
-private val appSavedStateConfiguration = SavedStateConfiguration {
-    serializersModule = appNavigationSerializers
+private val authSavedStateConfiguration = SavedStateConfiguration {
+    serializersModule = authNavigationSerializers
 }
 
 @Composable
-fun AppNavigation(modifier: Modifier = Modifier) {
+fun ProviderAuthNavigation(
+    onAuthSuccess: () -> Unit
+) {
     val backStack: SnapshotStateList<NavKey> = rememberSerializable(
         serializer = SnapshotStateListSerializer(
             PolymorphicSerializer(NavKey::class),
         ),
-        configuration = appSavedStateConfiguration,
+        configuration = authSavedStateConfiguration,
     ) {
         mutableStateListOf<NavKey>().apply {
-            navigate(SplashRoute)
+            navigate(LoginRoute)
         }
     }
 
     val entryProvider: (NavKey) -> NavEntry<NavKey> = entryProvider {
-        entry<SplashRoute> {
-            SplashScreen(
-                onNavigateToOnboarding = { backStack.replaceWith(OnboardingRoute) },
-                onNavigateToAuthentication = {
-                    backStack.replaceWith(ProviderAuthenticationRoute)
-                },
-            )
-        }
-        entry<OnboardingRoute> {
-            OnboardingScreen(
-                onNavigateToAuthentication = {
-                    backStack.replaceWith(ProviderAuthenticationRoute)
-                },
-            )
-        }
-        entry<ProviderAuthenticationRoute> {
-            ProviderAuthNavigation(
-                onAuthSuccess = {
-                    // Navigate to home/dashboard on success
+        entry<LoginRoute> {
+            LoginScreen(
+                onNavigateToOtp = { phone, _ -> 
+                    backStack.navigate(OtpRoute(phone))
                 }
+            )
+        }
+        entry<OtpRoute> { route ->
+            OtpScreen(
+                phone = route.phone,
+                onNavigateToHome = onAuthSuccess,
+                onNavigateBack = backStack::goBack
             )
         }
     }
 
     NavDisplay(
-        modifier = modifier,
         entries = rememberDecoratedNavEntries(
             backStack = backStack,
             entryProvider = entryProvider,
@@ -98,5 +86,3 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         onBack = backStack::goBack,
     )
 }
-
-
