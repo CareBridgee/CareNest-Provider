@@ -40,6 +40,8 @@ dependencies {
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
+    implementation(libs.bundles.coil)
+
 
     // Lifecycle and ViewModel
     implementation(libs.bundles.lifecycle)
