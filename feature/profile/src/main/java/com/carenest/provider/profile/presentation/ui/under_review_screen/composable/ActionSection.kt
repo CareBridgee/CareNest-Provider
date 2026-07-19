@@ -38,13 +38,12 @@ fun ActionSection(
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(Theme.spacing.medium),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         PrimaryButton(
             caption = stringResource(R.string.go_to_home_view_only),
             onClick = onGoToHomeClick,
-            isDisabled = true,
             modifier = Modifier.fillMaxWidth(),
         )
 
@@ -61,24 +60,24 @@ fun ActionSection(
             modifier = Modifier
                 .clip(Theme.shapes.small)
                 .clickable(onClick = onBackToLoginClick)
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(horizontal = Theme.spacing.medium, vertical = Theme.spacing.small)
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Theme.spacing.small))
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(Theme.shapes.extraLarge)
                 .background(Theme.colors.surface)
-                .border(1.dp, Theme.colors.divider, Theme.shapes.extraLarge)
+                .border(Theme.spacing.extraSmall / 4, Theme.colors.divider, Theme.shapes.extraLarge)
                 .padding(Theme.spacing.medium),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Theme.spacing.medium)
         ) {
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(Theme.size.medium)
                     .clip(CircleShape)
                     .background(Theme.colors.primary.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
@@ -86,7 +85,7 @@ fun ActionSection(
                 Icon(
                     painter = painterResource(id = RD.drawable.ic_notification),
                     contentDescription = null,
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(Theme.spacing.medium + Theme.spacing.extraSmall),
                     tint = Theme.colors.primary
                 )
             }
