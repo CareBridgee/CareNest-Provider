@@ -50,6 +50,10 @@ dependencies {
     // Lifecycle and ViewModel
     implementation(libs.bundles.lifecycle)
 
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    ksp(libs.hilt.compiler)
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
