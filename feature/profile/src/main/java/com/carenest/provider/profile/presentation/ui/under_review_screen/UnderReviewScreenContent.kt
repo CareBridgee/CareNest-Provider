@@ -1,4 +1,4 @@
-package com.carenest.provider.profile.presentation.completeprofile.under_review_screen
+package com.carenest.provider.profile.presentation.ui.under_review_screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,7 +24,12 @@ import com.carenest.provider.designsystem.components.topbar.TopBarLeading
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.profile.R
-import com.carenest.provider.profile.presentation.completeprofile.under_review_screen.composable.*
+import com.carenest.provider.profile.presentation.ui.under_review_screen.composable.ActionRequiredScreenContent
+import com.carenest.provider.profile.presentation.ui.under_review_screen.composable.ActionSection
+import com.carenest.provider.profile.presentation.ui.under_review_screen.composable.IllustrationSection
+import com.carenest.provider.profile.presentation.ui.under_review_screen.composable.StatusCardSection
+import com.carenest.provider.profile.presentation.ui.under_review_screen.composable.SuccessScreenContent
+import com.carenest.provider.profile.presentation.ui.under_review_screen.composable.TextSection
 
 
 @Composable

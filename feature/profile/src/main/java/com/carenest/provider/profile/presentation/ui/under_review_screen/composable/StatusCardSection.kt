@@ -1,4 +1,4 @@
-package com.carenest.provider.profile.presentation.completeprofile.under_review_screen.composable
+package com.carenest.provider.profile.presentation.ui.under_review_screen.composable
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,7 +20,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.profile.R
 import com.carenest.provider.designsystem.R as RD

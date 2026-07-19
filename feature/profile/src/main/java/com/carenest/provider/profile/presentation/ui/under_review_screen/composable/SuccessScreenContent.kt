@@ -1,4 +1,4 @@
-package com.carenest.provider.profile.presentation.completeprofile.under_review_screen.composable
+package com.carenest.provider.profile.presentation.ui.under_review_screen.composable
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
