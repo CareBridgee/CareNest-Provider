@@ -1,0 +1,52 @@
+<resources>
+    <string name="personal_info_title">Personal Information</string>
+    <string name="personal_info_subtitle">Let\'s start with the basics. Please provide your legal details for verification.</string>
+    <string name="upload_profile_photo">Upload Profile Photo</string>
+    <string name="first_name_label">First Name</string>
+    <string name="first_name_hint">e.g. Sarah</string>
+    <string name="last_name_label">Last Name</string>
+    <string name="last_name_hint">e.g. Jenkins</string>
+    <string name="dob_label">Date of Birth</string>
+    <string name="dob_hint">mm/dd/yyyy</string>
+    <string name="national_id_label">National ID</string>
+    <string name="national_id_hint">00000000000000</string>
+    <string name="gender_label">Gender Identity</string>
+    <string name="gender_hint">Select Gender</string>
+    <string name="next">Next</string>
+    <string name="step_indicator">Step %1$d of %2$d: %3$s</string>
+
+    <!-- Verification Documents -->
+    <string name="verification_docs_title">Verification Documents</string>
+    <string name="verification_docs_subtitle">Please upload the following documents to verify your profile and experience.</string>
+    <string name="national_id_card_title">National ID Card</string>
+    <string name="national_id_card_desc">Upload a clear scan of your Government issued Identity Card or Passport.</string>
+    <string name="nursing_license_title">Nursing License</string>
+    <string name="nursing_license_desc">Upload your valid nursing license issued by the relevant authority.</string>
+    <string name="professional_cert_title">Professional Certificate</string>
+    <string name="professional_cert_desc">Degree or specialization certificates (e.g., ICU, Pediatric Care).</string>
+    <string name="years_of_exp_label">Years of Experience</string>
+    <string name="years_of_exp_hint">e.g. 5</string>
+    <string name="primary_speciality_label">Primary Speciality</string>
+    <string name="primary_speciality_hint">e.g. General Nursing</string>
+    <string name="upload_document">Upload Document</string>
+
+    <!-- Services Selection -->
+    <string name="services_title">Services You Provide</string>
+    <string name="services_subtitle">Select all services you are qualified and willing to provide to patients.</string>
+    <string name="services_info_banner">You can update these services later from your profile settings. Ensure you have valid certifications for the selected specialized services.</string>
+    <string name="continue_to_step">Continue to Step %1$d (%2$d)</string>
+
+    <!-- Service Names -->
+    <string name="service_injection">Injection</string>
+    <string name="service_iv_therapy">IV Therapy</string>
+    <string name="service_blood_collection">Blood Collection</string>
+    <string name="service_wound_dressing">Wound Dressing</string>
+    <string name="service_catheter_care">Catheter Care</string>
+    <string name="service_elderly_care">Elderly Care</string>
+    <string name="service_child_care">Child Care</string>
+    <string name="service_post_surgery_care">Post-Surgery Care</string>
+    <string name="service_maternal_care">Maternal Care</string>
+    <string name="service_physiotherapy">Physiotherapy</string>
+    <string name="service_ecg_service">ECG Service</string>
+    <string name="service_home_assessment">Home Assessment</string>
+</resources>
