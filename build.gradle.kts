@@ -11,6 +11,10 @@ subprojects {
     if (name !in excludedModules && !path.contains("convention")) {
         apply(plugin = "org.jetbrains.kotlinx.kover")
     }
+
+    tasks.withType<Test>().configureEach {
+        failOnNoDiscoveredTests = false
+    }
 }
 
 dependencies {
