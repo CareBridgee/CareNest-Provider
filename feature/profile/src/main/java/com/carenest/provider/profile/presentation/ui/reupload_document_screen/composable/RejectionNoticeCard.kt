@@ -1,4 +1,4 @@
-package com.carenest.provider.profile.presentation.completeprofile.reupload_document_screen.composable
+package com.carenest.provider.profile.presentation.ui.reupload_document_screen.composable
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

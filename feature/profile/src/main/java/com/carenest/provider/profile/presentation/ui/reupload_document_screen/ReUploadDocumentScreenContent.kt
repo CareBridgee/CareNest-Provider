@@ -1,4 +1,4 @@
-package com.carenest.provider.profile.presentation.completeprofile.reupload_document_screen
+package com.carenest.provider.profile.presentation.ui.reupload_document_screen
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -26,11 +26,11 @@ import com.carenest.provider.designsystem.components.topbar.TopBarLeading
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.profile.R
-import com.carenest.provider.profile.presentation.completeprofile.reupload_document_screen.composable.CaptureTipsSection
-import com.carenest.provider.profile.presentation.completeprofile.reupload_document_screen.composable.DocumentProgressBar
-import com.carenest.provider.profile.presentation.completeprofile.reupload_document_screen.composable.ReUploadActionButtons
-import com.carenest.provider.profile.presentation.completeprofile.reupload_document_screen.composable.RejectionNoticeCard
-import com.carenest.provider.profile.presentation.completeprofile.reupload_document_screen.composable.UploadZone
+import com.carenest.provider.profile.presentation.ui.reupload_document_screen.composable.CaptureTipsSection
+import com.carenest.provider.profile.presentation.ui.reupload_document_screen.composable.DocumentProgressBar
+import com.carenest.provider.profile.presentation.ui.reupload_document_screen.composable.ReUploadActionButtons
+import com.carenest.provider.profile.presentation.ui.reupload_document_screen.composable.RejectionNoticeCard
+import com.carenest.provider.profile.presentation.ui.reupload_document_screen.composable.UploadZone
 
 @Composable
 fun ReUploadDocumentScreen(

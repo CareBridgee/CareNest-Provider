@@ -1,4 +1,4 @@
-package com.carenest.provider.profile.presentation.completeprofile.reupload_document_screen
+package com.carenest.provider.profile.presentation.ui.reupload_document_screen
 
 import android.net.Uri
 
