@@ -29,4 +29,19 @@
     <string name="account_activated">Once your account is activated.</string>
     <string name="user_message">We are currently verifying your credentials to ensure the highest standard of care. This usually takes</string>
 
+    <!-- Verification Success Screen -->
+    <string name="verified">Verified</string>
+    <string name="approved">Approved</string>
+    <string name="congratulations">Congratulations!</string>
+    <string name="account_verified">Your account has been verified.</string>
+    <string name="network_welcome_message">You are now part of the Serene Care network. Start accepting jobs to grow your career and provide care to those who need it most.</string>
+    <string name="go_to_home">Go to Home</string>
+    <string name="start_your_journey">Start your journey</string>
+    <string name="review_community_guidelines">Review Community Guidelines</string>
+    <string name="available_jobs">Available Jobs</string>
+    <string name="jobs_near_you">24 Near You</string>
+    <string name="network_perks">Network Perks</string>
+    <string name="network_rewards">12 Rewards</string>
+
+
 </resources>
