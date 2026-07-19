@@ -16,44 +16,57 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.carenest.provider.core.mvi.ObserveEffect
 import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
 import com.carenest.provider.designsystem.components.topbar.TopBarLeading
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.profile.R
-import com.carenest.provider.profile.presentation.completeprofile.under_review_screen.composable.ActionRequiredScreenContent
-import com.carenest.provider.profile.presentation.completeprofile.under_review_screen.composable.ActionSection
-import com.carenest.provider.profile.presentation.completeprofile.under_review_screen.composable.IllustrationSection
-import com.carenest.provider.profile.presentation.completeprofile.under_review_screen.composable.StatusCardSection
-import com.carenest.provider.profile.presentation.completeprofile.under_review_screen.composable.SuccessScreenContent
-import com.carenest.provider.profile.presentation.completeprofile.under_review_screen.composable.TextSection
+import com.carenest.provider.profile.presentation.completeprofile.under_review_screen.composable.*
 
 
 @Composable
 fun UnderReviewScreen(
-    modifier: Modifier = Modifier,
-    viewModel: UnderReviewViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
-    onBackClick: () -> Unit = {},
-    onGoToHomeClick: () -> Unit = {},
-    onContactSupportClick: () -> Unit = {},
-    onBackToLoginClick: () -> Unit = {},
-    onDashboardClick: () -> Unit = {},
-    onCommunityGuidelinesClick: () -> Unit = {},
-    onUploadAgainClick: () -> Unit = {}
+    viewModel: UnderReviewViewModel = hiltViewModel(),
+    onBackClick: () -> Unit,
+    onGoToHomeClick: () -> Unit,
+    onContactSupportClick: () -> Unit,
+    onBackToLoginClick: () -> Unit ,
+    onDashboardClick: () -> Unit,
+    onCommunityGuidelinesClick: () -> Unit ,
+    onUploadAgainClick: () -> Unit
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    ObserveEffect(viewModel.effect) { effect ->
+        when (effect) {
+            UnderReviewEvent.OnBackClick -> onBackClick()
+            UnderReviewEvent.OnGoToHomeClick -> onGoToHomeClick()
+            UnderReviewEvent.OnContactSupportClick -> onContactSupportClick()
+            UnderReviewEvent.OnBackToLoginClick -> onBackToLoginClick()
+        }
+    }
 
     UnderReviewScreenContent(
         state = state,
-        onBackClick = onBackClick,
-        onGoToHomeClick = onGoToHomeClick,
-        onContactSupportClick = onContactSupportClick,
-        onBackToLoginClick = onBackToLoginClick,
+        onBackClick = {
+            viewModel.onIntent(UnderReviewIntent.OnBackClick)
+        },
+        onGoToHomeClick = {
+            viewModel.onIntent(UnderReviewIntent.OnGoToHomeClick)
+        },
+        onContactSupportClick = {
+            viewModel.onIntent(UnderReviewIntent.OnContactSupportClick)
+        },
+        onBackToLoginClick = {
+            viewModel.onIntent(UnderReviewIntent.OnBackToLoginClick)
+        },
         onDashboardClick = onDashboardClick,
         onCommunityGuidelinesClick = onCommunityGuidelinesClick,
-        onUploadAgainClick = onUploadAgainClick,
-        modifier = modifier
+        onUploadAgainClick = onUploadAgainClick
     )
 }
 
