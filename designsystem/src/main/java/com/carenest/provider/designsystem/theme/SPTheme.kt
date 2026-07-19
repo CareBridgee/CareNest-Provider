@@ -19,17 +19,17 @@ fun SpTheme(
     languageCode: String = "en",
     content: @Composable () -> Unit,
 ) {
+    val normalizedLanguage = remember(languageCode) { normalizeLanguageCode(languageCode) }
     val colors = remember(isDarkTheme) {
         if (isDarkTheme) darkColors else lightColors
     }
-
-    val typography = defaultSPTypographyForLanguage(languageCode)
-
-    val layoutDirection = remember(languageCode) {
-        if (isRtlLanguage(languageCode)) LayoutDirection.Rtl else LayoutDirection.Ltr
+    val fontFamily = remember(normalizedLanguage) {
+        fontFamilyForLanguage(normalizedLanguage)
     }
-
-    val fontFamily =  if (languageCode == "ar") defaultFontFamily else englishFontFamily
+    val typography = spTypographyOf(fontFamily)
+    val layoutDirection = remember(normalizedLanguage) {
+        if (isRtlLanguage(normalizedLanguage)) LayoutDirection.Rtl else LayoutDirection.Ltr
+    }
 
     CompositionLocalProvider(
         LocalLayoutDirection provides layoutDirection,
@@ -43,8 +43,12 @@ fun SpTheme(
     )
 }
 
+internal fun normalizeLanguageCode(languageCode: String): String =
+    languageCode
+        .trim()
+        .lowercase()
+        .substringBefore('-')
+        .substringBefore('_')
+
 private fun isRtlLanguage(languageCode: String): Boolean =
-    when (languageCode) {
-        "ar", "fa", "he", "iw", "ur" -> true
-        else -> false
-    }
+    languageCode in setOf("ar", "fa", "he", "iw", "ur")

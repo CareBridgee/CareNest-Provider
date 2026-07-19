@@ -4,12 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Scaffold
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.intl.Locale
 import com.carenest.provider.designsystem.theme.SpTheme
-import com.carenest.provider.profile.presentation.ui.registration.RegistrationScreen
-import com.carenest.provider.ui.theme.CareNestProviderTheme
+import com.carenest.provider.navigation.AppNavigation
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -18,15 +16,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            CareNestProviderTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    SpTheme {
-                        RegistrationScreen(
-                            onNavigateToApplicationUnderReview = { TODO() }
-                        )
-                    }
-                }
+            SpTheme(languageCode = Locale.current.language) {
+                CareNestApp()
             }
         }
     }
+}
+
+@Composable
+fun CareNestApp() {
+    AppNavigation()
 }
