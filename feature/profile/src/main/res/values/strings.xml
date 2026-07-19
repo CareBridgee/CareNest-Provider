@@ -1,3 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+
 <resources>
     <string name="personal_info_title">Personal Information</string>
     <string name="personal_info_subtitle">Let\'s start with the basics. Please provide your legal details for verification.</string>
@@ -29,12 +31,37 @@
     <string name="primary_speciality_label">Primary Speciality</string>
     <string name="primary_speciality_hint">e.g. General Nursing</string>
     <string name="upload_document">Upload Document</string>
+    <!-- Top Bar -->
+    <string name="app_name">CareConnect</string>
+
+    <!-- Screen -->
+    <string name="application_under_review">Application Under Review</string>
+    <string name="verification_message">
+        We are currently verifying your credentials to ensure the highest standard of care. This usually takes %1$s.
+    </string>
+    <string name="verification_time">  less than 24 hours</string>
 
     <!-- Services Selection -->
     <string name="services_title">Services You Provide</string>
     <string name="services_subtitle">Select all services you are qualified and willing to provide to patients.</string>
     <string name="services_info_banner">You can update these services later from your profile settings. Ensure you have valid certifications for the selected specialized services.</string>
     <string name="continue_to_step">Continue to Step %1$d (%2$d)</string>
+    <!-- Status -->
+    <string name="application_received">Application Received</string>
+    <string name="background_check">Background Check</string>
+    <string name="in_progress">In Progress</string>
+    <string name="final_approval">Final Approval</string>
+    <string name="pending">Pending</string>
+
+    <!-- Actions -->
+    <string name="go_to_home_view_only">Go to Home </string>
+    <string name="contact_support">Contact Support</string>
+    <string name="back_to_login">Back to Login</string>
+
+    <!-- Notification -->
+    <string name="notify_email">We\'ll notify you via email</string>
+    <string name="account_activated">Once your account is activated.</string>
+    <string name="user_message">We are currently verifying your credentials to ensure the highest standard of care. This usually takes</string>
 
     <!-- Service Names -->
     <string name="service_injection">Injection</string>
