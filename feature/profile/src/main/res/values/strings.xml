@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <!-- Top Bar -->
+    <string name="app_name">CareConnect</string>
+
+    <!-- Screen -->
+    <string name="application_under_review">Application Under Review</string>
+    <string name="verification_message">
+        We are currently verifying your credentials to ensure the highest standard of care. This usually takes %1$s.
+    </string>
+    <string name="verification_time">  less than 24 hours</string>
+
+    <!-- Status -->
+    <string name="application_received">Application Received</string>
+    <string name="background_check">Background Check</string>
+    <string name="in_progress">In Progress</string>
+    <string name="final_approval">Final Approval</string>
+    <string name="pending">Pending</string>
+
+    <!-- Actions -->
+    <string name="go_to_home_view_only">Go to Home </string>
+    <string name="contact_support">Contact Support</string>
+    <string name="back_to_login">Back to Login</string>
+
+    <!-- Notification -->
+    <string name="notify_email">We\'ll notify you via email</string>
+    <string name="account_activated">Once your account is activated.</string>
+    <string name="user_message">We are currently verifying your credentials to ensure the highest standard of care. This usually takes</string>
+
+    <!-- Verification Success Screen -->
+    <string name="verified">Verified</string>
+    <string name="approved">Approved</string>
+    <string name="congratulations">Congratulations!</string>
+    <string name="account_verified">Your account has been verified.</string>
+    <string name="network_welcome_message">You are now part of the Serene Care network. Start accepting jobs to grow your career and provide care to those who need it most.</string>
+    <string name="go_to_home">Go to Home</string>
+    <string name="start_your_journey">Start your journey</string>
+    <string name="review_community_guidelines">Review Community Guidelines</string>
+    <string name="available_jobs">Available Jobs</string>
+    <string name="jobs_near_you">24 Near You</string>
+    <string name="network_perks">Network Perks</string>
+    <string name="network_rewards">12 Rewards</string>
+
+
+    <!-- Action Required Screen -->
+    <string name="action_required">Action Required</string>
+    <string name="rejected_license_reason">Your &lt;b>Nursing License&lt;/b> was rejected because the photo was blurry.</string>
+    <string name="ensure_good_lighting">Ensure Good Lighting</string>
+    <string name="good_lighting_desc">Capture your document in a well-lit area without glare or shadows.</string>
+    <string name="stay_in_focus">Stay in Focus</string>
+    <string name="in_focus_desc">Hold your phone steady and make sure all text is sharp and legible.</string>
+    <string name="visible_edges">Visible Edges</string>
+    <string name="visible_edges_desc">Place the document on a flat surface and show all four corners of the card.</string>
+    <string name="upload_again">Upload Again</string>
+    <string name="help_center_tip">Need help? Visit our &lt;b>Help Center&lt;/b> for a step-by-step guide on document verification.</string>
+</resources>

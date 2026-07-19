@@ -15,9 +15,11 @@ data class SPSpacing(
 )
 
 data class SPShapes(
-    val small: Shape = RoundedCornerShape(4.dp),
-    val medium: Shape = RoundedCornerShape(8.dp),
-    val large: Shape = RoundedCornerShape(16.dp)
+    val extraSmall: Shape = RoundedCornerShape(4.dp),
+    val small: Shape = RoundedCornerShape(8.dp),
+    val medium: Shape = RoundedCornerShape(12.dp),
+    val large: Shape = RoundedCornerShape(16.dp),
+    val extraLarge: Shape = RoundedCornerShape(24.dp)
 )
 
 data class SPSize(

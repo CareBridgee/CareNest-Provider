@@ -69,7 +69,7 @@ internal fun BaseButton(
                     Image(
                         painter = iconPainter,
                         contentDescription = null,
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(16.dp),
                         colorFilter = ColorFilter.tint(
                             if (isDisabled) Theme.colors.onDisable else contentColor
                         )

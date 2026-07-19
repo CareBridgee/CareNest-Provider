@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Top Bar -->
+    <string name="app_name">كير كونيكت</string>
+
+    <!-- Screen -->
+    <string name="application_under_review">طلبك قيد المراجعة</string>
+    <string name="verification_message">
+        نقوم حالياً بمراجعة بياناتك والتأكد من مؤهلاتك لضمان تقديم أعلى مستوى من الرعاية. تستغرق هذه العملية عادةً %1$s.
+    </string>
+    <string name="verification_time">أقل من 24 ساعة</string>
+
+    <!-- Status -->
+    <string name="application_received">تم استلام الطلب</string>
+    <string name="background_check">التحقق من البيانات</string>
+    <string name="in_progress">قيد التنفيذ</string>
+    <string name="final_approval">الموافقة النهائية</string>
+    <string name="pending">قيد الانتظار</string>
+
+    <!-- Actions -->
+    <string name="go_to_home_view_only">الانتقال إلى الرئيسية </string>
+    <string name="contact_support">التواصل مع الدعم</string>
+    <string name="back_to_login">العودة إلى تسجيل الدخول</string>
+
+    <!-- Notification -->
+    <string name="notify_email">سنقوم بإخطارك عبر البريد الإلكتروني</string>
+    <string name="account_activated">بمجرد تفعيل حسابك.</string>
+    <string name="user_message">نحن نتحقق حاليًا من بياناتك ومؤهلاتك لضمان تقديم أعلى مستوى من الرعاية. تستغرق هذه العملية عادةً</string>
+
+    <!-- Verification Success Screen -->
+    <string name="verified">تم التحقق</string>
+    <string name="approved">تمت الموافقة</string>
+    <string name="congratulations">تهانينا!</string>
+    <string name="account_verified">تم التحقق من حسابك.</string>
+    <string name="network_welcome_message">أنت الآن جزء من شبكة Serene Care. ابدأ في قبول الوظائف لتطوير مسيرتك المهنية وتقديم الرعاية لمن هم في أمس الحاجة إليها.</string>
+    <string name="go_to_home">الذهاب إلى الصفحه الرئيسية</string>
+    <string name="review_community_guidelines">مراجعة إرشادات المجتمع</string>
+    <string name="available_jobs">الوظائف المتاحة</string>
+    <string name="jobs_near_you">24 بالقرب منك</string>
+    <string name="network_perks">مزايا الشبكة</string>
+    <string name="network_rewards">12 مكافأة</string>
+    <string name="start_your_journey">ابدأ رحلتك</string>
+
+    <!-- Action Required Screen -->
+    <string name="action_required">إجراء مطلوب</string>
+    <string name="rejected_license_reason">تم رفض &lt;b>رخصة التمريض&lt;/b> الخاصة بك لأن الصورة كانت غير واضحة.</string>
+    <string name="ensure_good_lighting">تأكد من الإضاءة الجيدة</string>
+    <string name="good_lighting_desc">التقط صورة لمستندك في منطقة مضاءة جيدًا دون وهج أو ظلال.</string>
+    <string name="stay_in_focus">حافظ على التركيز</string>
+    <string name="in_focus_desc">ثبّت هاتفك وتأكد من أن النص واضح ومقروء تمامًا.</string>
+    <string name="visible_edges">حدود واضحة</string>
+    <string name="visible_edges_desc">ضع المستند على سطح مستوٍ واكشف الزوايا الأربع للبطاقة.</string>
+    <string name="upload_again">تحميل مرة أخرى</string>
+    <string name="help_center_tip">هل تحتاج إلى مساعدة؟ تفضل بزيارة &lt;b>مركز المساعدة&lt;/b> للحصول على دليل خطوة بخطوة حول التحقق من المستندات.</string>
+
+</resources>
