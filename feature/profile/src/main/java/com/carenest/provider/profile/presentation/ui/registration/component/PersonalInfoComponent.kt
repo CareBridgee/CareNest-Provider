@@ -27,14 +27,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.carenest.provider.designsystem.components.button.ButtonIconPosition
-import com.carenest.provider.designsystem.components.button.PrimaryButton
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import coil3.compose.AsyncImage
 import com.carenest.provider.designsystem.components.textfield.CustomTextField
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
@@ -48,11 +50,13 @@ fun PersonalInfoComponent(
     state: PersonalInfoState,
     onFirstNameChanged: (String) -> Unit,
     onLastNameChanged: (String) -> Unit,
+    onEmailChanged: (String) -> Unit,
+    onLocationChanged: (String) -> Unit,
     onDateOfBirthChanged: (String) -> Unit,
+    onDateOfBirthClick: () -> Unit,
     onNationalIdChanged: (String) -> Unit,
     onGenderClick: () -> Unit,
     onProfilePhotoClick: () -> Unit,
-    onContinueClick: () -> Unit,
     modifier: Modifier = Modifier,
     scrollState: ScrollState = rememberScrollState()
 ) {
@@ -97,7 +101,9 @@ fun PersonalInfoComponent(
             onTextChange = onFirstNameChanged,
             title = stringResource(R.string.first_name_label),
             hint = stringResource(R.string.first_name_hint),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
         )
 
         Spacer(modifier = Modifier.height(Theme.spacing.medium))
@@ -107,7 +113,33 @@ fun PersonalInfoComponent(
             onTextChange = onLastNameChanged,
             title = stringResource(R.string.last_name_label),
             hint = stringResource(R.string.last_name_hint),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+        )
+
+        Spacer(modifier = Modifier.height(Theme.spacing.medium))
+
+        CustomTextField(
+            text = state.email,
+            onTextChange = onEmailChanged,
+            title = stringResource(R.string.email_label),
+            hint = stringResource(R.string.email_hint),
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+        )
+
+        Spacer(modifier = Modifier.height(Theme.spacing.medium))
+
+        CustomTextField(
+            text = state.location,
+            onTextChange = onLocationChanged,
+            title = stringResource(R.string.location_label),
+            hint = stringResource(R.string.location_hint),
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
         )
 
         Spacer(modifier = Modifier.height(Theme.spacing.medium))
@@ -118,19 +150,28 @@ fun PersonalInfoComponent(
             title = stringResource(R.string.dob_label),
             hint = stringResource(R.string.dob_hint),
             leadingIcon = painterResource(id = com.carenest.provider.designsystem.R.drawable.ic_calendar),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .noRippleClickable { onDateOfBirthClick() },
             readOnly = true,
-            onClickLeadingIcon = { /* Should trigger calendar */ }
+            enabled = false,
+            singleLine = true
         )
 
         Spacer(modifier = Modifier.height(Theme.spacing.medium))
 
         CustomTextField(
             text = state.nationalId,
-            onTextChange = onNationalIdChanged,
+            onTextChange = {
+                if (it.length <= 14 && it.all { char -> char.isDigit() }) {
+                    onNationalIdChanged(it)
+                }
+            },
             title = stringResource(R.string.national_id_label),
             hint = stringResource(R.string.national_id_hint),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
 
         Spacer(modifier = Modifier.height(Theme.spacing.medium))
@@ -152,16 +193,6 @@ fun PersonalInfoComponent(
         }
 
         Spacer(modifier = Modifier.height(Theme.spacing.extraLarge))
-
-        PrimaryButton(
-            caption = stringResource(R.string.next),
-            onClick = onContinueClick,
-            modifier = Modifier.fillMaxWidth(),
-            iconPainter = painterResource(id = com.carenest.provider.designsystem.R.drawable.ic_chevron_right),
-            iconPosition = ButtonIconPosition.End
-        )
-
-        Spacer(modifier = Modifier.height(Theme.spacing.large))
 
         BasicText(
             text = stringResource(
@@ -216,12 +247,13 @@ fun ProfilePhotoPicker(
                         colorFilter = ColorFilter.tint(Color.Gray)
                     )
                 } else {
-                    Image(
-                        painter = painterResource(id = com.carenest.provider.designsystem.R.drawable.ic_camera),
+                    AsyncImage(
+                        model = profilePhotoUri,
                         contentDescription = null,
                         modifier = Modifier
                             .fillMaxSize()
-                            .clip(CircleShape)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
                     )
                 }
             }
@@ -263,11 +295,13 @@ fun PersonalInfoComponentPreview() {
             state = PersonalInfoState(),
             onFirstNameChanged = {},
             onLastNameChanged = {},
+            onEmailChanged = {},
+            onLocationChanged = {},
             onDateOfBirthChanged = {},
+            onDateOfBirthClick = {},
             onNationalIdChanged = {},
             onGenderClick = {},
-            onProfilePhotoClick = {},
-            onContinueClick = {}
+            onProfilePhotoClick = {}
         )
     }
 }
@@ -279,11 +313,13 @@ fun PersonalInfoComponentDarkPreview() {
             state = PersonalInfoState(),
             onFirstNameChanged = {},
             onLastNameChanged = {},
+            onEmailChanged = {},
+            onLocationChanged = {},
             onDateOfBirthChanged = {},
+            onDateOfBirthClick = {},
             onNationalIdChanged = {},
             onGenderClick = {},
-            onProfilePhotoClick = {},
-            onContinueClick = {}
+            onProfilePhotoClick = {}
         )
     }
 }

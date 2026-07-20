@@ -23,15 +23,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import coil3.compose.AsyncImage
 import com.carenest.provider.designsystem.R
-import com.carenest.provider.designsystem.components.button.ButtonIconPosition
-import com.carenest.provider.designsystem.components.button.PrimaryButton
 import com.carenest.provider.designsystem.components.textfield.CustomTextField
 import com.carenest.provider.designsystem.components.upload.UploadCard
 import com.carenest.provider.designsystem.theme.SpTheme
@@ -46,9 +48,11 @@ fun VerificationDocumentsComponent(
     onNationalIdClick: () -> Unit,
     onNursingLicenseClick: () -> Unit,
     onProfessionalCertificateClick: () -> Unit,
+    onRemoveNationalId: () -> Unit,
+    onRemoveNursingLicense: () -> Unit,
+    onRemoveProfessionalCertificate: () -> Unit,
     onYearsOfExpChanged: (String) -> Unit,
     onPrimarySpecialityChanged: (String) -> Unit,
-    onContinueClick: () -> Unit,
     modifier: Modifier = Modifier,
     scrollState: ScrollState = rememberScrollState()
 ) {
@@ -90,7 +94,13 @@ fun VerificationDocumentsComponent(
                 UploadButton(onClick = onNationalIdClick)
             },
             uploadedContent = {
-                state.nationalId?.let { UploadedFileItem(attachment = it) }
+                state.nationalId?.let {
+                    UploadedFileItem(
+                        attachment = it,
+                        onReplace = onNationalIdClick,
+                        onRemove = onRemoveNationalId
+                    )
+                }
             },
             modifier = Modifier.fillMaxWidth()
         )
@@ -106,7 +116,13 @@ fun VerificationDocumentsComponent(
                 UploadButton(onClick = onNursingLicenseClick)
             },
             uploadedContent = {
-                state.nursingLicense?.let { UploadedFileItem(attachment = it) }
+                state.nursingLicense?.let {
+                    UploadedFileItem(
+                        attachment = it,
+                        onReplace = onNursingLicenseClick,
+                        onRemove = onRemoveNursingLicense
+                    )
+                }
             },
             modifier = Modifier.fillMaxWidth()
         )
@@ -122,7 +138,13 @@ fun VerificationDocumentsComponent(
                 UploadButton(onClick = onProfessionalCertificateClick)
             },
             uploadedContent = {
-                state.professionalCertificate?.let { UploadedFileItem(attachment = it) }
+                state.professionalCertificate?.let {
+                    UploadedFileItem(
+                        attachment = it,
+                        onReplace = onProfessionalCertificateClick,
+                        onRemove = onRemoveProfessionalCertificate
+                    )
+                }
             },
             modifier = Modifier.fillMaxWidth()
         )
@@ -131,10 +153,16 @@ fun VerificationDocumentsComponent(
 
         CustomTextField(
             text = if (state.yearsOfExp == 0) "" else state.yearsOfExp.toString(),
-            onTextChange = onYearsOfExpChanged,
+            onTextChange = {
+                if (it.all { char -> char.isDigit() }) {
+                    onYearsOfExpChanged(it)
+                }
+            },
             title = stringResource(com.carenest.provider.profile.R.string.years_of_exp_label),
             hint = stringResource(com.carenest.provider.profile.R.string.years_of_exp_hint),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
 
         Spacer(modifier = Modifier.height(Theme.spacing.medium))
@@ -144,20 +172,12 @@ fun VerificationDocumentsComponent(
             onTextChange = onPrimarySpecialityChanged,
             title = stringResource(com.carenest.provider.profile.R.string.primary_speciality_label),
             hint = stringResource(com.carenest.provider.profile.R.string.primary_speciality_hint),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
         )
 
         Spacer(modifier = Modifier.height(Theme.spacing.extraLarge))
-
-        PrimaryButton(
-            caption = stringResource(com.carenest.provider.profile.R.string.next),
-            onClick = onContinueClick,
-            modifier = Modifier.fillMaxWidth(),
-            iconPainter = painterResource(id = R.drawable.ic_chevron_right),
-            iconPosition = ButtonIconPosition.End
-        )
-
-        Spacer(modifier = Modifier.height(Theme.spacing.large))
 
         BasicText(
             text = stringResource(
@@ -201,43 +221,101 @@ private fun UploadButton(onClick: () -> Unit) {
 }
 
 @Composable
-private fun UploadedFileItem(attachment: Attachment) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(Theme.shapes.medium)
-            .background(Theme.colors.surfaceVariant)
-            .padding(Theme.spacing.small),
-        horizontalArrangement = Arrangement.spacedBy(Theme.spacing.small),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_document_text),
-            contentDescription = null,
-            tint = Theme.colors.tint,
-            modifier = Modifier.size(Theme.size.iconMedium)
-        )
-        BasicText(
-            text = attachment.name,
-            style = Theme.typography.body.medium.copy(
-                color = Theme.colors.primaryFont,
-                fontWeight = FontWeight.Medium
-            ),
-            modifier = Modifier.weight(1f)
-        )
-        Box(
+private fun UploadedFileItem(
+    attachment: Attachment,
+    onReplace: () -> Unit,
+    onRemove: () -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(Theme.spacing.small)) {
+        Row(
             modifier = Modifier
-                .size(Theme.size.iconMedium)
-                .clip(CircleShape)
-                .background(Theme.colors.success, CircleShape),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth()
+                .clip(Theme.shapes.medium)
+                .background(Theme.colors.surfaceVariant)
+                .padding(Theme.spacing.small),
+            horizontalArrangement = Arrangement.spacedBy(Theme.spacing.small),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_check),
-                contentDescription = null,
-                tint = Theme.colors.surface,
-                modifier = Modifier.size(16.dp)
+            if (attachment.mimeType.startsWith("image/")) {
+                AsyncImage(
+                    model = attachment.uri,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(Theme.shapes.small),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_document_text),
+                    contentDescription = null,
+                    tint = Theme.colors.tint,
+                    modifier = Modifier.size(Theme.size.iconMedium)
+                )
+            }
+            BasicText(
+                text = attachment.name,
+                style = Theme.typography.body.medium.copy(
+                    color = Theme.colors.primaryFont,
+                    fontWeight = FontWeight.Medium
+                ),
+                modifier = Modifier.weight(1f)
             )
+            Box(
+                modifier = Modifier
+                    .size(Theme.size.iconMedium)
+                    .clip(CircleShape)
+                    .background(Theme.colors.success, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_check),
+                    contentDescription = null,
+                    tint = Theme.colors.surface,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Theme.spacing.medium)
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(Theme.shapes.medium)
+                    .border(1.dp, Theme.colors.tint, Theme.shapes.medium)
+                    .noRippleClickable { onReplace() }
+                    .padding(vertical = Theme.spacing.small),
+                contentAlignment = Alignment.Center
+            ) {
+                BasicText(
+                    text = stringResource(com.carenest.provider.profile.R.string.replace_action),
+                    style = Theme.typography.body.small.copy(
+                        color = Theme.colors.tint,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(Theme.shapes.medium)
+                    .border(1.dp, Theme.colors.error, Theme.shapes.medium)
+                    .noRippleClickable { onRemove() }
+                    .padding(vertical = Theme.spacing.small),
+                contentAlignment = Alignment.Center
+            ) {
+                BasicText(
+                    text = stringResource(com.carenest.provider.profile.R.string.remove_action),
+                    style = Theme.typography.body.small.copy(
+                        color = Theme.colors.error,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                )
+            }
         }
     }
 }
@@ -251,9 +329,11 @@ fun VerificationDocumentsComponentPreview() {
             onNationalIdClick = {},
             onNursingLicenseClick = {},
             onProfessionalCertificateClick = {},
+            onRemoveNationalId = {},
+            onRemoveNursingLicense = {},
+            onRemoveProfessionalCertificate = {},
             onYearsOfExpChanged = {},
-            onPrimarySpecialityChanged = {},
-            onContinueClick = {}
+            onPrimarySpecialityChanged = {}
         )
     }
 }
@@ -268,14 +348,12 @@ fun VerificationDocumentsComponentWithDataPreview() {
                 nationalId = Attachment(
                     uri = Uri.EMPTY,
                     name = "national_id.pdf",
-                    mimeType = "application/pdf",
-                    size = 1024
+                    mimeType = "application/pdf"
                 ),
                 nursingLicense = Attachment(
                     uri = Uri.EMPTY,
                     name = "nursing_license.pdf",
-                    mimeType = "application/pdf",
-                    size = 2048
+                    mimeType = "application/pdf"
                 ),
                 yearsOfExp = 5,
                 primarySpeciality = "Pediatric Care"
@@ -283,9 +361,11 @@ fun VerificationDocumentsComponentWithDataPreview() {
             onNationalIdClick = {},
             onNursingLicenseClick = {},
             onProfessionalCertificateClick = {},
+            onRemoveNationalId = {},
+            onRemoveNursingLicense = {},
+            onRemoveProfessionalCertificate = {},
             onYearsOfExpChanged = {},
-            onPrimarySpecialityChanged = {},
-            onContinueClick = {}
+            onPrimarySpecialityChanged = {}
         )
 
     }

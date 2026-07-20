@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.carenest.provider.designsystem.R
 import com.carenest.provider.designsystem.components.button.PrimaryButton
+import com.carenest.provider.designsystem.components.button.SecondaryButton
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.designsystem.util.noRippleClickable
@@ -40,7 +41,6 @@ import com.carenest.provider.profile.presentation.ui.registration.ServicesUiStat
 fun ServicesSelectionComponent(
     state: ServicesUiState,
     onServiceToggle: (ServiceUi) -> Unit,
-    onContinueClick: () -> Unit,
     modifier: Modifier = Modifier,
     scrollState: ScrollState = rememberScrollState()
 ) {
@@ -87,17 +87,6 @@ fun ServicesSelectionComponent(
         )
 
         Spacer(modifier = Modifier.height(Theme.spacing.extraLarge))
-
-        PrimaryButton(
-            caption = stringResource(
-                com.carenest.provider.profile.R.string.continue_to_step,
-                4,
-                state.selectedServices.size
-            ),
-            onClick = onContinueClick,
-            modifier = Modifier.fillMaxWidth(),
-            isDisabled = state.selectedServices.isEmpty()
-        )
     }
 }
 
@@ -231,8 +220,7 @@ fun ServicesSelectionComponentPreview() {
                 availableServices = mockServices,
                 selectedServices = listOf(mockServices[0], mockServices[1], mockServices[2])
             ),
-            onServiceToggle = {},
-            onContinueClick = {}
+            onServiceToggle = {}
         )
     }
 }
@@ -261,8 +249,7 @@ fun ServicesSelectionComponentDarkPreview() {
                 availableServices = mockServices,
                 selectedServices = listOf(mockServices[0], mockServices[1], mockServices[2])
             ),
-            onServiceToggle = {},
-            onContinueClick = {}
+            onServiceToggle = {}
         )
     }
 }

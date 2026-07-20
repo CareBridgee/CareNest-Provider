@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -56,7 +57,7 @@ fun ApplicationReviewComponent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         BasicText(
-            text = "Review Your Application",
+            text = stringResource(com.carenest.provider.profile.R.string.review_title),
             style = Theme.typography.displayMedium.copy(
                 color = Theme.colors.primaryFont,
                 fontWeight = FontWeight.Bold
@@ -67,7 +68,7 @@ fun ApplicationReviewComponent(
         Spacer(modifier = Modifier.height(Theme.spacing.small))
 
         BasicText(
-            text = "Please take a moment to ensure all details are correct. You can edit any section before final submission.",
+            text = stringResource(com.carenest.provider.profile.R.string.review_subtitle),
             style = Theme.typography.body.medium.copy(
                 color = Theme.colors.secondaryFont
             ),
@@ -78,21 +79,21 @@ fun ApplicationReviewComponent(
 
         // Personal Info Card
         SummaryCard(
-            title = "Personal Info",
+            title = stringResource(com.carenest.provider.profile.R.string.personal_info_summary),
             icon = painterResource(id = com.carenest.provider.designsystem.R.drawable.ic_profile),
             onEditClick = onEditPersonalInfo
         ) {
-            InfoRow(label = "Full Name", value = "${state.personalInfoState.firstName} ${state.personalInfoState.lastName}")
-            InfoRow(label = "Email Address", value = state.personalInfoState.email)
-            InfoRow(label = "Phone Number", value = state.personalInfoState.phoneNumber.ifEmpty { "+1 (555) 012-3456" })
-            InfoRow(label = "Location", value = state.personalInfoState.location)
+            InfoRow(label = stringResource(com.carenest.provider.profile.R.string.full_name_label), value = "${state.personalInfoState.firstName} ${state.personalInfoState.lastName}")
+            InfoRow(label = stringResource(com.carenest.provider.profile.R.string.email_label), value = state.personalInfoState.email)
+            InfoRow(label = stringResource(com.carenest.provider.profile.R.string.phone_number_label), value = state.personalInfoState.phoneNumber.ifEmpty { "+1 (555) 012-3456" })
+            InfoRow(label = stringResource(com.carenest.provider.profile.R.string.location_label), value = state.personalInfoState.location)
         }
 
         Spacer(modifier = Modifier.height(Theme.spacing.medium))
 
         // Professional Info Card
         SummaryCard(
-            title = "Professional Info",
+            title = stringResource(com.carenest.provider.profile.R.string.professional_info_summary),
             icon = painterResource(id = com.carenest.provider.designsystem.R.drawable.ic_work),
             onEditClick = onEditProfessionalInfo
         ) {
@@ -112,7 +113,7 @@ fun ApplicationReviewComponent(
                     )
                     Column {
                         BasicText(
-                            text = "License",
+                            text = stringResource(com.carenest.provider.profile.R.string.license_label),
                             style = Theme.typography.body.small.copy(color = Theme.colors.secondaryFont)
                         )
                         BasicText(
@@ -125,14 +126,21 @@ fun ApplicationReviewComponent(
 
             Spacer(modifier = Modifier.height(Theme.spacing.medium))
 
-            InfoRow(label = "Experience", value = "${state.verificationDocumentsUiState.yearsOfExp} Years in ${state.verificationDocumentsUiState.primarySpeciality}")
+            InfoRow(
+                label = stringResource(com.carenest.provider.profile.R.string.experience_label),
+                value = stringResource(
+                    com.carenest.provider.profile.R.string.experience_value_format,
+                    state.verificationDocumentsUiState.yearsOfExp,
+                    state.verificationDocumentsUiState.primarySpeciality
+                )
+            )
         }
 
         Spacer(modifier = Modifier.height(Theme.spacing.medium))
 
         // Selected Services Card
         SummaryCard(
-            title = "Selected Services",
+            title = stringResource(com.carenest.provider.profile.R.string.selected_services_summary),
             icon = painterResource(id = com.carenest.provider.designsystem.R.drawable.ic_services),
             onEditClick = onEditServices
         ) {
@@ -151,7 +159,7 @@ fun ApplicationReviewComponent(
 
         // Documents Card
         SummaryCard(
-            title = "Documents",
+            title = stringResource(com.carenest.provider.profile.R.string.documents_summary),
             icon = painterResource(id = com.carenest.provider.designsystem.R.drawable.ic_document_text),
             onEditClick = onEditDocuments
         ) {
@@ -180,7 +188,7 @@ fun ApplicationReviewComponent(
                     modifier = Modifier.size(Theme.size.iconSmall)
                 )
                 BasicText(
-                    text = "Your privacy is our priority. All information is encrypted and will only be used for our verification process. Approval typically takes 24-48 business hours.",
+                    text = stringResource(com.carenest.provider.profile.R.string.privacy_info),
                     style = Theme.typography.body.small.copy(
                         color = Theme.colors.secondaryFont,
                         fontSize = 12.sp
@@ -205,7 +213,7 @@ fun ApplicationReviewComponent(
                 )
             )
             BasicText(
-                text = "I certify that the above information is accurate and true.",
+                text = stringResource(com.carenest.provider.profile.R.string.certify_accuracy),
                 style = Theme.typography.body.small.copy(
                     color = Theme.colors.primaryFont,
                     fontWeight = FontWeight.Medium
