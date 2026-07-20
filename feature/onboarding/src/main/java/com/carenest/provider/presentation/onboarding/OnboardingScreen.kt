@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -90,6 +91,8 @@ fun OnboardingContent(
                 onSkip = { onIntent(OnboardingIntent.SkipClicked) },
                 isDisabled = state.isCompleting || cardStackState.isAnimating,
                 showSkip = !state.isLastPage,
+                pageCount = state.totalPageCount,
+                currentPage = currentPageIndex,
                 modifier = Modifier.padding(horizontal = OnboardingTokens.horizontalMargin),
             )
         },
@@ -148,13 +151,6 @@ fun OnboardingContent(
                     minimumHeight = textContentHeight,
                 )
 
-                Spacer(Modifier.height(Theme.spacing.small))
-
-                OnboardingPageIndicator(
-                    pageCount = state.totalPageCount,
-                    currentPage = currentPageIndex,
-                )
-
                 Spacer(Modifier.height(sectionSpacing))
 
                 OnboardingBottomActions(
@@ -172,28 +168,27 @@ private fun OnboardingTopBar(
     onSkip: () -> Unit,
     isDisabled: Boolean,
     showSkip: Boolean,
+    pageCount: Int,
+    currentPage: Int,
     modifier: Modifier = Modifier,
 ) {
-    Box(
+    Row(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = Theme.size.componentsNormalHeight),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        BasicText(
-            text = stringResource(R.string.onboarding_provider_brand),
-            modifier = Modifier.align(Alignment.CenterStart),
-            style = Theme.typography.title.copy(
-                color = Theme.colors.primary,
-                fontWeight = FontWeight.Bold,
-            ),
+        OnboardingPageIndicator(
+            pageCount = pageCount,
+            currentPage = currentPage,
         )
+
         if (showSkip) {
             TextButton(
                 onClick = onSkip,
                 enabled = !isDisabled,
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .heightIn(min = Theme.size.componentsNormalHeight),
+                modifier = Modifier.heightIn(min = Theme.size.componentsNormalHeight),
             ) {
                 BasicText(
                     text = stringResource(R.string.onboarding_skip),

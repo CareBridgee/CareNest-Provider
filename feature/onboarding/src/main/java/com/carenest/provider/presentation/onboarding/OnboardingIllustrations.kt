@@ -4,7 +4,9 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,7 +26,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
@@ -84,10 +89,6 @@ private fun OnboardingImageCard(page: OnboardingPage) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(
-                horizontal = OnboardingTokens.illustrationHorizontalInset,
-                vertical = OnboardingTokens.illustrationVerticalInset,
-            )
             .shadow(
                 elevation = OnboardingTokens.illustrationElevation,
                 shape = RoundedCornerShape(OnboardingTokens.illustrationCornerRadius),
@@ -100,9 +101,26 @@ private fun OnboardingImageCard(page: OnboardingPage) {
         Image(
             painter = painterResource(page.illustrationRes),
             contentDescription = stringResource(page.illustrationContentDescriptionRes),
-            contentScale = ContentScale.Crop,
+            contentScale = ContentScale.FillWidth,
             alignment = imageAlignment,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(OnboardingTokens.illustrationAspectRatio),
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.Transparent,
+                            Theme.colors.backGround.copy(
+                                alpha = OnboardingTokens.illustrationGradientAlpha,
+                            ),
+                        ),
+                    ),
+                ),
         )
     }
 }
@@ -112,24 +130,40 @@ private fun BoxScope.ManageVisitsOverlays() {
     OnboardingOverlayCard(
         iconRes = DesignSystemR.drawable.ic_heart_beat,
         labelRes = R.string.onboarding_vitals,
-        modifier = Modifier.align(Alignment.TopEnd),
+        modifier = Modifier
+            .align(Alignment.TopEnd)
+            .padding(OnboardingTokens.overlayPlacementInset),
     )
     OnboardingOverlayCard(
         iconRes = DesignSystemR.drawable.ic_location,
         labelRes = R.string.onboarding_live_map,
-        modifier = Modifier.align(Alignment.BottomStart),
+        modifier = Modifier
+            .align(Alignment.BottomStart)
+            .padding(OnboardingTokens.overlayPlacementInset),
     )
 }
 
 @Composable
 private fun BoxScope.GrowCareerOverlays() {
-    EarningsOverlay(modifier = Modifier.align(Alignment.TopStart))
+    EarningsOverlay(
+        modifier = Modifier
+            .align(Alignment.TopStart)
+            .padding(OnboardingTokens.overlayPlacementInset),
+    )
     ReviewOverlay(
         modifier = Modifier
             .align(Alignment.BottomEnd)
-            .padding(bottom = OnboardingTokens.reviewOverlayBottomOffset),
+            .padding(OnboardingTokens.overlayPlacementInset),
     )
-    FlexibleHoursChip(modifier = Modifier.align(Alignment.BottomStart))
+    FlexibleHoursChip(
+        modifier = Modifier
+            .align(Alignment.BottomStart)
+            .offset(
+                x = -OnboardingTokens.flexibleHoursOffset,
+                y = OnboardingTokens.flexibleHoursOffset,
+            )
+            .rotate(OnboardingTokens.flexibleHoursRotationDegrees),
+    )
 }
 
 @Composable
@@ -151,7 +185,7 @@ private fun OnboardingOverlayCard(
             OverlayIcon(iconRes = iconRes)
             BasicText(
                 text = stringResource(labelRes),
-                style = Theme.typography.hint.small.copy(
+                style = Theme.typography.hint.large.copy(
                     color = Theme.colors.primaryFont,
                     fontWeight = FontWeight.Medium,
                 ),
@@ -169,11 +203,11 @@ private fun EarningsOverlay(modifier: Modifier = Modifier) {
         ) {
             BasicText(
                 text = stringResource(R.string.onboarding_weekly_earnings),
-                style = Theme.typography.hint.small.copy(color = Theme.colors.hint),
+                style = Theme.typography.hint.large.copy(color = Theme.colors.hint),
             )
             BasicText(
                 text = stringResource(R.string.onboarding_earnings_amount),
-                style = Theme.typography.body.medium.copy(
+                style = Theme.typography.title.copy(
                     color = Theme.colors.primary,
                     fontWeight = FontWeight.SemiBold,
                 ),
@@ -189,7 +223,7 @@ private fun EarningsOverlay(modifier: Modifier = Modifier) {
                 )
                 BasicText(
                     text = stringResource(R.string.onboarding_earnings_trend),
-                    style = Theme.typography.hint.small.copy(color = Theme.colors.success),
+                    style = Theme.typography.hint.small.copy(color = Theme.colors.primary),
                 )
             }
         }
@@ -216,7 +250,7 @@ private fun ReviewOverlay(modifier: Modifier = Modifier) {
                 }
                 BasicText(
                     text = stringResource(R.string.onboarding_review_summary),
-                    style = Theme.typography.hint.small.copy(color = Theme.colors.primaryFont),
+                    style = Theme.typography.hint.large.copy(color = Theme.colors.primaryFont),
                 )
             }
             Box(
@@ -257,7 +291,7 @@ private fun FlexibleHoursChip(modifier: Modifier = Modifier) {
             )
             BasicText(
                 text = stringResource(R.string.onboarding_flexible_hours),
-                style = Theme.typography.hint.small.copy(
+                style = Theme.typography.body.small.copy(
                     color = Theme.colors.onPrimary,
                     fontWeight = FontWeight.SemiBold,
                 ),
@@ -289,7 +323,7 @@ private fun OnboardingBenefitChip(
             )
             BasicText(
                 text = stringResource(labelRes),
-                style = Theme.typography.hint.small.copy(
+                style = Theme.typography.hint.large.copy(
                     color = Theme.colors.onPrimaryContainer,
                     fontWeight = FontWeight.Medium,
                 ),
@@ -306,8 +340,12 @@ private fun OverlaySurface(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(OnboardingTokens.overlayCornerRadius),
-        color = Theme.colors.surface,
+        color = Theme.colors.surface.copy(alpha = OnboardingTokens.overlaySurfaceAlpha),
         shadowElevation = OnboardingTokens.overlayElevation,
+        border = BorderStroke(
+            width = OnboardingTokens.overlayBorderWidth,
+            color = Theme.colors.surface.copy(alpha = OnboardingTokens.overlayBorderAlpha),
+        ),
         content = content,
     )
 }
