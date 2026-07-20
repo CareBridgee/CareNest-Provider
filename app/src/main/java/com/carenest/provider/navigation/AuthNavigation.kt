@@ -16,8 +16,8 @@ import androidx.savedstate.serialization.SavedStateConfiguration
 import com.carenest.provider.core.navigation.NavigationConfig
 import com.carenest.provider.core.navigation.goBack
 import com.carenest.provider.core.navigation.navigate
-import com.carenest.provider.profile.presentation.ui.auth.login.LoginScreen
-import com.carenest.provider.profile.presentation.ui.auth.otp.OtpScreen
+import com.carenest.provider.auth.presentation.auth.login.LoginScreen
+import com.carenest.provider.auth.presentation.auth.otp.OtpScreen
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule

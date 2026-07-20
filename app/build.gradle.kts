@@ -45,6 +45,7 @@ dependencies {
     implementation(project(":designsystem"))
     implementation(project(":features:onboarding"))
     implementation(project(":feature:profile"))
+    implementation(project(":feature:auth"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.navigation3)
