@@ -438,7 +438,7 @@ private fun NavigationActions(
 
             PrimaryButton(
                 caption = if (isLastPage) {
-                    stringResource(ProfileR.string.submit_application)
+                    stringResource(ProfileR.string.submit)
                 } else {
                     stringResource(ProfileR.string.next)
                 },
