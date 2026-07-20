@@ -1,5 +1,9 @@
 package com.carenest.provider.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.saveable.rememberSerializable
@@ -22,16 +26,15 @@ import com.carenest.provider.core.navigation.NavigationConfig
 import com.carenest.provider.core.navigation.goBack
 import com.carenest.provider.core.navigation.navigate
 import com.carenest.provider.core.navigation.replaceWith
+import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.feature.onboarding.navigation.OnboardingRoute
 import com.carenest.provider.feature.onboarding.navigation.SplashRoute
 import com.carenest.provider.feature.onboarding.presentation.onboarding.OnboardingScreen
 import com.carenest.provider.feature.onboarding.presentation.splash.SplashScreen
-import com.carenest.provider.profile.presentation.ui.registration.RegistrationScreen
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
 
 @Serializable
 data object ProviderAuthenticationRoute : NavKey
@@ -102,22 +105,4 @@ fun AppNavigation(modifier: Modifier = Modifier) {
     )
 }
 
-@Composable
-private fun ProviderAuthenticationEntryPoint() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(Theme.spacing.large),
-        contentAlignment = Alignment.Center,
-    ) {
-        BasicText(
-            text = stringResource(
-                R.string.provider_authentication_integration_message,
-            ),
-            style = Theme.typography.body.large.copy(
-                color = Theme.colors.primaryFont,
-                textAlign = TextAlign.Center,
-            ),
-        )
-    }
-}
+
