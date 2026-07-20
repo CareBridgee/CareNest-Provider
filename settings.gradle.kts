@@ -26,5 +26,5 @@ rootProject.name = "CareNest-Provider"
 include(":app")
 include(":designsystem")
 include(":core")
-include(":features:onboarding")
 include(":feature:profile")
+include(":feature:onboarding")

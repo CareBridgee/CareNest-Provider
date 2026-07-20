@@ -1,101 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
 
+<resources>
+    <string name="personal_info_title">معلومات شخصية</string>
+    <string name="personal_info_subtitle">لنبدأ بالأساسيات. يرجى تقديم تفاصيلك القانونية للتحقق منها.</string>
+    <string name="upload_profile_photo">تحميل صورة شخصية</string>
+    <string name="first_name_label">الاسم الأول</string>
+    <string name="first_name_hint">مثال: سارة</string>
+    <string name="last_name_label">اسم العائلة</string>
+    <string name="last_name_hint">مثال: أحمد</string>
+    <string name="email_label">البريد الإلكتروني</string>
+    <string name="email_hint">مثال: sarah.j@example.com</string>
+    <string name="location_label">الموقع</string>
+    <string name="location_hint">مثال: القاهرة، مصر</string>
+    <string name="dob_label">تاريخ الميلاد</string>
+    <string name="dob_hint">شهر/يوم/سنة</string>
+    <string name="national_id_label">الرقم القومي</string>
+    <string name="national_id_hint">00000000000000</string>
+    <string name="gender_label">الجنس</string>
+    <string name="gender_hint">اختر الجنس</string>
+    <string name="next">التالي</string>
+    <string name="step_indicator">الخطوة %1$d من %2$d: %3$s</string>
+
+    <!-- Verification Documents -->
+    <string name="verification_docs_title">وثائق التحقق</string>
+    <string name="verification_docs_subtitle">يرجى تحميل الوثائق التالية للتحقق من ملفك الشخصي وخبرتك.</string>
+    <string name="national_id_card_title">بطاقة الرقم القومي</string>
+    <string name="national_id_card_desc">قم بتحميل نسخة واضحة من بطاقة الهوية الحكومية أو جواز السفر.</string>
+    <string name="nursing_license_title">ترخيص التمريض</string>
+    <string name="nursing_license_desc">قم بتحميل ترخيص التمريض الساري المفعول الصادر عن الجهة المختصة.</string>
+    <string name="professional_cert_title">شهادة مهنية</string>
+    <string name="professional_cert_desc">شهادات الدرجة العلمية أو التخصص (مثل العناية المركزة، رعاية الأطفال).</string>
+    <string name="years_of_exp_label">سنوات الخبرة</string>
+    <string name="years_of_exp_hint">مثال: ٥</string>
+    <string name="primary_speciality_label">التخصص الأساسي</string>
+    <string name="primary_speciality_hint">مثال: تمريض عام</string>
+    <string name="upload_document">تحميل وثيقة</string>
+    <string name="replace_action">استبدال</string>
+    <string name="remove_action">حذف</string>
     <!-- Top Bar -->
-    <string name="app_name">كير كونيكت</string>
+    <string name="app_name">CareConnect</string>
 
     <!-- Screen -->
-    <string name="application_under_review">طلبك قيد المراجعة</string>
-    <string name="verification_message">
-        نقوم حالياً بمراجعة بياناتك والتأكد من مؤهلاتك لضمان تقديم أعلى مستوى من الرعاية. تستغرق هذه العملية عادةً %1$s.
-    </string>
-    <string name="verification_time">أقل من 24 ساعة</string>
+    <string name="application_under_review">الطلب قيد المراجعة</string>
+    <string name="verification_message">نحن نقوم حاليًا بالتحقق من بيانات اعتمادك لضمان أعلى مستوى من الرعاية. يستغرق هذا عادةً %1$s.</string>
+    <string name="verification_time"> أقل من ٢٤ ساعة</string>
 
-    <!-- Status -->
-    <string name="application_received">تم استلام الطلب</string>
-    <string name="background_check">التحقق من البيانات</string>
-    <string name="in_progress">قيد التنفيذ</string>
-    <string name="final_approval">الموافقة النهائية</string>
-    <string name="pending">قيد الانتظار</string>
+    <!-- Services Selection -->
+    <string name="services_title">الخدمات التي تقدمها</string>
+    <string name="services_subtitle">اختر جميع الخدمات التي أنت مؤهل ومستعد لتقديمها للمرضى.</string>
+    <string name="services_info_banner">يمكنك تحديث هذه الخدمات لاحقًا من إعدادات ملفك الشخصي. تأكد من حصولك على شهادات صالحة للخدمات المتخصصة المختارة.</string>
+    <string name="continue_to_step">متابعة للخطوة %1$d (%2$d)</string>
 
-    <!-- Actions -->
-    <string name="go_to_home_view_only">الانتقال إلى الرئيسية </string>
-    <string name="contact_support">التواصل مع الدعم</string>
-    <string name="back_to_login">العودة إلى تسجيل الدخول</string>
+    <!-- Service Names -->
+    <string name="service_injection">حقن</string>
+    <string name="service_iv_therapy">العلاج بالوريد</string>
+    <string name="service_blood_collection">سحب عينات الدم</string>
+    <string name="service_wound_dressing">غيار الجروح</string>
+    <string name="service_catheter_care">رعاية القسطرة</string>
+    <string name="service_elderly_care">رعاية المسنين</string>
+    <string name="service_child_care">رعاية الأطفال</string>
+    <string name="service_post_surgery_care">رعاية ما بعد الجراحة</string>
+    <string name="service_maternal_care">رعاية الأمومة</string>
+    <string name="service_physiotherapy">العلاج الطبيعي</string>
+    <string name="service_ecg_service">خدمة رسم القلب</string>
+    <string name="service_home_assessment">التقييم المنزلي</string>
 
-    <!-- Notification -->
-    <string name="notify_email">سنقوم بإخطارك عبر البريد الإلكتروني</string>
-    <string name="account_activated">بمجرد تفعيل حسابك.</string>
-    <string name="user_message">نحن نتحقق حاليًا من بياناتك ومؤهلاتك لضمان تقديم أعلى مستوى من الرعاية. تستغرق هذه العملية عادةً</string>
+    <!-- Registration Review -->
+    <string name="review_title">مراجعة طلبك</string>
+    <string name="review_subtitle">يرجى قضاء بعض الوقت للتأكد من صحة جميع التفاصيل. يمكنك تعديل أي قسم قبل الإرسال النهائي.</string>
+    <string name="personal_info_summary">معلومات شخصية</string>
+    <string name="full_name_label">الاسم الكامل</string>
+    <string name="phone_number_label">رقم الهاتف</string>
+    <string name="professional_info_summary">المعلومات المهنية</string>
+    <string name="license_label">الترخيص</string>
+    <string name="experience_label">الخبرة</string>
+    <string name="experience_value_format">%1$d سنوات في %2$s</string>
+    <string name="selected_services_summary">الخدمات المختارة</string>
+    <string name="documents_summary">الوثائق</string>
+    <string name="privacy_info">خصوصيتك هي أولويتنا. جميع المعلومات مشفرة وسيتم استخدامها فقط لعملية التحقق الخاصة بنا. تستغرق الموافقة عادةً ٢٤-٤٨ ساعة عمل.</string>
+    <string name="certify_accuracy">أقر بأن المعلومات المذكورة أعلاه دقيقة وصحيحة.</string>
+    <string name="submit_application">إرسال الطلب</string>
+    <string name="select_gender">اختر الجنس</string>
 
-    <!-- Verification Success Screen -->
-    <string name="verified">تم التحقق</string>
-    <string name="approved">تمت الموافقة</string>
-    <string name="congratulations">تهانينا!</string>
-    <string name="account_verified">تم التحقق من حسابك.</string>
-    <string name="network_welcome_message">أنت الآن جزء من شبكة Serene Care. ابدأ في قبول الوظائف لتطوير مسيرتك المهنية وتقديم الرعاية لمن هم في أمس الحاجة إليها.</string>
-    <string name="go_to_home">الذهاب إلى الصفحه الرئيسية</string>
-    <string name="review_community_guidelines">مراجعة إرشادات المجتمع</string>
-    <string name="available_jobs">الوظائف المتاحة</string>
-    <string name="jobs_near_you">24 بالقرب منك</string>
-    <string name="network_perks">مزايا الشبكة</string>
-    <string name="network_rewards">12 مكافأة</string>
-    <string name="start_your_journey">ابدأ رحلتك</string>
+    <!-- Validation Messages -->
+    <string name="error_fill_all_fields">يرجى ملء جميع الحقول المطلوبة</string>
+    <string name="error_nid_dob_mismatch">الرقم القومي لا يتطابق مع تاريخ الميلاد</string>
+    <string name="error_upload_all_docs">يرجى تحميل جميع الوثائق وملء تفاصيل الخبرة</string>
+    <string name="error_select_service">يرجى اختيار خدمة واحدة على الأقل</string>
+    <string name="error_certify_information">يرجى الإقرار بصحة المعلومات</string>
 
-    <!-- Action Required Screen -->
-    <string name="action_required">إجراء مطلوب</string>
-    <string name="rejected_license_reason">تم رفض &lt;b>رخصة التمريض&lt;/b> الخاصة بك لأن الصورة كانت غير واضحة.</string>
-    <string name="ensure_good_lighting">تأكد من الإضاءة الجيدة</string>
-    <string name="good_lighting_desc">التقط صورة لمستندك في منطقة مضاءة جيدًا دون وهج أو ظلال.</string>
-    <string name="stay_in_focus">حافظ على التركيز</string>
-    <string name="in_focus_desc">ثبّت هاتفك وتأكد من أن النص واضح ومقروء تمامًا.</string>
-    <string name="visible_edges">حدود واضحة</string>
-    <string name="visible_edges_desc">ضع المستند على سطح مستوٍ واكشف الزوايا الأربع للبطاقة.</string>
-    <string name="upload_again">تحميل مرة أخرى</string>
-    <string name="help_center_tip">هل تحتاج إلى مساعدة؟ تفضل بزيارة &lt;b>مركز المساعدة&lt;/b> للحصول على دليل خطوة بخطوة حول التحقق من المستندات.</string>
-    
-    <!-- Re-upload Document Screen -->
-    <string name="reupload_title_default">إعادة رفع المستند</string>
-    <string name="reupload_title">إعادة رفع مستند &lt;b>%1$s&lt;/b></string>
-    <string name="default_rejection_reason">كانت صورة المستند غير واضحة. يُرجى التأكد من أن جميع النصوص مقروءة وأن حواف المستند ظاهرة بالكامل.</string>
-
-
-        <!-- Screen -->
-        <string name="document_verification_title">التحقق من المستند</string>
-        <string name="document_verification_step">الخطوة %1$d من %2$d</string>
-
-        <!-- Upload -->
-        <string name="upload_new_photo">رفع صورة جديدة</string>
-        <string name="upload_file_types">JPG أو PNG أو PDF (الحد الأقصى 10 ميجابايت)</string>
-
-        <!-- Rejection -->
-        <string name="previous_upload_rejected">تم رفض المستند الذي تم رفعه سابقًا</string>
-
-        <!-- Actions -->
-        <string name="update_document">تحديث المستند</string>
-        <string name="cancel">إلغاء</string>
-
-        <!-- Capture Tips -->
-        <string name="capture_tips">نصائح لالتقاط الصورة</string>
-
-        <string name="good_lighting">إضاءة جيدة</string>
-        <string name="good_lighting_tip">
-        تأكد من وجود إضاءة كافية وتجنب التصوير في الأماكن المظلمة.
-    </string>
-
-        <string name="show_edges">إظهار جميع الحواف</string>
-        <string name="show_edges_tip">
-        تأكد من ظهور الزوايا الأربع للمستند بالكامل داخل الإطار.
-    </string>
-
-        <string name="stay_focused">صورة واضحة</string>
-        <string name="stay_focused_tip">
-        ثبّت الهاتف حتى تصبح جميع البيانات واضحة وسهلة القراءة.
-    </string>
-
-        <string name="flat_surface">سطح مستوٍ</string>
-        <string name="flat_surface_tip">
-        ضع المستند على سطح مستوٍ وداكن لتحسين جودة الصورة.
-    </string>
+    <!-- Step Titles -->
+    <string name="step_personal_info">المعلومات الشخصية</string>
+    <string name="step_documents">الوثائق</string>
+    <string name="step_services">الخدمات</string>
+    <string name="step_review">المراجعة</string>
 
 </resources>
