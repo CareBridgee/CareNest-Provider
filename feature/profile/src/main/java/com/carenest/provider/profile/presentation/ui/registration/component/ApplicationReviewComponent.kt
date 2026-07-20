@@ -1,5 +1,6 @@
 package com.carenest.provider.profile.presentation.ui.registration.component
 
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -30,8 +31,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.carenest.provider.designsystem.components.button.ButtonIconPosition
-import com.carenest.provider.designsystem.components.button.PrimaryButton
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.profile.presentation.ui.registration.RegistrationUiState
@@ -45,7 +44,6 @@ fun ApplicationReviewComponent(
     onEditServices: () -> Unit,
     onEditDocuments: () -> Unit,
     onCertificationToggle: (Boolean) -> Unit,
-    onSubmitClick: () -> Unit,
     modifier: Modifier = Modifier,
     scrollState: ScrollState = rememberScrollState()
 ) {
@@ -84,10 +82,10 @@ fun ApplicationReviewComponent(
             icon = painterResource(id = com.carenest.provider.designsystem.R.drawable.ic_profile),
             onEditClick = onEditPersonalInfo
         ) {
-            InfoRow(label = "Full Name", value = "${state.personalInfoState.firstName} ${state.personalInfoState.lastName}".ifEmpty { "Sarah J. Cunningham" })
-            InfoRow(label = "Email Address", value = state.personalInfoState.email.ifEmpty { "sarah.c@careconnect.com" })
+            InfoRow(label = "Full Name", value = "${state.personalInfoState.firstName} ${state.personalInfoState.lastName}")
+            InfoRow(label = "Email Address", value = state.personalInfoState.email)
             InfoRow(label = "Phone Number", value = state.personalInfoState.phoneNumber.ifEmpty { "+1 (555) 012-3456" })
-            InfoRow(label = "Location", value = state.personalInfoState.location.ifEmpty { "Chicago, IL" })
+            InfoRow(label = "Location", value = state.personalInfoState.location)
         }
 
         Spacer(modifier = Modifier.height(Theme.spacing.medium))
@@ -114,11 +112,11 @@ fun ApplicationReviewComponent(
                     )
                     Column {
                         BasicText(
-                            text = "License Number",
+                            text = "License",
                             style = Theme.typography.body.small.copy(color = Theme.colors.secondaryFont)
                         )
                         BasicText(
-                            text = state.verificationDocumentsUiState.nursingLicense?.name ?: "RN-992834-IL",
+                            text = state.verificationDocumentsUiState.nursingLicense?.name ?: "",
                             style = Theme.typography.body.medium.copy(color = Theme.colors.primaryFont, fontWeight = FontWeight.SemiBold)
                         )
                     }
@@ -127,8 +125,7 @@ fun ApplicationReviewComponent(
 
             Spacer(modifier = Modifier.height(Theme.spacing.medium))
 
-            InfoRow(label = "Experience", value = "${if (state.verificationDocumentsUiState.yearsOfExp == 0) 8 else state.verificationDocumentsUiState.yearsOfExp} Years in Critical Care & Home Healthcare")
-            InfoRow(label = "Education", value = state.applicationReviewUiState.education.ifEmpty { "B.S. in Nursing, University of Illinois" })
+            InfoRow(label = "Experience", value = "${state.verificationDocumentsUiState.yearsOfExp} Years in ${state.verificationDocumentsUiState.primarySpeciality}")
         }
 
         Spacer(modifier = Modifier.height(Theme.spacing.medium))
@@ -144,14 +141,8 @@ fun ApplicationReviewComponent(
                 horizontalArrangement = Arrangement.spacedBy(Theme.spacing.small),
                 verticalArrangement = Arrangement.spacedBy(Theme.spacing.small)
             ) {
-                if (state.servicesUiState.selectedServices.isEmpty()) {
-                    listOf("Wound Care", "IV Therapy", "Elderly Care", "Post-Op Recovery", "Medication Management").forEach {
-                        ServiceTag(it)
-                    }
-                } else {
-                    state.servicesUiState.selectedServices.forEach { service ->
-                        ServiceTag(service.title)
-                    }
+                state.servicesUiState.selectedServices.forEach { service ->
+                    ServiceTag(service.title)
                 }
             }
         }
@@ -165,9 +156,9 @@ fun ApplicationReviewComponent(
             onEditClick = onEditDocuments
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(Theme.spacing.small)) {
-                DocumentItem(name = state.verificationDocumentsUiState.nursingLicense?.name ?: "Nursing_License.pdf")
-                DocumentItem(name = state.verificationDocumentsUiState.nationalId?.name ?: "Background_Check_Consent.pdf")
-                DocumentItem(name = "Government_ID_Front.jpg")
+                state.verificationDocumentsUiState.nursingLicense?.let { DocumentItem(name = it.name) }
+                state.verificationDocumentsUiState.nationalId?.let { DocumentItem(name = it.name) }
+                state.verificationDocumentsUiState.professionalCertificate?.let { DocumentItem(name = it.name) }
             }
         }
 
@@ -223,15 +214,6 @@ fun ApplicationReviewComponent(
         }
 
         Spacer(modifier = Modifier.height(Theme.spacing.medium))
-
-        PrimaryButton(
-            caption = "Submit Application",
-            onClick = onSubmitClick,
-            modifier = Modifier.fillMaxWidth(),
-            iconPainter = painterResource(id = com.carenest.provider.designsystem.R.drawable.ic_chevron_right),
-            iconPosition = ButtonIconPosition.End,
-            isDisabled = !state.applicationReviewUiState.isCertified
-        )
     }
 }
 
@@ -319,8 +301,21 @@ fun ApplicationReviewComponentPreview() {
             onEditProfessionalInfo = {},
             onEditServices = {},
             onEditDocuments = {},
-            onCertificationToggle = {},
-            onSubmitClick = {}
+            onCertificationToggle = {}
+        )
+    }
+}
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun ApplicationReviewComponentDarkPreview() {
+    SpTheme {
+        ApplicationReviewComponent(
+            state = RegistrationUiState(),
+            onEditPersonalInfo = {},
+            onEditProfessionalInfo = {},
+            onEditServices = {},
+            onEditDocuments = {},
+            onCertificationToggle = {}
         )
     }
 }
