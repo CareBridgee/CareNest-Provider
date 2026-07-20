@@ -259,13 +259,13 @@ fun RegistrationScreen(
 
             is RegistrationEffect.ShowMessage -> {
                 scope.launch {
-                    val message = context.getString(
-                        context.resources.getIdentifier(
-                            it.message,
-                            "string",
-                            context.packageName
-                        ).takeIf { id -> id != 0 } ?: ProfileR.string.app_name
-                    )
+                    val message = context.resources.getIdentifier(
+                        it.message,
+                        "string",
+                        context.packageName
+                    ).let { id ->
+                        if (id != 0) context.getString(id) else it.message
+                    }
                     snackbarHostState.showSnack(message, it.type)
                 }
             }

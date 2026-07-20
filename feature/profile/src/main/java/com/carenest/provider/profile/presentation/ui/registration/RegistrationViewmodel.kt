@@ -30,18 +30,18 @@ class RegistrationViewmodel @Inject constructor(
                 servicesUiState = servicesUiState.copy(
                     availableServices = listOf(
                         // I will remove them once we get a services response from the server, this is for testing only
-                        ServiceUi(R.drawable.ic_syringe, "Injection"),
-                        ServiceUi(R.drawable.ic_pill, "IV Therapy"),
-                        ServiceUi(R.drawable.ic_category_sales, "Blood Collection"),
-                        ServiceUi(R.drawable.ic_check, "Wound Dressing"),
-                        ServiceUi(R.drawable.ic_assignment, "Catheter Care"),
-                        ServiceUi(R.drawable.ic_elderly, "Elderly Care"),
-                        ServiceUi(R.drawable.ic_category_kids, "Child Care"),
-                        ServiceUi(R.drawable.ic_profile, "Post-Surgery Care"),
-                        ServiceUi(R.drawable.ic_category_women, "Maternal Care"),
-                        ServiceUi(R.drawable.ic_physical_therapy, "Physiotherapy"),
-                        ServiceUi(R.drawable.ic_heart_beat, "ECG Service"),
-                        ServiceUi(R.drawable.ic_home, "Home Assessment")
+                        ServiceUi(R.drawable.ic_syringe, "service_injection"),
+                        ServiceUi(R.drawable.ic_pill, "service_iv_therapy"),
+                        ServiceUi(R.drawable.ic_category_sales, "service_blood_collection"),
+                        ServiceUi(R.drawable.ic_check, "service_wound_dressing"),
+                        ServiceUi(R.drawable.ic_assignment, "service_catheter_care"),
+                        ServiceUi(R.drawable.ic_elderly, "service_elderly_care"),
+                        ServiceUi(R.drawable.ic_category_kids, "service_child_care"),
+                        ServiceUi(R.drawable.ic_profile, "service_post_surgery_care"),
+                        ServiceUi(R.drawable.ic_category_women, "service_maternal_care"),
+                        ServiceUi(R.drawable.ic_physical_therapy, "service_physiotherapy"),
+                        ServiceUi(R.drawable.ic_heart_beat, "service_ecg_service"),
+                        ServiceUi(R.drawable.ic_home, "service_home_assessment")
                     )
                 )
             )
