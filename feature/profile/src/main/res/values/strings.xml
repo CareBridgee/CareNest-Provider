@@ -1,7 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
+    <string name="personal_info_title">Personal Information</string>
+    <string name="personal_info_subtitle">Let\'s start with the basics. Please provide your legal details for verification.</string>
+    <string name="upload_profile_photo">Upload Profile Photo</string>
+    <string name="first_name_label">First Name</string>
+    <string name="first_name_hint">e.g. Sarah</string>
+    <string name="last_name_label">Last Name</string>
+    <string name="last_name_hint">e.g. Jenkins</string>
+    <string name="email_label">Email Address</string>
+    <string name="email_hint">e.g. sarah.j@example.com</string>
+    <string name="location_label">Location</string>
+    <string name="location_hint">e.g. Chicago, IL</string>
+    <string name="dob_label">Date of Birth</string>
+    <string name="dob_hint">mm/dd/yyyy</string>
+    <string name="national_id_label">National ID</string>
+    <string name="national_id_hint">00000000000000</string>
+    <string name="gender_label">Gender Identity</string>
+    <string name="gender_hint">Select Gender</string>
+    <string name="next">Next</string>
+    <string name="step_indicator">Step %1$d of %2$d: %3$s</string>
 
+    <!-- Verification Documents -->
+    <string name="verification_docs_title">Verification Documents</string>
+    <string name="verification_docs_subtitle">Please upload the following documents to verify your profile and experience.</string>
+    <string name="national_id_card_title">National ID Card</string>
+    <string name="national_id_card_desc">Upload a clear scan of your Government issued Identity Card or Passport.</string>
+    <string name="nursing_license_title">Nursing License</string>
+    <string name="nursing_license_desc">Upload your valid nursing license issued by the relevant authority.</string>
+    <string name="professional_cert_title">Professional Certificate</string>
+    <string name="professional_cert_desc">Degree or specialization certificates (e.g., ICU, Pediatric Care).</string>
+    <string name="years_of_exp_label">Years of Experience</string>
+    <string name="years_of_exp_hint">e.g. 5</string>
+    <string name="primary_speciality_label">Primary Speciality</string>
+    <string name="primary_speciality_hint">e.g. General Nursing</string>
+    <string name="upload_document">Upload Document</string>
+    <string name="replace_action">Replace</string>
+    <string name="remove_action">Remove</string>
     <!-- Top Bar -->
     <string name="app_name">CareConnect</string>
 
@@ -30,6 +65,11 @@
     </string>
     <string name="verification_time">  less than 24 hours</string>
 
+    <!-- Services Selection -->
+    <string name="services_title">Services You Provide</string>
+    <string name="services_subtitle">Select all services you are qualified and willing to provide to patients.</string>
+    <string name="services_info_banner">You can update these services later from your profile settings. Ensure you have valid certifications for the selected specialized services.</string>
+    <string name="continue_to_step">Continue to Step %1$d (%2$d)</string>
     <!-- Status -->
     <string name="application_received">Application Received</string>
     <string name="background_check">Background Check</string>
@@ -47,6 +87,19 @@
     <string name="account_activated">Once your account is activated.</string>
     <string name="user_message">We are currently verifying your credentials to ensure the highest standard of care. This usually takes</string>
 
+    <!-- Service Names -->
+    <string name="service_injection">Injection</string>
+    <string name="service_iv_therapy">IV Therapy</string>
+    <string name="service_blood_collection">Blood Collection</string>
+    <string name="service_wound_dressing">Wound Dressing</string>
+    <string name="service_catheter_care">Catheter Care</string>
+    <string name="service_elderly_care">Elderly Care</string>
+    <string name="service_child_care">Child Care</string>
+    <string name="service_post_surgery_care">Post-Surgery Care</string>
+    <string name="service_maternal_care">Maternal Care</string>
+    <string name="service_physiotherapy">Physiotherapy</string>
+    <string name="service_ecg_service">ECG Service</string>
+    <string name="service_home_assessment">Home Assessment</string>
     <!-- Verification Success Screen -->
     <string name="verified">Verified</string>
     <string name="approved">Approved</string>
@@ -94,5 +147,36 @@
     <string name="stay_focused_tip">Hold your device steady until the text appears sharp and readable.</string>
     <string name="flat_surface">Use a Flat Surface</string>
     <string name="flat_surface_tip">Place the document on a flat, dark surface to improve image quality.</string>
+    <string name="submit">Submit</string>
+
+    <!-- Registration Review -->
+    <string name="review_title">Review Your Application</string>
+    <string name="review_subtitle">Please take a moment to ensure all details are correct. You can edit any section before final submission.</string>
+    <string name="personal_info_summary">Personal Info</string>
+    <string name="full_name_label">Full Name</string>
+    <string name="phone_number_label">Phone Number</string>
+    <string name="professional_info_summary">Professional Info</string>
+    <string name="license_label">License</string>
+    <string name="experience_label">Experience</string>
+    <string name="experience_value_format">%1$d Years in %2$s</string>
+    <string name="selected_services_summary">Selected Services</string>
+    <string name="documents_summary">Documents</string>
+    <string name="privacy_info">Your privacy is our priority. All information is encrypted and will only be used for our verification process. Approval typically takes 24-48 business hours.</string>
+    <string name="certify_accuracy">I certify that the above information is accurate and true.</string>
+    <string name="submit_application">Submit Application</string>
+    <string name="select_gender">Select Gender</string>
+
+    <!-- Validation Messages -->
+    <string name="error_fill_all_fields">Please fill all required fields</string>
+    <string name="error_nid_dob_mismatch">National ID does not match Date of Birth</string>
+    <string name="error_upload_all_docs">Please upload all documents and fill experience details</string>
+    <string name="error_select_service">Please select at least one service</string>
+    <string name="error_certify_information">Please certify that the information is accurate</string>
+
+    <!-- Step Titles -->
+    <string name="step_personal_info">Personal Info</string>
+    <string name="step_documents">Documents</string>
+    <string name="step_services">Services</string>
+    <string name="step_review">Review</string>
 
 </resources>

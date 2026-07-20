@@ -20,6 +20,7 @@ kotlinxSerializationPlugin = "2.3.10"
 datastore = "1.2.1"
 coroutines = "1.11.0"
 material = "1.14.0"
+kover = "0.9.8"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -69,7 +70,7 @@ androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecy
 # Hilt DI
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
-androidx-hilt-lifecycle-viewmodel-compose = { module = "androidx.hilt:hilt-lifecycle-viewmodel-compose", version.ref = "androidxHilt" }
+androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidxHilt" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
@@ -82,6 +83,7 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinxSerializationPlugin" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 
 [bundles]
 
@@ -114,4 +116,8 @@ lifecycle = [
     "androidx-lifecycle-runtime-ktx",
     "androidx-lifecycle-runtime-compose",
     "androidx-lifecycle-viewmodel-compose",
+]
+hilt = [
+    "hilt-android",
+    "androidx-hilt-navigation-compose",
 ]

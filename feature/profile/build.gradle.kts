@@ -34,22 +34,29 @@ dependencies {
     implementation(project(":designsystem"))
     implementation(project(":core"))
 
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
+
+
+
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
     implementation(libs.material)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
-    implementation(libs.bundles.coil)
 
+    //hilt
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.navigation.compose)
+    ksp(libs.hilt.compiler)
 
     // Lifecycle and ViewModel
     implementation(libs.bundles.lifecycle)
 
-    implementation(libs.hilt.android)
-    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
-    ksp(libs.hilt.compiler)
-
+    // Image loading
+    implementation(libs.bundles.coil)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)

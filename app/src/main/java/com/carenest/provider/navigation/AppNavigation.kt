@@ -6,6 +6,8 @@ import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -24,6 +26,7 @@ import com.carenest.provider.feature.onboarding.navigation.OnboardingRoute
 import com.carenest.provider.feature.onboarding.navigation.SplashRoute
 import com.carenest.provider.feature.onboarding.presentation.onboarding.OnboardingScreen
 import com.carenest.provider.feature.onboarding.presentation.splash.SplashScreen
+import com.carenest.provider.profile.presentation.ui.registration.RegistrationScreen
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
@@ -99,4 +102,22 @@ fun AppNavigation(modifier: Modifier = Modifier) {
     )
 }
 
-
+@Composable
+private fun ProviderAuthenticationEntryPoint() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(Theme.spacing.large),
+        contentAlignment = Alignment.Center,
+    ) {
+        BasicText(
+            text = stringResource(
+                R.string.provider_authentication_integration_message,
+            ),
+            style = Theme.typography.body.large.copy(
+                color = Theme.colors.primaryFont,
+                textAlign = TextAlign.Center,
+            ),
+        )
+    }
+}

@@ -112,6 +112,7 @@
     <string name="phone_input_via_whatsapp">WhatsApp</string>
     <string name="phone_input_label">Phone Number</string>
     <string name="phone_input_carrier_charges">Standard carrier charges may apply</string>
+    <string name="back">Back</string>
 </resources>
 
 

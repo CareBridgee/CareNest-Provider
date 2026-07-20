@@ -11,7 +11,8 @@ data class SPSpacing(
     val small: Dp = 8.dp,
     val medium: Dp = 16.dp,
     val large: Dp = 24.dp,
-    val extraLarge: Dp = 32.dp
+    val extraLarge: Dp = 32.dp,
+    val veryExtraLarge: Dp = 40.dp
 )
 
 data class SPShapes(
@@ -19,7 +20,8 @@ data class SPShapes(
     val small: Shape = RoundedCornerShape(8.dp),
     val medium: Shape = RoundedCornerShape(12.dp),
     val large: Shape = RoundedCornerShape(16.dp),
-    val extraLarge: Shape = RoundedCornerShape(24.dp)
+    val extraLarge: Shape = RoundedCornerShape(24.dp),
+    val veryExtraLarge: Shape = RoundedCornerShape(32.dp)
 )
 
 data class SPSize(
@@ -29,6 +31,8 @@ data class SPSize(
     val componentsNormalHeight: Dp = 48.dp,
     val medium: Dp = 48.dp,
     val large: Dp = 64.dp ,
+    val extraLarge: Dp = 80.dp,
+    val veryExtraLarge: Dp = 100.dp,
     val logo: Dp = 220.dp,
     val onboardingImage: Dp = 280.dp,
     val onboardingBottomSpace: Dp = 120.dp
