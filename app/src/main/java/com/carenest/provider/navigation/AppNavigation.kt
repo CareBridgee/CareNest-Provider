@@ -31,12 +31,10 @@ import com.carenest.provider.feature.onboarding.navigation.OnboardingRoute
 import com.carenest.provider.feature.onboarding.navigation.SplashRoute
 import com.carenest.provider.feature.onboarding.presentation.onboarding.OnboardingScreen
 import com.carenest.provider.feature.onboarding.presentation.splash.SplashScreen
-import com.carenest.provider.profile.presentation.ui.registration.RegistrationScreen
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
 
 @Serializable
 data object ProviderAuthenticationRoute : NavKey
@@ -56,7 +54,7 @@ private val appSavedStateConfiguration = SavedStateConfiguration {
 }
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(modifier: Modifier = Modifier) {
     val backStack: SnapshotStateList<NavKey> = rememberSerializable(
         serializer = SnapshotStateListSerializer(
             PolymorphicSerializer(NavKey::class),
@@ -85,13 +83,16 @@ fun AppNavigation() {
             )
         }
         entry<ProviderAuthenticationRoute> {
-            RegistrationScreen(
-                onNavigateToApplicationUnderReview = { TODO() },
+            ProviderAuthNavigation(
+                onAuthSuccess = {
+                    // Navigate to home/dashboard on success
+                }
             )
         }
     }
 
     NavDisplay(
+        modifier = modifier,
         entries = rememberDecoratedNavEntries(
             backStack = backStack,
             entryProvider = entryProvider,
@@ -104,22 +105,4 @@ fun AppNavigation() {
     )
 }
 
-@Composable
-private fun ProviderAuthenticationEntryPoint() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(Theme.spacing.large),
-        contentAlignment = Alignment.Center,
-    ) {
-        BasicText(
-            text = stringResource(
-                R.string.provider_authentication_integration_message,
-            ),
-            style = Theme.typography.body.large.copy(
-                color = Theme.colors.primaryFont,
-                textAlign = TextAlign.Center,
-            ),
-        )
-    }
-}
+

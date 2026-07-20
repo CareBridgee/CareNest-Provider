@@ -41,6 +41,24 @@
     <string name="app_name">CareConnect</string>
 
     <!-- Screen -->
+    <string name="app_name_careconnect">CareConnect Provider</string>
+    <string name="app_auth_description">Welcome back! Please login or register</string>
+    <string name="auth_continue_google">Continue with Google</string>
+    <string name="auth_continue_phone">Continue with Phone</string>
+    <string name="auth_terms_agreement">By continuing, you agree to our Terms and Privacy Policy</string>
+    <string name="phone_input_topbar_title">Enter Phone Number</string>
+    <string name="phone_input_subtitle">We will send you a code to verify your number</string>
+    <string name="phone_input_next_btn">Continue</string>
+    <string name="otp_title">Verify OTP</string>
+    <string name="otp_subtitle">Enter the code sent to %1$s</string>
+    <string name="otp_verify_btn">Verify</string>
+    <string name="otp_resend_timer">Resend code in 00:30</string>
+    <string name="phone_header_brand">Secure Platform</string>
+    <string name="phone_input_secure_care_desc">Your information is protected and encrypted</string>
+    <string name="phone_input_via_sms">SMS</string>
+    <string name="phone_input_via_whatsapp">WhatsApp</string>
+    <string name="phone_input_label">Phone Number</string>
+    <string name="phone_input_carrier_charges">Standard carrier charges may apply</string>
     <string name="application_under_review">Application Under Review</string>
     <string name="verification_message">
         We are currently verifying your credentials to ensure the highest standard of care. This usually takes %1$s.
