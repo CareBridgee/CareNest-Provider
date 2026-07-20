@@ -1,7 +1,8 @@
 package com.carenest.provider.profile.presentation.ui.registration
 
-import androidx.annotation.DrawableRes
 import android.net.Uri
+import androidx.annotation.DrawableRes
+import com.carenest.provider.designsystem.components.toast.ToastType
 
 
 enum class Gender(val gender: String) {
@@ -39,7 +40,6 @@ data class Attachment(
     val uri: Uri,
     val name: String,
     val mimeType: String,
-    val size: Long
 )
 
 
@@ -94,18 +94,34 @@ data class RegistrationUiState(
 
 sealed interface RegistrationEffect {
     data object NavigateToNextStep: RegistrationEffect
-    data object OpenFilePicker: RegistrationEffect
+    data object NavigateToPreviousStep: RegistrationEffect
+    data object OpenProfilePhotoPicker: RegistrationEffect
+    data object OpenNIDPicker: RegistrationEffect
+    data object OpenCertificatePicker: RegistrationEffect
+    data object OpenLicensePicker: RegistrationEffect
+    data object OpenGenderSelection: RegistrationEffect
     data object ShowCalendar: RegistrationEffect
-    data object ShowMessage: RegistrationEffect
+    data class ShowMessage(val message: String, val type: ToastType = ToastType.Error): RegistrationEffect
 
 
 
 }
 
 sealed interface RegistrationIntent {
+    data object OnProfilePhotoClick : RegistrationIntent
+    data object OnGenderClick : RegistrationIntent
+    data object OnDateOfBirthClick : RegistrationIntent
+    data object OnNationalIdClick : RegistrationIntent
+    data object OnNursingLicenseClick : RegistrationIntent
+    data object OnProfessionalCertificateClick : RegistrationIntent
+    data object OnRemoveNationalId : RegistrationIntent
+    data object OnRemoveNursingLicense : RegistrationIntent
+    data object OnRemoveProfessionalCertificate : RegistrationIntent
     data class OnProfilePhotoPicked(val uri: Uri) : RegistrationIntent
     data class OnFirstNameChanged(val firstName: String) : RegistrationIntent
     data class OnLastNameChanged(val lastName: String) : RegistrationIntent
+    data class OnEmailChanged(val email: String) : RegistrationIntent
+    data class OnLocationChanged(val location: String) : RegistrationIntent
     data class OnDateOfBirthChanged(val dateOfBirth: String) : RegistrationIntent
     data class OnNationalIdChanged(val nationalId: String) : RegistrationIntent
     data class OnGenderChanged(val gender: Gender) : RegistrationIntent
@@ -116,6 +132,7 @@ sealed interface RegistrationIntent {
     data class OnPrimarySpecialityChanged(val speciality: String) : RegistrationIntent
     data class OnServiceToggle(val service: ServiceUi) : RegistrationIntent
     data class OnCertificationToggle(val isCertified: Boolean) : RegistrationIntent
-    data object OnContinueClicked : RegistrationIntent
+    data class OnContinueClicked(val currentPage: Int) : RegistrationIntent
+    data object OnBackClicked : RegistrationIntent
     data object OnSubmitApplication : RegistrationIntent
 }
