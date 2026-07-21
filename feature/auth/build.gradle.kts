@@ -41,6 +41,7 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
     implementation(libs.bundles.coil)
+    implementation(libs.androidx.navigation3.runtime)
 
 
     // Lifecycle and ViewModel
