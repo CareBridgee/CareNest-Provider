@@ -38,5 +38,4 @@
     <string name="onboarding_daily_payouts">دفعات يومية</string>
     <string name="onboarding_expert_badge">شارة خبير</string>
     <string name="onboarding_custom_shifts">مناوبات مرنة</string>
-    <string name="provider_authentication_integration_message">provider_authentication_integration_message</string>
 </resources>
