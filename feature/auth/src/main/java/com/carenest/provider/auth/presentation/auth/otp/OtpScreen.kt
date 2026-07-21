@@ -44,7 +44,7 @@ import com.carenest.provider.designsystem.theme.Theme
 fun OtpScreen(
     phone: String,
     viewModel: OtpViewModel = hiltViewModel(),
-    onNavigateToHome: () -> Unit,
+    onAuthenticationSuccess: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
@@ -55,7 +55,7 @@ fun OtpScreen(
 
     ObserveEffect(viewModel.effect) { effect ->
         when (effect) {
-            is OtpEffect.NavigateToHome -> onNavigateToHome()
+            is OtpEffect.AuthenticationSucceeded -> onAuthenticationSuccess()
             is OtpEffect.NavigateBack -> onNavigateBack()
         }
     }

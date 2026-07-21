@@ -3,6 +3,7 @@ package com.carenest.provider.profile.presentation.ui.registration
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
@@ -83,6 +84,10 @@ fun RegistrationScreen(
     var showDatePicker by remember { mutableStateOf(false) }
     var showGenderSheet by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
+
+    BackHandler(enabled = pagerState.currentPage > 0) {
+        registrationViewmodel.onIntent(RegistrationIntent.OnBackClicked)
+    }
 
     if (showGenderSheet) {
         BaseBottomSheet(
@@ -394,7 +399,6 @@ fun RegistrationContent(
             onBackClick = {
                 if (pagerState.currentPage > 0) {
                     onIntent(RegistrationIntent.OnBackClicked)
-                    onIntent(RegistrationIntent.OnContinueClicked(pagerState.currentPage - 2)) // Hacky but updates stepper
                 }
             },
             onNextClick = {

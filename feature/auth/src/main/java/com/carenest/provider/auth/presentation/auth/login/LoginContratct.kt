@@ -27,17 +27,17 @@ data class Country(
 )
 
 val countries = listOf(
-    _root_ide_package_.com.carenest.provider.auth.presentation.auth.login.Country(
+    Country(
         "Egypt",
         "+20",
         "\uD83C\uDDEA\uD83C\uDDEC"
     ),
-    _root_ide_package_.com.carenest.provider.auth.presentation.auth.login.Country(
+    Country(
         "Saudi Arabia",
         "+966",
         "\uD83C\uDDF8\uD83C\uDDE6"
     ),
-    _root_ide_package_.com.carenest.provider.auth.presentation.auth.login.Country(
+    Country(
         "UAE",
         "+971",
         "\uD83C\uDDE6\uD83C\uDDEA"
@@ -45,15 +45,15 @@ val countries = listOf(
 )
 
 data class LoginState(
-    val currentStep: com.carenest.provider.auth.presentation.auth.login.LoginStep = _root_ide_package_.com.carenest.provider.auth.presentation.auth.login.LoginStep.LANDING,
+    val currentStep: LoginStep = LoginStep.LANDING,
     val phoneNumber: String = "",
-    val selectedCountry: com.carenest.provider.auth.presentation.auth.login.Country = _root_ide_package_.com.carenest.provider.auth.presentation.auth.login.countries[0],
+    val selectedCountry: Country = countries[0],
     val isCountryDropdownExpanded: Boolean = false,
-    val selectedOtpMethod: com.carenest.provider.auth.presentation.auth.login.OtpDeliveryMethod = _root_ide_package_.com.carenest.provider.auth.presentation.auth.login.OtpDeliveryMethod.SMS,
+    val selectedOtpMethod: OtpDeliveryMethod = OtpDeliveryMethod.SMS,
     val isLoading: Boolean = false,
     val errorMessage: String? = null
 )
 
 sealed interface LoginEffect {
-    data class NavigateToOtp(val phone: String, val method: com.carenest.provider.auth.presentation.auth.login.OtpDeliveryMethod) : LoginEffect
+    data class NavigateToOtp(val phone: String, val method: OtpDeliveryMethod) : LoginEffect
 }

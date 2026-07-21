@@ -17,6 +17,6 @@ data class OtpState(
 )
 
 sealed interface OtpEffect {
-    data object NavigateToHome : OtpEffect
+    data object AuthenticationSucceeded : OtpEffect
     data object NavigateBack : OtpEffect
 }
