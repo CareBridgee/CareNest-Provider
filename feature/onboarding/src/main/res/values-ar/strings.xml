@@ -2,7 +2,7 @@
 <resources>
     <string name="splash_brand_name">كيرنست</string>
     <string name="splash_provider_label">مقدم الخدمة</string>
-    <string name="splash_tagline">نُمكّن مقدمي الرعاية بأدوات احترافية.</string>
+    <string name="splash_tagline">نُمكّن مقدمي الرعاية\nبأدوات احترافية.</string>
     <string name="splash_initializing">جارٍ تهيئة الجلسة الآمنة…</string>
     <string name="splash_logo_content_description">شعار كيرنست لمقدم الخدمة</string>
     <string name="splash_image_content_description">مقدم رعاية صحية يستخدم أدوات رقمية احترافية</string>
@@ -14,6 +14,8 @@
     <string name="onboarding_back_to_start">العودة إلى البداية</string>
     <string name="onboarding_provider_brand">كيرنست لمقدم الخدمة</string>
     <string name="onboarding_step_count">الخطوة %1$d من %2$d</string>
+    <string name="onboarding_watch_how_it_works">شاهد كيف يعمل</string>
+    <string name="onboarding_completion_error">تعذّر حفظ تقدّمك. يُرجى المحاولة مرة أخرى.</string>
 
     <string name="onboarding_network_title">قدّم الرعاية الصحية في أي مكان</string>
     <string name="onboarding_network_description">انضم إلى شبكتنا من المتخصصين في الرعاية الصحية وقدّم الرعاية الطبية للمرضى مباشرةً في منازلهم.</string>
@@ -28,7 +30,13 @@
     <string name="onboarding_career_title">طوّر مسيرتك المهنية</string>
     <string name="onboarding_career_description">حدّد ساعات عملك وتابع أرباحك وابنِ سمعتك المهنية من خلال تقييمات المرضى.</string>
     <string name="onboarding_career_image_description">ممرضة تراجع جدولها وأرباحها على جهاز لوحي</string>
+    <string name="onboarding_weekly_earnings">الأرباح الأسبوعية</string>
+    <string name="onboarding_earnings_amount">$1,450.00</string>
+    <string name="onboarding_earnings_trend" formatted="false">+12% عن الأسبوع الماضي</string>
+    <string name="onboarding_review_summary">4.9 (124 تقييمًا)</string>
+    <string name="onboarding_flexible_hours">ساعات عمل مرنة</string>
     <string name="onboarding_daily_payouts">دفعات يومية</string>
     <string name="onboarding_expert_badge">شارة خبير</string>
     <string name="onboarding_custom_shifts">مناوبات مرنة</string>
+    <string name="provider_authentication_integration_message">provider_authentication_integration_message</string>
 </resources>

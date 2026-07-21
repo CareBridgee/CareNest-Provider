@@ -2,7 +2,7 @@
 <resources>
     <string name="splash_brand_name">CareNest</string>
     <string name="splash_provider_label">Provider</string>
-    <string name="splash_tagline">Empowering caregivers with professional tools.</string>
+    <string name="splash_tagline">Empowering caregivers\nwith professional tools.</string>
     <string name="splash_initializing">Initializing secure session…</string>
     <string name="splash_logo_content_description">CareNest Provider logo</string>
     <string name="splash_image_content_description">Healthcare provider using professional digital tools</string>
@@ -32,7 +32,7 @@
     <string name="onboarding_career_image_description">Nurse reviewing her schedule and earnings on a tablet</string>
     <string name="onboarding_weekly_earnings">Weekly Earnings</string>
     <string name="onboarding_earnings_amount">$1,450.00</string>
-    <string name="onboarding_earnings_trend">+12% from last week</string>
+    <string name="onboarding_earnings_trend" formatted="false">+12% from last week</string>
     <string name="onboarding_review_summary">4.9 (124 reviews)</string>
     <string name="onboarding_flexible_hours">Flexible Hours</string>
     <string name="onboarding_daily_payouts">Daily Payouts</string>

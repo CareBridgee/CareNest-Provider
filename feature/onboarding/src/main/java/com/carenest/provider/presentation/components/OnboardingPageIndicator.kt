@@ -1,7 +1,6 @@
 package com.carenest.provider.feature.onboarding.presentation.components
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,27 +28,25 @@ fun OnboardingPageIndicator(
     ) {
         repeat(pageCount) { index ->
             val isSelected = index == currentPage
-            val width by animateDpAsState(
-                targetValue = if (isSelected) {
-                    Theme.spacing.extraLarge
-                } else {
-                    Theme.spacing.small
-                },
-                label = "onboardingIndicatorWidth",
-            )
             val color by animateColorAsState(
                 targetValue = if (isSelected) {
                     Theme.colors.primary
                 } else {
-                    Theme.colors.onDisable
+                    Theme.colors.primaryContainer
                 },
                 label = "onboardingIndicatorColor",
             )
 
             Box(
                 modifier = Modifier
-                    .width(width)
-                    .height(Theme.spacing.small)
+                    .width(
+                        if (isSelected) {
+                            OnboardingTokens.activeIndicatorWidth
+                        } else {
+                            OnboardingTokens.inactiveIndicatorWidth
+                        },
+                    )
+                    .height(OnboardingTokens.pageIndicatorHeight)
                     .clip(CircleShape)
                     .background(color),
             )
