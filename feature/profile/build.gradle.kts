@@ -58,6 +58,9 @@ dependencies {
     // Image loading
     implementation(libs.bundles.coil)
 
+
+     implementation(libs.bundles.mapbox)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
