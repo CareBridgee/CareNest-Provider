@@ -20,6 +20,7 @@
     <string name="gender_hint">Select Gender</string>
     <string name="next">Next</string>
     <string name="step_indicator">Step %1$d of %2$d: %3$s</string>
+    <string name="registration_title">Registration</string>
 
     <!-- Verification Documents -->
     <string name="verification_docs_title">Verification Documents</string>

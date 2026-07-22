@@ -3,6 +3,7 @@ package com.carenest.provider.auth.presentation.auth.login
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.activity.compose.BackHandler
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.carenest.provider.core.mvi.ObserveEffect
 
@@ -15,6 +16,10 @@ fun LoginScreen(
     onNavigateToOtp: (String, com.carenest.provider.auth.presentation.auth.login.OtpDeliveryMethod) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
+
+    BackHandler(enabled = state.currentStep == LoginStep.PHONE_INPUT) {
+        viewModel.onEvent(LoginIntent.BackClicked)
+    }
 
     ObserveEffect(viewModel.effect) { effect ->
         when (effect) {

@@ -51,7 +51,7 @@ class OtpViewModel @Inject constructor(
                 onSuccess = { authResult ->
                     // TODO: Save tokens to DataStore/EncryptedSharedPreferences
                     updateState { copy(isSuccess = true) }
-                    sendEffect(OtpEffect.NavigateToHome)
+                    sendEffect(OtpEffect.AuthenticationSucceeded)
                 },
                 onFailure = { error ->
                     updateState { copy(errorMessage = error.message ?: "Verification failed") }

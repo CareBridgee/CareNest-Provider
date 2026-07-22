@@ -3,6 +3,7 @@ package com.carenest.provider.profile.presentation.ui.registration
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
@@ -25,6 +26,8 @@ import com.carenest.provider.core.mvi.ObserveEffect
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.designsystem.components.stepper.HorizontalStepper
 import com.carenest.provider.designsystem.theme.SpTheme
+import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
+import com.carenest.provider.designsystem.components.topbar.TopBarLeading
 import com.carenest.provider.profile.presentation.ui.registration.component.ApplicationReviewComponent
 import com.carenest.provider.profile.presentation.ui.registration.component.PersonalInfoComponent
 import com.carenest.provider.profile.presentation.ui.registration.component.ServicesSelectionComponent
@@ -83,6 +86,10 @@ fun RegistrationScreen(
     var showDatePicker by remember { mutableStateOf(false) }
     var showGenderSheet by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
+
+    BackHandler(enabled = pagerState.currentPage > 0) {
+        registrationViewmodel.onIntent(RegistrationIntent.OnBackClicked)
+    }
 
     if (showGenderSheet) {
         BaseBottomSheet(
@@ -272,7 +279,35 @@ fun RegistrationScreen(
         }
     }
 
+    RegistrationScreenContent(
+        modifier = modifier,
+        state = state,
+        onIntent = registrationViewmodel::onIntent,
+        pagerState = pagerState,
+        snackbarHostState = snackbarHostState
+    )
+}
+
+@Composable
+private fun RegistrationScreenContent(
+    state: RegistrationUiState,
+    onIntent: (RegistrationIntent) -> Unit,
+    pagerState: PagerState,
+    snackbarHostState: SnackbarHostState,
+    modifier: Modifier = Modifier,
+) {
     Scaffold(
+        modifier = modifier.fillMaxSize(),
+        topBar = {
+            CareNestTopBar(
+                title = stringResource(ProfileR.string.registration_title),
+                leading = TopBarLeading.Back {
+                    onIntent(RegistrationIntent.OnBackClicked)
+                },
+                modifier = Modifier.fillMaxWidth(),
+              //  centerTitle = true,
+            )
+        },
         snackbarHost = {
             Box(modifier = Modifier.fillMaxSize()) {
                 SnackbarHost(
@@ -282,14 +317,15 @@ fun RegistrationScreen(
                         .padding(top = Theme.spacing.veryExtraLarge)
                 )
             }
-        }
-    ) { padding ->
+        },
+        containerColor = Theme.colors.backGround
+    ) { innerPadding ->
         RegistrationContent(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(innerPadding),
             state = state,
-            onIntent = registrationViewmodel::onIntent,
+            onIntent = onIntent,
             pagerState = pagerState
         )
     }
@@ -394,7 +430,6 @@ fun RegistrationContent(
             onBackClick = {
                 if (pagerState.currentPage > 0) {
                     onIntent(RegistrationIntent.OnBackClicked)
-                    onIntent(RegistrationIntent.OnContinueClicked(pagerState.currentPage - 2)) // Hacky but updates stepper
                 }
             },
             onNextClick = {
@@ -475,15 +510,30 @@ private fun getFileName(context: Context, uri: Uri): String {
     return result ?: "unknown"
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "Registration Light")
 @Composable
-private fun RegistrationContentPreview() {
-    SpTheme {
-        RegistrationContent(
-            state = RegistrationUiState().copy(
-                stepperState = StepperState(remainingSteps = 1)
-            ),
-            onIntent = {}
-        )
+private fun RegistrationScreenLightPreview() {
+    SpTheme(isDarkTheme = false) {
+        RegistrationScreenPreviewContent()
     }
+}
+
+@Preview(showBackground = true, name = "Registration Dark")
+@Composable
+private fun RegistrationScreenDarkPreview() {
+    SpTheme(isDarkTheme = true) {
+        RegistrationScreenPreviewContent()
+    }
+}
+
+@Composable
+private fun RegistrationScreenPreviewContent() {
+    RegistrationScreenContent(
+        state = RegistrationUiState().copy(
+            stepperState = StepperState(remainingSteps = 1)
+        ),
+        onIntent = {},
+        pagerState = rememberPagerState(pageCount = { 4 }),
+        snackbarHostState = remember { SnackbarHostState() }
+    )
 }

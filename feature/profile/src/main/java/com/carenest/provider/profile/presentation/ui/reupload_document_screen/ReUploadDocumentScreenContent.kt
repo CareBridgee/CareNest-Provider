@@ -18,8 +18,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.carenest.provider.core.mvi.ObserveEffect
 import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
 import com.carenest.provider.designsystem.components.topbar.TopBarLeading
@@ -35,8 +35,9 @@ import com.carenest.provider.profile.presentation.ui.reupload_document_screen.co
 @Composable
 fun ReUploadDocumentScreen(
     modifier: Modifier = Modifier,
-    viewModel: ReUploadDocumentViewModel = viewModel(),
-    onBackClick: () -> Unit = {}
+    viewModel: ReUploadDocumentViewModel = hiltViewModel(),
+    onBackClick: () -> Unit = {},
+    onUploadSuccess: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -68,7 +69,7 @@ fun ReUploadDocumentScreen(
                 )
 
             ReUploadDocumentEvent.UploadSuccess -> {
-                // TODO Navigate or show success
+                onUploadSuccess()
             }
 
             is ReUploadDocumentEvent.ShowError -> {

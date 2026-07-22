@@ -41,7 +41,7 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.kotlinx.coroutines.core)
 
-    implementation(libs.bundles.navigation3)
+    implementation(libs.androidx.navigation3.runtime)
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
