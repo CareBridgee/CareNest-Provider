@@ -45,7 +45,7 @@ fun PhoneInputField(
             modifier = Modifier
                 .height(60.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(Theme.colors.surface)
+                .background(Theme.colors.disable)
                 .clickable { onCountryClick() }
                 .padding(horizontal = 16.dp),
             contentAlignment = Alignment.Center
@@ -86,7 +86,7 @@ fun PhoneInputField(
                 .weight(1f)
                 .height(60.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(Theme.colors.surface)
+                .background(Theme.colors.disable)
                 .padding(horizontal = 16.dp),
             contentAlignment = Alignment.CenterStart
         ) {
@@ -102,7 +102,7 @@ fun PhoneInputField(
             BasicTextField(
                 value = phone,
                 onValueChange = { 
-                    if (it.length <= 11 && it.all { char -> char.isDigit() || char.isWhitespace() || char == '-' }) {
+                    if (it.length <= 10 && it.all { char -> char.isDigit() || char.isWhitespace() || char == '-' }) {
                         onPhoneChange(it)
                     }
                 },

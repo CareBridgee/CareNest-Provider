@@ -73,7 +73,7 @@ fun UploadCard(
             BasicText(
                 text = title,
                 style = Theme.typography.title.copy(
-                    fontSize = 18.sp,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Theme.colors.primaryFont,
                     lineHeight = 22.sp
@@ -84,7 +84,7 @@ fun UploadCard(
                 text = description,
                 style = Theme.typography.body.small.copy(
                     color = Theme.colors.secondaryFont,
-                    fontSize = 14.sp,
+                    fontSize = 12.sp,
                     lineHeight = 20.sp
                 )
             )
@@ -180,7 +180,8 @@ fun UploadCardPreview() {
                                 text = "+ Upload Certificate",
                                 style = Theme.typography.body.medium.copy(
                                     color = Theme.colors.tint,
-                                    fontWeight = FontWeight.SemiBold
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 14.sp
                                 )
                             )
                         }

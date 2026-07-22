@@ -40,10 +40,17 @@ internal fun BaseButton(
     borderColor: Color = Color.Transparent,
     hasBorder: Boolean = false,
     isLoading: Boolean = false,
+    changeIconColor : Boolean = true,
     loadingView: (@Composable () -> Unit)? = null,
 ) {
     val backGroundColor = if (isDisabled) Theme.colors.disable else containerColor
     val borderColor = if (!hasBorder || isDisabled) Color.Transparent else borderColor
+    val colorFilter =
+        when {
+            isDisabled -> ColorFilter.tint(Theme.colors.onDisable)
+            changeIconColor -> ColorFilter.tint(contentColor)
+            else -> null
+        }
     Row(
         modifier = modifier
             .height(
@@ -70,9 +77,7 @@ internal fun BaseButton(
                         painter = iconPainter,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
-                        colorFilter = ColorFilter.tint(
-                            if (isDisabled) Theme.colors.onDisable else contentColor
-                        )
+                        colorFilter = colorFilter
                     )
                 }
             }

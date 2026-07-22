@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.designsystem.R
 
@@ -28,7 +29,7 @@ fun PhoneNumberSection(
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = stringResource(id = R.string.phone_input_label),
-            style = Theme.typography.body.large.copy(
+            style = Theme.typography.body.medium.copy(
                 color = Theme.colors.primary,
                 fontWeight = FontWeight.Bold
             )
@@ -48,8 +49,10 @@ fun PhoneNumberSection(
 
         Text(
             text = stringResource(id = R.string.phone_input_carrier_charges),
-            style = Theme.typography.body.medium.copy(
-                color = Theme.colors.secondaryFont
+            style = Theme.typography.body.small.copy(
+                color = Theme.colors.secondaryFont,
+                fontWeight = FontWeight.Normal,
+                fontSize = 12.sp
             )
         )
 

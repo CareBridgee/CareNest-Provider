@@ -1,4 +1,4 @@
-package com.carenest.provider.feature.onboarding.presentation.onboarding
+package com.carenest.provider.presentation.onboarding
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carenest.provider.core.mvi.ObserveEffect
@@ -43,9 +44,8 @@ import com.carenest.provider.designsystem.components.swipingcards.rememberSwipin
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.feature.onboarding.R
-import com.carenest.provider.feature.onboarding.presentation.components.OnboardingPageIndicator
-import com.carenest.provider.feature.onboarding.presentation.components.OnboardingTokens
-import com.carenest.provider.presentation.onboarding.providerOnboardingPages
+import com.carenest.provider.presentation.components.OnboardingPageIndicator
+import com.carenest.provider.presentation.components.OnboardingTokens
 
 @Composable
 fun OnboardingScreen(
@@ -96,6 +96,12 @@ fun OnboardingContent(
                 modifier = Modifier.padding(horizontal = OnboardingTokens.horizontalMargin),
             )
         },
+        bottomBar = {
+            OnboardingBottomActions(
+                state = state,
+                onIntent = onIntent,
+            )
+        }
     ) { contentPadding ->
         BoxWithConstraints(
             modifier = Modifier
@@ -150,14 +156,6 @@ fun OnboardingContent(
                     page = currentPage,
                     minimumHeight = textContentHeight,
                 )
-
-                Spacer(Modifier.height(sectionSpacing))
-
-                OnboardingBottomActions(
-                    state = state,
-                    isAnimating = cardStackState.isAnimating,
-                    onIntent = onIntent,
-                )
             }
         }
     }
@@ -205,7 +203,7 @@ private fun OnboardingTopBar(
 @Composable
 private fun OnboardingTextContent(
     page: OnboardingPage,
-    minimumHeight: androidx.compose.ui.unit.Dp,
+    minimumHeight: Dp,
 ) {
     val isCareerPage = page.style == OnboardingPageStyle.Career
     val horizontalAlignment = if (isCareerPage) {
@@ -218,7 +216,7 @@ private fun OnboardingTextContent(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = minimumHeight),
+            .heightIn(min = minimumHeight).padding(vertical = Theme.spacing.medium),
         contentAlignment = Alignment.Center,
     ) {
         AnimatedContent(
@@ -235,7 +233,7 @@ private fun OnboardingTextContent(
                 BasicText(
                     text = stringResource(targetPage.titleRes),
                     modifier = Modifier.fillMaxWidth(),
-                    style = Theme.typography.displayMedium.copy(
+                    style = Theme.typography.title.copy(
                         color = Theme.colors.primaryFont,
                         fontWeight = FontWeight.Bold,
                         textAlign = textAlignment,
@@ -260,7 +258,6 @@ private fun OnboardingTextContent(
 @Composable
 private fun OnboardingBottomActions(
     state: OnboardingState,
-    isAnimating: Boolean,
     onIntent: (OnboardingIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -282,7 +279,6 @@ private fun OnboardingBottomActions(
             caption = stringResource(actionLabel),
             iconPainter = painterResource(R.drawable.onboarding_arrow_forward),
             iconPosition = ButtonIconPosition.End,
-            isDisabled = state.isCompleting || isAnimating,
             isLoading = state.isCompleting,
             onClick = {
                 onIntent(

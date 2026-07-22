@@ -12,8 +12,8 @@ import com.carenest.provider.auth.presentation.auth.login.components.PhoneInputS
 
 @Composable
 fun LoginScreen(
-    viewModel: com.carenest.provider.auth.presentation.auth.login.LoginViewModel = hiltViewModel(),
-    onNavigateToOtp: (String, com.carenest.provider.auth.presentation.auth.login.OtpDeliveryMethod) -> Unit
+    viewModel: LoginViewModel = hiltViewModel(),
+    onNavigateToOtp: (String, OtpDeliveryMethod) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
 

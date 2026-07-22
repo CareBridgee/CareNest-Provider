@@ -33,9 +33,6 @@ import com.carenest.provider.core.navigation.replaceWith
 import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
 import com.carenest.provider.designsystem.components.topbar.TopBarLeading
 import com.carenest.provider.designsystem.theme.Theme
-import com.carenest.provider.feature.onboarding.navigation.onboardingNavigationSerializers
-import com.carenest.provider.feature.onboarding.navigation.providerOnboardingEntries
-import com.carenest.provider.feature.onboarding.navigation.providerOnboardingStartRoute
 import com.carenest.provider.profile.navigation.profileCompletionNavigationSerializers
 import com.carenest.provider.profile.navigation.providerProfileCompletionEntries
 import com.carenest.provider.profile.navigation.providerProfileCompletionStartRoute

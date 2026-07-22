@@ -1,14 +1,13 @@
-package com.carenest.provider.feature.onboarding.navigation
+package com.carenest.provider.navigation
 
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.carenest.provider.core.navigation.replaceWith
-import com.carenest.provider.feature.onboarding.presentation.onboarding.OnboardingScreen
-import com.carenest.provider.feature.onboarding.presentation.splash.SplashScreen
+import com.carenest.provider.presentation.onboarding.OnboardingScreen
+import com.carenest.provider.presentation.splash.SplashScreen
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
 
 val onboardingNavigationSerializers = SerializersModule {
     polymorphic(NavKey::class) {

@@ -11,7 +11,7 @@ import com.carenest.provider.designsystem.R
 import com.carenest.provider.designsystem.components.button.PrimaryButton
 
 @Composable
-fun ContinueButton(
+fun NextButton(
     isLoading: Boolean,
     isEnabled: Boolean,
     onClick: () -> Unit

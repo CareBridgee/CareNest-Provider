@@ -18,7 +18,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.carenest.provider.designsystem.R
 import com.carenest.provider.designsystem.theme.Theme
@@ -62,7 +61,7 @@ fun CareNestTopBar(
 
         Text(
             text = title,
-            style = Theme.typography.displayMedium.copy(
+            style = Theme.typography.title.copy(
                 color = Theme.colors.primary
             ),
             modifier = Modifier.weight(1f)

@@ -196,7 +196,6 @@ class RegistrationViewmodel @Inject constructor(
             0 -> { // Personal Info
                 val personalInfo = state.personalInfoState
                 if (personalInfo.firstName.isEmpty() || personalInfo.lastName.isEmpty() ||
-                    personalInfo.email.isEmpty() || personalInfo.location.isEmpty() ||
                     personalInfo.dateOfBirth.isEmpty() || personalInfo.nationalId.isEmpty() ||
                     personalInfo.gender == Gender.UNKNOWN || personalInfo.profilePhotoUri == null
                 ) {

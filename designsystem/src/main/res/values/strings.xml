@@ -99,19 +99,21 @@
     <string name="auth_continue_google">Continue with Google</string>
     <string name="auth_continue_phone">Continue with Phone</string>
     <string name="auth_terms_agreement">By continuing, you agree to our Terms and Privacy Policy</string>
-    <string name="phone_input_topbar_title">Enter Phone Number</string>
-    <string name="phone_input_subtitle">We will send you a code to verify your number</string>
-    <string name="phone_input_next_btn">Continue</string>
+    <string name="phone_input_topbar_title">Join us via phone number</string>
+    <string name="phone_input_subtitle">We\'ll text a code to verify your \n phone.</string>
+    <string name="phone_input_next_btn">Next</string>
     <string name="otp_title">Verify OTP</string>
     <string name="otp_subtitle">Enter the code sent to %1$s</string>
     <string name="otp_verify_btn">Verify</string>
     <string name="otp_resend_timer">Resend code in 00:30</string>
     <string name="phone_header_brand">Secure Platform</string>
-    <string name="phone_input_secure_care_desc">Your information is protected and encrypted</string>
+    <string name="phone_input_secure_care_desc">Your number is used only for
+verification and secure
+coordination of services.</string>
     <string name="phone_input_via_sms">SMS</string>
     <string name="phone_input_via_whatsapp">WhatsApp</string>
     <string name="phone_input_label">Phone Number</string>
-    <string name="phone_input_carrier_charges">Standard carrier charges may apply</string>
+    <string name="phone_input_carrier_charges">Carrier charges may apply for SMS.</string>
     <string name="back">Back</string>
 </resources>
 

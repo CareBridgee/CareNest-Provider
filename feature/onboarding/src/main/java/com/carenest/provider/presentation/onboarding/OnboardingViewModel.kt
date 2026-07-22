@@ -1,4 +1,4 @@
-package com.carenest.provider.feature.onboarding.presentation.onboarding
+package com.carenest.provider.presentation.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

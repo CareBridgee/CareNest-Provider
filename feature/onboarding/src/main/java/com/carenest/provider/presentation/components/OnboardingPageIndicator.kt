@@ -1,4 +1,4 @@
-package com.carenest.provider.feature.onboarding.presentation.components
+package com.carenest.provider.presentation.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background

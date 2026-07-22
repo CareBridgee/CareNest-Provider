@@ -50,7 +50,7 @@ fun SummaryCard(
             )
             BasicText(
                 text = title,
-                style = Theme.typography.body.large.copy(
+                style = Theme.typography.body.medium.copy(
                     color = Theme.colors.tint,
                     fontWeight = FontWeight.Bold
                 ),

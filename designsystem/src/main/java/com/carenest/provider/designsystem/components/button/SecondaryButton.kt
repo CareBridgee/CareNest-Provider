@@ -23,6 +23,7 @@ fun SecondaryButton(
     iconPosition: ButtonIconPosition = ButtonIconPosition.Start,
     isDisabled: Boolean = false,
     isLoading: Boolean = false,
+    changeIconColor : Boolean = true
 ) {
     val containerColor = Theme.colors.backGround
     val contentColor = Theme.colors.primary
@@ -35,6 +36,7 @@ fun SecondaryButton(
         containerColor = containerColor,
         contentColor = contentColor,
         borderColor = border,
+        changeIconColor = changeIconColor,
         hasBorder = true,
         isDisabled = isDisabled,
         isLoading = isLoading,

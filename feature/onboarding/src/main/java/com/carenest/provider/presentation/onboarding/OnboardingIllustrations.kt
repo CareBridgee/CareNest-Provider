@@ -1,4 +1,4 @@
-package com.carenest.provider.feature.onboarding.presentation.onboarding
+package com.carenest.provider.presentation.onboarding
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.Dp
 import com.carenest.provider.feature.onboarding.R
 import com.carenest.provider.designsystem.R as DesignSystemR
 import com.carenest.provider.designsystem.theme.Theme
-import com.carenest.provider.feature.onboarding.presentation.components.OnboardingTokens
+import com.carenest.provider.presentation.components.OnboardingTokens
 
 @Composable
 internal fun OnboardingIllustration(page: OnboardingPage) {
@@ -101,11 +101,9 @@ private fun OnboardingImageCard(page: OnboardingPage) {
         Image(
             painter = painterResource(page.illustrationRes),
             contentDescription = stringResource(page.illustrationContentDescriptionRes),
-            contentScale = ContentScale.FillWidth,
+            contentScale = ContentScale.FillBounds,
             alignment = imageAlignment,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(OnboardingTokens.illustrationAspectRatio),
+            modifier = Modifier.fillMaxSize()
         )
         Box(
             modifier = Modifier
