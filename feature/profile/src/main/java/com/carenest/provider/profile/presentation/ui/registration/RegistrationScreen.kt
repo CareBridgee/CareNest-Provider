@@ -305,7 +305,6 @@ private fun RegistrationScreenContent(
                     onIntent(RegistrationIntent.OnBackClicked)
                 },
                 modifier = Modifier.fillMaxWidth(),
-              //  centerTitle = true,
             )
         },
         snackbarHost = {
@@ -317,6 +316,28 @@ private fun RegistrationScreenContent(
                         .padding(top = Theme.spacing.veryExtraLarge)
                 )
             }
+        },
+        bottomBar = {
+            NavigationActions(
+                currentPage = pagerState.currentPage,
+                isNextDisabled = when (pagerState.currentPage) {
+                    2 -> state.servicesUiState.selectedServices.isEmpty()
+                    3 -> !state.applicationReviewUiState.isCertified
+                    else -> false
+                },
+                onBackClick = {
+                    if (pagerState.currentPage > 0) {
+                        onIntent(RegistrationIntent.OnBackClicked)
+                    }
+                },
+                onNextClick = {
+                    if (pagerState.currentPage == 3) {
+                        onIntent(RegistrationIntent.OnSubmitApplication)
+                    } else {
+                        onIntent(RegistrationIntent.OnContinueClicked(pagerState.currentPage))
+                    }
+                }
+            )
         },
         containerColor = Theme.colors.backGround
     ) { innerPadding ->
@@ -356,8 +377,6 @@ fun RegistrationContent(
             showStepLabel = false
         )
 
-        Spacer(modifier = Modifier.height(Theme.spacing.medium))
-
         Box(modifier = Modifier.weight(1f)) {
             HorizontalPager(
                 state = pagerState,
@@ -369,8 +388,6 @@ fun RegistrationContent(
                         state = state.personalInfoState,
                         onFirstNameChanged = { onIntent(RegistrationIntent.OnFirstNameChanged(it)) },
                         onLastNameChanged = { onIntent(RegistrationIntent.OnLastNameChanged(it)) },
-                        onEmailChanged = { onIntent(RegistrationIntent.OnEmailChanged(it)) },
-                        onLocationChanged = { onIntent(RegistrationIntent.OnLocationChanged(it)) },
                         onDateOfBirthChanged = { onIntent(RegistrationIntent.OnDateOfBirthChanged(it)) },
                         onDateOfBirthClick = { onIntent(RegistrationIntent.OnDateOfBirthClick) },
                         onNationalIdChanged = { onIntent(RegistrationIntent.OnNationalIdChanged(it)) },
@@ -420,26 +437,6 @@ fun RegistrationContent(
                 }
             }
         }
-        NavigationActions(
-            currentPage = pagerState.currentPage,
-            isNextDisabled = when (pagerState.currentPage) {
-                2 -> state.servicesUiState.selectedServices.isEmpty()
-                3 -> !state.applicationReviewUiState.isCertified
-                else -> false
-            },
-            onBackClick = {
-                if (pagerState.currentPage > 0) {
-                    onIntent(RegistrationIntent.OnBackClicked)
-                }
-            },
-            onNextClick = {
-                if (pagerState.currentPage == 3) {
-                    onIntent(RegistrationIntent.OnSubmitApplication)
-                } else {
-                    onIntent(RegistrationIntent.OnContinueClicked(pagerState.currentPage))
-                }
-            }
-        )
     }
 }
 

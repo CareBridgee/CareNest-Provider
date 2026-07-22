@@ -149,7 +149,7 @@ fun CustomTextField(
                         BasicText(
                             text = it,
                             style = Theme.typography.body.medium.copy(
-                                color = Theme.colors.hint.copy(alpha = 0.8f),
+                                color = Theme.colors.hint,
                                 fontSize = 16.sp
                             )
                         )

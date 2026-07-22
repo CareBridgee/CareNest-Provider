@@ -50,8 +50,6 @@ fun PersonalInfoComponent(
     state: PersonalInfoState,
     onFirstNameChanged: (String) -> Unit,
     onLastNameChanged: (String) -> Unit,
-    onEmailChanged: (String) -> Unit,
-    onLocationChanged: (String) -> Unit,
     onDateOfBirthChanged: (String) -> Unit,
     onDateOfBirthClick: () -> Unit,
     onNationalIdChanged: (String) -> Unit,
@@ -65,14 +63,15 @@ fun PersonalInfoComponent(
             .fillMaxWidth()
             .background(Theme.colors.backGround)
             .verticalScroll(scrollState)
-            .padding(horizontal = Theme.spacing.medium, Theme.spacing.extraLarge),
+            .padding(horizontal = Theme.spacing.medium),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         BasicText(
             text = stringResource(R.string.personal_info_title),
-            style = Theme.typography.displayMedium.copy(
+            style = Theme.typography.title.copy(
                 color = Theme.colors.primaryFont,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontSize = 22.sp
             ),
             modifier = Modifier.fillMaxWidth()
         )
@@ -113,30 +112,6 @@ fun PersonalInfoComponent(
             onTextChange = onLastNameChanged,
             title = stringResource(R.string.last_name_label),
             hint = stringResource(R.string.last_name_hint),
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
-        )
-
-        Spacer(modifier = Modifier.height(Theme.spacing.medium))
-
-        CustomTextField(
-            text = state.email,
-            onTextChange = onEmailChanged,
-            title = stringResource(R.string.email_label),
-            hint = stringResource(R.string.email_hint),
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-        )
-
-        Spacer(modifier = Modifier.height(Theme.spacing.medium))
-
-        CustomTextField(
-            text = state.location,
-            onTextChange = onLocationChanged,
-            title = stringResource(R.string.location_label),
-            hint = stringResource(R.string.location_hint),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
@@ -295,8 +270,6 @@ fun PersonalInfoComponentPreview() {
             state = PersonalInfoState(),
             onFirstNameChanged = {},
             onLastNameChanged = {},
-            onEmailChanged = {},
-            onLocationChanged = {},
             onDateOfBirthChanged = {},
             onDateOfBirthClick = {},
             onNationalIdChanged = {},
@@ -313,8 +286,6 @@ fun PersonalInfoComponentDarkPreview() {
             state = PersonalInfoState(),
             onFirstNameChanged = {},
             onLastNameChanged = {},
-            onEmailChanged = {},
-            onLocationChanged = {},
             onDateOfBirthChanged = {},
             onDateOfBirthClick = {},
             onNationalIdChanged = {},

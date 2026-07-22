@@ -49,14 +49,15 @@ fun ServicesSelectionComponent(
             .fillMaxWidth()
             .background(Theme.colors.backGround)
             .verticalScroll(scrollState)
-            .padding(horizontal = Theme.spacing.medium, vertical = Theme.spacing.extraLarge),
+            .padding(horizontal = Theme.spacing.medium),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         BasicText(
             text = stringResource(com.carenest.provider.profile.R.string.services_title),
-            style = Theme.typography.displayMedium.copy(
+            style = Theme.typography.title.copy(
                 color = Theme.colors.primaryFont,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontSize = 22.sp
             ),
             modifier = Modifier.fillMaxWidth()
         )
@@ -159,8 +160,7 @@ private fun ServiceCard(
             text = service.title,
             style = Theme.typography.body.medium.copy(
                 color = Theme.colors.primaryFont,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 16.sp
+                fontWeight = FontWeight.Bold,
             )
         )
     }

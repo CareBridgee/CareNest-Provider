@@ -61,14 +61,15 @@ fun VerificationDocumentsComponent(
             .fillMaxWidth()
             .background(Theme.colors.backGround)
             .verticalScroll(scrollState)
-            .padding(horizontal = Theme.spacing.medium, vertical = Theme.spacing.extraLarge),
+            .padding(horizontal = Theme.spacing.medium),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         BasicText(
             text = stringResource(com.carenest.provider.profile.R.string.verification_docs_title),
-            style = Theme.typography.displayMedium.copy(
+            style = Theme.typography.title.copy(
                 color = Theme.colors.primaryFont,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontSize = 22.sp
             ),
             modifier = Modifier.fillMaxWidth()
         )
