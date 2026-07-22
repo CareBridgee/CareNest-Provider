@@ -101,11 +101,9 @@ private fun OnboardingImageCard(page: OnboardingPage) {
         Image(
             painter = painterResource(page.illustrationRes),
             contentDescription = stringResource(page.illustrationContentDescriptionRes),
-            contentScale = ContentScale.FillWidth,
+            contentScale = ContentScale.FillBounds,
             alignment = imageAlignment,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(OnboardingTokens.illustrationAspectRatio),
+            modifier = Modifier.fillMaxSize()
         )
         Box(
             modifier = Modifier
