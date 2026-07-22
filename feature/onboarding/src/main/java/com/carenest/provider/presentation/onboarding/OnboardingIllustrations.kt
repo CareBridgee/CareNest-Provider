@@ -1,4 +1,4 @@
-package com.carenest.provider.feature.onboarding.presentation.onboarding
+package com.carenest.provider.presentation.onboarding
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.Dp
 import com.carenest.provider.feature.onboarding.R
 import com.carenest.provider.designsystem.R as DesignSystemR
 import com.carenest.provider.designsystem.theme.Theme
-import com.carenest.provider.feature.onboarding.presentation.components.OnboardingTokens
+import com.carenest.provider.presentation.components.OnboardingTokens
 
 @Composable
 internal fun OnboardingIllustration(page: OnboardingPage) {

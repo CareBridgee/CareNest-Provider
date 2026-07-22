@@ -1,4 +1,4 @@
-package com.carenest.provider.feature.onboarding.navigation
+package com.carenest.provider.navigation
 
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
