@@ -10,8 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -23,7 +23,6 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.compose.serialization.serializers.SnapshotStateListSerializer
 import androidx.savedstate.serialization.SavedStateConfiguration
-import com.carenest.provider.core.navigation.NavigationConfig
 import com.carenest.provider.R
 import com.carenest.provider.auth.navigation.authNavigationSerializers
 import com.carenest.provider.auth.navigation.providerAuthEntries
@@ -31,11 +30,6 @@ import com.carenest.provider.auth.navigation.providerAuthStartRoute
 import com.carenest.provider.core.navigation.goBack
 import com.carenest.provider.core.navigation.navigate
 import com.carenest.provider.core.navigation.replaceWith
-import com.carenest.provider.feature.onboarding.navigation.OnboardingRoute
-import com.carenest.provider.feature.onboarding.navigation.SplashRoute
-import com.carenest.provider.feature.onboarding.presentation.onboarding.OnboardingScreen
-import com.carenest.provider.feature.onboarding.presentation.splash.SplashScreen
-import com.carenest.provider.profile.presentation.ui.registration.RegistrationScreen
 import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
 import com.carenest.provider.designsystem.components.topbar.TopBarLeading
 import com.carenest.provider.designsystem.theme.Theme
@@ -48,7 +42,6 @@ import com.carenest.provider.profile.navigation.providerProfileCompletionStartRo
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
 
 private val appNavigationSerializers = SerializersModule {
     include(onboardingNavigationSerializers)
