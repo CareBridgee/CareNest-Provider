@@ -94,4 +94,27 @@
     <string name="availability_distance_min_label">١ ميل</string>
     <string name="availability_distance_max_label">٥٠ ميل</string>
     <string name="back">رجوع</string>
+    <!-- Auth strings -->
+    <string name="app_name_careconnect">كير كونيكت لمقدمي الرعاية</string>
+    <string name="app_auth_description">مرحبًا بعودتك! يُرجى تسجيل الدخول أو إنشاء حساب.</string>
+    <string name="auth_continue_google">المتابعة باستخدام Google</string>
+    <string name="auth_continue_phone">المتابعة باستخدام رقم الهاتف</string>
+    <string name="auth_terms_agreement">بالمتابعة، فإنك توافق على الشروط وسياسة الخصوصية الخاصة بنا.</string>
+
+    <string name="phone_input_topbar_title">انضم إلينا باستخدام رقم الهاتف</string>
+    <string name="phone_input_subtitle">سنرسل إليك رمز تحقق عبر رسالة نصية للتحقق من رقم هاتفك.</string>
+    <string name="phone_input_next_btn">التالي</string>
+
+    <string name="otp_title">التحقق من رمز OTP</string>
+    <string name="otp_subtitle">أدخل الرمز المُرسل إلى %1$s</string>
+    <string name="otp_verify_btn">تحقق</string>
+    <string name="otp_resend_timer">إعادة إرسال الرمز خلال 00:30</string>
+
+    <string name="phone_header_brand">منصة آمنة</string>
+    <string name="phone_input_secure_care_desc">يُستخدم رقم هاتفك فقط للتحقق من هويتك والتنسيق الآمن للخدمات.</string>
+
+    <string name="phone_input_via_sms">رسالة نصية (SMS)</string>
+    <string name="phone_input_via_whatsapp">واتساب</string>
+    <string name="phone_input_label">رقم الهاتف</string>
+    <string name="phone_input_carrier_charges">قد تُطبق رسوم من شركة الاتصالات على الرسائل النصية.</string>
 </resources>

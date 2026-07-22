@@ -44,7 +44,7 @@ fun PhoneInputScreen(state: LoginState, onEvent: (LoginIntent) -> Unit) {
             Text(
                 text = stringResource(id = R.string.phone_input_subtitle),
                 style = Theme.typography.title.copy(
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     color = Theme.colors.secondaryFont,
                     fontWeight = FontWeight.Normal,
                     lineHeight = 28.sp
@@ -77,7 +77,7 @@ fun PhoneInputScreen(state: LoginState, onEvent: (LoginIntent) -> Unit) {
             Spacer(modifier = Modifier.weight(1f))
             Spacer(modifier = Modifier.height(24.dp))
 
-            ContinueButton(
+            NextButton(
                 isLoading = state.isLoading,
                 isEnabled = state.phoneNumber.isNotBlank() && state.errorMessage == null,
                 onClick = { onEvent(LoginIntent.RequestOtpClicked) }

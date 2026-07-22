@@ -26,8 +26,9 @@ fun SquareOptionCard(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val backgroundColor = if (isSelected) Theme.colors.primary.copy(alpha = 0.05f) else Theme.colors.surface
+    val backgroundColor = if (isSelected) Theme.colors.primary.copy(alpha = 0.05f) else Theme.colors.disable
     val borderColor = if (isSelected) Theme.colors.primary else Color.Transparent
+    val color = if (isSelected) Theme.colors.primary else Theme.colors.secondary
 
     Surface(
         shape = RoundedCornerShape(20.dp),
@@ -46,7 +47,7 @@ fun SquareOptionCard(
             Icon(
                 painter = painterResource(id = iconRes),
                 contentDescription = title,
-                tint = Theme.colors.primary,
+                tint = color,
                 modifier = Modifier.size(32.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -54,7 +55,7 @@ fun SquareOptionCard(
                 text = title,
                 style = Theme.typography.body.medium.copy(
                     fontWeight = FontWeight.SemiBold,
-                    color = Theme.colors.primary
+                    color = color
                 ),
                 textAlign = TextAlign.Center
             )
