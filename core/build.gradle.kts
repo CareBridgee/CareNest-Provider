@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.hilt)
@@ -14,18 +16,28 @@ android {
         }
     }
 
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
+
+    val properties = Properties()
+    val localPropertiesFile = project.rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { properties.load(it) }
+    }
+    val baseUrl = properties.getProperty("BASE_URL") ?: "https://api.carenest.com/"
+
     defaultConfig {
         minSdk = 24
 
+        buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    buildFeatures {
-        compose = true
     }
 }
 
@@ -42,6 +54,10 @@ dependencies {
     //di
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+
+    implementation(libs.bundles.ktor)
+    implementation(libs.kotlinx.serialization)
+    implementation(libs.androidx.datastore.preferences)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
