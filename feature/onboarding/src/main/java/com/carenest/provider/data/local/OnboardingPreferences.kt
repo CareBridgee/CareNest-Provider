@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import com.carenest.provider.feature.onboarding.di.OnboardingDataStore
 import java.io.IOException
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -18,7 +19,7 @@ interface OnboardingPreferences {
 }
 
 class DataStoreOnboardingPreferences @Inject constructor(
-    private val dataStore: DataStore<Preferences>,
+    @OnboardingDataStore private val dataStore: DataStore<Preferences>,
 ) : OnboardingPreferences {
 
     override val isCompleted: Flow<Boolean> = dataStore.data

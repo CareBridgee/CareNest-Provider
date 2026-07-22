@@ -14,12 +14,17 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 private const val PROVIDER_ONBOARDING_DATA_STORE_NAME = "provider_onboarding"
 private val Context.providerOnboardingDataStore by preferencesDataStore(
     name = PROVIDER_ONBOARDING_DATA_STORE_NAME,
 )
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class OnboardingDataStore
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -40,6 +45,7 @@ abstract class OnboardingBindingsModule {
 @Module
 @InstallIn(SingletonComponent::class)
 object OnboardingDataStoreModule {
+    @OnboardingDataStore
     @Provides
     @Singleton
     fun provideOnboardingDataStore(
