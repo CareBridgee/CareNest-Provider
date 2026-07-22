@@ -31,6 +31,7 @@ import com.carenest.provider.feature.onboarding.navigation.OnboardingRoute
 import com.carenest.provider.feature.onboarding.navigation.SplashRoute
 import com.carenest.provider.feature.onboarding.presentation.onboarding.OnboardingScreen
 import com.carenest.provider.feature.onboarding.presentation.splash.SplashScreen
+import com.carenest.provider.profile.presentation.ui.registration.RegistrationScreen
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
@@ -38,6 +39,8 @@ import kotlinx.serialization.modules.polymorphic
 
 @Serializable
 data object ProviderAuthenticationRoute : NavKey
+@Serializable
+data object Registration : NavKey
 
 private val appNavigationSerializers = SerializersModule {
     include(NavigationConfig.serializer)
@@ -46,6 +49,7 @@ private val appNavigationSerializers = SerializersModule {
         subclass(SplashRoute::class, SplashRoute.serializer())
         subclass(OnboardingRoute::class, OnboardingRoute.serializer())
         subclass(ProviderAuthenticationRoute::class, ProviderAuthenticationRoute.serializer())
+        subclass(Registration::class, Registration.serializer())
     }
 }
 
@@ -85,8 +89,13 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         entry<ProviderAuthenticationRoute> {
             ProviderAuthNavigation(
                 onAuthSuccess = {
-                    // Navigate to home/dashboard on success
+                    backStack.replaceWith(Registration)
                 }
+            )
+        }
+        entry<Registration> {
+            RegistrationScreen(
+                onNavigateToApplicationUnderReview = {}
             )
         }
     }
@@ -105,4 +114,22 @@ fun AppNavigation(modifier: Modifier = Modifier) {
     )
 }
 
-
+@Composable
+private fun ProviderAuthenticationEntryPoint() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(Theme.spacing.large),
+        contentAlignment = Alignment.Center,
+    ) {
+        BasicText(
+            text = stringResource(
+                R.string.provider_authentication_integration_message,
+            ),
+            style = Theme.typography.body.large.copy(
+                color = Theme.colors.primaryFont,
+                textAlign = TextAlign.Center,
+            ),
+        )
+    }
+}
