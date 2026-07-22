@@ -467,7 +467,7 @@ private fun NavigationActions(
                 SecondaryButton(
                     caption = stringResource(DesignR.string.back),
                     onClick = onBackClick,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(.5f)
                 )
             }
 
@@ -491,15 +491,13 @@ private fun getFileName(context: Context, uri: Uri): String {
     var result: String? = null
     if (uri.scheme == "content") {
         val cursor = context.contentResolver.query(uri, null, null, null, null)
-        try {
+        cursor.use { cursor ->
             if (cursor != null && cursor.moveToFirst()) {
                 val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
                 if (index != -1) {
                     result = cursor.getString(index)
                 }
             }
-        } finally {
-            cursor?.close()
         }
     }
     if (result == null) {
