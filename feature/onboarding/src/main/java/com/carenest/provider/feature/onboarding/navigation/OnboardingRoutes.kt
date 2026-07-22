@@ -4,7 +4,7 @@ import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object SplashRoute : NavKey
+internal data object SplashRoute : NavKey
 
 @Serializable
-data object OnboardingRoute : NavKey
+internal data object OnboardingRoute : NavKey

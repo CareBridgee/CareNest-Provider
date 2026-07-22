@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">CareNest-Provider</string>
-    <string name="provider_authentication_integration_message">Provider authentication will be connected here.</string>
+    <string name="provider_dashboard_title">Provider Dashboard</string>
+    <string name="provider_dashboard_message">The dashboard feature is not included in this project snapshot.</string>
+    <string name="contact_support_title">Contact Support</string>
+    <string name="contact_support_message">Contact support is not included in this project snapshot.</string>
+    <string name="community_guidelines_title">Community Guidelines</string>
+    <string name="community_guidelines_message">Community guidelines are not included in this project snapshot.</string>
 </resources>

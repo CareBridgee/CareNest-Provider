@@ -9,7 +9,7 @@ sealed interface UnderReviewIntent {
 
 
 data class UnderReviewState(
-    val underReviewState: ReviewState = ReviewState.Success,
+    val underReviewState: ReviewState = ReviewState.UnderReview,
     val error: String? = null
 )
 

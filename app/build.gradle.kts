@@ -53,7 +53,6 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.bundles.compose)
 
-    implementation(project(":feature:profile"))
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

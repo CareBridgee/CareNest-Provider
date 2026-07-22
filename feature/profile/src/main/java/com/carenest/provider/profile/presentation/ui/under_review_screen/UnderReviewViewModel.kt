@@ -5,8 +5,11 @@ import com.carenest.provider.core.mvi.DefaultEffectPublisher
 import com.carenest.provider.core.mvi.DefaultStateHolder
 import com.carenest.provider.core.mvi.EffectPublisher
 import com.carenest.provider.core.mvi.StateHolder
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class UnderReviewViewModel : ViewModel(),
+@HiltViewModel
+class UnderReviewViewModel @Inject constructor() : ViewModel(),
     StateHolder<UnderReviewState> by DefaultStateHolder(UnderReviewState()),
     EffectPublisher<UnderReviewEvent> by DefaultEffectPublisher() {
 

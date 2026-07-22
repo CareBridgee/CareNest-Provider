@@ -22,18 +22,21 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SpTheme(languageCode = Locale.current.language) {
-                CareNestApp()
+                CareNestApp(onExitApp = { finish() })
             }
         }
     }
 }
 
 @Composable
-fun CareNestApp() {
+fun CareNestApp(onExitApp: () -> Unit) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = Theme.colors.backGround
     ) { innerPadding ->
-        AppNavigation(modifier = Modifier.padding(innerPadding))
+        AppNavigation(
+            onExitApp = onExitApp,
+            modifier = Modifier.padding(innerPadding),
+        )
     }
 }
