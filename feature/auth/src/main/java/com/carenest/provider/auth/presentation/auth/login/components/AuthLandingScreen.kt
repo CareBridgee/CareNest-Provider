@@ -26,7 +26,6 @@ import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.auth.presentation.auth.login.LoginIntent
 import com.carenest.provider.designsystem.R
 import com.carenest.provider.designsystem.R as DR
-// import com.carenest.presentation.navigation.HideTopBar
 
 @Composable
 fun AuthLandingScreen(onEvent: (LoginIntent) -> Unit) {
@@ -35,10 +34,6 @@ fun AuthLandingScreen(onEvent: (LoginIntent) -> Unit) {
             .fillMaxSize()
             .background(Theme.colors.backGround)
     ) {
-        // HideTopBar()
-
-        val primaryColor = Theme.colors.primary
-        
 
         Column(
             modifier = Modifier
@@ -58,19 +53,18 @@ fun AuthLandingScreen(onEvent: (LoginIntent) -> Unit) {
                 ) {
 
                     Image(
-                        painter = painterResource(DR.drawable.auth_logo),
+                        painter = painterResource(DR.drawable.logo),
                         contentDescription = null,
                         modifier = Modifier.size(200.dp),
                         contentScale = ContentScale.Fit
                     )
-
                 }
             }
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
+                    .padding(horizontal = Theme.spacing.medium)
                     .weight(0.3f)
                 ,
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -104,6 +98,7 @@ fun AuthLandingScreen(onEvent: (LoginIntent) -> Unit) {
                 SecondaryButton(
                     caption = stringResource(R.string.auth_continue_google),
                     iconPainter = painterResource(id = DR.drawable.ic_google),
+                    changeIconColor = false,
                     onClick = { /* Simulated */ },
                     modifier = Modifier.fillMaxWidth().height(56.dp)
                 )
