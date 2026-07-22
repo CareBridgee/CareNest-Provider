@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nurse_requests_title">Nurse Requests</string>
+    <string name="nurse_requests_subtitle">Manage incoming patient care requests</string>
+    <string name="nurse_requests_online_title">Available for Requests</string>
+    <string name="nurse_requests_online_subtitle">Toggle on to receive incoming care requests</string>
+    <string name="nurse_requests_offline_title">You are currently offline</string>
+    <string name="nurse_requests_offline_description">Flip the switch to start receiving requests from nearby patients.</string>
+    <string name="nurse_requests_loading">Fetching incoming requests…</string>
+    <string name="nurse_requests_incoming">Incoming Requests</string>
+    <string name="nurse_requests_patient">Patient</string>
+    <string name="nurse_requests_service">Service</string>
+    <string name="nurse_requests_rate">Base Rate</string>
+    <string name="nurse_requests_distance">Distance</string>
+    <string name="nurse_requests_status">Status</string>
+    <string name="nurse_requests_status_estimated">ESTIMATED</string>
+    <string name="nurse_requests_status_canceled">CANCELED</string>
+    <string name="nurse_requests_status_accepted">ACCEPTED</string>
+    <string name="nurse_requests_action_edit">Edit</string>
+    <string name="nurse_requests_action_make_offer">Make Offer</string>
+    <string name="nurse_requests_edit_rate_title">Edit Rate</string>
+    <string name="nurse_requests_edit_rate_subtitle">Adjust your offer rate for this request</string>
+    <string name="nurse_requests_save">Save</string>
+    <string name="nurse_requests_make_offer_title">Waiting for Patient</string>
+    <string name="nurse_requests_make_offer_message">Your offer has been sent. Waiting for the patient to accept…</string>
+    <string name="nurse_requests_offer_success_title">Offer Accepted!</string>
+    <string name="nurse_requests_offer_success_message">The patient accepted your offer. You can now proceed with the visit.</string>
+    <string name="nurse_requests_rate_per_hour">$%1$.0f</string>
+    <string name="nurse_requests_distance_miles">%1$.1f mi</string>
+    <string name="nurse_requests_step_accepted">Accepted</string>
+    <string name="nurse_requests_step_en_route">En Route</string>
+    <string name="nurse_requests_step_arrived">Arrived</string>
+    <string name="nurse_requests_step_in_progress">In Progress</string>
+    <string name="nurse_requests_step_completed">Completed</string>
+    <string name="nurse_requests_countdown_seconds">%1$d s</string>
+</resources>
