@@ -3,7 +3,7 @@ package com.carenest.provider.auth.presentation.auth.otp
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.carenest.provider.auth.domain.auth.VerifyOtpUseCase
+import com.carenest.provider.auth.domain.usecase.VerifyOtpUseCase
 import com.carenest.provider.core.mvi.DefaultEffectPublisher
 import com.carenest.provider.core.mvi.DefaultStateHolder
 import com.carenest.provider.core.mvi.EffectPublisher
