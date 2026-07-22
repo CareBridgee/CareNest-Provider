@@ -1,4 +1,4 @@
-package com.carenest.provider.feature.onboarding.presentation.splash
+package com.carenest.provider.presentation.splash
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -26,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.graphicsLayer
@@ -36,18 +35,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carenest.provider.core.mvi.ObserveEffect
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.feature.onboarding.R
-import com.carenest.provider.feature.onboarding.presentation.components.OnboardingTokens
-import kotlin.math.PI
-import kotlin.math.sin
+import com.carenest.provider.presentation.components.OnboardingTokens
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.PI
+import kotlin.math.sin
+import com.carenest.provider.designsystem.R as RD
 
 private const val LOGO_ENTRANCE_DURATION_MILLIS = 800
 private const val CARENEST_FADE_DELAY_MILLIS = 280L
@@ -239,7 +240,7 @@ fun SplashContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Theme.colors.primaryVariant)
+            .background(Theme.colors.primary)
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
@@ -256,40 +257,34 @@ fun SplashContent(
     ) {
         PremiumLogoAnimation(
             lightSweepProgress = lightSweep.value,
-            alpha = logoAlpha.value,
-            scale = logoScale.value,
-            glowAlpha = glowAlpha.value,
-            modifier = Modifier.size(Theme.size.logo - Theme.spacing.large),
         )
 
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            BasicText(
-                text = stringResource(R.string.splash_brand_name),
-                modifier = Modifier.graphicsLayer {
-                    alpha = careNestAlpha.value
-                    translationY = upwardOffsetPx * careNestOffset.value
-                },
-                style = Theme.typography.displayMedium.copy(
-                    color = Theme.colors.onPrimary,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                ),
-            )
-            BasicText(
-                text = stringResource(R.string.splash_provider_label),
-                modifier = Modifier.graphicsLayer { alpha = providerAlpha.value },
-                style = Theme.typography.hint.large.copy(
-                    color = Theme.colors.onPrimaryVariant,
-                    fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Center,
-                ),
-            )
-        }
+        Spacer(modifier = Modifier.height(Theme.spacing.medium))
+
+        BasicText(
+            text = stringResource(R.string.splash_brand_name),
+            modifier = Modifier.graphicsLayer {
+                alpha = careNestAlpha.value
+                translationY = upwardOffsetPx * careNestOffset.value
+            },
+            style = Theme.typography.displayMedium.copy(
+                color = Theme.colors.onPrimary,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+            ),
+        )
+        BasicText(
+            text = stringResource(R.string.splash_provider_label),
+            modifier = Modifier.graphicsLayer { alpha = providerAlpha.value },
+            style = Theme.typography.hint.large.copy(
+                color = Theme.colors.onPrimaryVariant,
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center,
+            ),
+        )
 
         Spacer(Modifier.height(Theme.spacing.medium))
+
         BasicText(
             text = stringResource(R.string.splash_tagline),
             modifier = Modifier
@@ -335,56 +330,30 @@ fun SplashContent(
 @Composable
 private fun PremiumLogoAnimation(
     lightSweepProgress: Float,
-    alpha: Float,
-    scale: Float,
-    glowAlpha: Float,
     modifier: Modifier = Modifier,
 ) {
-    val logoPainter = painterResource(R.drawable.splash_provider_icon)
-    val lightSweepAlpha = (
-        sin(lightSweepProgress * PI).toFloat() * LIGHT_SWEEP_MAX_ALPHA
-        ).coerceAtLeast(0f)
+    val logoPainter = painterResource(RD.drawable.logo)
+    val lightSweepAlpha =
+        (sin(lightSweepProgress * PI).toFloat() * LIGHT_SWEEP_MAX_ALPHA).coerceAtLeast(0f)
 
     Box(
-        modifier = modifier,
+        modifier = modifier
+            .background(
+                shape = Theme.shapes.veryExtraLarge, color = Theme.colors.onPrimary
+            )
+            .size(128.dp),
     ) {
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .graphicsLayer { this.alpha = glowAlpha }
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(
-                            Theme.colors.onPrimaryVariant,
-                            Color.Transparent,
-                        ),
-                    ),
-                ),
-        )
         Image(
             painter = logoPainter,
             contentDescription = stringResource(R.string.splash_logo_content_description),
-            colorFilter = ColorFilter.tint(Theme.colors.onPrimaryVariant),
-            modifier = Modifier
-                .matchParentSize()
-                .graphicsLayer {
-                    this.alpha = alpha
-                    scaleX = scale
-                    scaleY = scale
-                },
+            modifier = Modifier.matchParentSize()
         )
         if (lightSweepAlpha > 0f) {
             Image(
                 painter = logoPainter,
                 contentDescription = null,
-                colorFilter = ColorFilter.tint(Theme.colors.onPrimary),
                 modifier = Modifier
                     .matchParentSize()
-                    .graphicsLayer {
-                        this.alpha = lightSweepAlpha * alpha
-                        scaleX = scale
-                        scaleY = scale
-                    }
                     .lightSweep(lightSweepProgress),
             )
         }

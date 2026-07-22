@@ -1,4 +1,4 @@
-package com.carenest.provider.feature.onboarding.presentation.splash
+package com.carenest.provider.presentation.splash
 
 data class SplashState(
     val isLoading: Boolean = true,

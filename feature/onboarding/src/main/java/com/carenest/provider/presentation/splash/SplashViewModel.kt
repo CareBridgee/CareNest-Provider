@@ -1,4 +1,4 @@
-package com.carenest.provider.feature.onboarding.presentation.splash
+package com.carenest.provider.presentation.splash
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,7 +14,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-internal const val SPLASH_MINIMUM_DURATION_MILLIS = 2_000L
+internal const val SPLASH_MINIMUM_DURATION_MILLIS = 2_500L
 
 @HiltViewModel
 class SplashViewModel @Inject constructor(
