@@ -8,9 +8,11 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -32,9 +34,13 @@ import com.carenest.provider.profile.presentation.ui.registration.component.Serv
 import com.carenest.provider.profile.presentation.ui.registration.component.VerificationDocumentsComponent
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,6 +71,7 @@ import com.carenest.provider.designsystem.components.button.SecondaryButton
 import com.carenest.provider.designsystem.components.button.ButtonIconPosition
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import com.carenest.provider.profile.R as ProfileR
 import com.carenest.provider.designsystem.R as DesignR
 
@@ -278,6 +285,14 @@ fun RegistrationScreen(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        topBar = {
+            RegistrationTopBar(
+                onBackClick = {
+                    registrationViewmodel.onIntent(RegistrationIntent.OnBackClicked)
+                }
+            )
+        },
         snackbarHost = {
             Box(modifier = Modifier.fillMaxSize()) {
                 SnackbarHost(
@@ -287,7 +302,8 @@ fun RegistrationScreen(
                         .padding(top = Theme.spacing.veryExtraLarge)
                 )
             }
-        }
+        },
+        containerColor = Theme.colors.backGround
     ) { padding ->
         RegistrationContent(
             modifier = modifier
@@ -298,6 +314,42 @@ fun RegistrationScreen(
             pagerState = pagerState
         )
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun RegistrationTopBar(
+    onBackClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    CenterAlignedTopAppBar(
+        title = {
+            Text(
+                text = stringResource(ProfileR.string.registration_title),
+                style = Theme.typography.body.medium.copy(
+                    color = Theme.colors.primaryFont,
+                    fontWeight = FontWeight.Medium
+                )
+            )
+        },
+        modifier = modifier,
+        windowInsets = WindowInsets(0, 0, 0, 0),
+        navigationIcon = {
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    painter = painterResource(DesignR.drawable.ic_arrow_back),
+                    contentDescription = stringResource(DesignR.string.back),
+                    tint = Theme.colors.primaryFont,
+                    modifier = Modifier.size(Theme.size.iconMedium)
+                )
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Theme.colors.surface,
+            navigationIconContentColor = Theme.colors.primaryFont,
+            titleContentColor = Theme.colors.primaryFont
+        )
+    )
 }
 
 @Composable
@@ -485,11 +537,29 @@ private fun getFileName(context: Context, uri: Uri): String {
 @Composable
 private fun RegistrationContentPreview() {
     SpTheme {
-        RegistrationContent(
-            state = RegistrationUiState().copy(
-                stepperState = StepperState(remainingSteps = 1)
-            ),
-            onIntent = {}
-        )
+        Scaffold(
+            containerColor = Theme.colors.backGround
+        ) { parentPadding ->
+            Scaffold(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(parentPadding),
+                contentWindowInsets = WindowInsets(0, 0, 0, 0),
+                topBar = {
+                    RegistrationTopBar(onBackClick = {})
+                },
+                containerColor = Theme.colors.backGround
+            ) { registrationPadding ->
+                RegistrationContent(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(registrationPadding),
+                    state = RegistrationUiState().copy(
+                        stepperState = StepperState(remainingSteps = 1)
+                    ),
+                    onIntent = {}
+                )
+            }
+        }
     }
 }
