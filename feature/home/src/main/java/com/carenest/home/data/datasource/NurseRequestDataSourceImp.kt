@@ -1,21 +1,19 @@
-package com.carenest.home.data.repository
+package com.carenest.home.data.datasource
 
+
+import com.carenest.home.domain.model.EarningsSummary
+import com.carenest.home.domain.model.NurseProfile
 import com.carenest.home.domain.model.NurseRequest
 import kotlinx.coroutines.delay
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.random.Random
 
-interface NurseRequestsRepository {
-    suspend fun fetchIncomingRequests(): List<NurseRequest>
-    fun simulatePatientAcceptance(requestId: String): Pair<Boolean, Int>
-}
-
 @Singleton
-class FakeNurseRequestsRepository @Inject constructor() : NurseRequestsRepository {
+class FakeNurseRequestsDataSource @Inject constructor() : NurseRequestsDataSource {
 
-    override suspend fun fetchIncomingRequests(): List<NurseRequest> {
-        delay(FETCH_DELAY_MS)
+    override suspend fun getIncomingRequests(): List<NurseRequest> {
+        delay(REQUESTS_DELAY_MS)
         return listOf(
             NurseRequest(
                 id = "req-001",
@@ -24,7 +22,7 @@ class FakeNurseRequestsRepository @Inject constructor() : NurseRequestsRepositor
                 baseRate = 45f,
                 distanceMiles = 2.4f,
                 patientImage = "",
-                serviceImage = ""
+                serviceImage = "",
             ),
             NurseRequest(
                 id = "req-002",
@@ -33,7 +31,7 @@ class FakeNurseRequestsRepository @Inject constructor() : NurseRequestsRepositor
                 baseRate = 55f,
                 distanceMiles = 4.1f,
                 patientImage = "",
-                serviceImage = ""
+                serviceImage = "",
             ),
             NurseRequest(
                 id = "req-003",
@@ -42,7 +40,7 @@ class FakeNurseRequestsRepository @Inject constructor() : NurseRequestsRepositor
                 baseRate = 40f,
                 distanceMiles = 1.8f,
                 patientImage = "",
-                serviceImage = ""
+                serviceImage = "",
             ),
             NurseRequest(
                 id = "req-004",
@@ -51,20 +49,38 @@ class FakeNurseRequestsRepository @Inject constructor() : NurseRequestsRepositor
                 baseRate = 50f,
                 distanceMiles = 5.6f,
                 patientImage = "",
-                serviceImage = ""
+                serviceImage = "",
             ),
         )
     }
 
-    override fun simulatePatientAcceptance(requestId: String): Pair<Boolean, Int> {
+    override suspend fun getEarningsSummary(): EarningsSummary {
+        delay(EARNINGS_DELAY_MS)
+        return EarningsSummary(
+            todayEarnings = 240.0,
+            changePercent = 12.0,
+            jobsToday = 3,
+            rating = 4.9,
+        )
+    }
+
+    override fun sendOfferToPatient(requestId: String): Pair<Boolean, Int> {
         val random = Random(requestId.hashCode())
         val willAccept = random.nextInt(3) != 0
         val acceptAtSecond = if (willAccept) random.nextInt(4, 9) else OFFER_TIMEOUT_SECONDS
         return willAccept to acceptAtSecond
     }
 
+    override suspend fun getNurseProfile(): NurseProfile {
+        return NurseProfile(
+            name = "Dr. Sarah Johnson",
+            avatarUrl = "",
+        )
+    }
+
     private companion object {
-        const val FETCH_DELAY_MS = 1_500L
+        const val REQUESTS_DELAY_MS = 1_500L
+        const val EARNINGS_DELAY_MS = 800L
         const val OFFER_TIMEOUT_SECONDS = 10
     }
 }
