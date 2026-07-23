@@ -7,7 +7,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,29 +16,24 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carenest.home.R
+import com.carenest.home.presentation.home.components.AvailableRequestsHeader
+import com.carenest.home.presentation.home.components.EarningsSection
 import com.carenest.home.presentation.home.components.EditRateBottomSheet
+import com.carenest.home.presentation.home.components.HomeGreetingBar
 import com.carenest.home.presentation.home.components.MakeOfferDialog
 import com.carenest.home.presentation.home.components.NurseRequestCard
 import com.carenest.home.presentation.home.components.NurseRequestsLoadingSkeleton
+import com.carenest.home.presentation.home.components.OfflineEmptyState
 import com.carenest.home.presentation.home.components.OnlineToggleCard
-import com.carenest.provider.designsystem.components.emptystate.EmptyState
-import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
-import com.carenest.provider.designsystem.components.topbar.TopBarLeading
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
 
@@ -64,30 +58,30 @@ fun HomeContent(
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            CareNestTopBar(
-                title = "Home",
-                modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxSize(), containerColor = Theme.colors.backGround, topBar = {
+            HomeGreetingBar(
+                name = state.nurseName,
+                avatarUrl = "https://picsum.photos/200/300",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = Theme.spacing.medium)
             )
-        }
-    ){innerPadding ->
+        }) { innerPadding ->
         Column(
             modifier = modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(Theme.colors.backGround),
         ) {
-            NurseRequestsTopBar()
 
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                    .padding(horizontal = Theme.spacing.medium),
+                verticalArrangement = Arrangement.spacedBy(Theme.spacing.small),
             ) {
                 item {
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(Theme.spacing.extraSmall))
                     OnlineToggleCard(
                         isOnline = state.isOnline,
                         onToggle = { onIntent(HomeIntent.OnlineToggled(it)) },
@@ -95,7 +89,16 @@ fun HomeContent(
                 }
 
                 item {
-                    Spacer(Modifier.height(4.dp))
+                    EarningsSection(
+                        earnings = "$" + state.earnings.toString(),
+                        changePercent = state.changePercent.toString() + "%",
+                        jobsToday = state.jobsToday,
+                        rating = state.rating.toString()
+                    )
+                }
+
+                item {
+                    Spacer(Modifier.height(Theme.spacing.extraSmall))
                     AnimatedContent(
                         targetState = when {
                             !state.isOnline -> ContentPhase.Offline
@@ -108,11 +111,7 @@ fun HomeContent(
                         label = "requestsContent",
                     ) { phase ->
                         when (phase) {
-                            ContentPhase.Offline -> OfflineEmptyState(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 48.dp),
-                            )
+                            ContentPhase.Offline -> OfflineEmptyState()
 
                             ContentPhase.Loading -> Column(
                                 modifier = Modifier.fillMaxWidth(),
@@ -122,7 +121,7 @@ fun HomeContent(
                                     style = Theme.typography.body.medium.copy(
                                         color = Theme.colors.secondaryFont,
                                     ),
-                                    modifier = Modifier.padding(bottom = 16.dp),
+                                    modifier = Modifier.padding(bottom = Theme.spacing.medium),
                                 )
                                 NurseRequestsLoadingSkeleton()
                             }
@@ -130,16 +129,12 @@ fun HomeContent(
                             ContentPhase.List -> Column(
                                 modifier = Modifier.fillMaxWidth(),
                             ) {
-                                BasicText(
-                                    text = stringResource(
-                                        R.string.nurse_requests_incoming,
-                                    ) + " (${state.requests.size})",
-                                    style = Theme.typography.body.large.copy(
-                                        color = Theme.colors.primaryFont,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 18.sp,
+                                AvailableRequestsHeader(
+                                    onViewAllClick = { onIntent(HomeIntent.ViewAllRequestsClicked) },
+                                    modifier = Modifier.padding(
+                                        top = Theme.spacing.extraSmall,
+                                        bottom = Theme.spacing.small,
                                     ),
-                                    modifier = Modifier.padding(bottom = 12.dp),
                                 )
                             }
                         }
@@ -156,12 +151,10 @@ fun HomeContent(
                             isExpanded = state.selectedCardId == request.id,
                             onClick = { onIntent(HomeIntent.CardClicked(request.id)) },
                             onEditClick = { onIntent(HomeIntent.EditRateClicked(request.id)) },
-                            onMakeOfferClick = { onIntent(HomeIntent.MakeOfferClicked(request.id)) },
+                            onMakeOfferClick = {
+                                onIntent(HomeIntent.MakeOfferClicked(request.id))
+                            },
                         )
-                    }
-
-                    item {
-                        Spacer(Modifier.height(24.dp))
                     }
                 }
             }
@@ -185,57 +178,11 @@ fun HomeContent(
                 onDismiss = { onIntent(HomeIntent.DismissModal) },
             )
         }
-
-    }
-
-}
-
-@Composable
-private fun NurseRequestsTopBar(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(Theme.colors.backGround)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-    ) {
-        BasicText(
-            text = stringResource(R.string.nurse_requests_title),
-            style = Theme.typography.title.copy(
-                color = Theme.colors.tint,
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp,
-            ),
-        )
-        Spacer(Modifier.height(2.dp))
-        BasicText(
-            text = stringResource(R.string.nurse_requests_subtitle),
-            style = Theme.typography.body.small.copy(
-                color = Theme.colors.secondaryFont,
-                fontSize = 13.sp,
-            ),
-        )
-    }
-}
-
-@Composable
-private fun OfflineEmptyState(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center,
-    ) {
-        EmptyState(
-            title = stringResource(R.string.nurse_requests_offline_title),
-            description = stringResource(R.string.nurse_requests_offline_description),
-            icon = Icons.Default.WifiOff,
-            accentColor = Theme.colors.secondaryFont,
-        )
     }
 }
 
 private enum class ContentPhase {
-    Offline,
-    Loading,
-    List,
+    Offline, Loading, List,
 }
 
 @Preview(showBackground = true, heightDp = 800)
@@ -243,7 +190,7 @@ private enum class ContentPhase {
 private fun HomeOfflinePreview() {
     SpTheme(isDarkTheme = false) {
         HomeContent(
-            state = HomeUiState(isOnline = false),
+            state = HomeUiState(isOnline = false, nurseName = "Hend"),
             onIntent = {},
         )
     }
@@ -254,7 +201,7 @@ private fun HomeOfflinePreview() {
 private fun HomeLoadingPreview() {
     SpTheme(isDarkTheme = false) {
         HomeContent(
-            state = HomeUiState(isOnline = true, isLoading = true),
+            state = HomeUiState(isOnline = true, isLoading = true, nurseName = "Hend"),
             onIntent = {},
         )
     }

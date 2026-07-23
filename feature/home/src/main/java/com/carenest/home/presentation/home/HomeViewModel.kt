@@ -2,24 +2,36 @@ package com.carenest.home.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.carenest.home.data.repository.NurseRequestsRepository
 import com.carenest.home.domain.model.RequestStatus
+import com.carenest.home.domain.usecase.GetEarningsSummaryUseCase
+import com.carenest.home.domain.usecase.GetIncomingRequestsUseCase
+import com.carenest.home.domain.usecase.GetNurseProfileUseCase
+import com.carenest.home.domain.usecase.SendOfferToPatientUseCase
 import com.carenest.provider.core.mvi.DefaultStateHolder
 import com.carenest.provider.core.mvi.StateHolder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val repository: NurseRequestsRepository,
+    private val getIncomingRequests: GetIncomingRequestsUseCase,
+    private val getEarningsSummary: GetEarningsSummaryUseCase,
+    private val sendOfferToPatient: SendOfferToPatientUseCase,
+    private val getNurseProfile: GetNurseProfileUseCase,
 ) : ViewModel(),
     StateHolder<HomeUiState> by DefaultStateHolder(HomeUiState()) {
 
     private var fetchJob: Job? = null
     private var offerTimerJob: Job? = null
+
+    init {
+       getNurseData()
+    }
 
     fun onIntent(intent: HomeIntent) {
         when (intent) {
@@ -32,6 +44,15 @@ class HomeViewModel @Inject constructor(
             }
             HomeIntent.SaveRateClicked -> saveEditedRate()
             HomeIntent.DismissModal -> dismissModal()
+            HomeIntent.ViewAllRequestsClicked -> { /* TODO: navigate to full requests list */ }
+        }
+    }
+
+    private fun getNurseData(){
+        viewModelScope.launch {
+            getNurseProfile().onSuccess { profile ->
+                updateState { copy(nurseName = profile.name, nurseAvatar = profile.avatarUrl) }
+            }
         }
     }
 
@@ -53,18 +74,28 @@ class HomeViewModel @Inject constructor(
 
         if (isOnline) {
             fetchJob = viewModelScope.launch {
-                runCatching { repository.fetchIncomingRequests() }
-                    .onSuccess { requests ->
-                        updateState {
-                            copy(isLoading = false, requests = requests)
-                        }
+                coroutineScope {
+                    val requestsDeferred = async { getIncomingRequests() }
+                    val earningsDeferred = async { getEarningsSummary() }
+
+                    val requestsResult = requestsDeferred.await()
+                    val earningsSummary = earningsDeferred.await().getOrNull()
+
+                    updateState {
+                        copy(
+                            isLoading = false,
+                            requests = requestsResult.getOrDefault(emptyList()),
+                            earnings = earningsSummary?.todayEarnings ?: earnings,
+                            changePercent = earningsSummary?.changePercent ?: changePercent,
+                            jobsToday = earningsSummary?.jobsToday ?: jobsToday,
+                            rating = earningsSummary?.rating ?: rating,
+                        )
                     }
-                    .onFailure {
-                        updateState { copy(isLoading = false, requests = emptyList()) }
-                    }
+                }
             }
         }
     }
+
 
     private fun handleCardClick(requestId: String) {
         val request = currentState.requests.find { it.id == requestId } ?: return
@@ -104,7 +135,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun startMakeOffer(requestId: String) {
-        val (willAccept, acceptAtSecond) = repository.simulatePatientAcceptance(requestId)
+        val (willAccept, acceptAtSecond) = sendOfferToPatient(requestId)
 
         offerTimerJob?.cancel()
         updateState {

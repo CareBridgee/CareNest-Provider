@@ -10,6 +10,8 @@ enum class ActiveModal {
 }
 
 data class HomeUiState(
+    val nurseName : String = "",
+    val nurseAvatar : String?=null,
     val isOnline: Boolean = false,
     val isLoading: Boolean = false,
     val requests: List<NurseRequest> = emptyList(),
@@ -21,6 +23,10 @@ data class HomeUiState(
     val offerCountdown: Int? = null,
     val offerWillAccept: Boolean = false,
     val offerAcceptAtSecond: Int = 10,
+    val earnings : Double = 0.0,
+    val changePercent : Double = 0.0,
+    val jobsToday : Int = 0,
+    val rating : Double = 0.0
 )
 
 sealed interface HomeIntent {
@@ -29,6 +35,7 @@ sealed interface HomeIntent {
     data class EditRateClicked(val requestId: String) : HomeIntent
     data class MakeOfferClicked(val requestId: String) : HomeIntent
     data class EditRateChanged(val rate: Float) : HomeIntent
+    data object ViewAllRequestsClicked : HomeIntent
     data object SaveRateClicked : HomeIntent
     data object DismissModal : HomeIntent
 }

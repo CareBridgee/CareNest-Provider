@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+        <string name="nurse_requests_title">طلبات التمريض</string>
+        <string name="nurse_requests_subtitle">إدارة طلبات رعاية المرضى الواردة</string>
+        <string name="nurse_requests_online_title">الحالة:</string>
+        <string name="nurse_requests_online_subtitle">فعّل المفتاح لاستقبال طلبات الرعاية الجديدة</string>
+        <string name="nurse_requests_offline_title">أنت غير متصل حالياً</string>
+        <string name="nurse_requests_offline_description">قم بتفعيل المفتاح لبدء استقبال الطلبات من المرضى القريبين.</string>
+        <string name="nurse_requests_loading">جارٍ جلب الطلبات الواردة…</string>
+        <string name="nurse_requests_incoming">الطلبات الواردة</string>
+        <string name="nurse_requests_patient">المريض</string>
+        <string name="nurse_requests_service">الخدمة</string>
+        <string name="nurse_requests_rate">السعر الأساسي</string>
+        <string name="nurse_requests_distance">المسافة</string>
+        <string name="nurse_requests_status">الحالة</string>
+        <string name="nurse_requests_status_estimated">قيد التقدير</string>
+        <string name="nurse_requests_status_canceled">ملغاة</string>
+        <string name="nurse_requests_status_accepted">تم القبول</string>
+        <string name="nurse_requests_action_edit">تعديل</string>
+        <string name="nurse_requests_action_make_offer">تقديم عرض</string>
+        <string name="nurse_requests_edit_rate_title">تعديل السعر</string>
+        <string name="nurse_requests_edit_rate_subtitle">عدّل السعر الذي ترغب في تقديمه لهذا الطلب</string>
+        <string name="nurse_requests_save">حفظ</string>
+        <string name="nurse_requests_make_offer_title">بانتظار المريض</string>
+        <string name="nurse_requests_make_offer_message">تم إرسال عرضك. بانتظار موافقة المريض…</string>
+        <string name="nurse_requests_offer_success_title">تم قبول العرض!</string>
+        <string name="nurse_requests_offer_success_message">وافق المريض على عرضك. يمكنك الآن المتابعة لبدء الزيارة.</string>
+        <string name="nurse_requests_rate_per_hour">%1$.0f$</string>
+        <string name="nurse_requests_distance_miles">%1$.1f ميل</string>
+        <string name="nurse_requests_step_accepted">تم القبول</string>
+        <string name="nurse_requests_step_en_route">في الطريق</string>
+        <string name="nurse_requests_step_arrived">تم الوصول</string>
+        <string name="nurse_requests_step_in_progress">قيد التنفيذ</string>
+        <string name="nurse_requests_step_completed">مكتملة</string>
+        <string name="nurse_requests_countdown_seconds">%1$d ثانية</string>
+
+        <string name="welcome_title">مرحبًا بعودتك!</string>
+        <string name="online">متصل</string>
+        <string name="offline">غير متصل</string>
+        <string name="today_earning">أرباح اليوم</string>
+        <string name="from_yesterday">مقارنةً بالأمس</string>
+        <string name="today_job">مهام اليوم</string>
+        <string name="total">الإجمالي</string>
+        <string name="rating">التقييم</string>
+        <string name="avaliable_request">الطلبات المتاحة</string>
+        <string name="view_all">عرض الكل</string>
+        <string name="cancel">إلغاء</string>
+        <string name="save">حفظ</string>
+        <string name="min">الحد الأدنى</string>
+        <string name="Max">الحد الأقصى</string>
+        <string name="estimated_price">السعر التقديري</string>
+</resources>
