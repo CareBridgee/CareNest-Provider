@@ -23,6 +23,9 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.compose.serialization.serializers.SnapshotStateListSerializer
 import androidx.savedstate.serialization.SavedStateConfiguration
+import com.carenest.home.navigation.HomeRoutes
+import com.carenest.home.navigation.homeSerializers
+import com.carenest.home.navigation.providerHomeEntries
 import com.carenest.provider.R
 import com.carenest.provider.auth.navigation.authNavigationSerializers
 import com.carenest.provider.auth.navigation.providerAuthEntries
@@ -44,6 +47,7 @@ private val appNavigationSerializers = SerializersModule {
     include(onboardingNavigationSerializers)
     include(authNavigationSerializers)
     include(profileCompletionNavigationSerializers)
+    include(homeSerializers)
 
     polymorphic(NavKey::class) {
         subclass(ProviderDashboardRoute::class, ProviderDashboardRoute.serializer())
@@ -92,7 +96,7 @@ fun AppNavigation(
                 backStack.replaceWith(providerAuthStartRoute())
             },
             onOpenDashboard = {
-                backStack.replaceWith(ProviderDashboardRoute)
+                backStack.replaceWith(HomeRoutes.Home)
             },
             onOpenContactSupport = {
                 backStack.navigate(
@@ -106,12 +110,11 @@ fun AppNavigation(
             },
             onExitRequested = ::exitCurrentRoot,
         )
-        entry<ProviderDashboardRoute> {
-            AppPlaceholderScreen(
-                title = stringResource(R.string.provider_dashboard_title),
-                message = stringResource(R.string.provider_dashboard_message),
-            )
-        }
+
+        providerHomeEntries(
+            backStack = backStack,
+        )
+
         entry<ProviderInfoRoute> { route ->
             val title = when (route.destination) {
                 ProviderInfoDestination.CONTACT_SUPPORT -> {
