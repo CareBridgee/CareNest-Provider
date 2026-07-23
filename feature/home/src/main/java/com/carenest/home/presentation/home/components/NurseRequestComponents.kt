@@ -3,6 +3,7 @@ package com.carenest.home.presentation.home.components
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,10 +13,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -115,72 +119,65 @@ fun OnlineToggleCard(
     onToggle: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val statusLabel = if (isOnline) stringResource(R.string.online) else stringResource(R.string.offline)
+    val statusColor = if(isOnline) Theme.colors.primary else Theme.colors.hint
+
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .shadow(elevation = 1.dp, shape = Theme.shapes.large, clip = false),
+            .shadow(elevation = 2.dp, shape = Theme.shapes.large, clip = false),
         shape = Theme.shapes.large,
-        colors = CardDefaults.cardColors(containerColor = Theme.colors.surface),
+        border = BorderStroke(
+            width = 1.dp,
+            color = Theme.colors.disable.copy(alpha = 0.10f),
+        ),
+        colors = CardDefaults.cardColors(containerColor = Theme.colors.onPrimary),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
+                .padding(horizontal = Theme.spacing.medium, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            horizontalArrangement = Arrangement.spacedBy(Theme.spacing.small),
         ) {
             Box(
                 modifier = Modifier
-                    .size(46.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(
-                        if (isOnline) Theme.colors.successContainer else Theme.colors.track,
-                    ),
-                contentAlignment = Alignment.Center,
-            ) {
-                BasicText(
-                    text = if (isOnline) "ON" else "OFF",
-                    style = Theme.typography.body.small.copy(
-                        color = if (isOnline) {
-                            Theme.colors.onSuccessContainer
-                        } else {
-                            Theme.colors.secondaryFont
-                        },
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp,
-                    ),
-                )
-            }
+                    .size(12.dp)
+                    .clip(RoundedCornerShape(percent = 50))
+                    .background(statusColor)
+            )
 
-            Column(modifier = Modifier.weight(1f)) {
+            Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
                 BasicText(
                     text = stringResource(R.string.nurse_requests_online_title),
-                    style = Theme.typography.body.large.copy(
+                    style = Theme.typography.body.medium.copy(
                         color = Theme.colors.primaryFont,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 14.sp,
                     ),
                 )
-                Spacer(Modifier.height(2.dp))
+
+                Spacer(Modifier.width(5.dp))
+
                 BasicText(
-                    text = stringResource(R.string.nurse_requests_online_subtitle),
+                    text = statusLabel,
                     style = Theme.typography.body.small.copy(
-                        color = Theme.colors.secondaryFont,
-                        fontSize = 12.sp,
+                        color =  statusColor
                     ),
                 )
             }
 
-            androidx.compose.material3.Switch(
+            Switch(
                 checked = isOnline,
                 onCheckedChange = onToggle,
-                colors = androidx.compose.material3.SwitchDefaults.colors(
+                colors = SwitchDefaults.colors(
                     checkedThumbColor = androidx.compose.ui.graphics.Color.White,
                     checkedTrackColor = Theme.colors.tint,
                     uncheckedThumbColor = androidx.compose.ui.graphics.Color.White,
                     uncheckedTrackColor = Theme.colors.track,
                     uncheckedBorderColor = androidx.compose.ui.graphics.Color.Transparent,
                 ),
+                modifier = Modifier.size(width = 48.dp, height = 32.dp),
             )
         }
     }
@@ -191,5 +188,22 @@ fun OnlineToggleCard(
 private fun Preview(){
     SpTheme {
         RequestStatusBadge(status = RequestStatus.ESTIMATED)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewSwitch(){
+    SpTheme {
+       OnlineToggleCard(isOnline = true,{})
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewRequest(){
+    SpTheme {
+       NurseRequestDetailRow(label = "Patient Name", value = "John Doe")
     }
 }

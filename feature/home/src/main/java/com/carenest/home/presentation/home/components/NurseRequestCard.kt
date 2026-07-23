@@ -8,6 +8,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,7 +22,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -70,7 +71,9 @@ fun NurseRequestCard(
         modifier = modifier
             .fillMaxWidth()
             .shadow(
-                elevation = if (isExpanded) 4.dp else 1.dp, shape = Theme.shapes.large, clip = false
+                elevation = if (isExpanded) 4.dp else 2.dp,
+                shape = Theme.shapes.large,
+                clip = false,
             )
             .animateContentSize(
                 animationSpec = spring(
@@ -81,15 +84,21 @@ fun NurseRequestCard(
                 if (isInteractive) {
                     Modifier.clickable(onClick = onClick)
                 } else Modifier
-            ), shape = Theme.shapes.large, colors = CardDefaults.cardColors(
-            containerColor = Theme.colors.surface
-        )
+            ),
+        shape = Theme.shapes.large,
+        border = BorderStroke(
+            width = 1.dp,
+            color = Theme.colors.tint.copy(
+                alpha = if (request.status == RequestStatus.ACCEPTED) 0.28f else 0.16f,
+            ),
+        ),
+        colors = CardDefaults.cardColors(containerColor = Theme.colors.surface),
     ) {
 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(Theme.spacing.medium)
         ) {
 
             Row(
@@ -101,26 +110,28 @@ fun NurseRequestCard(
                 Row(
                     modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically
                 ) {
-
-                    AsyncImage(
-                        model = request.patientImage.ifBlank { null },
-                        placeholder = painterResource(com.carenest.provider.designsystem.R.drawable.ic_profile),
-                        error = painterResource(com.carenest.provider.designsystem.R.drawable.ic_profile),
-                        contentDescription = request.patientName,
+                    //will use async image
+                    Image(
+                        painter = painterResource(com.carenest.provider.designsystem.R.drawable.patient_imgae),
+                        contentDescription = null,
                         modifier = Modifier
-                            .size(64.dp)
-                            .clip(CircleShape)
-
+                            .size(48.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Theme.colors.tint),
+                        contentScale = ContentScale.Crop
                     )
 
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(Theme.spacing.small))
 
                     Column {
 
                         Text(
-                            text = request.patientName, style = Theme.typography.body.medium.copy(
-                                fontWeight = FontWeight.Bold, color = Theme.colors.primaryFont
-                            )
+                            text = request.patientName,
+                            style = Theme.typography.body.medium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                color = Theme.colors.primaryFont,
+                            ),
+                            maxLines = 2,
                         )
 
                         Spacer(modifier = Modifier.height(4.dp))
@@ -137,7 +148,10 @@ fun NurseRequestCard(
                             Text(
                                 text = stringResource(
                                     R.string.nurse_requests_distance_miles, request.distanceMiles
-                                ), style = Theme.typography.body.medium
+                                ),
+                                style = Theme.typography.body.small.copy(
+                                    color = Theme.colors.secondaryFont,
+                                ),
                             )
                         }
 
@@ -151,11 +165,12 @@ fun NurseRequestCard(
                         text = stringResource(
                             R.string.nurse_requests_rate_per_hour, request.baseRate
                         ), style = Theme.typography.title.copy(
-                            color = Theme.colors.primary, fontWeight = FontWeight.Bold
+                            color = Theme.colors.tint,
+                            fontWeight = FontWeight.SemiBold,
                         )
                     )
 
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
 
                     RequestStatusBadge(
                         status = request.status
@@ -163,40 +178,42 @@ fun NurseRequestCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            HorizontalDivider(
-                color = Theme.colors.track
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Theme.spacing.medium))
 
             Row(
-                modifier = Modifier.fillMaxWidth().height(46.dp).background(
-                    color = Theme.colors.disable,
-                    shape = RoundedCornerShape(12.dp)
-                ).padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(44.dp)
+                    .background(
+                        color = Theme.colors.disable.copy(alpha = 0.30f),
+                        shape = Theme.shapes.medium,
+                    )
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(Theme.spacing.small),
                 verticalAlignment = Alignment.CenterVertically)
             {
                 AsyncImage(
                     model = request.serviceImage.ifBlank { null },
-                    placeholder = painterResource(com.carenest.provider.designsystem.R.drawable.ic_services),
-                    error = painterResource(com.carenest.provider.designsystem.R.drawable.ic_services),
+                    placeholder = painterResource(com.carenest.provider.designsystem.R.drawable.ic_service_placeholder),
+                    error = painterResource(com.carenest.provider.designsystem.R.drawable.ic_service_placeholder),
                     contentDescription = request.serviceType,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(20.dp)
                 )
 
                 Text(
                     text = request.serviceType, style = Theme.typography.body.large.copy(
-                        color = Theme.colors.primaryFont, fontWeight = FontWeight.SemiBold
-                    )
+                        color = Theme.colors.primaryFont,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = Theme.typography.body.small.fontSize,
+                    ),
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1,
                 )
 
                 Image(
                     painter = painterResource(com.carenest.provider.designsystem.R.drawable.ic_file),
                     contentDescription = null,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(20.dp)
                 )
 
             }
@@ -204,34 +221,29 @@ fun NurseRequestCard(
             AnimatedVisibility(
                 visible = isExpanded && isInteractive,
                 enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut()
+                exit = shrinkVertically() + fadeOut(),
             ) {
-
                 Column {
+                    Spacer(modifier = Modifier.height(Theme.spacing.medium))
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    HorizontalDivider(color = Theme.colors.track)
 
-                    HorizontalDivider(
-                        color = Theme.colors.track
-                    )
-
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(Theme.spacing.medium))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(Theme.spacing.small),
                     ) {
-
                         SecondaryButton(
-                            caption = stringResource(
-                                R.string.nurse_requests_action_edit
-                            ), onClick = onEditClick, modifier = Modifier.weight(1f)
+                            caption = stringResource(R.string.nurse_requests_action_edit),
+                            onClick = onEditClick,
+                            modifier = Modifier.weight(1f),
                         )
 
                         PrimaryButton(
-                            caption = stringResource(
-                                R.string.nurse_requests_action_make_offer
-                            ), onClick = onMakeOfferClick, modifier = Modifier.weight(1f)
+                            caption = stringResource(R.string.nurse_requests_action_make_offer),
+                            onClick = onMakeOfferClick,
+                            modifier = Modifier.weight(1f),
                         )
                     }
                 }
@@ -256,25 +268,13 @@ fun NurseRequestCard(
                         currentPrice = request.baseRate,
                         minPrice = 50f,
                         maxPrice = 120f,
-                        onCancelClick = onClick, // Closes card expansion
+                        onCancelClick = onClick,
                         onSaveClick = { updatedPrice ->
                             // Handle saving updated rate here
                             onEditClick()
                         }
                     )
 
-
-//                    HorizontalStepper(
-//                        currentStep = request.progressStep,
-//                        steps = listOf(
-//                            stringResource(R.string.nurse_requests_step_accepted),
-//                            stringResource(R.string.nurse_requests_step_en_route),
-//                            stringResource(R.string.nurse_requests_step_arrived),
-//                            stringResource(R.string.nurse_requests_step_in_progress),
-//                            stringResource(R.string.nurse_requests_step_completed),
-//                        ),
-//                        showStepLabel = false,
-//                    )
                 }
             }
         }
@@ -298,7 +298,6 @@ fun PriceAdjustmentSection(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Price Badge Popup ($85.00 ESTIMATED PRICE)
         Box(
             modifier = Modifier
                 .shadow(elevation = 6.dp, shape = RoundedCornerShape(12.dp))
@@ -315,7 +314,7 @@ fun PriceAdjustmentSection(
                     )
                 )
                 Text(
-                    text = "ESTIMATED",
+                    text = stringResource(R.string.estimated_price),
                     style = Theme.typography.hint.medium.copy(
                         color = Theme.colors.secondaryFont,
                         fontWeight = FontWeight.SemiBold
@@ -326,7 +325,6 @@ fun PriceAdjustmentSection(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Price Slider Bar
         Slider(
             value = selectedPrice,
             onValueChange = { selectedPrice = it },
@@ -339,20 +337,19 @@ fun PriceAdjustmentSection(
             modifier = Modifier.fillMaxWidth()
         )
 
-        // Min & Max Labels
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "$${minPrice.toInt()} Min",
+                text = "$${minPrice.toInt()} ${stringResource(R.string.min)}",
                 style = Theme.typography.body.medium.copy(
                     fontWeight = FontWeight.Bold,
                     color = Theme.colors.primaryFont
                 )
             )
             Text(
-                text = "$${maxPrice.toInt()} Max",
+                text = "$${maxPrice.toInt()} ${stringResource(R.string.Max)}",
                 style = Theme.typography.body.medium.copy(
                     fontWeight = FontWeight.Bold,
                     color = Theme.colors.primaryFont
@@ -362,19 +359,18 @@ fun PriceAdjustmentSection(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Action Buttons (Cancel & Save)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             SecondaryButton(
-                caption = "Cancel",
+                caption = stringResource(R.string.cancel),
                 onClick = onCancelClick,
                 modifier = Modifier.weight(1f)
             )
 
             PrimaryButton(
-                caption = "Save",
+                caption = stringResource(R.string.save),
                 onClick = { onSaveClick(selectedPrice) },
                 modifier = Modifier.weight(1f)
             )
