@@ -1,27 +1,61 @@
 package com.carenest.provider
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.intl.Locale
+import androidx.core.os.LocaleListCompat
+import com.carenest.provider.core.datastore.AppPreferences
+import com.carenest.provider.core.datastore.AppPreferencesState
+import com.carenest.provider.core.datastore.AppThemeMode
 import com.carenest.provider.designsystem.theme.SpTheme
-import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.navigation.AppNavigation
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
+    @Inject
+    lateinit var appPreferences: AppPreferences
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            SpTheme(languageCode = Locale.current.language) {
+            val preferences by appPreferences.state.collectAsState(
+                initial = AppPreferencesState(),
+            )
+            val systemDarkTheme = isSystemInDarkTheme()
+            val isDarkTheme = when (preferences.themeMode) {
+                AppThemeMode.System -> systemDarkTheme
+                AppThemeMode.Light -> false
+                AppThemeMode.Dark -> true
+            }
+
+            LaunchedEffect(preferences.languageCode) {
+                val requestedLocales = LocaleListCompat.forLanguageTags(
+                    preferences.languageCode,
+                )
+                if (
+                    AppCompatDelegate.getApplicationLocales().toLanguageTags() !=
+                    requestedLocales.toLanguageTags()
+                ) {
+                    AppCompatDelegate.setApplicationLocales(requestedLocales)
+                }
+            }
+
+            SpTheme(
+                isDarkTheme = isDarkTheme,
+                languageCode = preferences.languageCode,
+            ) {
                 CareNestApp(onExitApp = { finish() })
             }
         }
@@ -30,13 +64,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun CareNestApp(onExitApp: () -> Unit) {
-    Scaffold(
+    AppNavigation(
+        onExitApp = onExitApp,
         modifier = Modifier.fillMaxSize(),
-        containerColor = Theme.colors.backGround
-    ) { innerPadding ->
-        AppNavigation(
-            onExitApp = onExitApp,
-            modifier = Modifier.padding(innerPadding),
-        )
-    }
+    )
 }
