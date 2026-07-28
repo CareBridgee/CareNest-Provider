@@ -47,12 +47,14 @@ dependencies {
     implementation(project(":feature:profile"))
     implementation(project(":feature:auth"))
     implementation(project(":feature:home"))
+    implementation(project(":feature:account"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.navigation3)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.bundles.compose)
+    implementation(libs.androidx.appcompat)
 
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
