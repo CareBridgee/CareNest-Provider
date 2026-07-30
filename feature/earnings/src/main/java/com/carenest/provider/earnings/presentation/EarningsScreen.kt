@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -81,11 +82,11 @@ fun EarningsScreenContent(
 ) {
     val navItems = remember {
         listOf(
-            BottomNavItem(label = "Home", iconRes = R.drawable.ic_home),
-            BottomNavItem(label = "Support", iconRes = R.drawable.ic_contact),
-            BottomNavItem(label = "Profile", iconRes = R.drawable.ic_profile),
-            BottomNavItem(label = "Active Jobs", iconRes = R.drawable.ic_work),
-            BottomNavItem(label = "Wallet", iconRes = R.drawable.ic_wallet)
+            BottomNavItem(label = stringResource(com.carenest.provider.earnings.R.string.nav_home), iconRes = R.drawable.ic_home),
+            BottomNavItem(label = stringResource(com.carenest.provider.earnings.R.string.nav_support), iconRes = R.drawable.ic_contact),
+            BottomNavItem(label = stringResource(com.carenest.provider.earnings.R.string.nav_profile), iconRes = R.drawable.ic_profile),
+            BottomNavItem(label = stringResource(com.carenest.provider.earnings.R.string.nav_active_jobs), iconRes = R.drawable.ic_work),
+            BottomNavItem(label = stringResource(com.carenest.provider.earnings.R.string.nav_wallet), iconRes = R.drawable.ic_wallet)
         )
     }
 
@@ -94,7 +95,7 @@ fun EarningsScreenContent(
         containerColor = Theme.colors.backGround,
         topBar = {
             CareNestTopBar(
-                title = "Serene Care",
+                title = stringResource(com.carenest.provider.earnings.R.string.top_bar_title),
                 trailingAvatarUrl = "https://picsum.photos/200/300"
             )
         },
@@ -134,7 +135,7 @@ fun EarningsScreenContent(
                             verticalArrangement = Arrangement.spacedBy(Theme.spacing.medium)
                         ) {
                             BasicText(
-                                text = state.errorMessage ?: "An error occurred",
+                                text = state.errorMessage ?: stringResource(com.carenest.provider.earnings.R.string.error_occurred),
                                 style = Theme.typography.body.large.copy(color = Theme.colors.error)
                             )
                             Button(
@@ -142,7 +143,7 @@ fun EarningsScreenContent(
                                 colors = ButtonDefaults.buttonColors(containerColor = Theme.colors.primary)
                             ) {
                                 BasicText(
-                                    text = "Retry",
+                                    text = stringResource(com.carenest.provider.earnings.R.string.retry),
                                     style = Theme.typography.body.medium.copy(color = Color.White)
                                 )
                             }
@@ -167,7 +168,7 @@ fun EarningsScreenContent(
 
                         item {
                             BasicText(
-                                text = "Service Earnings",
+                                text = stringResource(com.carenest.provider.earnings.R.string.service_earnings),
                                 style = Theme.typography.title.copy(
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 20.sp,
@@ -186,8 +187,8 @@ fun EarningsScreenContent(
                         if (state.isEmpty) {
                             item {
                                 EmptyState(
-                                    title = "No Service Earnings",
-                                    description = "You don't have any service earnings for the selected filter.",
+                                    title = stringResource(com.carenest.provider.earnings.R.string.no_service_earnings),
+                                    description = stringResource(com.carenest.provider.earnings.R.string.no_service_earnings_desc),
                                     modifier = Modifier.padding(vertical = Theme.spacing.large)
                                 )
                             }
@@ -229,7 +230,7 @@ fun TotalEarningsSummaryCard(
             verticalArrangement = Arrangement.spacedBy(Theme.spacing.small)
         ) {
             BasicText(
-                text = "Total Earnings (${summary.monthName})",
+                text = stringResource(com.carenest.provider.earnings.R.string.total_earnings, summary.monthName),
                 style = Theme.typography.body.medium.copy(
                     color = Color.White.copy(alpha = 0.85f),
                     fontWeight = FontWeight.Normal
@@ -268,7 +269,7 @@ fun TotalEarningsSummaryCard(
                         modifier = Modifier.size(16.dp)
                     )
                     BasicText(
-                        text = "${summary.jobsCount} Jobs",
+                        text = stringResource(com.carenest.provider.earnings.R.string.jobs_count, summary.jobsCount),
                         style = Theme.typography.body.medium.copy(
                             color = Color.White,
                             fontWeight = FontWeight.SemiBold
@@ -293,7 +294,7 @@ fun TotalEarningsSummaryCard(
                         modifier = Modifier.size(18.dp)
                     )
                     BasicText(
-                        text = "View Payouts",
+                        text = stringResource(com.carenest.provider.earnings.R.string.view_payouts),
                         style = Theme.typography.body.medium.copy(
                             color = Color(0xFF0D7C84),
                             fontWeight = FontWeight.Bold
@@ -317,7 +318,7 @@ fun FilterChipsRow(
     ) {
         item {
             FilterChipItem(
-                label = "All Services",
+                label = stringResource(com.carenest.provider.earnings.R.string.filter_all_services),
                 iconRes = R.drawable.ic_services,
                 isSelected = selectedFilter == ServiceFilter.ALL_SERVICES,
                 onClick = { onFilterSelect(ServiceFilter.ALL_SERVICES) }
@@ -325,7 +326,7 @@ fun FilterChipsRow(
         }
         item {
             FilterChipItem(
-                label = "This Month",
+                label = stringResource(com.carenest.provider.earnings.R.string.filter_this_month),
                 iconRes = R.drawable.ic_calendar,
                 isSelected = selectedFilter == ServiceFilter.THIS_MONTH,
                 onClick = { onFilterSelect(ServiceFilter.THIS_MONTH) }
@@ -333,7 +334,7 @@ fun FilterChipsRow(
         }
         item {
             FilterChipItem(
-                label = "Sort",
+                label = stringResource(com.carenest.provider.earnings.R.string.filter_sort),
                 iconRes = R.drawable.ic_work,
                 isSelected = selectedFilter == ServiceFilter.SORT,
                 onClick = { onFilterSelect(ServiceFilter.SORT) }
@@ -430,14 +431,14 @@ fun ServiceEarningCard(
                 )
             )
             BasicText(
-                text = "Patient: ${item.patientName}",
+                text = stringResource(com.carenest.provider.earnings.R.string.patient_name_format, item.patientName),
                 style = Theme.typography.body.small.copy(
                     color = Theme.colors.secondaryFont,
                     fontSize = 13.sp
                 )
             )
             BasicText(
-                text = "${item.date} • ${item.duration}",
+                text = stringResource(com.carenest.provider.earnings.R.string.date_duration_format, item.date, item.duration),
                 style = Theme.typography.body.small.copy(
                     color = Theme.colors.hint,
                     fontSize = 12.sp
@@ -460,9 +461,9 @@ fun ServiceEarningCard(
             )
 
             val (bgColor, textColor, label) = when (item.status) {
-                EarningStatus.COMPLETED -> Triple(Color(0xFFE6F7ED), Color(0xFF0F9D58), "Completed")
-                EarningStatus.PROCESSING -> Triple(Color(0xFFE8F0FE), Color(0xFF1A73E8), "Processing")
-                EarningStatus.CANCELED -> Triple(Color(0xFFFCE8E6), Color(0xFFD93025), "Canceled")
+                EarningStatus.COMPLETED -> Triple(Color(0xFFE6F7ED), Color(0xFF0F9D58), stringResource(com.carenest.provider.earnings.R.string.status_completed))
+                EarningStatus.PROCESSING -> Triple(Color(0xFFE8F0FE), Color(0xFF1A73E8), stringResource(com.carenest.provider.earnings.R.string.status_processing))
+                EarningStatus.CANCELED -> Triple(Color(0xFFFCE8E6), Color(0xFFD93025), stringResource(com.carenest.provider.earnings.R.string.status_canceled))
             }
 
             Box(
@@ -538,7 +539,7 @@ private fun EarningsScreenEmptyPreview() {
 private fun EarningsScreenErrorPreview() {
     SpTheme {
         EarningsScreenContent(
-            state = EarningsUiState(isError = true, errorMessage = "Failed to load service earnings."),
+            state = EarningsUiState(isError = true, errorMessage = stringResource(com.carenest.provider.earnings.R.string.error_loading_earnings)),
             onIntent = {}
         )
     }

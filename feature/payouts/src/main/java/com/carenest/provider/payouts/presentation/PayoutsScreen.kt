@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -86,11 +87,11 @@ fun PayoutsScreenContent(
 ) {
     val navItems = remember {
         listOf(
-            BottomNavItem(label = "Home", iconRes = R.drawable.ic_home),
-            BottomNavItem(label = "Support", iconRes = R.drawable.ic_contact),
-            BottomNavItem(label = "Profile", iconRes = R.drawable.ic_profile),
-            BottomNavItem(label = "Active Jobs", iconRes = R.drawable.ic_work),
-            BottomNavItem(label = "Wallet", iconRes = R.drawable.ic_wallet)
+            BottomNavItem(label = stringResource(com.carenest.provider.payouts.R.string.nav_home), iconRes = R.drawable.ic_home),
+            BottomNavItem(label = stringResource(com.carenest.provider.payouts.R.string.nav_support), iconRes = R.drawable.ic_contact),
+            BottomNavItem(label = stringResource(com.carenest.provider.payouts.R.string.nav_profile), iconRes = R.drawable.ic_profile),
+            BottomNavItem(label = stringResource(com.carenest.provider.payouts.R.string.nav_active_jobs), iconRes = R.drawable.ic_work),
+            BottomNavItem(label = stringResource(com.carenest.provider.payouts.R.string.nav_wallet), iconRes = R.drawable.ic_wallet)
         )
     }
 
@@ -99,7 +100,7 @@ fun PayoutsScreenContent(
         containerColor = Theme.colors.backGround,
         topBar = {
             CareNestTopBar(
-                title = "Payouts & Withdrawals",
+                title = stringResource(com.carenest.provider.payouts.R.string.top_bar_payouts_title),
                 leading = TopBarLeading.Back(
                     onBackClick = { onIntent(PayoutsIntent.BackToServiceEarningsClicked) }
                 ),
@@ -142,7 +143,7 @@ fun PayoutsScreenContent(
                             verticalArrangement = Arrangement.spacedBy(Theme.spacing.medium)
                         ) {
                             BasicText(
-                                text = state.errorMessage ?: "An error occurred",
+                                text = state.errorMessage ?: stringResource(com.carenest.provider.payouts.R.string.error_occurred),
                                 style = Theme.typography.body.large.copy(color = Theme.colors.error)
                             )
                             Button(
@@ -150,7 +151,7 @@ fun PayoutsScreenContent(
                                 colors = ButtonDefaults.buttonColors(containerColor = Theme.colors.primary)
                             ) {
                                 BasicText(
-                                    text = "Retry",
+                                    text = stringResource(com.carenest.provider.payouts.R.string.retry),
                                     style = Theme.typography.body.medium.copy(color = Color.White)
                                 )
                             }
@@ -193,7 +194,7 @@ fun PayoutsScreenContent(
                                     modifier = Modifier.size(18.dp)
                                 )
                                 BasicText(
-                                    text = "Back to Service Earnings",
+                                    text = stringResource(com.carenest.provider.payouts.R.string.back_to_service_earnings),
                                     style = Theme.typography.body.medium.copy(
                                         color = Color(0xFF006168),
                                         fontWeight = FontWeight.Bold
@@ -204,7 +205,7 @@ fun PayoutsScreenContent(
 
                         item {
                             BasicText(
-                                text = "Withdraw History",
+                                text = stringResource(com.carenest.provider.payouts.R.string.withdraw_history),
                                 style = Theme.typography.title.copy(
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 20.sp,
@@ -216,8 +217,8 @@ fun PayoutsScreenContent(
                         if (state.isEmpty) {
                             item {
                                 EmptyState(
-                                    title = "No Withdraw History",
-                                    description = "You don't have any withdrawal transactions yet.",
+                                    title = stringResource(com.carenest.provider.payouts.R.string.no_withdraw_history),
+                                    description = stringResource(com.carenest.provider.payouts.R.string.no_withdraw_history_desc),
                                     modifier = Modifier.padding(vertical = Theme.spacing.large)
                                 )
                             }
@@ -275,7 +276,7 @@ fun AvailablePayoutCard(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             BasicText(
-                text = "Available for Payout",
+                text = stringResource(com.carenest.provider.payouts.R.string.available_for_payout),
                 style = Theme.typography.body.medium.copy(
                     color = Theme.colors.secondaryFont,
                     fontWeight = FontWeight.Medium
@@ -301,7 +302,7 @@ fun AvailablePayoutCard(
                     .padding(horizontal = 20.dp, vertical = 12.dp)
             ) {
                 BasicText(
-                    text = "Withdraw Now",
+                    text = stringResource(com.carenest.provider.payouts.R.string.withdraw_now),
                     style = Theme.typography.body.medium.copy(
                         color = Color.White,
                         fontWeight = FontWeight.Bold
@@ -322,12 +323,12 @@ fun PayoutSummaryRow(
         horizontalArrangement = Arrangement.spacedBy(Theme.spacing.medium)
     ) {
         SummaryMiniCard(
-            title = "PENDING",
+            title = stringResource(com.carenest.provider.payouts.R.string.summary_pending),
             amount = summary.pendingAmount,
             modifier = Modifier.weight(1f)
         )
         SummaryMiniCard(
-            title = "THIS MONTH",
+            title = stringResource(com.carenest.provider.payouts.R.string.summary_this_month),
             amount = summary.thisMonthAmount,
             modifier = Modifier.weight(1f)
         )
@@ -441,9 +442,9 @@ fun PayoutHistoryCard(
             )
 
             val (bgColor, textColor, label) = when (item.status) {
-                PayoutStatus.PENDING -> Triple(Color(0xFFE8ECEF), Color(0xFF5F6D7A), "PENDING")
-                PayoutStatus.COMPLETED -> Triple(Color(0xFFE6F7ED), Color(0xFF006168), "COMPLETED")
-                PayoutStatus.FAILED -> Triple(Color(0xFFFCE8E6), Color(0xFFD93025), "FAILED")
+                PayoutStatus.PENDING -> Triple(Color(0xFFE8ECEF), Color(0xFF5F6D7A), stringResource(com.carenest.provider.payouts.R.string.status_pending_caps))
+                PayoutStatus.COMPLETED -> Triple(Color(0xFFE6F7ED), Color(0xFF006168), stringResource(com.carenest.provider.payouts.R.string.status_completed_caps))
+                PayoutStatus.FAILED -> Triple(Color(0xFFFCE8E6), Color(0xFFD93025), stringResource(com.carenest.provider.payouts.R.string.status_failed_caps))
             }
 
             Box(
@@ -518,7 +519,7 @@ private fun PayoutsScreenEmptyPreview() {
 private fun PayoutsScreenErrorPreview() {
     SpTheme {
         PayoutsScreenContent(
-            state = PayoutsUiState(isError = true, errorMessage = "Failed to load payouts data."),
+            state = PayoutsUiState(isError = true, errorMessage = stringResource(com.carenest.provider.payouts.R.string.error_loading_payouts)),
             onIntent = {}
         )
     }

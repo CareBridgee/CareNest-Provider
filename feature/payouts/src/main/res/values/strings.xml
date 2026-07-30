@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_home">Home</string>
+    <string name="nav_support">Support</string>
+    <string name="nav_profile">Profile</string>
+    <string name="nav_active_jobs">Active Jobs</string>
+    <string name="nav_wallet">Wallet</string>
+
+    <string name="top_bar_payouts_title">Payouts &amp; Withdrawals</string>
+    <string name="error_occurred">An error occurred</string>
+    <string name="retry">Retry</string>
+
+    <string name="available_for_payout">Available for Payout</string>
+    <string name="withdraw_now">Withdraw Now</string>
+
+    <string name="status_pending_caps">PENDING</string>
+    <string name="status_completed_caps">COMPLETED</string>
+    <string name="status_failed_caps">FAILED</string>
+
+    <string name="summary_pending">PENDING</string>
+    <string name="summary_this_month">THIS MONTH</string>
+
+    <string name="back_to_service_earnings">Back to Service Earnings</string>
+
+    <string name="withdraw_history">Withdraw History</string>
+    <string name="no_withdraw_history">No Withdraw History</string>
+    <string name="no_withdraw_history_desc">You don\'t have any withdrawal transactions yet.</string>
+
+    <string name="error_loading_payouts">Failed to load payouts data.</string>
+</resources>
