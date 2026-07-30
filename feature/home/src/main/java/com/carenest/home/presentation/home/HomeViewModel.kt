@@ -42,6 +42,9 @@ class HomeViewModel @Inject constructor(
             is HomeIntent.EditRateChanged -> {
                 updateState { copy(editRateDraft = intent.rate) }
             }
+            is HomeIntent.TabSelected -> {
+                updateState { copy(selectedTab = intent.index) }
+            }
             HomeIntent.SaveRateClicked -> saveEditedRate()
             HomeIntent.DismissModal -> dismissModal()
             HomeIntent.ViewAllRequestsClicked -> { /* TODO: navigate to full requests list */ }

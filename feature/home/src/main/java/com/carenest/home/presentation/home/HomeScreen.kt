@@ -24,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.remember
 import com.carenest.home.R
 import com.carenest.home.presentation.home.components.AvailableRequestsHeader
 import com.carenest.home.presentation.home.components.EarningsSection
@@ -34,6 +35,8 @@ import com.carenest.home.presentation.home.components.NurseRequestCard
 import com.carenest.home.presentation.home.components.NurseRequestsLoadingSkeleton
 import com.carenest.home.presentation.home.components.OfflineEmptyState
 import com.carenest.home.presentation.home.components.OnlineToggleCard
+import com.carenest.provider.designsystem.components.bottomnav.BottomNavItem
+import com.carenest.provider.designsystem.components.bottomnav.SPBottomNavigation
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
 
@@ -57,8 +60,31 @@ fun HomeContent(
     onIntent: (HomeIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val navItems = remember {
+        listOf(
+            BottomNavItem(
+                label = "Home",
+                iconRes = com.carenest.provider.designsystem.R.drawable.ic_home,
+            ),
+            BottomNavItem(
+                label = "Services",
+                iconRes = com.carenest.provider.designsystem.R.drawable.ic_services,
+            ),
+            BottomNavItem(
+                label = "Booking",
+                iconRes = com.carenest.provider.designsystem.R.drawable.ic_booking,
+            ),
+            BottomNavItem(
+                label = "Profile",
+                iconRes = com.carenest.provider.designsystem.R.drawable.ic_profile,
+            ),
+        )
+    }
+
     Scaffold(
-        modifier = modifier.fillMaxSize(), containerColor = Theme.colors.backGround, topBar = {
+        modifier = modifier.fillMaxSize(),
+        containerColor = Theme.colors.backGround,
+        topBar = {
             HomeGreetingBar(
                 name = state.nurseName,
                 avatarUrl = "https://picsum.photos/200/300",
@@ -66,9 +92,17 @@ fun HomeContent(
                     .fillMaxWidth()
                     .padding(horizontal = Theme.spacing.medium)
             )
-        }) { innerPadding ->
+        },
+        bottomBar = {
+            SPBottomNavigation(
+                items = navItems,
+                selectedIndex = state.selectedTab,
+                onItemSelected = { index -> onIntent(HomeIntent.TabSelected(index)) },
+            )
+        }
+    ) { innerPadding ->
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(Theme.colors.backGround),
