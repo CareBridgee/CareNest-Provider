@@ -12,12 +12,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.FileUpload
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -29,6 +29,8 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -44,6 +46,7 @@ import com.carenest.provider.account.presentation.model.DocumentStatus
 import com.carenest.provider.core.mvi.ObserveEffect
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
+import com.carenest.provider.designsystem.R as DesignSystemR
 
 @Composable
 fun ProfessionalDocumentsRoute(
@@ -159,10 +162,12 @@ private fun UploadDocumentCard(onClick: () -> Unit) {
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                imageVector = Icons.Rounded.FileUpload,
+                painter = painterResource(DesignSystemR.drawable.ic_account_upload),
                 contentDescription = null,
-                tint = Theme.colors.tint,
-                modifier = Modifier.size(32.dp),
+                tint = Color.Unspecified,
+                modifier = Modifier
+                    .width(26.dp)
+                    .height(32.dp),
             )
         }
         Spacer(Modifier.height(Theme.spacing.medium))

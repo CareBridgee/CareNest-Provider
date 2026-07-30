@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -30,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.carenest.provider.account.presentation.model.DocumentStatus
 import com.carenest.provider.account.presentation.model.ProfessionalDocumentUiModel
 import com.carenest.provider.designsystem.theme.Theme
+import com.carenest.provider.designsystem.R as DesignSystemR
 
 @Composable
 fun DocumentStatusBadge(
@@ -100,8 +103,22 @@ fun ProfessionalDocumentCard(
             Icon(
                 painter = painterResource(document.iconRes),
                 contentDescription = null,
-                tint = Theme.colors.tint,
-                modifier = Modifier.size(25.dp),
+                tint = if (
+                    document.iconRes == DesignSystemR.drawable.ic_account_acls_certificate
+                ) {
+                    Color.Unspecified
+                } else {
+                    Theme.colors.tint
+                },
+                modifier = if (
+                    document.iconRes == DesignSystemR.drawable.ic_account_acls_certificate
+                ) {
+                    Modifier
+                        .width(19.dp)
+                        .height(25.dp)
+                } else {
+                    Modifier.size(25.dp)
+                },
             )
         }
         Spacer(Modifier.width(Theme.spacing.medium))

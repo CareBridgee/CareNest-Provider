@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -147,8 +148,12 @@ fun ProfileMenuCard(
             Icon(
                 painter = painterResource(iconRes),
                 contentDescription = null,
-                tint = Theme.colors.tint,
-                modifier = Modifier.size(23.dp),
+                tint = if (iconRes.isOriginalColorAccountIcon()) {
+                    Color.Unspecified
+                } else {
+                    Theme.colors.tint
+                },
+                modifier = iconRes.accountMenuIconModifier(),
             )
         }
         Spacer(Modifier.width(Theme.spacing.medium))
@@ -186,4 +191,32 @@ fun ProfileMenuCard(
             modifier = Modifier.size(24.dp),
         )
     }
+}
+
+private fun Int.isOriginalColorAccountIcon(): Boolean = this in setOf(
+    DesignSystemR.drawable.ic_account_professional_info,
+    DesignSystemR.drawable.ic_account_availability,
+    DesignSystemR.drawable.ic_account_reviews,
+    DesignSystemR.drawable.ic_account_wallet,
+    DesignSystemR.drawable.ic_account_support_chat,
+)
+
+private fun Int.accountMenuIconModifier(): Modifier = when (this) {
+    DesignSystemR.drawable.ic_account_professional_info,
+    DesignSystemR.drawable.ic_account_reviews,
+    -> Modifier.size(20.dp)
+
+    DesignSystemR.drawable.ic_account_availability -> Modifier
+        .width(18.dp)
+        .height(20.dp)
+
+    DesignSystemR.drawable.ic_account_wallet -> Modifier
+        .width(19.dp)
+        .height(18.dp)
+
+    DesignSystemR.drawable.ic_account_support_chat -> Modifier
+        .width(17.dp)
+        .height(20.dp)
+
+    else -> Modifier.size(23.dp)
 }

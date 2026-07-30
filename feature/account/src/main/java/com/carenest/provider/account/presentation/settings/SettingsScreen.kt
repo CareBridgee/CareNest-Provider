@@ -14,9 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.Language
-import androidx.compose.material.icons.rounded.PrivacyTip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -30,6 +28,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,6 +46,7 @@ import com.carenest.provider.core.mvi.ObserveEffect
 import com.carenest.provider.designsystem.components.bottomsheet.BaseBottomSheet
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
+import com.carenest.provider.designsystem.R as DesignSystemR
 
 @Composable
 fun SettingsRoute(
@@ -119,7 +121,7 @@ fun SettingsContent(
                 SettingsSectionTitle(stringResource(R.string.settings_app_preferences))
                 SettingsCard {
                     SettingsNavigationRow(
-                        icon = Icons.Rounded.Language,
+                        icon = rememberVectorPainter(Icons.Rounded.Language),
                         title = stringResource(R.string.settings_language),
                         value = stringResource(
                             if (state.languageCode == "ar") {
@@ -133,7 +135,8 @@ fun SettingsContent(
                     )
                     SettingsDivider()
                     SettingsSwitchRow(
-                        icon = Icons.Rounded.DarkMode,
+                        icon = painterResource(DesignSystemR.drawable.ic_account_dark_mode),
+                        iconTint = Color.Unspecified,
                         title = stringResource(R.string.settings_dark_mode),
                         checked = state.isDarkModeEnabled,
                         onCheckedChange = { onIntent(SettingsIntent.DarkModeChanged(it)) },
@@ -145,7 +148,10 @@ fun SettingsContent(
                 SettingsSectionTitle(stringResource(R.string.settings_security_privacy))
                 SettingsCard {
                     SettingsNavigationRow(
-                        icon = Icons.Rounded.PrivacyTip,
+                        icon = painterResource(
+                            DesignSystemR.drawable.ic_account_privacy_policy,
+                        ),
+                        iconTint = Color.Unspecified,
                         title = stringResource(R.string.settings_privacy_policy),
                         onClick = { onIntent(SettingsIntent.PrivacyPolicyClicked) },
                         modifier = Modifier.fillMaxWidth(),

@@ -20,11 +20,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicText
+import androidx.annotation.DrawableRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -35,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -109,14 +108,14 @@ fun PublicProfileContent(
                     ) {
                         ProfileActionButton(
                             label = stringResource(R.string.public_profile_edit_address),
-                            icon = Icons.Rounded.Edit,
+                            iconRes = DesignSystemR.drawable.ic_account_edit_address,
                             primary = true,
                             onClick = { onIntent(PublicProfileIntent.EditAddressClicked) },
                             modifier = Modifier.weight(1f),
                         )
                         ProfileActionButton(
                             label = stringResource(R.string.public_profile_share),
-                            icon = Icons.Rounded.Share,
+                            iconRes = DesignSystemR.drawable.ic_account_share,
                             primary = false,
                             onClick = { onIntent(PublicProfileIntent.ShareProfileClicked) },
                             modifier = Modifier.weight(1f),
@@ -230,7 +229,7 @@ private fun PublicProfileHero(state: PublicProfileUiState) {
 @Composable
 private fun ProfileActionButton(
     label: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    @DrawableRes iconRes: Int,
     primary: Boolean,
     onClick: () -> Unit,
     modifier: Modifier,
@@ -245,7 +244,11 @@ private fun ProfileActionButton(
             contentColor = if (primary) Theme.colors.onPrimary else Theme.colors.secondaryFont,
         ),
     ) {
-        Icon(icon, contentDescription = null)
+        Icon(
+            painter = painterResource(iconRes),
+            contentDescription = null,
+            tint = Color.Unspecified,
+        )
         Spacer(Modifier.width(Theme.spacing.small))
         BasicText(
             text = label,
@@ -269,7 +272,11 @@ private fun AboutMeCard() {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Rounded.Person, contentDescription = null, tint = Theme.colors.tint)
+            Icon(
+                painter = painterResource(DesignSystemR.drawable.ic_account_about_me),
+                contentDescription = null,
+                tint = Color.Unspecified,
+            )
             Spacer(Modifier.width(Theme.spacing.small))
             BasicText(
                 text = stringResource(R.string.public_profile_about),

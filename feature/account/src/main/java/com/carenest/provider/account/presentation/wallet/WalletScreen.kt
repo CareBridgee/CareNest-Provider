@@ -13,14 +13,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,6 +35,7 @@ import com.carenest.provider.account.presentation.components.WalletSecureBadge
 import com.carenest.provider.core.mvi.ObserveEffect
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
+import com.carenest.provider.designsystem.R as DesignSystemR
 
 @Composable
 fun WalletRoute(
@@ -182,9 +183,9 @@ private fun AutomaticPayoutsCard() {
         verticalAlignment = Alignment.Top,
     ) {
         Icon(
-            imageVector = Icons.Rounded.Info,
+            painter = painterResource(DesignSystemR.drawable.ic_account_info),
             contentDescription = null,
-            tint = Theme.colors.tint,
+            tint = Color.Unspecified,
         )
         Spacer(Modifier.padding(Theme.spacing.small))
         Column(verticalArrangement = Arrangement.spacedBy(Theme.spacing.small)) {

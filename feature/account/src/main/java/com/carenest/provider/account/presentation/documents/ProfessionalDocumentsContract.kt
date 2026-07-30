@@ -41,7 +41,7 @@ private val sampleDocuments = listOf(
         id = "acls",
         titleRes = R.string.documents_acls,
         uploadedDateRes = R.string.documents_uploaded_sep_28,
-        iconRes = DesignSystemR.drawable.ic_badge,
+        iconRes = DesignSystemR.drawable.ic_account_acls_certificate,
         status = DocumentStatus.Verified,
     ),
 )

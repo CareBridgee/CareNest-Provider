@@ -34,7 +34,7 @@ private val sampleProfileMenuItems = listOf(
         MenuItemId.ProfessionalInfo,
         R.string.profile_menu_professional_info,
         R.string.profile_menu_professional_info_subtitle,
-        DesignSystemR.drawable.ic_id_card,
+        DesignSystemR.drawable.ic_account_professional_info,
     ),
     MenuItemUiModel(
         MenuItemId.Documents,
@@ -47,24 +47,24 @@ private val sampleProfileMenuItems = listOf(
         MenuItemId.Availability,
         R.string.profile_menu_availability,
         R.string.profile_menu_availability_subtitle,
-        DesignSystemR.drawable.ic_calendar,
+        DesignSystemR.drawable.ic_account_availability,
     ),
     MenuItemUiModel(
         MenuItemId.Reviews,
         R.string.profile_menu_reviews,
         R.string.profile_menu_reviews_subtitle,
-        DesignSystemR.drawable.comment_sms,
+        DesignSystemR.drawable.ic_account_reviews,
     ),
     MenuItemUiModel(
         MenuItemId.Wallet,
         R.string.profile_menu_wallet,
         R.string.profile_menu_wallet_subtitle,
-        DesignSystemR.drawable.ic_wallet,
+        DesignSystemR.drawable.ic_account_wallet,
     ),
     MenuItemUiModel(
         MenuItemId.Support,
         R.string.profile_menu_support,
         R.string.profile_menu_support_subtitle,
-        DesignSystemR.drawable.ic_info,
+        DesignSystemR.drawable.ic_account_support_chat,
     ),
 )

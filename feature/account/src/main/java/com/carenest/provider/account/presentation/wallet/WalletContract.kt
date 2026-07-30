@@ -49,14 +49,14 @@ private val sampleAlternativeMethods = listOf(
         id = "vodafone-cash",
         titleRes = R.string.wallet_vodafone_cash,
         subtitleRes = R.string.wallet_vodafone_number,
-        iconRes = DesignSystemR.drawable.ic_wallet,
+        iconRes = DesignSystemR.drawable.ic_account_cash,
         accent = AlternativePayoutAccent.Vodafone,
     ),
     AlternativePayoutMethodUiModel(
         id = "instapay",
         titleRes = R.string.wallet_instapay,
         subtitleRes = R.string.wallet_instapay_account,
-        iconRes = DesignSystemR.drawable.ic_payment_method,
+        iconRes = DesignSystemR.drawable.ic_account_instapay,
         accent = AlternativePayoutAccent.Neutral,
     ),
 )

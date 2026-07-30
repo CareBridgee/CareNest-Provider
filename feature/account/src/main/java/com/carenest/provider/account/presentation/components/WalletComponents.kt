@@ -21,7 +21,6 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -32,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -54,10 +54,12 @@ fun WalletSecureBadge(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            imageVector = Icons.Rounded.Lock,
+            painter = painterResource(DesignSystemR.drawable.ic_account_secure),
             contentDescription = null,
-            tint = Theme.colors.tint,
-            modifier = Modifier.size(16.dp),
+            tint = Color.Unspecified,
+            modifier = Modifier
+                .width(14.dp)
+                .height(18.dp),
         )
         Spacer(Modifier.width(6.dp))
         BasicText(
@@ -104,10 +106,10 @@ fun PrimaryPayoutCard(
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    painter = painterResource(DesignSystemR.drawable.ic_bank),
+                    painter = painterResource(DesignSystemR.drawable.ic_account_bank),
                     contentDescription = null,
-                    tint = Theme.colors.onPrimary,
-                    modifier = Modifier.size(26.dp),
+                    tint = Color.Unspecified,
+                    modifier = Modifier.size(27.dp),
                 )
             }
             Spacer(Modifier.width(Theme.spacing.medium))
@@ -255,10 +257,6 @@ fun AlternativePayoutMethodCard(
         AlternativePayoutAccent.Vodafone -> Theme.colors.vodafoneContainer
         AlternativePayoutAccent.Neutral -> Theme.colors.primaryContainer
     }
-    val iconTint = when (method.accent) {
-        AlternativePayoutAccent.Vodafone -> Theme.colors.onVodafoneContainer
-        AlternativePayoutAccent.Neutral -> Theme.colors.secondaryFont
-    }
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -279,8 +277,18 @@ fun AlternativePayoutMethodCard(
             Icon(
                 painter = painterResource(method.iconRes),
                 contentDescription = null,
-                tint = iconTint,
-                modifier = Modifier.size(22.dp),
+                tint = Color.Unspecified,
+                modifier = when (method.iconRes) {
+                    DesignSystemR.drawable.ic_account_cash -> Modifier
+                        .width(19.dp)
+                        .height(18.dp)
+
+                    DesignSystemR.drawable.ic_account_instapay -> Modifier
+                        .width(22.dp)
+                        .height(16.dp)
+
+                    else -> Modifier.size(22.dp)
+                },
             )
         }
         Spacer(Modifier.width(Theme.spacing.medium))
