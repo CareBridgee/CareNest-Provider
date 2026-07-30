@@ -115,6 +115,19 @@ coordination of services.</string>
     <string name="phone_input_label">Phone Number</string>
     <string name="phone_input_carrier_charges">Carrier charges may apply for SMS.</string>
     <string name="back">Back</string>
+
+    <!-- Request -->
+    <string name="nurse_requests_edit_rate_title">Edit Rate</string>
+    <string name="nurse_requests_edit_rate_subtitle">Adjust your offer rate for this request</string>
+    <string name="nurse_requests_save">Save</string>
+    <string name="nurse_requests_make_offer_title">Waiting for Patient</string>
+    <string name="nurse_requests_make_offer_message">Your offer has been sent. Waiting for the patient to accept…</string>
+    <string name="nurse_requests_offer_success_title">Offer Accepted!</string>
+    <string name="nurse_requests_rate_per_hour">$%1$.0f</string>
+    <string name="nurse_requests_countdown_seconds">%1$d s</string>
+    <string name="nurse_requests_offer_success_message">The patient accepted your offer. You can now proceed with the visit.</string>
+
+
 </resources>
 
 

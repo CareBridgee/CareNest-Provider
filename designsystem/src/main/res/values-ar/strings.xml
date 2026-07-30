@@ -117,4 +117,16 @@
     <string name="phone_input_via_whatsapp">واتساب</string>
     <string name="phone_input_label">رقم الهاتف</string>
     <string name="phone_input_carrier_charges">قد تُطبق رسوم من شركة الاتصالات على الرسائل النصية.</string>
+
+    <!-- Request -->
+    <string name="nurse_requests_edit_rate_title">تعديل السعر</string>
+    <string name="nurse_requests_edit_rate_subtitle">عدّل السعر الذي ترغب في تقديمه لهذا الطلب</string>
+    <string name="nurse_requests_save">حفظ</string>
+    <string name="nurse_requests_make_offer_title">بانتظار المريض</string>
+    <string name="nurse_requests_make_offer_message">تم إرسال عرضك. بانتظار موافقة المريض…</string>
+    <string name="nurse_requests_offer_success_title">تم قبول العرض!</string>
+    <string name="nurse_requests_countdown_seconds">%1$d ثانية</string>
+    <string name="nurse_requests_rate_per_hour">%1$.0f$</string>
+    <string name="nurse_requests_offer_success_message">وافق المريض على عرضك. يمكنك الآن المتابعة لبدء الزيارة.</string>
+
 </resources>
