@@ -27,13 +27,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carenest.home.R
 import com.carenest.home.presentation.home.components.AvailableRequestsHeader
 import com.carenest.home.presentation.home.components.EarningsSection
-import com.carenest.home.presentation.home.components.EditRateBottomSheet
 import com.carenest.home.presentation.home.components.HomeGreetingBar
-import com.carenest.home.presentation.home.components.MakeOfferDialog
 import com.carenest.home.presentation.home.components.NurseRequestCard
-import com.carenest.home.presentation.home.components.NurseRequestsLoadingSkeleton
 import com.carenest.home.presentation.home.components.OfflineEmptyState
 import com.carenest.home.presentation.home.components.OnlineToggleCard
+import com.carenest.provider.designsystem.components.request.EditRateBottomSheet
+import com.carenest.provider.designsystem.components.request.MakeOfferDialog
+import com.carenest.provider.designsystem.components.request.NurseRequestsLoadingSkeleton
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
 
