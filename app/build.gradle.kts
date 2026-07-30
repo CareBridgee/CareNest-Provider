@@ -47,6 +47,8 @@ dependencies {
     implementation(project(":feature:profile"))
     implementation(project(":feature:auth"))
     implementation(project(":feature:home"))
+    implementation(project(":feature:earnings"))
+    implementation(project(":feature:payouts"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.navigation3)
