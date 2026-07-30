@@ -16,10 +16,12 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.request.accept
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.encodedPath
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.Serializable
@@ -61,6 +63,11 @@ object NetworkModule {
 
         install(Auth) {
             bearer {
+                sendWithoutRequest { request ->
+                    val path = request.url.encodedPath
+                    !path.contains("/auth/")
+                }
+
                 loadTokens {
                     val accessToken = tokenManager.accessToken.first()
                     val refreshToken = tokenManager.refreshToken.first()
@@ -92,6 +99,9 @@ object NetworkModule {
 
         defaultRequest {
             url(BASE_URL)
+            contentType(ContentType.Application.Json)
+            accept(ContentType.Application.Json)
+            headers.append("User-Agent", "CareNestProviderApp/1.0")
         }
     }
 }
