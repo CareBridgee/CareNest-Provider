@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.carenest.provider"
+    namespace = "com.carenest.provider.account"
     compileSdk {
         version = release(37) {
             minorApiLevel = 1
@@ -15,26 +15,15 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.carenest.provider"
         minSdk = 24
-        targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    buildTypes {
-        release {
-            optimization {
-                enable = false
-            }
-        }
-    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     buildFeatures {
         compose = true
     }
@@ -43,25 +32,19 @@ android {
 dependencies {
     implementation(project(":core"))
     implementation(project(":designsystem"))
-    implementation(project(":feature:onboarding"))
-    implementation(project(":feature:profile"))
-    implementation(project(":feature:auth"))
-    implementation(project(":feature:home"))
-    implementation(project(":feature:request"))
-    implementation(project(":feature:account"))
 
+    implementation(libs.androidx.core.ktx)
     implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.bundles.navigation3)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
     implementation(libs.bundles.compose)
-    implementation(libs.androidx.appcompat)
+    implementation(libs.bundles.coil)
+    implementation(libs.bundles.navigation3)
+    implementation(libs.bundles.lifecycle)
+
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.navigation.compose)
+    ksp(libs.hilt.compiler)
 
     testImplementation(libs.junit)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
-    debugImplementation(libs.androidx.compose.ui.tooling)
 }
