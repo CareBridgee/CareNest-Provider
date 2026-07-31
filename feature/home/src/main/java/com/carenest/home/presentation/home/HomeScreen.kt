@@ -25,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carenest.home.R
+import com.carenest.provider.core.mvi.ObserveEffect
 import com.carenest.home.presentation.home.components.AvailableRequestsHeader
 import com.carenest.home.presentation.home.components.EarningsSection
 import com.carenest.home.presentation.home.components.HomeGreetingBar
@@ -39,10 +40,19 @@ import com.carenest.provider.designsystem.theme.Theme
 
 @Composable
 fun HomeScreen(
+    onNavigateToRequests: () -> Unit,
+    onOfferConfirmed: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    ObserveEffect(viewModel.effect) { effect ->
+        when (effect) {
+            HomeEffect.NavigateToRequestList -> onNavigateToRequests()
+            is HomeEffect.NavigateToOfferConfirmed -> onOfferConfirmed(effect.requestId)
+        }
+    }
 
     HomeContent(
         state = state,
