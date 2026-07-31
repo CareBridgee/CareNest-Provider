@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,7 +43,7 @@ fun VisitSummaryCard(summary: VisitSummary, modifier: Modifier = Modifier) {
         ) {
             Text(
                 text = stringResource(R.string.visit_completed_summary_title),
-                style = Theme.typography.hint.large.copy(
+                style = Theme.typography.body.medium.copy(
                     fontWeight = FontWeight.SemiBold
                 ),
                 color = Theme.colors.primary,
@@ -59,16 +61,18 @@ fun VisitSummaryCard(summary: VisitSummary, modifier: Modifier = Modifier) {
             }
         }
 
-        Divider(modifier = Modifier.padding(top = Theme.spacing.medium))
+        HorizontalDivider(modifier = Modifier.padding(top = Theme.spacing.medium))
 
         Row(modifier = Modifier
             .fillMaxWidth()
-            .padding(top = Theme.spacing.medium)) {
+            .padding(top = Theme.spacing.medium),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             SummaryField(
                 label = stringResource(R.string.visit_completed_professional_label),
                 value = summary.professionalName,
                 modifier = Modifier.weight(1f),
-                icon = painterResource(RD.drawable.patient_imgae)
+                icon = painterResource(RD.drawable.ic_personality)
             )
             SummaryField(
                 label = stringResource(R.string.visit_completed_service_type_label),
@@ -80,7 +84,9 @@ fun VisitSummaryCard(summary: VisitSummary, modifier: Modifier = Modifier) {
 
         Row(modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 14.dp)) {
+            .padding(top = 14.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             SummaryField(
                 label = stringResource(R.string.visit_completed_duration_label),
                 value = stringResource(
@@ -110,25 +116,31 @@ private fun SummaryField(
     Column(modifier = modifier) {
         Text(
             text = label,
-            style = Theme.typography.body.small,
+            style = Theme.typography.body.small.copy(
+                fontWeight = FontWeight.Normal
+            ),
             color = Theme.colors.secondaryFont,
         )
 
-        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
 
             Icon(
                 painter = icon,
                 contentDescription = null,
                 tint = Theme.colors.primary,
-                modifier = Modifier.padding(top = Theme.spacing.space6)
+                modifier = Modifier.padding(top = Theme.spacing.space6).size(16.dp)
             )
 
             Text(
                 text = value,
                 style = Theme.typography.body.medium.copy(
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.SemiBold
                 ),
                 color = Theme.colors.primaryFont,
+                modifier = Modifier.padding(top = Theme.spacing.space6)
             )
         }
     }

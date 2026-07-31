@@ -2,10 +2,13 @@ package com.carenest.request.presentation.ui.visit_summary.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,28 +23,35 @@ import com.carenest.request.R
 
 @Composable
 fun TotalAmountCard(amount: Double, modifier: Modifier = Modifier) {
-    Row(
+
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .background(Theme.colors.surface, RoundedCornerShape(16.dp))
             .padding(Theme.spacing.medium),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            text = stringResource(R.string.visit_completed_total_amount_label),
-            style = Theme.typography.hint.large.copy(
-                fontWeight = FontWeight.SemiBold
-            ),
-            color = Theme.colors.primary,
-        )
-        Text(
-            text = stringResource(R.string.visit_completed_total_amount_value, amount),
-            style = Theme.typography.hint.large.copy(
-                fontWeight = FontWeight.SemiBold
-            ),
-            color = Theme.colors.primary,
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(R.string.visit_completed_total_amount_label),
+                style = Theme.typography.hint.large.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = Theme.colors.primary,
+            )
+            Text(
+                text = stringResource(R.string.visit_completed_total_amount_value, amount),
+                style = Theme.typography.hint.large.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = Theme.colors.primary,
+            )
+        }
+        HorizontalDivider(modifier = Modifier.padding(horizontal = Theme.spacing.space6, vertical = Theme.spacing.space10))
     }
 }
 

@@ -93,7 +93,7 @@
     <string name="cancel_reason_other">Other reason (please describe)</string>
 
     <!-- Visit Complete -->
-    <string name="visit_completed_total_amount_label">TOTAL AMOUNT DUE</string>
+    <string name="visit_completed_total_amount_label">You Will Receive</string>
     <string name="visit_completed_total_amount_value">$%1$.2f</string>
     <string name="visit_rating_title">How was your visit?</string>
     <string name="visit_rating_subtitle">Your feedback helps us provide better care for everyone.</string>

@@ -42,6 +42,7 @@ import com.carenest.provider.profile.navigation.providerProfileCompletionEntries
 import com.carenest.provider.profile.navigation.providerProfileCompletionStartRoute
 import com.carenest.request.navigation.RequestRoutes
 import com.carenest.request.navigation.providerRequestEntries
+import com.carenest.request.navigation.providerRequestStartRoute
 import com.carenest.request.navigation.requestSerializers
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.modules.SerializersModule
@@ -73,7 +74,7 @@ fun AppNavigation(
         serializer = SnapshotStateListSerializer(PolymorphicSerializer(NavKey::class)),
         configuration = appSavedStateConfiguration,
     ) {
-        mutableStateListOf<NavKey>().apply { navigate(providerOnboardingStartRoute()) }
+        mutableStateListOf<NavKey>().apply { navigate(providerRequestStartRoute()) }
     }
 
     fun exitCurrentRoot() {

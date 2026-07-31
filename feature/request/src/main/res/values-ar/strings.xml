@@ -88,7 +88,7 @@
     <string name="cancel_reason_other">سبب آخر (يرجى التوضيح)</string>
 
     <!-- Visit Complete -->
-    <string name="visit_completed_total_amount_label">إجمالي المبلغ المستحق</string>
+    <string name="visit_completed_total_amount_label">سوف تستلم</string>
     <string name="visit_completed_total_amount_value">$%1$.2f</string>
     <string name="visit_rating_title">كيف كانت زيارتك؟</string>
     <string name="visit_rating_subtitle">تقييمك يساعدنا في تقديم خدمة أفضل للجميع.</string>
