@@ -25,24 +25,34 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carenest.home.R
+import com.carenest.provider.core.mvi.ObserveEffect
 import com.carenest.home.presentation.home.components.AvailableRequestsHeader
 import com.carenest.home.presentation.home.components.EarningsSection
-import com.carenest.home.presentation.home.components.EditRateBottomSheet
 import com.carenest.home.presentation.home.components.HomeGreetingBar
-import com.carenest.home.presentation.home.components.MakeOfferDialog
 import com.carenest.home.presentation.home.components.NurseRequestCard
-import com.carenest.home.presentation.home.components.NurseRequestsLoadingSkeleton
 import com.carenest.home.presentation.home.components.OfflineEmptyState
 import com.carenest.home.presentation.home.components.OnlineToggleCard
+import com.carenest.provider.designsystem.components.request.EditRateBottomSheet
+import com.carenest.provider.designsystem.components.request.MakeOfferDialog
+import com.carenest.provider.designsystem.components.request.NurseRequestsLoadingSkeleton
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
 
 @Composable
 fun HomeScreen(
+    onNavigateToRequests: () -> Unit,
+    onOfferConfirmed: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    ObserveEffect(viewModel.effect) { effect ->
+        when (effect) {
+            HomeEffect.NavigateToRequestList -> onNavigateToRequests()
+            is HomeEffect.NavigateToOfferConfirmed -> onOfferConfirmed(effect.requestId)
+        }
+    }
 
     HomeContent(
         state = state,

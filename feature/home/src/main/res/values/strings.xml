@@ -18,21 +18,12 @@
     <string name="nurse_requests_status_accepted">Accepted</string>
     <string name="nurse_requests_action_edit">Edit</string>
     <string name="nurse_requests_action_make_offer">Make Offer</string>
-    <string name="nurse_requests_edit_rate_title">Edit Rate</string>
-    <string name="nurse_requests_edit_rate_subtitle">Adjust your offer rate for this request</string>
-    <string name="nurse_requests_save">Save</string>
-    <string name="nurse_requests_make_offer_title">Waiting for Patient</string>
-    <string name="nurse_requests_make_offer_message">Your offer has been sent. Waiting for the patient to accept…</string>
-    <string name="nurse_requests_offer_success_title">Offer Accepted!</string>
-    <string name="nurse_requests_offer_success_message">The patient accepted your offer. You can now proceed with the visit.</string>
-    <string name="nurse_requests_rate_per_hour">$%1$.0f</string>
     <string name="nurse_requests_distance_miles">%1$.1f mi</string>
     <string name="nurse_requests_step_accepted">Accepted</string>
     <string name="nurse_requests_step_en_route">En Route</string>
     <string name="nurse_requests_step_arrived">Arrived</string>
     <string name="nurse_requests_step_in_progress">In Progress</string>
     <string name="nurse_requests_step_completed">Completed</string>
-    <string name="nurse_requests_countdown_seconds">%1$d s</string>
     <string name="welcome_title">Welcome back !</string>
     <string name="online">Online</string>
     <string name="offline">Offline</string>
@@ -48,4 +39,5 @@
     <string name="min">Min</string>
     <string name="Max">Max</string>
     <string name="estimated_price">Estimated Price</string>
+    <string name="nurse_requests_rate_per_hour">%1$.0f$</string>
 </resources>

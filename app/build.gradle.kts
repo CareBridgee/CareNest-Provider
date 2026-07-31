@@ -47,6 +47,7 @@ dependencies {
     implementation(project(":feature:profile"))
     implementation(project(":feature:auth"))
     implementation(project(":feature:home"))
+    implementation(project(":feature:request"))
     implementation(project(":feature:account"))
 
     implementation(platform(libs.androidx.compose.bom))

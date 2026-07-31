@@ -39,3 +39,8 @@ sealed interface HomeIntent {
     data object SaveRateClicked : HomeIntent
     data object DismissModal : HomeIntent
 }
+
+sealed interface HomeEffect {
+    data object NavigateToRequestList : HomeEffect
+    data class NavigateToOfferConfirmed(val requestId: String) : HomeEffect
+}

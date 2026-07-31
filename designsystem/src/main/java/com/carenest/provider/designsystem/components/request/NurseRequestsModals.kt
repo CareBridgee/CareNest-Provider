@@ -1,4 +1,4 @@
-package com.carenest.home.presentation.home.components
+package com.carenest.provider.designsystem.components.request
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -29,7 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.carenest.home.R
+import com.carenest.provider.designsystem.R
 import com.carenest.provider.designsystem.components.bottomsheet.BaseBottomSheet
 import com.carenest.provider.designsystem.components.button.PrimaryButton
 import com.carenest.provider.designsystem.theme.SpTheme

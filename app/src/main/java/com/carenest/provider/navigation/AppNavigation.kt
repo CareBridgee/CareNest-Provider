@@ -27,6 +27,7 @@ import androidx.savedstate.serialization.SavedStateConfiguration
 import com.carenest.home.navigation.HomeRoutes
 import com.carenest.home.navigation.homeSerializers
 import com.carenest.home.navigation.providerHomeEntries
+import com.carenest.home.navigation.providerHomeStartRoute
 import com.carenest.provider.R
 import com.carenest.provider.account.R as AccountR
 import com.carenest.provider.account.navigation.AccountRoutes
@@ -47,6 +48,10 @@ import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.profile.navigation.profileCompletionNavigationSerializers
 import com.carenest.provider.profile.navigation.providerProfileCompletionEntries
 import com.carenest.provider.profile.navigation.providerProfileCompletionStartRoute
+import com.carenest.request.navigation.RequestRoutes
+import com.carenest.request.navigation.providerRequestEntries
+import com.carenest.request.navigation.providerRequestStartRoute
+import com.carenest.request.navigation.requestSerializers
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -56,6 +61,7 @@ private val appNavigationSerializers = SerializersModule {
     include(authNavigationSerializers)
     include(profileCompletionNavigationSerializers)
     include(homeSerializers)
+    include(requestSerializers)
     include(accountNavigationSerializers)
 
     polymorphic(NavKey::class) {
@@ -77,7 +83,7 @@ fun AppNavigation(
         serializer = SnapshotStateListSerializer(PolymorphicSerializer(NavKey::class)),
         configuration = appSavedStateConfiguration,
     ) {
-        mutableStateListOf<NavKey>().apply { navigate(providerOnboardingStartRoute()) }
+        mutableStateListOf<NavKey>().apply { navigate(providerRequestStartRoute()) }
     }
 
     fun exitCurrentRoot() {
@@ -122,6 +128,19 @@ fun AppNavigation(
 
         providerHomeEntries(
             backStack = backStack,
+            onViewAllRequests = {
+                backStack.navigate(RequestRoutes.RequestList)
+            },
+            onOfferConfirmed = { requestId ->
+                backStack.navigate(RequestRoutes.OfferConfirmed(requestId))
+            }
+        )
+
+        providerRequestEntries(
+            backStack = backStack,
+            onNavigateHome = {
+                backStack.replaceWith(HomeRoutes.Home)
+            }
         )
         providerAccountEntries(
             backStack = backStack,

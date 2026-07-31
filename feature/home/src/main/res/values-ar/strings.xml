@@ -18,21 +18,12 @@
         <string name="nurse_requests_status_accepted">تم القبول</string>
         <string name="nurse_requests_action_edit">تعديل</string>
         <string name="nurse_requests_action_make_offer">تقديم عرض</string>
-        <string name="nurse_requests_edit_rate_title">تعديل السعر</string>
-        <string name="nurse_requests_edit_rate_subtitle">عدّل السعر الذي ترغب في تقديمه لهذا الطلب</string>
-        <string name="nurse_requests_save">حفظ</string>
-        <string name="nurse_requests_make_offer_title">بانتظار المريض</string>
-        <string name="nurse_requests_make_offer_message">تم إرسال عرضك. بانتظار موافقة المريض…</string>
-        <string name="nurse_requests_offer_success_title">تم قبول العرض!</string>
-        <string name="nurse_requests_offer_success_message">وافق المريض على عرضك. يمكنك الآن المتابعة لبدء الزيارة.</string>
-        <string name="nurse_requests_rate_per_hour">%1$.0f$</string>
         <string name="nurse_requests_distance_miles">%1$.1f ميل</string>
         <string name="nurse_requests_step_accepted">تم القبول</string>
         <string name="nurse_requests_step_en_route">في الطريق</string>
         <string name="nurse_requests_step_arrived">تم الوصول</string>
         <string name="nurse_requests_step_in_progress">قيد التنفيذ</string>
         <string name="nurse_requests_step_completed">مكتملة</string>
-        <string name="nurse_requests_countdown_seconds">%1$d ثانية</string>
 
         <string name="welcome_title">مرحبًا بعودتك!</string>
         <string name="online">متصل</string>
@@ -49,4 +40,5 @@
         <string name="min">الحد الأدنى</string>
         <string name="Max">الحد الأقصى</string>
         <string name="estimated_price">السعر التقديري</string>
+        <string name="nurse_requests_rate_per_hour">%1$.0f$</string>
 </resources>
