@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.saveable.rememberSerializable
@@ -27,6 +28,10 @@ import com.carenest.home.navigation.HomeRoutes
 import com.carenest.home.navigation.homeSerializers
 import com.carenest.home.navigation.providerHomeEntries
 import com.carenest.provider.R
+import com.carenest.provider.account.R as AccountR
+import com.carenest.provider.account.navigation.AccountRoutes
+import com.carenest.provider.account.navigation.accountNavigationSerializers
+import com.carenest.provider.account.navigation.providerAccountEntries
 import com.carenest.provider.auth.navigation.authNavigationSerializers
 import com.carenest.provider.auth.navigation.providerAuthEntries
 import com.carenest.provider.auth.navigation.providerAuthStartRoute
@@ -35,6 +40,9 @@ import com.carenest.provider.core.navigation.navigate
 import com.carenest.provider.core.navigation.replaceWith
 import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
 import com.carenest.provider.designsystem.components.topbar.TopBarLeading
+import com.carenest.provider.designsystem.components.bottomnav.BottomNavItem
+import com.carenest.provider.designsystem.components.bottomnav.SPBottomNavigation
+import com.carenest.provider.designsystem.R as DesignSystemR
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.profile.navigation.profileCompletionNavigationSerializers
 import com.carenest.provider.profile.navigation.providerProfileCompletionEntries
@@ -48,6 +56,7 @@ private val appNavigationSerializers = SerializersModule {
     include(authNavigationSerializers)
     include(profileCompletionNavigationSerializers)
     include(homeSerializers)
+    include(accountNavigationSerializers)
 
     polymorphic(NavKey::class) {
         subclass(ProviderDashboardRoute::class, ProviderDashboardRoute.serializer())
@@ -114,6 +123,17 @@ fun AppNavigation(
         providerHomeEntries(
             backStack = backStack,
         )
+        providerAccountEntries(
+            backStack = backStack,
+            onOpenSupport = {
+                backStack.navigate(
+                    ProviderInfoRoute(ProviderInfoDestination.CONTACT_SUPPORT),
+                )
+            },
+            onLogout = {
+                backStack.replaceWith(providerAuthStartRoute())
+            },
+        )
 
         entry<ProviderInfoRoute> { route ->
             val title = when (route.destination) {
@@ -143,17 +163,88 @@ fun AppNavigation(
         }
     }
 
-    NavDisplay(
-        modifier = modifier,
-        entries = rememberDecoratedNavEntries(
-            backStack = backStack,
-            entryProvider = entryProvider,
-            entryDecorators = listOf(
-                rememberSaveableStateHolderNavEntryDecorator(),
-                rememberViewModelStoreNavEntryDecorator(),
-            ),
+    val currentRoute = backStack.lastOrNull()
+    val isAuthenticatedRoute =
+        currentRoute is HomeRoutes || currentRoute is AccountRoutes
+    val selectedBottomNavIndex = when (currentRoute) {
+        AccountRoutes.Wallet -> 4
+        is AccountRoutes -> 2
+        else -> 0
+    }
+    val navEntries = rememberDecoratedNavEntries(
+        backStack = backStack,
+        entryProvider = entryProvider,
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator(),
         ),
-        onBack = ::exitCurrentRoot,
+    )
+
+    Scaffold(
+        modifier = modifier,
+        containerColor = Theme.colors.backGround,
+        bottomBar = {
+            if (isAuthenticatedRoute) {
+                ProviderBottomNavigation(
+                    selectedIndex = selectedBottomNavIndex,
+                    onItemSelected = { index ->
+                        when (index) {
+                            0 -> if (currentRoute !is HomeRoutes.Home) {
+                                backStack.replaceWith(HomeRoutes.Home)
+                            }
+                            2 -> if (currentRoute != AccountRoutes.ProfileMenu) {
+                                backStack.replaceWith(AccountRoutes.ProfileMenu)
+                            }
+                            4 -> if (currentRoute != AccountRoutes.Wallet) {
+                                backStack.replaceWith(AccountRoutes.Wallet)
+                            }
+                        }
+                    },
+                )
+            }
+        },
+    ) { innerPadding ->
+        NavDisplay(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            entries = navEntries,
+            onBack = ::exitCurrentRoot,
+        )
+    }
+}
+
+@Composable
+private fun ProviderBottomNavigation(
+    selectedIndex: Int,
+    onItemSelected: (Int) -> Unit,
+) {
+    val items = listOf(
+        BottomNavItem(
+            label = stringResource(AccountR.string.bottom_nav_home),
+            iconRes = DesignSystemR.drawable.ic_home,
+        ),
+        BottomNavItem(
+            label = stringResource(AccountR.string.bottom_nav_support),
+            iconRes = DesignSystemR.drawable.ic_info,
+        ),
+        BottomNavItem(
+            label = stringResource(AccountR.string.bottom_nav_profile),
+            iconRes = DesignSystemR.drawable.ic_profile,
+        ),
+        BottomNavItem(
+            label = stringResource(AccountR.string.bottom_nav_active_jobs),
+            iconRes = DesignSystemR.drawable.ic_work,
+        ),
+        BottomNavItem(
+            label = stringResource(AccountR.string.bottom_nav_wallet),
+            iconRes = DesignSystemR.drawable.ic_wallet,
+        ),
+    )
+    SPBottomNavigation(
+        items = items,
+        selectedIndex = selectedIndex,
+        onItemSelected = onItemSelected,
     )
 }
 

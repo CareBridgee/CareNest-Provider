@@ -4,6 +4,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import com.carenest.provider.designsystem.dimensions.LocalSPShapes
@@ -39,9 +40,12 @@ fun SpTheme(
         LocalSPSpacing provides remember { SPSpacing() },
         LocalSPShapes provides remember { SPShapes() },
         LocalSPSize provides remember { SPSize() },
+        LocalIsDarkTheme provides isDarkTheme,
         content = content,
     )
 }
+
+internal val LocalIsDarkTheme = staticCompositionLocalOf { false }
 
 internal fun normalizeLanguageCode(languageCode: String): String =
     languageCode
