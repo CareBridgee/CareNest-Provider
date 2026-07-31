@@ -2,35 +2,20 @@ package com.carenest.request.presentation.ui.list
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.carenest.request.domain.model.NurseRequest
-import com.carenest.request.domain.model.RequestStatus
 import com.carenest.provider.core.mvi.ObserveEffect
-import com.carenest.request.R
-import com.carenest.provider.designsystem.R as RD
-import com.carenest.provider.designsystem.components.chip.StatusChip
 import com.carenest.provider.designsystem.components.request.EditRateBottomSheet
 import com.carenest.provider.designsystem.components.request.MakeOfferDialog
 import com.carenest.provider.designsystem.components.request.NurseRequestsLoadingSkeleton
@@ -38,13 +23,17 @@ import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
 import com.carenest.provider.designsystem.components.topbar.TopBarLeading
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
-import com.carenest.request.presentation.ui.list.components.NurseRequestCard
+import com.carenest.request.R
+import com.carenest.request.domain.model.Request
+import com.carenest.request.domain.model.RequestStatus
+import com.carenest.request.presentation.ui.list.components.PatientRequestCard
 import com.carenest.request.presentation.ui.list.components.RequestsListHeader
 
 @Composable
 fun RequestsListScreen(
     onBack: () -> Unit,
     onOfferConfirmed: (String) -> Unit,
+    onViewDetails: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: RequestsListViewModel = hiltViewModel(),
 ) {
@@ -53,6 +42,7 @@ fun RequestsListScreen(
     ObserveEffect(viewModel.effect) { effect ->
         when (effect) {
             is RequestsListEffect.NavigateToOfferConfirmed -> onOfferConfirmed(effect.requestId)
+            is RequestsListEffect.NavigateToRequestDetails -> onViewDetails(effect.requestId)
         }
     }
 
@@ -95,17 +85,16 @@ fun RequestsListContent(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding( Theme.spacing.medium),
+                        .padding(Theme.spacing.medium),
                     verticalArrangement = Arrangement.spacedBy(Theme.spacing.small),
                 ) {
                     item {
                         RequestsListHeader(
-                            pendingCount = state.requests.count { it.status == RequestStatus.ESTIMATED }
-                        )
+                            pendingCount = state.requests.count { it.status == RequestStatus.ESTIMATED })
                     }
 
-                    items(items = state.requests, key = { it.id }) { request: NurseRequest ->
-                        NurseRequestCard(
+                    items(items = state.requests, key = { it.id }) { request: Request ->
+                        PatientRequestCard(
                             request = request,
                             isExpanded = state.selectedCardId == request.id,
                             onClick = { onIntent(RequestsListIntent.CardClicked(request.id)) },
@@ -122,7 +111,7 @@ fun RequestsListContent(
 
         if (state.activeModal == RequestsListModal.EditRate) {
             EditRateBottomSheet(
-                currentRate = state.editRateDraft,
+                currentRate = state.editPriceDraft,
                 minRate = 25f,
                 maxRate = 120f,
                 onRateChange = { onIntent(RequestsListIntent.EditRateChanged(it)) },
@@ -149,15 +138,15 @@ private fun RequestsListPreview() {
             state = RequestsListUiState(
                 isLoading = false,
                 requests = listOf(
-                    NurseRequest(
+                    Request(
                         id = "1",
                         patientName = "Anonymous Patient",
-                        patientImage = "",
-                        serviceType = "Injection Service",
-                        baseRate = 85f,
-                        distanceMiles = 2.4f,
+                        serviceName = "Home Care",
                         serviceImage = "",
-                    ),
+                        basePrice = 120f,
+                        patientAddress = "",
+                        status = RequestStatus.ESTIMATED,
+                    )
                 ),
             ),
             onIntent = {},

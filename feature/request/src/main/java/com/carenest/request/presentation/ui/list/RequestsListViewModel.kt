@@ -32,12 +32,15 @@ class RequestsListViewModel @Inject constructor(
     fun onIntent(intent: RequestsListIntent) {
         when (intent) {
             is RequestsListIntent.CardClicked -> handleCardClick(intent.requestId)
+            is RequestsListIntent.ViewDetailsClicked -> {
+                sendEffect(RequestsListEffect.NavigateToRequestDetails(intent.requestId))
+            }
             is RequestsListIntent.EditRateClicked -> openEditRateModal(intent.requestId)
             is RequestsListIntent.MakeOfferClicked -> startMakeOffer(intent.requestId)
             is RequestsListIntent.EditRateChanged -> {
-                updateState { copy(editRateDraft = intent.rate) }
+                updateState { copy(editPriceDraft = intent.rate) }
             }
-            RequestsListIntent.SaveRateClicked -> saveEditedRate()
+            RequestsListIntent.SaveRateClicked -> saveEditedPrice()
             RequestsListIntent.DismissModal -> dismissModal()
         }
     }
@@ -52,6 +55,12 @@ class RequestsListViewModel @Inject constructor(
 
     private fun handleCardClick(requestId: String) {
         val request = currentState.requests.find { it.id == requestId } ?: return
+        
+        if (request.status == RequestStatus.ACCEPTED) {
+            sendEffect(RequestsListEffect.NavigateToRequestDetails(requestId))
+            return
+        }
+
         if (request.status != RequestStatus.ESTIMATED) return
 
         updateState {
@@ -66,20 +75,20 @@ class RequestsListViewModel @Inject constructor(
             copy(
                 activeModal = RequestsListModal.EditRate,
                 editingRequestId = requestId,
-                editRateDraft = request.baseRate,
+                editPriceDraft = request.basePrice,
                 selectedCardId = requestId,
             )
         }
     }
 
-    private fun saveEditedRate() {
+    private fun saveEditedPrice() {
         val requestId = currentState.editingRequestId ?: return
-        val newRate = currentState.editRateDraft
+        val newPrice = currentState.editPriceDraft
 
         updateState {
             copy(
                 requests = requests.map { request ->
-                    if (request.id == requestId) request.copy(baseRate = newRate) else request
+                    if (request.id == requestId) request.copy(basePrice = newPrice) else request
                 },
                 activeModal = RequestsListModal.None,
                 editingRequestId = null,
@@ -124,7 +133,7 @@ class RequestsListViewModel @Inject constructor(
             copy(
                 requests = requests.map { request ->
                     if (request.id == requestId) {
-                        request.copy(status = RequestStatus.ACCEPTED, progressStep = 1)
+                        request.copy(status = RequestStatus.ACCEPTED)
                     } else {
                         request
                     }

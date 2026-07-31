@@ -13,7 +13,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,16 +24,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,14 +43,13 @@ import com.carenest.provider.designsystem.components.button.SecondaryButton
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.request.R
-import com.carenest.provider.designsystem.R as RD
-import com.carenest.request.domain.model.NurseRequest
+import com.carenest.request.domain.model.Request
 import com.carenest.request.domain.model.RequestStatus
-import kotlin.math.roundToInt
+import com.carenest.provider.designsystem.R as RD
 
 @Composable
-fun NurseRequestCard(
-    request: NurseRequest,
+fun PatientRequestCard(
+    request: Request,
     isExpanded: Boolean,
     onClick: () -> Unit,
     onEditClick: () -> Unit,
@@ -81,11 +72,7 @@ fun NurseRequestCard(
                     stiffness = Spring.StiffnessMediumLow
                 )
             )
-            .then(
-                if (isInteractive) {
-                    Modifier.clickable(onClick = onClick)
-                } else Modifier
-            ),
+            .clickable(onClick = onClick),
         shape = Theme.shapes.large,
         border = BorderStroke(
             width = 1.dp,
@@ -147,9 +134,7 @@ fun NurseRequestCard(
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = stringResource(
-                                    R.string.nurse_requests_distance_miles, request.distanceMiles
-                                ),
+                                text = request.patientAddress,
                                 style = Theme.typography.body.small.copy(
                                     color = Theme.colors.secondaryFont,
                                 ),
@@ -164,7 +149,7 @@ fun NurseRequestCard(
                 ) {
                     Text(
                         text = stringResource(
-                            R.string.nurse_requests_rate_per_hour, request.baseRate
+                            R.string.nurse_requests_rate_per_hour, request.basePrice
                         ), style = Theme.typography.title.copy(
                             color = Theme.colors.tint,
                             fontWeight = FontWeight.SemiBold,
@@ -191,18 +176,19 @@ fun NurseRequestCard(
                     )
                     .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(Theme.spacing.small),
-                verticalAlignment = Alignment.CenterVertically)
-            {
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 AsyncImage(
                     model = request.serviceImage.ifBlank { null },
                     placeholder = painterResource(RD.drawable.ic_service_placeholder),
                     error = painterResource(RD.drawable.ic_service_placeholder),
-                    contentDescription = request.serviceType,
+                    contentDescription = request.serviceName,
                     modifier = Modifier.size(20.dp)
                 )
 
                 Text(
-                    text = request.serviceType, style = Theme.typography.body.large.copy(
+                    text = request.serviceName,
+                    style = Theme.typography.body.large.copy(
                         color = Theme.colors.primaryFont,
                         fontWeight = FontWeight.Medium,
                         fontSize = Theme.typography.body.small.fontSize,
@@ -266,15 +252,13 @@ fun NurseRequestCard(
                     Spacer(modifier = Modifier.height(20.dp))
 
                     PriceAdjustmentSection(
-                        currentPrice = request.baseRate,
+                        currentPrice = request.basePrice,
                         minPrice = 50f,
                         maxPrice = 120f,
                         onCancelClick = onClick,
                         onSaveClick = { updatedPrice ->
-                            // Handle saving updated rate here
                             onEditClick()
-                        }
-                    )
+                        })
 
                 }
             }
@@ -282,147 +266,24 @@ fun NurseRequestCard(
     }
 }
 
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PriceAdjustmentSection(
-    currentPrice: Float,
-    minPrice: Float = 50f,
-    maxPrice: Float = 120f,
-    onCancelClick: () -> Unit,
-    onSaveClick: (Float) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var selectedPrice by remember(currentPrice) { mutableFloatStateOf(currentPrice) }
-
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(
-            modifier = Modifier
-                .shadow(elevation = 6.dp, shape = RoundedCornerShape(12.dp))
-                .background(Theme.colors.surface, shape = RoundedCornerShape(12.dp))
-                .padding(horizontal = 24.dp, vertical = 8.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "$${selectedPrice.roundToInt()}.00",
-                    style = Theme.typography.title.copy(
-                        color = Theme.colors.primaryFont,
-                        fontWeight = FontWeight.Bold
-                    )
-                )
-                Text(
-                    text = stringResource(R.string.estimated_price),
-                    style = Theme.typography.hint.medium.copy(
-                        color = Theme.colors.secondaryFont,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Slider(
-            value = selectedPrice,
-            onValueChange = { selectedPrice = it },
-            valueRange = minPrice..maxPrice,
-            colors = SliderDefaults.colors(
-                thumbColor = Theme.colors.primary,
-                activeTrackColor = Theme.colors.primary,
-                inactiveTrackColor = Theme.colors.disable
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "$${minPrice.toInt()} ${stringResource(R.string.min)}",
-                style = Theme.typography.body.medium.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = Theme.colors.primaryFont
-                )
-            )
-            Text(
-                text = "$${maxPrice.toInt()} ${stringResource(R.string.Max)}",
-                style = Theme.typography.body.medium.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = Theme.colors.primaryFont
-                )
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            SecondaryButton(
-                caption = stringResource(R.string.cancel),
-                onClick = onCancelClick,
-                modifier = Modifier.weight(1f)
-            )
-
-            PrimaryButton(
-                caption = stringResource(R.string.save),
-                onClick = { onSaveClick(selectedPrice) },
-                modifier = Modifier.weight(1f)
-            )
-        }
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
-private fun NurseRequestCardPreview() {
+private fun PatientRequestCardPreview() {
     SpTheme {
-        NurseRequestCard(
-            request = NurseRequest(
+        PatientRequestCard(
+            request = Request(
                 id = "1",
                 patientName = "Anonymous Patient",
-                patientImage = "",
-                serviceType = "Injection Service",
-                baseRate = 85f,
-                distanceMiles = 2.4f,
+                serviceName = "Home Care",
+                serviceImage = "",
+                basePrice = 120f,
+                patientAddress = "",
                 status = RequestStatus.ESTIMATED,
-                progressStep = 0,
-                serviceImage = ""
             ),
-            isExpanded = true,
             onClick = {},
             onEditClick = {},
             onMakeOfferClick = {},
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun NurseRequestAcceptedPreview() {
-    SpTheme {
-        NurseRequestCard(
-            request = NurseRequest(
-                id = "2",
-                patientName = "Anonymous Patient",
-                patientImage = "",
-                serviceType = "Home Care",
-                baseRate = 120f,
-                distanceMiles = 1.8f,
-                status = RequestStatus.ACCEPTED,
-                progressStep = 2,
-                serviceImage = ""
-            ),
             isExpanded = false,
-            onClick = {},
-            onEditClick = {},
-            onMakeOfferClick = {},
         )
     }
 }
