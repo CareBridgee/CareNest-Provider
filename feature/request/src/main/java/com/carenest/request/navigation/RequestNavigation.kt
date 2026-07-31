@@ -5,7 +5,7 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.carenest.provider.core.navigation.goBack
 import com.carenest.provider.core.navigation.navigate
-import com.carenest.request.presentation.ui.details.RequestDetailsScreen
+import com.carenest.request.presentation.ui.details.OfferDetailsScreen
 import com.carenest.request.presentation.ui.list.RequestsListScreen
 import com.carenest.request.presentation.ui.offerconfirmed.OfferConfirmedScreen
 import com.carenest.request.presentation.ui.visit_summary.VisitCompletedScreen
@@ -56,7 +56,7 @@ fun EntryProviderScope<NavKey>.providerRequestEntries(
     }
 
     entry<RequestRoutes.RequestDetails> { route ->
-        RequestDetailsScreen(
+        OfferDetailsScreen(
             requestId = route.requestId,
             onBack = { backStack.goBack() }
         )
