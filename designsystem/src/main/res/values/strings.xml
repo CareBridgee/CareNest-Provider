@@ -126,8 +126,24 @@ coordination of services.</string>
     <string name="nurse_requests_rate_per_hour">$%1$.0f</string>
     <string name="nurse_requests_countdown_seconds">%1$d s</string>
     <string name="nurse_requests_offer_success_message">The patient accepted your offer. You can now proceed with the visit.</string>
-
-
+    <string name="request_details_estimated_duration">Estimated duration</string>
+    <string name="request_details_view_summary">View patient summary</string>
+    <string name="nurse_requests_online_title">Status:</string>
+    <string name="nurse_requests_online_subtitle">Toggle on to receive incoming care requests</string>
+    <string name="nurse_requests_offline_title">You are currently offline</string>
+    <string name="nurse_requests_offline_description">Flip the switch to start receiving requests from nearby patients.</string>
+    <string name="nurse_requests_loading">Fetching incoming requests…</string>
+    <string name="nurse_requests_incoming">Incoming Requests</string>
+    <string name="nurse_requests_patient">Patient</string>
+    <string name="nurse_requests_service">Service</string>
+    <string name="nurse_requests_rate">Base Rate</string>
+    <string name="nurse_requests_distance">Distance</string>
+    <string name="nurse_requests_status">Status</string>
+    <string name="nurse_requests_status_estimated">Estimated</string>
+    <string name="nurse_requests_status_canceled">Cancelled</string>
+    <string name="nurse_requests_status_accepted">Accepted</string>
+    <string name="nurse_requests_action_edit">Edit</string>
+    <string name="nurse_requests_action_make_offer">Make Offer</string>
 </resources>
 
 

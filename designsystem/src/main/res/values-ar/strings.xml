@@ -128,5 +128,22 @@
     <string name="nurse_requests_countdown_seconds">%1$d ثانية</string>
     <string name="nurse_requests_rate_per_hour">%1$.0f$</string>
     <string name="nurse_requests_offer_success_message">وافق المريض على عرضك. يمكنك الآن المتابعة لبدء الزيارة.</string>
-
+    <string name="request_details_estimated_duration">المدة التقديرية</string>
+    <string name="request_details_view_summary">عرض ملخص المريض</string>
+    <string name="nurse_requests_online_title">الحالة:</string>
+    <string name="nurse_requests_online_subtitle">فعّل المفتاح لاستقبال طلبات الرعاية الجديدة</string>
+    <string name="nurse_requests_offline_title">أنت غير متصل حالياً</string>
+    <string name="nurse_requests_offline_description">قم بتفعيل المفتاح لبدء استقبال الطلبات من المرضى القريبين.</string>
+    <string name="nurse_requests_loading">جارٍ جلب الطلبات الواردة…</string>
+    <string name="nurse_requests_incoming">الطلبات الواردة</string>
+    <string name="nurse_requests_patient">المريض</string>
+    <string name="nurse_requests_service">الخدمة</string>
+    <string name="nurse_requests_rate">السعر الأساسي</string>
+    <string name="nurse_requests_distance">المسافة</string>
+    <string name="nurse_requests_status">الحالة</string>
+    <string name="nurse_requests_status_estimated">قيد التقدير</string>
+    <string name="nurse_requests_status_canceled">ملغاة</string>
+    <string name="nurse_requests_status_accepted">تم القبول</string>
+    <string name="nurse_requests_action_edit">تعديل</string>
+    <string name="nurse_requests_action_make_offer">تقديم عرض</string>
 </resources>
