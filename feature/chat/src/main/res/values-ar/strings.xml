@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_back_content_description">رجوع</string>
+    <string name="chat_call_content_description">الاتصال بالممرض</string>
+    <string name="chat_send_content_description">إرسال الرسالة</string>
+    <string name="chat_status_active_now">متصل الآن</string>
+    <string name="chat_status_offline">غير متصل</string>
+    <string name="chat_input_placeholder">اكتب رسالة…</string>
+    <string name="chat_quick_tip_title">نصيحة سريعة</string>
+    <string name="chat_message_seen">تمت القراءة</string>
+</resources>
