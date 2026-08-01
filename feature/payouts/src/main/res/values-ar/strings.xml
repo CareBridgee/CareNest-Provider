@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_home">الرئيسية</string>
+    <string name="nav_support">الدعم</string>
+    <string name="nav_profile">الملف الشخصي</string>
+    <string name="nav_active_jobs">المهام النشطة</string>
+    <string name="nav_wallet">المحفظة</string>
+
+    <string name="top_bar_payouts_title">الدفعات والسحوبات</string>
+    <string name="error_occurred">حدث خطأ ما</string>
+    <string name="retry">إعادة المحاولة</string>
+
+    <string name="available_for_payout">المتاح للصرف</string>
+    <string name="withdraw_now">سحب الآن</string>
+
+    <string name="status_pending_caps">معلق</string>
+    <string name="status_completed_caps">مكتمل</string>
+    <string name="status_failed_caps">فشل</string>
+
+    <string name="summary_pending">معلق</string>
+    <string name="summary_this_month">هذا الشهر</string>
+
+    <string name="back_to_service_earnings">العودة إلى أرباح الخدمات</string>
+
+    <string name="withdraw_history">سجل السحب</string>
+    <string name="no_withdraw_history">لا يوجد سجل سحب</string>
+    <string name="no_withdraw_history_desc">ليس لديك أي معاملات سحب حتى الآن.</string>
+
+    <string name="error_loading_payouts">فشل في تحميل بيانات المدفوعات.</string>
+
+    <string name="withdrawal_submitted_success">تم تقديم طلب السحب بنجاح!</string>
+    <string name="withdrawal_failed">فشل عملية السحب. يُرجى المحاولة مرة أخرى.</string>
+</resources>

@@ -1,6 +1,5 @@
 package com.carenest.home.domain.usecase
 
-
 import com.carenest.home.domain.model.EarningsSummary
 import com.carenest.home.domain.repository.NurseRequestsRepository
 import javax.inject.Inject

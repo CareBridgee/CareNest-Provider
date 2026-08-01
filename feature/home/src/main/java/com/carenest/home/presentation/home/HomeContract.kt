@@ -26,7 +26,8 @@ data class HomeUiState(
     val earnings : Double = 0.0,
     val changePercent : Double = 0.0,
     val jobsToday : Int = 0,
-    val rating : Double = 0.0
+    val rating : Double = 0.0,
+    val selectedTab: Int = 0,
 )
 
 sealed interface HomeIntent {
@@ -35,6 +36,7 @@ sealed interface HomeIntent {
     data class EditRateClicked(val requestId: String) : HomeIntent
     data class MakeOfferClicked(val requestId: String) : HomeIntent
     data class EditRateChanged(val rate: Float) : HomeIntent
+    data class TabSelected(val index: Int) : HomeIntent
     data object ViewAllRequestsClicked : HomeIntent
     data object SaveRateClicked : HomeIntent
     data object DismissModal : HomeIntent

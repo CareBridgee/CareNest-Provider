@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_home">الرئيسية</string>
+    <string name="nav_support">الدعم</string>
+    <string name="nav_profile">الملف الشخصي</string>
+    <string name="nav_active_jobs">المهام النشطة</string>
+    <string name="nav_wallet">المحفظة</string>
+
+    <string name="top_bar_title">سيرين كير</string>
+    <string name="error_occurred">حدث خطأ ما</string>
+    <string name="retry">إعادة المحاولة</string>
+
+    <string name="total_earnings">إجمالي الأرباح (%1$s)</string>
+    <string name="jobs_count">%1$s وظائف</string>
+    <string name="view_payouts">عرض عمليات الصرف</string>
+
+    <string name="service_earnings">أرباح الخدمات</string>
+
+    <string name="filter_all_services">جميع الخدمات</string>
+    <string name="filter_this_month">هذا الشهر</string>
+    <string name="filter_sort">فرز</string>
+
+    <string name="no_service_earnings">لا توجد أرباح خدمات</string>
+    <string name="no_service_earnings_desc">ليس لديك أي أرباح خدمات للتصفية المحددة.</string>
+
+    <string name="patient_name_format">المريض: %1$s</string>
+    <string name="date_duration_format">%1$s • %2$s</string>
+
+    <string name="status_completed">مكتمل</string>
+    <string name="status_processing">قيد المعالجة</string>
+    <string name="status_canceled">ملغي</string>
+
+    <string name="error_loading_earnings">فشل في تحميل أرباح الخدمات.</string>
+</resources>

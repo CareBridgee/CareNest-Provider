@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_home">Home</string>
+    <string name="nav_support">Support</string>
+    <string name="nav_profile">Profile</string>
+    <string name="nav_active_jobs">Active Jobs</string>
+    <string name="nav_wallet">Wallet</string>
+
+    <string name="top_bar_title">Serene Care</string>
+    <string name="error_occurred">An error occurred</string>
+    <string name="retry">Retry</string>
+
+    <string name="total_earnings">Total Earnings (%1$s)</string>
+    <string name="jobs_count">%1$s Jobs</string>
+    <string name="view_payouts">View Payouts</string>
+
+    <string name="service_earnings">Service Earnings</string>
+
+    <string name="filter_all_services">All Services</string>
+    <string name="filter_this_month">This Month</string>
+    <string name="filter_sort">Sort</string>
+
+    <string name="no_service_earnings">No Service Earnings</string>
+    <string name="no_service_earnings_desc">You don\'t have any service earnings for the selected filter.</string>
+
+    <string name="patient_name_format">Patient: %1$s</string>
+    <string name="date_duration_format">%1$s • %2$s</string>
+
+    <string name="status_completed">Completed</string>
+    <string name="status_processing">Processing</string>
+    <string name="status_canceled">Canceled</string>
+
+    <string name="error_loading_earnings">Failed to load service earnings.</string>
+</resources>

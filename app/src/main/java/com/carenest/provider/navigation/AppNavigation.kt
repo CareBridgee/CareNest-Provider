@@ -45,6 +45,12 @@ import com.carenest.provider.designsystem.components.bottomnav.BottomNavItem
 import com.carenest.provider.designsystem.components.bottomnav.SPBottomNavigation
 import com.carenest.provider.designsystem.R as DesignSystemR
 import com.carenest.provider.designsystem.theme.Theme
+import com.carenest.provider.earnings.navigation.earningsSerializers
+import com.carenest.provider.earnings.navigation.providerEarningsEntries
+import com.carenest.provider.earnings.navigation.providerEarningsStartRoute
+import com.carenest.provider.payouts.navigation.payoutsSerializers
+import com.carenest.provider.payouts.navigation.providerPayoutsEntries
+import com.carenest.provider.payouts.navigation.providerPayoutsStartRoute
 import com.carenest.provider.profile.navigation.profileCompletionNavigationSerializers
 import com.carenest.provider.profile.navigation.providerProfileCompletionEntries
 import com.carenest.provider.profile.navigation.providerProfileCompletionStartRoute
@@ -63,6 +69,8 @@ private val appNavigationSerializers = SerializersModule {
     include(homeSerializers)
     include(requestSerializers)
     include(accountNavigationSerializers)
+    include(earningsSerializers)
+    include(payoutsSerializers)
 
     polymorphic(NavKey::class) {
         subclass(ProviderDashboardRoute::class, ProviderDashboardRoute.serializer())
@@ -152,6 +160,20 @@ fun AppNavigation(
             onLogout = {
                 backStack.replaceWith(providerAuthStartRoute())
             },
+        )
+
+        providerEarningsEntries(
+            backStack = backStack,
+            onNavigateToPayouts = {
+                backStack.navigate(providerPayoutsStartRoute())
+            }
+        )
+
+        providerPayoutsEntries(
+            backStack = backStack,
+            onNavigateBackToEarnings = {
+                backStack.goBack()
+            }
         )
 
         entry<ProviderInfoRoute> { route ->

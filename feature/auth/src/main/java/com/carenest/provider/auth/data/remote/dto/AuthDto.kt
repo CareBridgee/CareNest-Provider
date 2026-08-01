@@ -41,10 +41,10 @@ data class UserDto(
 
 @Serializable
 data class ErrorResponseDto(
-    val timestamp: String,
-    val status: Int,
-    val error: String,
-    val code: String,
-    val message: String,
+    val timestamp: String? = null,
+    val status: Int? = null,
+    val error: String? = null,
+    val code: String? = null,
+    val message: String? = null,
     val details: String? = null
 )

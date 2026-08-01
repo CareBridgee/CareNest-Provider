@@ -7,6 +7,7 @@ import com.carenest.provider.auth.domain.repository.AuthRepository
 import com.carenest.provider.core.datastore.TokenManager
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.isSuccess
 import javax.inject.Inject
 
@@ -47,11 +48,27 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     private suspend fun handleErrorResponse(response: HttpResponse): Result<Unit> {
+        val statusCode = response.status.value
         return try {
             val errorBody = response.body<ErrorResponseDto>()
-            Result.failure(Exception(errorBody.message))
+            val parsedMsg = errorBody.message ?: errorBody.error ?: errorBody.details
+            if (!parsedMsg.isNullOrBlank()) {
+                Result.failure(Exception(parsedMsg))
+            } else {
+                val rawBody = response.bodyAsText()
+                if (rawBody.isNotBlank()) {
+                    Result.failure(Exception("HTTP $statusCode: $rawBody"))
+                } else {
+                    Result.failure(Exception("HTTP $statusCode (${response.status.description})"))
+                }
+            }
         } catch (e: Exception) {
-            Result.failure(Exception("Unknown error: ${response.status}"))
+            val rawBody = runCatching { response.bodyAsText() }.getOrDefault("")
+            if (rawBody.isNotBlank()) {
+                Result.failure(Exception("HTTP $statusCode: $rawBody"))
+            } else {
+                Result.failure(Exception("HTTP $statusCode (${response.status.description})"))
+            }
         }
     }
 }
