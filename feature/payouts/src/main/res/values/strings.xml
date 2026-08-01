@@ -27,4 +27,7 @@
     <string name="no_withdraw_history_desc">You don\'t have any withdrawal transactions yet.</string>
 
     <string name="error_loading_payouts">Failed to load payouts data.</string>
+
+    <string name="withdrawal_submitted_success">Withdrawal request submitted successfully!</string>
+    <string name="withdrawal_failed">Withdrawal failed. Please try again.</string>
 </resources>
