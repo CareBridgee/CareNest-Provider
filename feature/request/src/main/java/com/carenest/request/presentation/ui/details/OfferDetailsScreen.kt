@@ -55,6 +55,7 @@ import com.carenest.provider.designsystem.R as RD
 fun OfferDetailsScreen(
     requestId: String,
     onBack: () -> Unit,
+    onOpenChat: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: OfferDetailsViewModel = hiltViewModel(),
 ) {
@@ -78,7 +79,7 @@ fun OfferDetailsScreen(
             }
 
             is OfferDetailsEffect.OpenChat -> {
-                // Navigation to chat
+                onOpenChat(effect.patientId)
             }
 
             is OfferDetailsEffect.CopyToClipboard -> {

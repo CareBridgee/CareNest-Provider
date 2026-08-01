@@ -27,6 +27,7 @@ fun providerRequestStartRoute(): NavKey = RequestRoutes.RequestList
 fun EntryProviderScope<NavKey>.providerRequestEntries(
     backStack: SnapshotStateList<NavKey>,
     onNavigateHome: () -> Unit,
+    onOpenChat: (String) -> Unit,
 ){
     entry<RequestRoutes.RequestList> {
         RequestsListScreen(
@@ -51,14 +52,16 @@ fun EntryProviderScope<NavKey>.providerRequestEntries(
             },
             onShowQrCode = {
                 // Handle QR code display
-            }
+            },
+            onOpenChat = onOpenChat
         )
     }
 
     entry<RequestRoutes.RequestDetails> { route ->
         OfferDetailsScreen(
             requestId = route.requestId,
-            onBack = { backStack.goBack() }
+            onBack = { backStack.goBack() },
+            onOpenChat = onOpenChat
         )
     }
 

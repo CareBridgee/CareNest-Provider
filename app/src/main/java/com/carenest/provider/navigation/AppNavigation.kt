@@ -1,5 +1,7 @@
 package com.carenest.provider.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,10 +26,12 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.compose.serialization.serializers.SnapshotStateListSerializer
 import androidx.savedstate.serialization.SavedStateConfiguration
+import com.carenest.chat.navigation.ChatRoutes
+import com.carenest.chat.navigation.chatSerializers
+import com.carenest.chat.navigation.providerChatEntries
 import com.carenest.home.navigation.HomeRoutes
 import com.carenest.home.navigation.homeSerializers
 import com.carenest.home.navigation.providerHomeEntries
-import com.carenest.home.navigation.providerHomeStartRoute
 import com.carenest.provider.R
 import com.carenest.provider.account.R as AccountR
 import com.carenest.provider.account.navigation.AccountRoutes
@@ -47,7 +51,6 @@ import com.carenest.provider.designsystem.R as DesignSystemR
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.earnings.navigation.earningsSerializers
 import com.carenest.provider.earnings.navigation.providerEarningsEntries
-import com.carenest.provider.earnings.navigation.providerEarningsStartRoute
 import com.carenest.provider.payouts.navigation.payoutsSerializers
 import com.carenest.provider.payouts.navigation.providerPayoutsEntries
 import com.carenest.provider.payouts.navigation.providerPayoutsStartRoute
@@ -56,7 +59,6 @@ import com.carenest.provider.profile.navigation.providerProfileCompletionEntries
 import com.carenest.provider.profile.navigation.providerProfileCompletionStartRoute
 import com.carenest.request.navigation.RequestRoutes
 import com.carenest.request.navigation.providerRequestEntries
-import com.carenest.request.navigation.providerRequestStartRoute
 import com.carenest.request.navigation.requestSerializers
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.modules.SerializersModule
@@ -71,6 +73,7 @@ private val appNavigationSerializers = SerializersModule {
     include(accountNavigationSerializers)
     include(earningsSerializers)
     include(payoutsSerializers)
+    include(chatSerializers)
 
     polymorphic(NavKey::class) {
         subclass(ProviderDashboardRoute::class, ProviderDashboardRoute.serializer())
@@ -82,6 +85,7 @@ private val appSavedStateConfiguration = SavedStateConfiguration {
     serializersModule = appNavigationSerializers
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation(
     onExitApp: () -> Unit,
@@ -91,7 +95,7 @@ fun AppNavigation(
         serializer = SnapshotStateListSerializer(PolymorphicSerializer(NavKey::class)),
         configuration = appSavedStateConfiguration,
     ) {
-        mutableStateListOf<NavKey>().apply { navigate(providerRequestStartRoute()) }
+        mutableStateListOf<NavKey>().apply { navigate(providerOnboardingStartRoute()) }
     }
 
     fun exitCurrentRoot() {
@@ -148,6 +152,9 @@ fun AppNavigation(
             backStack = backStack,
             onNavigateHome = {
                 backStack.replaceWith(HomeRoutes.Home)
+            },
+            onOpenChat = { requestId ->
+                backStack.navigate(ChatRoutes.Chat(requestId))
             }
         )
         providerAccountEntries(
@@ -174,6 +181,10 @@ fun AppNavigation(
             onNavigateBackToEarnings = {
                 backStack.goBack()
             }
+        )
+
+        providerChatEntries(
+            backStack = backStack
         )
 
         entry<ProviderInfoRoute> { route ->
