@@ -47,6 +47,8 @@ dependencies {
     implementation(project(":feature:profile"))
     implementation(project(":feature:auth"))
     implementation(project(":feature:home"))
+    implementation(project(":feature:request"))
+    implementation(project(":feature:account"))
     implementation(project(":feature:earnings"))
     implementation(project(":feature:payouts"))
 
@@ -55,6 +57,7 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.bundles.compose)
+    implementation(libs.androidx.appcompat)
 
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))

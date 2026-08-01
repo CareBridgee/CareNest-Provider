@@ -313,7 +313,7 @@ private fun RegistrationScreenContent(
                     hostState = snackbarHostState,
                     modifier = Modifier
                         .align(AlignmentUI.TopCenter)
-                        .padding(top = Theme.spacing.veryExtraLarge)
+                        .padding(top = Theme.spacing.space36)
                 )
             }
         },

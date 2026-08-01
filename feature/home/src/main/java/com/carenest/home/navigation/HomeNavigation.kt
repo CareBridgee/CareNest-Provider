@@ -19,8 +19,13 @@ fun providerHomeStartRoute(): NavKey = HomeRoutes.Home
 
 fun EntryProviderScope<NavKey>.providerHomeEntries(
     backStack: SnapshotStateList<NavKey>,
+    onViewAllRequests: () -> Unit,
+    onOfferConfirmed: (String) -> Unit,
 ) {
     entry<HomeRoutes.Home> {
-        HomeScreen()
+        HomeScreen(
+            onNavigateToRequests = onViewAllRequests,
+            onOfferConfirmed = onOfferConfirmed
+        )
     }
 }

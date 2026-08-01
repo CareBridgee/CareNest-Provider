@@ -29,4 +29,7 @@ object Theme {
 
     val size: SPSize
         @Composable @ReadOnlyComposable get() = LocalSPSize.current
+
+    val isDarkTheme: Boolean
+        @Composable @ReadOnlyComposable get() = LocalIsDarkTheme.current
 }

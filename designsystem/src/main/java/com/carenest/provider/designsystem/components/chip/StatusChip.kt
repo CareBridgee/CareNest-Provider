@@ -22,10 +22,10 @@ import com.carenest.provider.designsystem.theme.Theme
 @Composable
 fun StatusChip(
     label: String,
-    icon: Painter,
     containerColor: Color,
     contentColor: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    icon: Painter?=null
 ) {
     Row(
         modifier = modifier
@@ -35,12 +35,14 @@ fun StatusChip(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Icon(
-            painter = icon,
-            contentDescription = null,
-            tint = contentColor,
-            modifier = Modifier.size(16.dp)
-        )
+        if(icon!=null) {
+            Icon(
+                painter = icon,
+                contentDescription = null,
+                tint = contentColor,
+                modifier = Modifier.size(16.dp)
+            )
+        }
         BasicText(
             text = label,
             style = Theme.typography.body.small.copy(

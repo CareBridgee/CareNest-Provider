@@ -7,7 +7,9 @@ import com.carenest.home.domain.usecase.GetEarningsSummaryUseCase
 import com.carenest.home.domain.usecase.GetIncomingRequestsUseCase
 import com.carenest.home.domain.usecase.GetNurseProfileUseCase
 import com.carenest.home.domain.usecase.SendOfferToPatientUseCase
+import com.carenest.provider.core.mvi.DefaultEffectPublisher
 import com.carenest.provider.core.mvi.DefaultStateHolder
+import com.carenest.provider.core.mvi.EffectPublisher
 import com.carenest.provider.core.mvi.StateHolder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -24,7 +26,8 @@ class HomeViewModel @Inject constructor(
     private val sendOfferToPatient: SendOfferToPatientUseCase,
     private val getNurseProfile: GetNurseProfileUseCase,
 ) : ViewModel(),
-    StateHolder<HomeUiState> by DefaultStateHolder(HomeUiState()) {
+    StateHolder<HomeUiState> by DefaultStateHolder(HomeUiState()),
+    EffectPublisher<HomeEffect> by DefaultEffectPublisher() {
 
     private var fetchJob: Job? = null
     private var offerTimerJob: Job? = null
@@ -47,7 +50,7 @@ class HomeViewModel @Inject constructor(
             }
             HomeIntent.SaveRateClicked -> saveEditedRate()
             HomeIntent.DismissModal -> dismissModal()
-            HomeIntent.ViewAllRequestsClicked -> { /* TODO: navigate to full requests list */ }
+            HomeIntent.ViewAllRequestsClicked -> sendEffect(HomeEffect.NavigateToRequestList)
         }
     }
 
@@ -192,6 +195,7 @@ class HomeViewModel @Inject constructor(
                 selectedCardId = null,
             )
         }
+        sendEffect(HomeEffect.NavigateToOfferConfirmed(requestId))
     }
 
     private fun completeOfferTimeout(requestId: String) {

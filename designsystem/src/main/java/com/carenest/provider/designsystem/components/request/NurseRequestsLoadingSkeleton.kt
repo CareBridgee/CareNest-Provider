@@ -1,4 +1,4 @@
-package com.carenest.home.presentation.home.components
+package com.carenest.provider.designsystem.components.request
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

@@ -8,11 +8,20 @@ import androidx.compose.ui.unit.dp
 
 data class SPSpacing(
     val extraSmall: Dp = 4.dp,
+    val space6: Dp = 6.dp,
     val small: Dp = 8.dp,
+    val space9: Dp = 9.dp,
+    val space10: Dp = 10.dp,
+    val space12: Dp = 12.dp,
+    val space14: Dp = 14.dp,
     val medium: Dp = 16.dp,
+    val space18: Dp = 18.dp,
+    val space20: Dp = 20.dp,
+    val space22: Dp = 22.dp,
     val large: Dp = 24.dp,
+    val space28: Dp = 28.dp,
     val extraLarge: Dp = 32.dp,
-    val veryExtraLarge: Dp = 40.dp
+    val space36: Dp = 36.dp
 )
 
 data class SPShapes(
