@@ -60,26 +60,24 @@ fun HomeContent(
     onIntent: (HomeIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val navItems = remember {
-        listOf(
-            BottomNavItem(
-                label = "Home",
-                iconRes = com.carenest.provider.designsystem.R.drawable.ic_home,
-            ),
-            BottomNavItem(
-                label = "Services",
-                iconRes = com.carenest.provider.designsystem.R.drawable.ic_services,
-            ),
-            BottomNavItem(
-                label = "Booking",
-                iconRes = com.carenest.provider.designsystem.R.drawable.ic_booking,
-            ),
-            BottomNavItem(
-                label = "Profile",
-                iconRes = com.carenest.provider.designsystem.R.drawable.ic_profile,
-            ),
-        )
-    }
+    val navItems = listOf(
+        BottomNavItem(
+            label = stringResource(R.string.nav_home),
+            iconRes = com.carenest.provider.designsystem.R.drawable.ic_home,
+        ),
+        BottomNavItem(
+            label = stringResource(R.string.nav_services),
+            iconRes = com.carenest.provider.designsystem.R.drawable.ic_services,
+        ),
+        BottomNavItem(
+            label = stringResource(R.string.nav_booking),
+            iconRes = com.carenest.provider.designsystem.R.drawable.ic_booking,
+        ),
+        BottomNavItem(
+            label = stringResource(R.string.nav_profile),
+            iconRes = com.carenest.provider.designsystem.R.drawable.ic_profile,
+        ),
+    )
 
     Scaffold(
         modifier = modifier.fillMaxSize(),

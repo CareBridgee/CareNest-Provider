@@ -48,4 +48,8 @@
     <string name="min">Min</string>
     <string name="Max">Max</string>
     <string name="estimated_price">Estimated Price</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_services">Services</string>
+    <string name="nav_booking">Booking</string>
+    <string name="nav_profile">Profile</string>
 </resources>

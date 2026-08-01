@@ -6,7 +6,8 @@ import com.carenest.provider.core.mvi.DefaultEffectPublisher
 import com.carenest.provider.core.mvi.DefaultStateHolder
 import com.carenest.provider.core.mvi.EffectPublisher
 import com.carenest.provider.core.mvi.StateHolder
-import com.carenest.provider.payouts.domain.usecase.GetPayoutsSummaryUseCase
+import com.carenest.provider.payouts.domain.usecase.GetPayoutSummaryUseCase
+import com.carenest.provider.payouts.domain.usecase.GetWithdrawHistoryUseCase
 import com.carenest.provider.payouts.domain.usecase.RequestWithdrawalUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -14,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PayoutsViewModel @Inject constructor(
-    private val getPayoutsSummaryUseCase: GetPayoutsSummaryUseCase,
+    private val getPayoutSummaryUseCase: GetPayoutSummaryUseCase,
+    private val getWithdrawHistoryUseCase: GetWithdrawHistoryUseCase,
     private val requestWithdrawalUseCase: RequestWithdrawalUseCase
 ) : ViewModel(),
     StateHolder<PayoutsUiState> by DefaultStateHolder(PayoutsUiState()),
@@ -46,8 +48,8 @@ class PayoutsViewModel @Inject constructor(
     private fun loadData() {
         updateState { copy(isLoading = true, isError = false, errorMessage = null) }
         viewModelScope.launch {
-            val summaryResult = getPayoutsSummaryUseCase.getSummary()
-            val historyResult = getPayoutsSummaryUseCase.getHistory()
+            val summaryResult = getPayoutSummaryUseCase()
+            val historyResult = getWithdrawHistoryUseCase()
 
             if (summaryResult.isSuccess && historyResult.isSuccess) {
                 val summary = summaryResult.getOrThrow()

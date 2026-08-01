@@ -221,7 +221,7 @@ fun TotalEarningsSummaryCard(
         modifier = modifier
             .fillMaxWidth()
             .clip(cardShape)
-            .background(Color(0xFF0D7C84))
+            .background(Theme.colors.primaryVariant)
             .padding(Theme.spacing.large)
     ) {
         Column(
@@ -288,13 +288,13 @@ fun TotalEarningsSummaryCard(
                     Icon(
                         painter = painterResource(id = R.drawable.ic_wallet),
                         contentDescription = null,
-                        tint = Color(0xFF0D7C84),
+                        tint = Theme.colors.primaryVariant,
                         modifier = Modifier.size(18.dp)
                     )
                     BasicText(
                         text = stringResource(com.carenest.provider.earnings.R.string.view_payouts),
                         style = Theme.typography.body.medium.copy(
-                            color = Color(0xFF0D7C84),
+                            color = Theme.colors.primaryVariant,
                             fontWeight = FontWeight.Bold
                         )
                     )
@@ -348,7 +348,7 @@ private fun FilterChipItem(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val backgroundColor = if (isSelected) Color(0xFF0D7C84) else Theme.colors.surface
+    val backgroundColor = if (isSelected) Theme.colors.primaryVariant else Theme.colors.surface
     val contentColor = if (isSelected) Color.White else Theme.colors.primaryFont
 
     Row(
@@ -409,7 +409,7 @@ fun ServiceEarningCard(
             Icon(
                 painter = painterResource(id = item.iconRes),
                 contentDescription = null,
-                tint = Color(0xFF0D7C84),
+                tint = Theme.colors.primaryVariant,
                 modifier = Modifier.size(24.dp)
             )
         }
@@ -453,7 +453,7 @@ fun ServiceEarningCard(
                 text = item.amount,
                 style = Theme.typography.body.large.copy(
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF0D7C84),
+                    color = Theme.colors.primaryVariant,
                     fontSize = 17.sp
                 )
             )

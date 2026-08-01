@@ -6,6 +6,7 @@ import com.carenest.provider.core.mvi.DefaultEffectPublisher
 import com.carenest.provider.core.mvi.DefaultStateHolder
 import com.carenest.provider.core.mvi.EffectPublisher
 import com.carenest.provider.core.mvi.StateHolder
+import com.carenest.provider.earnings.domain.usecase.GetEarningsSummaryUseCase
 import com.carenest.provider.earnings.domain.usecase.GetServiceEarningsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -13,6 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class EarningsViewModel @Inject constructor(
+    private val getEarningsSummaryUseCase: GetEarningsSummaryUseCase,
     private val getServiceEarningsUseCase: GetServiceEarningsUseCase
 ) : ViewModel(),
     StateHolder<EarningsUiState> by DefaultStateHolder(EarningsUiState()),
@@ -38,8 +40,8 @@ class EarningsViewModel @Inject constructor(
     private fun loadData() {
         updateState { copy(isLoading = true, isError = false, errorMessage = null) }
         viewModelScope.launch {
-            val summaryResult = getServiceEarningsUseCase.getSummary()
-            val listResult = getServiceEarningsUseCase.getEarningsList()
+            val summaryResult = getEarningsSummaryUseCase()
+            val listResult = getServiceEarningsUseCase()
 
             if (summaryResult.isSuccess && listResult.isSuccess) {
                 val summary = summaryResult.getOrThrow()
