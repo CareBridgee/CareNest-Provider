@@ -19,4 +19,7 @@ sealed interface AccountRoutes : NavKey {
 
     @Serializable
     data object RatingsAndReviews : AccountRoutes
+
+    @Serializable
+    data object Wallet : AccountRoutes
 }

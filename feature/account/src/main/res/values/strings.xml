@@ -21,6 +21,8 @@
     <string name="profile_menu_earnings_subtitle">View revenue &amp; service earnings</string>
     <string name="profile_menu_payouts">Payouts</string>
     <string name="profile_menu_payouts_subtitle">Payout history &amp; withdrawals</string>
+    <string name="profile_menu_wallet">Wallet</string>
+    <string name="profile_menu_wallet_subtitle">Payment methods</string>
     <string name="profile_menu_support">Support</string>
     <string name="profile_menu_support_subtitle">Help center and live chat</string>
     <string name="profile_menu_logout">Logout</string>

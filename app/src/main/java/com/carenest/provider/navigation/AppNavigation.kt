@@ -167,6 +167,7 @@ fun AppNavigation(
             onOpenSettings = { backStack.navigate(AccountRoutes.Settings) },
             onOpenEarnings = { backStack.navigate(providerEarningsStartRoute()) },
             onOpenPayouts = { backStack.navigate(providerPayoutsStartRoute()) },
+            onOpenWallet = { backStack.navigate(AccountRoutes.Wallet) },
             onOpenSupport = {
                 backStack.navigate(
                     ProviderInfoRoute(ProviderInfoDestination.CONTACT_SUPPORT),

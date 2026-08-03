@@ -21,6 +21,8 @@
     <string name="profile_menu_earnings_subtitle">عرض الإيرادات وأرباح الخدمات</string>
     <string name="profile_menu_payouts">المسحوبات</string>
     <string name="profile_menu_payouts_subtitle">سجل المسحوبات والتحويلات</string>
+    <string name="profile_menu_wallet">المحفظة</string>
+    <string name="profile_menu_wallet_subtitle">طريقة الدفع</string>
     <string name="profile_menu_support">الدعم</string>
     <string name="profile_menu_support_subtitle">مركز المساعدة والدردشة المباشرة</string>
     <string name="profile_menu_logout">تسجيل الخروج</string>

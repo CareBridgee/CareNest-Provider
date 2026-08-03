@@ -8,6 +8,7 @@ import com.carenest.provider.account.presentation.profilemenu.ProfileMenuRoute
 import com.carenest.provider.account.presentation.publicprofile.PublicProfileRoute
 import com.carenest.provider.account.presentation.reviews.RatingsAndReviewsRoute
 import com.carenest.provider.account.presentation.settings.SettingsRoute
+import com.carenest.provider.account.presentation.wallet.WalletRoute
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
@@ -25,6 +26,7 @@ val accountNavigationSerializers = SerializersModule {
             AccountRoutes.RatingsAndReviews::class,
             AccountRoutes.RatingsAndReviews.serializer(),
         )
+        subclass(AccountRoutes.Wallet::class, AccountRoutes.Wallet.serializer())
     }
 }
 
@@ -37,6 +39,7 @@ fun EntryProviderScope<NavKey>.providerAccountEntries(
     onOpenSettings: () -> Unit,
     onOpenEarnings: () -> Unit,
     onOpenPayouts: () -> Unit,
+    onOpenWallet: () -> Unit,
     onOpenSupport: () -> Unit,
     onLogout: () -> Unit,
     onNavigateBack: () -> Unit,
@@ -49,6 +52,7 @@ fun EntryProviderScope<NavKey>.providerAccountEntries(
             onOpenSettings = onOpenSettings,
             onOpenEarnings = onOpenEarnings,
             onOpenPayouts = onOpenPayouts,
+            onOpenWallet = onOpenWallet,
             onOpenSupport = onOpenSupport,
             onLogout = onLogout,
         )
@@ -67,6 +71,9 @@ fun EntryProviderScope<NavKey>.providerAccountEntries(
     }
     entry<AccountRoutes.RatingsAndReviews> {
         RatingsAndReviewsRoute(onNavigateBack = onNavigateBack)
+    }
+    entry<AccountRoutes.Wallet> {
+        WalletRoute(onNavigateBack = onNavigateBack)
     }
 }
 

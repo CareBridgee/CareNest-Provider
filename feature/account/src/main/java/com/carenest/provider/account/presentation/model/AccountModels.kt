@@ -18,6 +18,7 @@ enum class MenuItemId {
     Reviews,
     Earnings,
     Payouts,
+    Wallet,
     Support,
 }
 
