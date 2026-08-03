@@ -21,6 +21,8 @@ class ProfileMenuViewModel @Inject constructor() : ViewModel(),
             ProfileMenuIntent.SettingsClicked -> sendEffect(ProfileMenuEffect.OpenSettings)
             ProfileMenuIntent.AvailabilitySettingsClicked ->
                 sendEffect(ProfileMenuEffect.OpenSettings)
+            ProfileMenuIntent.EarningsClicked -> sendEffect(ProfileMenuEffect.OpenEarnings)
+            ProfileMenuIntent.PayoutsClicked -> sendEffect(ProfileMenuEffect.OpenPayouts)
             ProfileMenuIntent.WalletClicked -> sendEffect(ProfileMenuEffect.OpenWallet)
             ProfileMenuIntent.LogoutClicked -> sendEffect(ProfileMenuEffect.Logout)
             is ProfileMenuIntent.MenuItemClicked -> when (intent.id) {
@@ -28,6 +30,8 @@ class ProfileMenuViewModel @Inject constructor() : ViewModel(),
                 MenuItemId.Documents -> sendEffect(ProfileMenuEffect.OpenDocuments)
                 MenuItemId.Availability -> sendEffect(ProfileMenuEffect.OpenSettings)
                 MenuItemId.Reviews -> sendEffect(ProfileMenuEffect.OpenRatingsAndReviews)
+                MenuItemId.Earnings -> sendEffect(ProfileMenuEffect.OpenEarnings)
+                MenuItemId.Payouts -> sendEffect(ProfileMenuEffect.OpenPayouts)
                 MenuItemId.Wallet -> sendEffect(ProfileMenuEffect.OpenWallet)
                 MenuItemId.Support -> sendEffect(ProfileMenuEffect.OpenSupport)
             }

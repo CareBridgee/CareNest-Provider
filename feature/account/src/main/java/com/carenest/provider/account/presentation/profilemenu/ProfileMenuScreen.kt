@@ -45,6 +45,8 @@ fun ProfileMenuRoute(
     onOpenDocuments: () -> Unit,
     onOpenRatingsAndReviews: () -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenEarnings: () -> Unit,
+    onOpenPayouts: () -> Unit,
     onOpenWallet: () -> Unit,
     onOpenSupport: () -> Unit,
     onLogout: () -> Unit,
@@ -58,6 +60,8 @@ fun ProfileMenuRoute(
             ProfileMenuEffect.OpenDocuments -> onOpenDocuments()
             ProfileMenuEffect.OpenRatingsAndReviews -> onOpenRatingsAndReviews()
             ProfileMenuEffect.OpenSettings -> onOpenSettings()
+            ProfileMenuEffect.OpenEarnings -> onOpenEarnings()
+            ProfileMenuEffect.OpenPayouts -> onOpenPayouts()
             ProfileMenuEffect.OpenWallet -> onOpenWallet()
             ProfileMenuEffect.OpenSupport -> onOpenSupport()
             ProfileMenuEffect.Logout -> onLogout()
@@ -107,6 +111,8 @@ fun ProfileMenuContent(
                     onClick = {
                         onIntent(
                             when (item.id) {
+                                MenuItemId.Earnings -> ProfileMenuIntent.EarningsClicked
+                                MenuItemId.Payouts -> ProfileMenuIntent.PayoutsClicked
                                 MenuItemId.Wallet -> ProfileMenuIntent.WalletClicked
                                 MenuItemId.Availability ->
                                     ProfileMenuIntent.AvailabilitySettingsClicked

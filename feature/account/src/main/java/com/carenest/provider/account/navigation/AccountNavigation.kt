@@ -9,8 +9,6 @@ import com.carenest.provider.account.presentation.publicprofile.PublicProfileRou
 import com.carenest.provider.account.presentation.reviews.RatingsAndReviewsRoute
 import com.carenest.provider.account.presentation.settings.SettingsRoute
 import com.carenest.provider.account.presentation.wallet.WalletRoute
-import com.carenest.provider.core.navigation.goBack
-import com.carenest.provider.core.navigation.navigate
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
@@ -35,37 +33,47 @@ val accountNavigationSerializers = SerializersModule {
 fun providerAccountStartRoute(): NavKey = AccountRoutes.ProfileMenu
 
 fun EntryProviderScope<NavKey>.providerAccountEntries(
-    backStack: SnapshotStateList<NavKey>,
-    onOpenSupport: () -> Unit = {},
+    onOpenPublicProfile: () -> Unit,
+    onOpenDocuments: () -> Unit,
+    onOpenRatingsAndReviews: () -> Unit,
+    onOpenSettings: () -> Unit,
+    onOpenEarnings: () -> Unit,
+    onOpenPayouts: () -> Unit,
+    onOpenWallet: () -> Unit,
+    onOpenSupport: () -> Unit,
     onLogout: () -> Unit,
+    onNavigateBack: () -> Unit,
 ) {
     entry<AccountRoutes.ProfileMenu> {
         ProfileMenuRoute(
-            onOpenPublicProfile = { backStack.navigate(AccountRoutes.PublicProfile) },
-            onOpenDocuments = { backStack.navigate(AccountRoutes.ProfessionalDocuments) },
-            onOpenRatingsAndReviews = { backStack.navigate(AccountRoutes.RatingsAndReviews) },
-            onOpenSettings = { backStack.navigate(AccountRoutes.Settings) },
-            onOpenWallet = { backStack.navigate(AccountRoutes.Wallet) },
+            onOpenPublicProfile = onOpenPublicProfile,
+            onOpenDocuments = onOpenDocuments,
+            onOpenRatingsAndReviews = onOpenRatingsAndReviews,
+            onOpenSettings = onOpenSettings,
+            onOpenEarnings = onOpenEarnings,
+            onOpenPayouts = onOpenPayouts,
+            onOpenWallet = onOpenWallet,
             onOpenSupport = onOpenSupport,
             onLogout = onLogout,
         )
     }
     entry<AccountRoutes.PublicProfile> {
         PublicProfileRoute(
-            onNavigateBack = { backStack.goBack() },
-            onOpenSettings = { backStack.navigate(AccountRoutes.Settings) },
+            onNavigateBack = onNavigateBack,
+            onOpenSettings = onOpenSettings,
         )
     }
     entry<AccountRoutes.ProfessionalDocuments> {
-        ProfessionalDocumentsRoute(onNavigateBack = { backStack.goBack() })
+        ProfessionalDocumentsRoute(onNavigateBack = onNavigateBack)
     }
     entry<AccountRoutes.Settings> {
-        SettingsRoute(onNavigateBack = { backStack.goBack() })
+        SettingsRoute(onNavigateBack = onNavigateBack)
     }
     entry<AccountRoutes.RatingsAndReviews> {
-        RatingsAndReviewsRoute(onNavigateBack = { backStack.goBack() })
+        RatingsAndReviewsRoute(onNavigateBack = onNavigateBack)
     }
     entry<AccountRoutes.Wallet> {
-        WalletRoute(onNavigateBack = { backStack.goBack() })
+        WalletRoute(onNavigateBack = onNavigateBack)
     }
 }
+
