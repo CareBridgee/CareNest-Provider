@@ -51,6 +51,7 @@ dependencies {
     implementation(project(":feature:account"))
     implementation(project(":feature:earnings"))
     implementation(project(":feature:payouts"))
+    implementation(project(":feature:chat"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.navigation3)

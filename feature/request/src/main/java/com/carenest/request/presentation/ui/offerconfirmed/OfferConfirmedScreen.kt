@@ -55,6 +55,7 @@ fun OfferConfirmedScreen(
     onViewDetails: (String) -> Unit,
     onCancelled: () -> Unit,
     onShowQrCode: () -> Unit,
+    onOpenChat: (String) -> Unit,
     viewModel: OfferConfirmedViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -80,7 +81,7 @@ fun OfferConfirmedScreen(
                 context.startActivity(intent)
             }
             is OfferConfirmedEffect.OpenChat -> {
-                // TODO: Handle chat
+                onOpenChat(effect.patientId)
             }
         }
     }
