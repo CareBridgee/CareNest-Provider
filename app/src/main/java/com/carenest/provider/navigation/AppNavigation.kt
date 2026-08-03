@@ -49,8 +49,11 @@ import com.carenest.provider.designsystem.components.bottomnav.BottomNavItem
 import com.carenest.provider.designsystem.components.bottomnav.SPBottomNavigation
 import com.carenest.provider.designsystem.R as DesignSystemR
 import com.carenest.provider.designsystem.theme.Theme
+import com.carenest.provider.earnings.navigation.EarningsRoutes
 import com.carenest.provider.earnings.navigation.earningsSerializers
 import com.carenest.provider.earnings.navigation.providerEarningsEntries
+import com.carenest.provider.earnings.navigation.providerEarningsStartRoute
+import com.carenest.provider.payouts.navigation.PayoutsRoutes
 import com.carenest.provider.payouts.navigation.payoutsSerializers
 import com.carenest.provider.payouts.navigation.providerPayoutsEntries
 import com.carenest.provider.payouts.navigation.providerPayoutsStartRoute
@@ -158,7 +161,12 @@ fun AppNavigation(
             }
         )
         providerAccountEntries(
-            backStack = backStack,
+            onOpenPublicProfile = { backStack.navigate(AccountRoutes.PublicProfile) },
+            onOpenDocuments = { backStack.navigate(AccountRoutes.ProfessionalDocuments) },
+            onOpenRatingsAndReviews = { backStack.navigate(AccountRoutes.RatingsAndReviews) },
+            onOpenSettings = { backStack.navigate(AccountRoutes.Settings) },
+            onOpenEarnings = { backStack.navigate(providerEarningsStartRoute()) },
+            onOpenPayouts = { backStack.navigate(providerPayoutsStartRoute()) },
             onOpenSupport = {
                 backStack.navigate(
                     ProviderInfoRoute(ProviderInfoDestination.CONTACT_SUPPORT),
@@ -166,6 +174,9 @@ fun AppNavigation(
             },
             onLogout = {
                 backStack.replaceWith(providerAuthStartRoute())
+            },
+            onNavigateBack = {
+                backStack.goBack()
             },
         )
 
@@ -217,9 +228,9 @@ fun AppNavigation(
 
     val currentRoute = backStack.lastOrNull()
     val isAuthenticatedRoute =
-        currentRoute is HomeRoutes || currentRoute is AccountRoutes
+        currentRoute is HomeRoutes || currentRoute is AccountRoutes || currentRoute is EarningsRoutes || currentRoute is PayoutsRoutes
     val selectedBottomNavIndex = when (currentRoute) {
-        AccountRoutes.Wallet -> 4
+        is EarningsRoutes, is PayoutsRoutes -> 4
         is AccountRoutes -> 2
         else -> 0
     }
@@ -247,8 +258,8 @@ fun AppNavigation(
                             2 -> if (currentRoute != AccountRoutes.ProfileMenu) {
                                 backStack.replaceWith(AccountRoutes.ProfileMenu)
                             }
-                            4 -> if (currentRoute != AccountRoutes.Wallet) {
-                                backStack.replaceWith(AccountRoutes.Wallet)
+                            4 -> if (currentRoute !is EarningsRoutes) {
+                                backStack.replaceWith(providerEarningsStartRoute())
                             }
                         }
                     },
@@ -289,7 +300,7 @@ private fun ProviderBottomNavigation(
             iconRes = DesignSystemR.drawable.ic_work,
         ),
         BottomNavItem(
-            label = stringResource(AccountR.string.bottom_nav_wallet),
+            label = stringResource(AccountR.string.bottom_nav_earnings),
             iconRes = DesignSystemR.drawable.ic_wallet,
         ),
     )
