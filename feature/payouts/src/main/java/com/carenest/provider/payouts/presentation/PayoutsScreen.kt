@@ -85,14 +85,6 @@ fun PayoutsScreenContent(
     onIntent: (PayoutsIntent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val navItems = listOf(
-        BottomNavItem(label = stringResource(com.carenest.provider.payouts.R.string.nav_home), iconRes = R.drawable.ic_home),
-        BottomNavItem(label = stringResource(com.carenest.provider.payouts.R.string.nav_support), iconRes = R.drawable.ic_contact),
-        BottomNavItem(label = stringResource(com.carenest.provider.payouts.R.string.nav_profile), iconRes = R.drawable.ic_profile),
-        BottomNavItem(label = stringResource(com.carenest.provider.payouts.R.string.nav_active_jobs), iconRes = R.drawable.ic_work),
-        BottomNavItem(label = stringResource(com.carenest.provider.payouts.R.string.nav_wallet), iconRes = R.drawable.ic_wallet)
-    )
-
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = Theme.colors.backGround,
@@ -105,13 +97,6 @@ fun PayoutsScreenContent(
                 trailingAvatarUrl = "https://picsum.photos/200/300"
             )
         },
-        bottomBar = {
-            SPBottomNavigation(
-                items = navItems,
-                selectedIndex = state.selectedTab.coerceIn(0, navItems.lastIndex),
-                onItemSelected = { index -> onIntent(PayoutsIntent.TabSelected(index)) }
-            )
-        }
     ) { innerPadding ->
         Column(
             modifier = Modifier

@@ -70,25 +70,6 @@ fun HomeContent(
     onIntent: (HomeIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val navItems = listOf(
-        BottomNavItem(
-            label = stringResource(R.string.nav_home),
-            iconRes = com.carenest.provider.designsystem.R.drawable.ic_home,
-        ),
-        BottomNavItem(
-            label = stringResource(R.string.nav_services),
-            iconRes = com.carenest.provider.designsystem.R.drawable.ic_services,
-        ),
-        BottomNavItem(
-            label = stringResource(R.string.nav_booking),
-            iconRes = com.carenest.provider.designsystem.R.drawable.ic_booking,
-        ),
-        BottomNavItem(
-            label = stringResource(R.string.nav_profile),
-            iconRes = com.carenest.provider.designsystem.R.drawable.ic_profile,
-        ),
-    )
-
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = Theme.colors.backGround,
@@ -101,13 +82,6 @@ fun HomeContent(
                     .padding(horizontal = Theme.spacing.medium)
             )
         },
-        bottomBar = {
-            SPBottomNavigation(
-                items = navItems,
-                selectedIndex = state.selectedTab,
-                onItemSelected = { index -> onIntent(HomeIntent.TabSelected(index)) },
-            )
-        }
     ) { innerPadding ->
         Column(
             modifier = Modifier
