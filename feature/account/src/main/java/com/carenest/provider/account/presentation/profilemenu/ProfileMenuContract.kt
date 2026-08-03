@@ -15,7 +15,8 @@ sealed interface ProfileMenuIntent {
     data class MenuItemClicked(val id: MenuItemId) : ProfileMenuIntent
     data object SettingsClicked : ProfileMenuIntent
     data object AvailabilitySettingsClicked : ProfileMenuIntent
-    data object WalletClicked : ProfileMenuIntent
+    data object EarningsClicked : ProfileMenuIntent
+    data object PayoutsClicked : ProfileMenuIntent
     data object LogoutClicked : ProfileMenuIntent
 }
 
@@ -23,7 +24,8 @@ sealed interface ProfileMenuEffect {
     data object OpenPublicProfile : ProfileMenuEffect
     data object OpenDocuments : ProfileMenuEffect
     data object OpenRatingsAndReviews : ProfileMenuEffect
-    data object OpenWallet : ProfileMenuEffect
+    data object OpenEarnings : ProfileMenuEffect
+    data object OpenPayouts : ProfileMenuEffect
     data object OpenSupport : ProfileMenuEffect
     data object OpenSettings : ProfileMenuEffect
     data object Logout : ProfileMenuEffect
@@ -56,10 +58,16 @@ private val sampleProfileMenuItems = listOf(
         DesignSystemR.drawable.ic_account_reviews,
     ),
     MenuItemUiModel(
-        MenuItemId.Wallet,
-        R.string.profile_menu_wallet,
-        R.string.profile_menu_wallet_subtitle,
-        DesignSystemR.drawable.ic_account_wallet,
+        MenuItemId.Earnings,
+        R.string.profile_menu_earnings,
+        R.string.profile_menu_earnings_subtitle,
+        DesignSystemR.drawable.ic_wallet,
+    ),
+    MenuItemUiModel(
+        MenuItemId.Payouts,
+        R.string.profile_menu_payouts,
+        R.string.profile_menu_payouts_subtitle,
+        DesignSystemR.drawable.ic_document_text,
     ),
     MenuItemUiModel(
         MenuItemId.Support,

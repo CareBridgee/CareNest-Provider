@@ -260,54 +260,6 @@ fun RatingsAndReviewsLoadingSkeleton(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun WalletLoadingSkeleton(modifier: Modifier = Modifier) {
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(Theme.spacing.medium),
-        verticalArrangement = Arrangement.spacedBy(Theme.spacing.medium),
-    ) {
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(Modifier.weight(1f)) {
-                    ShimmerLine(.56f, 24.dp)
-                    Spacer(Modifier.height(Theme.spacing.small))
-                    ShimmerLine(.8f, 14.dp)
-                }
-                ShimmerBlock(Modifier.width(92.dp).height(32.dp), CircleShape)
-            }
-        }
-        item {
-            ShimmerLine(.34f, 14.dp)
-            Spacer(Modifier.height(Theme.spacing.small))
-            PrimaryPayoutCardSkeleton()
-        }
-        item {
-            Row(Modifier.fillMaxWidth()) {
-                ShimmerLine(.45f, 14.dp, Modifier.weight(1f))
-                ShimmerBlock(Modifier.width(58.dp).height(14.dp))
-            }
-        }
-        repeat(2) {
-            item { MenuRowSkeleton() }
-        }
-        item {
-            SkeletonSurface {
-                ShimmerLine(.46f, 16.dp)
-                Spacer(Modifier.height(Theme.spacing.medium))
-                ShimmerLine(1f, 12.dp)
-                Spacer(Modifier.height(8.dp))
-                ShimmerLine(.92f, 12.dp)
-                Spacer(Modifier.height(8.dp))
-                ShimmerLine(.7f, 12.dp)
-            }
-        }
-    }
-}
-
-@Composable
 private fun MenuRowSkeleton() {
     SkeletonSurface(
         contentPadding = PaddingValues(
@@ -426,51 +378,6 @@ private fun RatingDistributionSkeleton() {
         )
         Spacer(Modifier.width(Theme.spacing.small))
         ShimmerBlock(Modifier.width(34.dp).height(12.dp))
-    }
-}
-
-@Composable
-private fun PrimaryPayoutCardSkeleton() {
-    SkeletonSurface {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            ShimmerBlock(Modifier.size(48.dp), Theme.shapes.medium)
-            Spacer(Modifier.width(Theme.spacing.medium))
-            Column(Modifier.weight(1f)) {
-                ShimmerLine(.62f, 18.dp)
-                Spacer(Modifier.height(6.dp))
-                ShimmerLine(.78f, 13.dp)
-            }
-        }
-        Spacer(Modifier.height(Theme.spacing.large))
-        Row(Modifier.fillMaxWidth()) {
-            Column(Modifier.weight(1f)) {
-                ShimmerLine(.48f, 12.dp)
-                Spacer(Modifier.height(6.dp))
-                ShimmerLine(.7f, 18.dp)
-            }
-            Column(
-                horizontalAlignment = Alignment.End,
-                modifier = Modifier.weight(.7f),
-            ) {
-                ShimmerLine(.5f, 12.dp)
-                Spacer(Modifier.height(6.dp))
-                ShimmerBlock(Modifier.width(76.dp).height(26.dp), CircleShape)
-            }
-        }
-        Spacer(Modifier.height(Theme.spacing.large))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(Theme.spacing.small),
-        ) {
-            repeat(2) {
-                ShimmerBlock(
-                    Modifier
-                        .weight(1f)
-                        .height(48.dp),
-                    Theme.shapes.large,
-                )
-            }
-        }
     }
 }
 

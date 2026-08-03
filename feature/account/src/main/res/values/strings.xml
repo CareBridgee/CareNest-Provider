@@ -17,8 +17,10 @@
     <string name="profile_menu_availability_subtitle">Working hours &amp; block dates</string>
     <string name="profile_menu_reviews">Reviews</string>
     <string name="profile_menu_reviews_subtitle">128 patient testimonials</string>
-    <string name="profile_menu_wallet">Wallet</string>
-    <string name="profile_menu_wallet_subtitle">Payment method</string>
+    <string name="profile_menu_earnings">Earnings</string>
+    <string name="profile_menu_earnings_subtitle">View revenue &amp; service earnings</string>
+    <string name="profile_menu_payouts">Payouts</string>
+    <string name="profile_menu_payouts_subtitle">Payout history &amp; withdrawals</string>
     <string name="profile_menu_support">Support</string>
     <string name="profile_menu_support_subtitle">Help center and live chat</string>
     <string name="profile_menu_logout">Logout</string>
@@ -117,5 +119,5 @@
     <string name="bottom_nav_support">Support</string>
     <string name="bottom_nav_profile">Profile</string>
     <string name="bottom_nav_active_jobs">Active Jobs</string>
-    <string name="bottom_nav_wallet">Wallet</string>
+    <string name="bottom_nav_earnings">Earnings</string>
 </resources>
