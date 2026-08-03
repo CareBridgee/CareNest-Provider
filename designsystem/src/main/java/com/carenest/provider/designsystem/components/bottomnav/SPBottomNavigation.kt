@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.carenest.provider.designsystem.R
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 data class BottomNavItem(
     val label: String,
@@ -47,6 +48,7 @@ fun SPBottomNavigation(
         modifier = modifier
             .fillMaxWidth()
             .background(Theme.colors.surface)
+            .navigationBarsPadding()
             .padding(horizontal = 8.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
