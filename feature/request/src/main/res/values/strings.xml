@@ -119,4 +119,10 @@
     <string name="offer_confirmed_cancellation_info">You can cancel within 2 minutes after the visit starts. After that, a cancellation fee will apply.</string>
     <string name="service">Service</string>
     <string name="distance">Distance</string>
+
+    <!-- Scan QR -->
+    <string name="scan_qr_title">Scan QR Code</string>
+    <string name="scan_qr_instruction">Align the QR code within the frame to scan</string>
+    <string name="scan_qr_scanning">Scanning…</string>
+    <string name="scan_qr_retry">Try Again</string>
 </resources>
