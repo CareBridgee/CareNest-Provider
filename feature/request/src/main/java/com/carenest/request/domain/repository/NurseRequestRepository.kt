@@ -13,4 +13,5 @@ interface NurseRequestsRepository {
         reason: CancellationReason,
         note: String,
     ): Boolean
+    suspend fun completeRequest(serviceRequestId: String, visitCode: String): Boolean
 }
