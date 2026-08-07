@@ -53,7 +53,10 @@ fun EntryProviderScope<NavKey>.providerRequestEntries(
             onShowQrCode = {
                 // Handle QR code display
             },
-            onOpenChat = onOpenChat
+            onOpenChat = onOpenChat,
+            onVisitCompleted = { requestId ->
+                backStack.navigate(RequestRoutes.VisitCompleted(requestId))
+            },
         )
     }
 
@@ -61,7 +64,10 @@ fun EntryProviderScope<NavKey>.providerRequestEntries(
         OfferDetailsScreen(
             requestId = route.requestId,
             onBack = { backStack.goBack() },
-            onOpenChat = onOpenChat
+            onOpenChat = onOpenChat,
+            onVisitCompleted = { requestId ->
+                backStack.navigate(RequestRoutes.VisitCompleted(requestId))
+            },
         )
     }
 
