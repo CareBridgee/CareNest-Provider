@@ -1,10 +1,10 @@
 package com.carenest.request.data.mapper
 
+import com.carenest.request.data.remote.dto.AddressSummaryDto
 import com.carenest.request.data.remote.dto.NurseOfferDto
-import com.carenest.request.data.remote.dto.PatientAddressDto
-import com.carenest.request.data.remote.dto.PatientProfileDto
 import com.carenest.request.data.remote.dto.PatientReportDto
 import com.carenest.request.data.remote.dto.ServiceRequestDetailsDto
+import com.carenest.request.data.remote.dto.ServiceRequestNurseProfileDto
 import com.carenest.request.data.remote.dto.VisitCodeDto
 import com.carenest.request.domain.model.Offer
 import com.carenest.request.domain.model.PatientInfo
@@ -19,40 +19,55 @@ import kotlinx.serialization.json.intOrNull
 fun ServiceRequestDetailsDto.toDomainOffer(
     requestedServiceRequestId: String,
     acceptedOffer: NurseOfferDto?,
-    patientProfile: PatientProfileDto?,
+    assignedProfile: ServiceRequestNurseProfileDto?,
     patientReport: PatientReportDto?,
-    patientAddress: PatientAddressDto?,
 ): Offer {
     val summary = profile
-    val profileId = summary?.id.orEmpty()
+    val patient = assignedProfile?.patient
+    val profileId = patient?.profileId ?: summary?.id.orEmpty()
     val patientName = listOf(
-        patientProfile?.firstName ?: summary?.firstName,
-        patientProfile?.lastName ?: summary?.lastName,
+        patient?.firstName ?: summary?.firstName,
+        patient?.lastName ?: summary?.lastName,
     ).joinNonBlank()
 
     return Offer(
         offerId = serviceRequestId ?: requestedServiceRequestId,
         nurseOfferId = acceptedOffer?.id,
-        reservationId = reservationId,
-        serviceRequestStatus = status,
+        // The latest service-request contracts do not expose a reservation ID.
+        reservationId = null,
+        serviceRequestStatus = status ?: assignedProfile?.status,
         patientInfo = PatientInfo(
             id = profileId,
             name = patientName,
             image = "",
             distanceMiles = null,
-            age = patientProfile?.dateOfBirth.toAgeOrNull(),
-            phone = summary?.phoneNumber.orEmpty(),
-            addressLine = patientAddress.addressLine(),
-            addressDetail = patientAddress.addressDetail(),
-            summery = patientReport?.report ?: serviceDescription.orEmpty(),
+            age = patient?.dateOfBirth.toAgeOrNull(),
+            phone = (assignedProfile?.patientPhoneNumber ?: summary?.phoneNumber).orEmpty(),
+            addressLine = assignedProfile?.address.addressLine(),
+            addressDetail = assignedProfile?.address.addressDetail(),
+            summery = patientReport?.report
+                ?: assignedProfile?.serviceDescription
+                ?: serviceDescription.orEmpty(),
         ),
-        visitDate = (acceptedOffer?.proposedDate ?: preferredDate).orPlaceholder(),
-        visitTime = (acceptedOffer?.proposedTime ?: preferredTime).toDisplayTime().orPlaceholder(),
+        visitDate = (
+            acceptedOffer?.proposedDate
+                ?: assignedProfile?.preferredDate
+                ?: preferredDate
+            ).orPlaceholder(),
+        visitTime = (
+            acceptedOffer?.proposedTime
+                ?: assignedProfile?.preferredTime
+                ?: preferredTime
+            ).toDisplayTime().orPlaceholder(),
         distanceMiles = null,
         estimatedArrival = PLACEHOLDER,
         estimatedDuration = durationMinutes?.let { "$it mins" } ?: PLACEHOLDER,
-        totalAmount = (acceptedOffer?.proposedPrice ?: serviceType?.basePrice)?.toFloat(),
-        serviceType = serviceType?.name.orEmpty(),
+        totalAmount = (
+            acceptedOffer?.proposedPrice
+                ?: assignedProfile?.estimatedPrice
+                ?: serviceType?.basePrice
+            )?.toFloat(),
+        serviceType = (serviceType?.name ?: assignedProfile?.serviceName).orEmpty(),
         serviceImage = "",
     )
 }
@@ -89,12 +104,12 @@ private fun List<String?>.joinNonBlank(): String =
 private fun List<String?>.joinNonBlankAddressParts(): String =
     mapNotNull { it?.trim()?.takeIf(String::isNotEmpty) }.joinToString(", ")
 
-private fun PatientAddressDto?.addressLine(): String = listOf(
+private fun AddressSummaryDto?.addressLine(): String = listOf(
     this?.buildingNumber,
     this?.street,
 ).joinNonBlank()
 
-private fun PatientAddressDto?.addressDetail(): String = listOf(
+private fun AddressSummaryDto?.addressDetail(): String = listOf(
     this?.apartmentNumber,
     this?.area,
     this?.city,
@@ -127,4 +142,4 @@ private fun String?.toAgeOrNull(): Int? {
 
 private fun String?.orPlaceholder(): String = this?.takeIf(String::isNotBlank) ?: PLACEHOLDER
 
-private const val PLACEHOLDER = "—"
+private const val PLACEHOLDER = "\u2014"

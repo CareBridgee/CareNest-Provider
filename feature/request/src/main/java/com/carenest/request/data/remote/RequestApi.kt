@@ -15,9 +15,6 @@ class RequestApi @Inject constructor(
     suspend fun getServiceRequestDetails(serviceRequestId: String): HttpResponse =
         httpClient.get("/api/v1/service-requests/$serviceRequestId")
 
-    suspend fun getOffer(offerId: String): HttpResponse =
-        httpClient.get("/api/v1/nurse-offers/$offerId")
-
     suspend fun acceptOffer(offerId: String): HttpResponse =
         httpClient.patch("/api/v1/nurse-offers/$offerId/accept")
 
@@ -32,12 +29,10 @@ class RequestApi @Inject constructor(
             setBody(CompleteServiceRequestDto(visitCode))
         }
 
-    suspend fun getPatientProfile(profileId: String): HttpResponse =
-        httpClient.get("/api/v1/profiles/$profileId")
+    suspend fun getServiceRequestProfile(serviceRequestId: String): HttpResponse =
+        httpClient.get("/api/v1/service-requests/$serviceRequestId/profile")
 
     suspend fun getPatientReport(profileId: String): HttpResponse =
         httpClient.get("/api/v1/profiles/report/$profileId/report")
 
-    suspend fun getPatientAddress(profileId: String): HttpResponse =
-        httpClient.get("/api/v1/profiles/$profileId/address")
 }

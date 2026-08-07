@@ -1,12 +1,13 @@
 package com.carenest.request.data.mapper
 
+import com.carenest.request.data.remote.dto.AddressSummaryDto
 import com.carenest.request.data.remote.dto.NurseOfferDto
 import com.carenest.request.data.remote.dto.NurseSummaryDto
-import com.carenest.request.data.remote.dto.PatientAddressDto
-import com.carenest.request.data.remote.dto.PatientProfileDto
+import com.carenest.request.data.remote.dto.PatientMedicalSummaryDto
 import com.carenest.request.data.remote.dto.PatientReportDto
 import com.carenest.request.data.remote.dto.ProfileSummaryDto
 import com.carenest.request.data.remote.dto.ServiceRequestDetailsDto
+import com.carenest.request.data.remote.dto.ServiceRequestNurseProfileDto
 import com.carenest.request.data.remote.dto.ServiceTypeSummaryDto
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
@@ -27,7 +28,6 @@ class RequestMapperTest {
             preferredDate = "2026-08-09",
             preferredTime = Json.parseToJsonElement("{\"hour\":14,\"minute\":30}"),
             durationMinutes = 45,
-            reservationId = null,
         )
         val offer = NurseOfferDto(
             id = "offer-id",
@@ -40,26 +40,32 @@ class RequestMapperTest {
         val result = details.toDomainOffer(
             requestedServiceRequestId = "fallback-id",
             acceptedOffer = offer,
-            patientProfile = PatientProfileDto(
-                firstName = "Amina",
-                lastName = "Hassan",
-                dateOfBirth = "2000-01-01",
+            assignedProfile = ServiceRequestNurseProfileDto(
+                patient = PatientMedicalSummaryDto(
+                    profileId = "profile-id",
+                    firstName = "Amina",
+                    lastName = "Hassan",
+                    dateOfBirth = "2000-01-01",
+                ),
+                patientPhoneNumber = "+201111111111",
+                address = AddressSummaryDto(
+                    buildingNumber = "12",
+                    street = "Nile Street",
+                    apartmentNumber = "4B",
+                    area = "Dokki",
+                    city = "Giza",
+                    country = "Egypt",
+                ),
             ),
             patientReport = PatientReportDto(report = "Patient report"),
-            patientAddress = PatientAddressDto(
-                buildingNumber = "12",
-                street = "Nile Street",
-                apartmentNumber = "4B",
-                area = "Dokki",
-                city = "Giza",
-                country = "Egypt",
-            ),
         )
 
         assertEquals("request-id", result.offerId)
         assertEquals("offer-id", result.nurseOfferId)
         assertEquals(null, result.reservationId)
         assertEquals("Amina Hassan", result.patientInfo.name)
+        assertEquals("+201111111111", result.patientInfo.phone)
+        assertEquals("Patient report", result.patientInfo.summery)
         assertEquals("15:45", result.visitTime)
         assertEquals("12 Nile Street", result.patientInfo.addressLine)
         assertEquals("4B, Dokki, Giza, Egypt", result.patientInfo.addressDetail)

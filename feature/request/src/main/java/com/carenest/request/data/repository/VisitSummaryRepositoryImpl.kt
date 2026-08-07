@@ -16,10 +16,7 @@ class VisitSummaryRepositoryImpl @Inject constructor(
         val embeddedAcceptedOffer = details.offers.firstOrNull {
             it.status.equals("ACCEPTED", ignoreCase = true)
         } ?: details.offers.singleOrNull()
-        val acceptedOffer = embeddedAcceptedOffer?.id?.let { offerId ->
-            runCatching { remoteDataSource.getOffer(offerId) }.getOrNull()
-        } ?: embeddedAcceptedOffer
-        details.toVisitSummary(requestId, acceptedOffer)
+        details.toVisitSummary(requestId, embeddedAcceptedOffer)
     }
 
     override suspend fun submitRating(

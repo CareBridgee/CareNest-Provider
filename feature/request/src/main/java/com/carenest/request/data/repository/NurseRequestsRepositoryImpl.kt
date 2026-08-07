@@ -32,29 +32,25 @@ class NurseRequestsRepositoryImpl @Inject constructor(
             it.status.equals("ACCEPTED", ignoreCase = true)
         } ?: details.offers.singleOrNull()
 
-        val offerDeferred = async {
-            embeddedAcceptedOffer?.id?.let { offerId ->
-                runCatching { remoteDataSource.getOffer(offerId) }.getOrNull()
-            } ?: embeddedAcceptedOffer
+        val assignedProfileDeferred = async {
+            runCatching { remoteDataSource.getServiceRequestProfile(requestId) }.getOrNull()
         }
-
-        val profileId = details.profile?.id
-        val profileDeferred = async {
-            profileId?.let { runCatching { remoteDataSource.getPatientProfile(it) }.getOrNull() }
+        val detailsProfileId = details.profile?.id
+        val reportDeferred = detailsProfileId?.let { profileId ->
+            async {
+                runCatching { remoteDataSource.getPatientReport(profileId) }.getOrNull()
+            }
         }
-        val reportDeferred = async {
-            profileId?.let { runCatching { remoteDataSource.getPatientReport(it) }.getOrNull() }
-        }
-        val addressDeferred = async {
-            profileId?.let { runCatching { remoteDataSource.getPatientAddress(it) }.getOrNull() }
+        val assignedProfile = assignedProfileDeferred.await()
+        val report = reportDeferred?.await() ?: assignedProfile?.patient?.profileId?.let { profileId ->
+            runCatching { remoteDataSource.getPatientReport(profileId) }.getOrNull()
         }
 
         details.toDomainOffer(
             requestedServiceRequestId = requestId,
-            acceptedOffer = offerDeferred.await(),
-            patientProfile = profileDeferred.await(),
-            patientReport = reportDeferred.await(),
-            patientAddress = addressDeferred.await(),
+            acceptedOffer = embeddedAcceptedOffer,
+            assignedProfile = assignedProfile,
+            patientReport = report,
         )
     }
 
