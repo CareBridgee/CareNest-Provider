@@ -1,8 +1,5 @@
 package com.carenest.request.data.datasource
 
-import com.carenest.request.domain.model.CancellationReason
-import com.carenest.request.domain.model.Offer
-import com.carenest.request.domain.model.PatientInfo
 import com.carenest.request.domain.model.Request
 import com.carenest.request.domain.model.RequestStatus
 import kotlinx.coroutines.delay
@@ -44,38 +41,4 @@ class FakeNurseRequestsDataSource @Inject constructor() : NurseRequestsDataSourc
         return willAccept to acceptAtSecond
     }
 
-    override suspend fun getRequestContract(requestId: String): Offer {
-        delay(800)
-        return Offer(
-            offerId = requestId,
-            visitDate = "Today, Nov 24",
-            visitTime = "2:30 PM",
-            distanceMiles = 2.4f,
-            estimatedArrival = "10:30 AM",
-            estimatedDuration = "45 mins",
-            patientInfo = PatientInfo(
-                id = "pat-001",
-                name = "Sarah Mitchell",
-                age = 72,
-                image = "",
-                phone = "+1 (310) 555-0142",
-                addressLine = "1224 Oakwood Heights",
-                addressDetail = "Apt 4B, Beverly Hills, CA 90210",
-                summery = "Patient needs wound care post-surgery.",
-                distanceMiles = 2.4f
-            ),
-            totalAmount = 95f,
-            serviceType = "Wound Care",
-            serviceImage = ""
-        )
-    }
-
-    override suspend fun cancelRequest(
-        requestId: String,
-        reason: CancellationReason,
-        note: String
-    ): Boolean {
-        delay(500)
-        return true
-    }
 }
