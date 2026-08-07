@@ -22,7 +22,7 @@ import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.request.R
 
 @Composable
-fun TotalAmountCard(amount: Double, modifier: Modifier = Modifier) {
+fun TotalAmountCard(amount: Double?, modifier: Modifier = Modifier) {
 
     Column(
         modifier = modifier
@@ -44,7 +44,9 @@ fun TotalAmountCard(amount: Double, modifier: Modifier = Modifier) {
                 color = Theme.colors.primary,
             )
             Text(
-                text = stringResource(R.string.visit_completed_total_amount_value, amount),
+                text = amount?.let {
+                    stringResource(R.string.visit_completed_total_amount_value, it)
+                } ?: stringResource(R.string.not_available),
                 style = Theme.typography.hint.large.copy(
                     fontWeight = FontWeight.SemiBold
                 ),

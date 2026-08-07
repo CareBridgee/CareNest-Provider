@@ -3,6 +3,9 @@ package com.carenest.request.presentation.ui.details
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.carenest.request.domain.usecase.GetRequestContractUseCase
+import com.carenest.request.R
+import com.carenest.request.presentation.UiText
+import com.carenest.request.presentation.toUiText
 import com.carenest.provider.core.mvi.DefaultEffectPublisher
 import com.carenest.provider.core.mvi.DefaultStateHolder
 import com.carenest.provider.core.mvi.EffectPublisher
@@ -25,27 +28,46 @@ class OfferDetailsViewModel @Inject constructor(
             is OfferDetailsIntent.Load -> loadContract(intent.requestId)
             OfferDetailsIntent.BackClicked -> sendEffect(OfferDetailsEffect.NavigateBack)
             OfferDetailsIntent.CallClicked -> {
-                currentState.offer?.patientInfo?.phone?.let {
-                    sendEffect(OfferDetailsEffect.InitiateCall(it))
+                val phone = currentState.offer?.patientInfo?.phone
+                if (phone.isNullOrBlank()) {
+                    sendEffect(
+                        OfferDetailsEffect.ShowError(
+                            UiText.StringResource(R.string.patient_phone_unavailable)
+                        )
+                    )
+                } else {
+                    sendEffect(OfferDetailsEffect.InitiateCall(phone))
                 }
             }
             OfferDetailsIntent.MessageClicked -> {
-                currentState.offer?.patientInfo?.id?.let {
-                    sendEffect(OfferDetailsEffect.OpenChat(it))
+                val reservationId = currentState.offer?.reservationId
+                if (reservationId.isNullOrBlank()) {
+                    sendEffect(
+                        OfferDetailsEffect.ShowError(
+                            UiText.StringResource(R.string.chat_reservation_unavailable)
+                        )
+                    )
+                } else {
+                    sendEffect(OfferDetailsEffect.OpenChat(reservationId))
                 }
             }
             OfferDetailsIntent.CopyAddressClicked -> {
-                val address = "${currentState.offer?.patientInfo?.addressLine}, ${currentState.offer?.patientInfo?.addressDetail}"
-                sendEffect(OfferDetailsEffect.CopyToClipboard(address))
+                withAddress { sendEffect(OfferDetailsEffect.CopyToClipboard(it)) }
             }
             OfferDetailsIntent.ViewSummaryClicked -> {
-                currentState.offer?.patientInfo?.summery?.let {
-                    sendEffect(OfferDetailsEffect.ShowSummary(it))
+                val summary = currentState.offer?.patientInfo?.summery
+                if (summary.isNullOrBlank()) {
+                    sendEffect(
+                        OfferDetailsEffect.ShowError(
+                            UiText.StringResource(R.string.patient_report_unavailable)
+                        )
+                    )
+                } else {
+                    sendEffect(OfferDetailsEffect.ShowSummary(summary))
                 }
             }
             OfferDetailsIntent.OpenInMapsClicked -> {
-                val address = "${currentState.offer?.patientInfo?.addressLine}, ${currentState.offer?.patientInfo?.addressDetail}"
-                sendEffect(OfferDetailsEffect.OpenMaps(address))
+                withAddress { sendEffect(OfferDetailsEffect.OpenMaps(it)) }
             }
             OfferDetailsIntent.MoreClicked -> {
                 // Handle more options if needed
@@ -59,8 +81,35 @@ class OfferDetailsViewModel @Inject constructor(
 
         viewModelScope.launch {
             updateState { copy(isLoading = true) }
-            val contract = getRequestContract(requestId).getOrNull()
-            updateState { copy(isLoading = false, offer = contract) }
+            getRequestContract(requestId)
+                .onSuccess { contract ->
+                    updateState { copy(isLoading = false, offer = contract) }
+                    if (contract.serviceRequestStatus.equals("COMPLETED", ignoreCase = true)) {
+                        sendEffect(OfferDetailsEffect.NavigateToVisitCompleted(contract.offerId))
+                    }
+                }
+                .onFailure { error ->
+                    loadedRequestId = null
+                    updateState { copy(isLoading = false, offer = null) }
+                    sendEffect(OfferDetailsEffect.ShowError(error.toUiText()))
+                }
         }
     }
+
+    private fun withAddress(block: (String) -> Unit) {
+        val patient = currentState.offer?.patientInfo ?: return
+        val address = listOf(patient.addressLine, patient.addressDetail)
+            .filter(String::isNotBlank)
+            .joinToString(", ")
+        if (address.isBlank()) {
+            sendEffect(
+                OfferDetailsEffect.ShowError(
+                    UiText.StringResource(R.string.patient_address_unavailable)
+                )
+            )
+        } else {
+            block(address)
+        }
+    }
+
 }

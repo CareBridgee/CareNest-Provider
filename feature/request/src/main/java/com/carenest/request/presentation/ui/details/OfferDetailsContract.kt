@@ -1,6 +1,7 @@
 package com.carenest.request.presentation.ui.details
 
 import com.carenest.request.domain.model.Offer
+import com.carenest.request.presentation.UiText
 
 data class OfferDetailsUiState(
     val isLoading: Boolean = true,
@@ -20,9 +21,11 @@ sealed interface OfferDetailsIntent {
 
 sealed interface OfferDetailsEffect {
     data object NavigateBack : OfferDetailsEffect
+    data class NavigateToVisitCompleted(val requestId: String) : OfferDetailsEffect
     data class InitiateCall(val phone: String) : OfferDetailsEffect
     data class OpenChat(val patientId: String) : OfferDetailsEffect
     data class CopyToClipboard(val text: String) : OfferDetailsEffect
     data class ShowSummary(val summary: String) : OfferDetailsEffect
     data class OpenMaps(val address: String) : OfferDetailsEffect
+    data class ShowError(val message: UiText) : OfferDetailsEffect
 }

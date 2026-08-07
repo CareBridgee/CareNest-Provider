@@ -8,6 +8,7 @@ import com.carenest.provider.core.mvi.DefaultStateHolder
 import com.carenest.provider.core.mvi.EffectPublisher
 import com.carenest.provider.core.mvi.StateHolder
 import com.carenest.request.domain.usecase.GetVisitSummaryUseCase
+import com.carenest.request.presentation.toUiText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -47,7 +48,7 @@ class VisitCompletedViewModel @Inject constructor(
                 }
                 .onFailure { throwable ->
                     updateState { copy(isLoading = false, errorMessage = throwable.message) }
-                    sendEffect(VisitCompletedEffect.ShowError(throwable.message.orEmpty()))
+                    sendEffect(VisitCompletedEffect.ShowError(throwable.toUiText()))
                 }
         }
     }
@@ -67,7 +68,7 @@ class VisitCompletedViewModel @Inject constructor(
                 }
                 .onFailure { throwable ->
                     updateState { copy(isSubmittingRating = false) }
-                    sendEffect(VisitCompletedEffect.ShowError(throwable.message.orEmpty()))
+                    sendEffect(VisitCompletedEffect.ShowError(throwable.toUiText()))
                 }
         }
     }

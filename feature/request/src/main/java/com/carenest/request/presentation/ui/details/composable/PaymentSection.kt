@@ -46,7 +46,9 @@ fun PaymentSection(
             style = Theme.typography.body.large.copy(color = Theme.colors.primaryFont, fontWeight = FontWeight.Bold),
         )
         BasicText(
-            text = stringResource(R.string.request_details_amount_value, offer.totalAmount),
+            text = offer.totalAmount?.let {
+                stringResource(R.string.request_details_amount_value, it)
+            } ?: stringResource(R.string.not_available),
             style = Theme.typography.title.copy(color = Theme.colors.primary, fontWeight = FontWeight.Bold),
         )
     }

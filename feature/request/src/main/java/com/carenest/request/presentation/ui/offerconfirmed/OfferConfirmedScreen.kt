@@ -2,6 +2,7 @@ package com.carenest.request.presentation.ui.offerconfirmed
 
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -46,6 +47,7 @@ import com.carenest.request.presentation.ui.offerconfirmed.components.OfferConfi
 import com.carenest.provider.designsystem.R as RD
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.request.domain.model.PatientInfo
+import com.carenest.request.presentation.asString
 import com.carenest.request.presentation.ui.offerconfirmed.components.CancellationInfoBanner
 import com.carenest.request.presentation.ui.offerconfirmed.components.PatientCard
 
@@ -56,6 +58,7 @@ fun OfferConfirmedScreen(
     onCancelled: () -> Unit,
     onShowQrCode: () -> Unit,
     onOpenChat: (String) -> Unit,
+    onVisitCompleted: (String) -> Unit,
     viewModel: OfferConfirmedViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -69,10 +72,18 @@ fun OfferConfirmedScreen(
     ObserveEffect(viewModel.effect) { effect ->
         when (effect) {
             is OfferConfirmedEffect.NavigateToDetails -> onViewDetails(effect.offerId)
-            OfferConfirmedEffect.NavigateToQrCode -> onShowQrCode()
+            is OfferConfirmedEffect.NavigateToVisitCompleted -> onVisitCompleted(effect.requestId)
+            is OfferConfirmedEffect.NavigateToQrCode -> {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.visit_code_generated, effect.visitCode.code),
+                    Toast.LENGTH_LONG,
+                ).show()
+                onShowQrCode()
+            }
             OfferConfirmedEffect.NavigateBackToList -> onCancelled()
             is OfferConfirmedEffect.ShowError -> {
-                // TODO: Handle error
+                Toast.makeText(context, effect.message.asString(context), Toast.LENGTH_LONG).show()
             }
             is OfferConfirmedEffect.InitiateCall -> {
                 val intent = Intent(Intent.ACTION_DIAL).apply {
@@ -113,6 +124,7 @@ fun OfferConfirmedContent(
                 state.offer != null -> OfferConfirmedBody(
                     contract = state.offer,
                     isCancelling = state.cancelDialog.isSubmitting,
+                    isGeneratingVisitCode = state.isGeneratingVisitCode,
                     onIntent = onIntent,
                 )
                 else -> BasicText(
@@ -140,6 +152,7 @@ fun OfferConfirmedContent(
 private fun OfferConfirmedBody(
     contract: Offer,
     isCancelling: Boolean,
+    isGeneratingVisitCode: Boolean,
     onIntent: (OfferConfirmedIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -199,7 +212,9 @@ private fun OfferConfirmedBody(
             InfoCard(
                 icon = painterResource(RD.drawable.ic_location),
                 label = stringResource(R.string.distance),
-                value = stringResource(R.string.nurse_requests_distance_miles, contract.distanceMiles),
+                value = contract.distanceMiles?.let {
+                    stringResource(R.string.nurse_requests_distance_miles, it)
+                } ?: stringResource(R.string.not_available),
                 modifier = Modifier.weight(1f)
             )
             InfoCard(
@@ -217,6 +232,7 @@ private fun OfferConfirmedBody(
             onCancelClick = { onIntent(OfferConfirmedIntent.CancelClicked) },
             onShowOfferDetailsClick = { onIntent(OfferConfirmedIntent.ViewDetailsClicked) },
             isCancelling = isCancelling,
+            isGeneratingVisitCode = isGeneratingVisitCode,
             modifier = Modifier.fillMaxWidth()
         )
     }

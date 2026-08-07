@@ -54,7 +54,9 @@ fun PatientSection(
                 ),
             )
             BasicText(
-                text = stringResource(R.string.request_details_patient_age, offer.patientInfo.age),
+                text = offer.patientInfo.age?.let {
+                    stringResource(R.string.request_details_patient_age, it)
+                } ?: stringResource(R.string.not_available),
                 style = Theme.typography.body.small.copy(
                     color = Theme.colors.secondaryFont,
                     fontWeight = FontWeight.Normal

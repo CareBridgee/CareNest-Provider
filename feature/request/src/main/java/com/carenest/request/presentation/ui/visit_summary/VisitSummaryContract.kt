@@ -1,6 +1,7 @@
 package com.carenest.request.presentation.ui.visit_summary
 
 import com.carenest.request.domain.model.VisitSummary
+import com.carenest.request.presentation.UiText
 
 
 data class VisitCompletedState(
@@ -24,5 +25,5 @@ sealed interface VisitCompletedIntent {
 sealed interface VisitCompletedEffect {
     data object NavigateHome : VisitCompletedEffect
     data object RatingSubmitted : VisitCompletedEffect
-    data class ShowError(val message: String) : VisitCompletedEffect
+    data class ShowError(val message: UiText) : VisitCompletedEffect
 }

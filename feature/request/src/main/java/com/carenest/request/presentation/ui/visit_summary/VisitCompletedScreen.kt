@@ -23,6 +23,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -36,10 +37,12 @@ import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.request.R
 import com.carenest.request.domain.model.VisitSummary
+import com.carenest.request.presentation.asString
 import com.carenest.request.presentation.ui.visit_summary.components.TotalAmountCard
 import com.carenest.request.presentation.ui.visit_summary.components.VisitRatingDialogContent
 import com.carenest.request.presentation.ui.visit_summary.components.VisitSummaryCard
 import com.carenest.provider.designsystem.R as RD
+import android.widget.Toast
 
 @Composable
 fun VisitCompletedScreen(
@@ -49,6 +52,7 @@ fun VisitCompletedScreen(
     viewModel: VisitCompletedViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     LaunchedEffect(requestId) {
         viewModel.handleIntent(VisitCompletedIntent.LoadVisitSummary(requestId))
@@ -57,8 +61,16 @@ fun VisitCompletedScreen(
     ObserveEffect(effect = viewModel.effect) { effect ->
         when (effect) {
             VisitCompletedEffect.NavigateHome -> onNavigateHome()
-            VisitCompletedEffect.RatingSubmitted -> onShowSnackbar("Thanks for your feedback!")
-            is VisitCompletedEffect.ShowError -> onShowSnackbar(effect.message)
+            VisitCompletedEffect.RatingSubmitted -> {
+                val message = context.getString(R.string.visit_rating_local_only)
+                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                onShowSnackbar(message)
+            }
+            is VisitCompletedEffect.ShowError -> {
+                val message = effect.message.asString(context)
+                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                onShowSnackbar(message)
+            }
         }
     }
     Box(
@@ -70,16 +82,15 @@ fun VisitCompletedScreen(
         when {
             state.isLoading -> CircularProgressIndicator(color = Theme.colors.primary)
             state.summary != null -> VisitCompletedContent(
-                summary = state.summary ?: VisitSummary(
-                    requestId = "",
-                    professionalName = "Professional Name",
-                    serviceType = "Service Type",
-                    durationMinutes = 60,
-                    completedDate = "30 jun",
-                    totalAmount = 85.0,
-                    isVerified = true,
-                ),
+                summary = state.summary!!,
                 onIntent = viewModel::handleIntent,
+            )
+            else -> Text(
+                text = state.errorMessage ?: stringResource(R.string.request_not_found),
+                style = Theme.typography.body.medium,
+                color = Theme.colors.secondaryFont,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(Theme.spacing.large),
             )
         }
 
