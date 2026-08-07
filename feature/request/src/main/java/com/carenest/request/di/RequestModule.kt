@@ -1,6 +1,6 @@
 package com.carenest.request.di
 
-import com.carenest.request.data.datasource.FakeNurseRequestsDataSource
+import com.carenest.request.data.datasource.NurseRequestsDataSourceImpl
 import com.carenest.request.data.datasource.FakeVisitSummaryDataSource
 import com.carenest.request.data.datasource.NurseRequestsDataSource
 import com.carenest.request.data.datasource.VisitSummaryDataSource
@@ -21,7 +21,7 @@ abstract class RequestModule {
     @Binds
     @Singleton
     abstract fun bindNurseRequestsDataSource(
-        impl: FakeNurseRequestsDataSource
+        impl: NurseRequestsDataSourceImpl
     ): NurseRequestsDataSource
 
     @Binds
