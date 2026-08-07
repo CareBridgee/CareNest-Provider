@@ -8,6 +8,7 @@ import com.carenest.provider.core.navigation.navigate
 import com.carenest.request.presentation.ui.details.OfferDetailsScreen
 import com.carenest.request.presentation.ui.list.RequestsListScreen
 import com.carenest.request.presentation.ui.offerconfirmed.OfferConfirmedScreen
+import com.carenest.request.presentation.ui.scan.ScanQrScreen
 import com.carenest.request.presentation.ui.visit_summary.VisitCompletedScreen
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -19,6 +20,7 @@ val requestSerializers = SerializersModule {
         subclass(RequestRoutes.OfferConfirmed::class, RequestRoutes.OfferConfirmed.serializer())
         subclass(RequestRoutes.RequestDetails::class, RequestRoutes.RequestDetails.serializer())
         subclass(RequestRoutes.VisitCompleted::class, RequestRoutes.VisitCompleted.serializer())
+        subclass(RequestRoutes.ScanQr::class, RequestRoutes.ScanQr.serializer())
     }
 }
 
@@ -51,9 +53,17 @@ fun EntryProviderScope<NavKey>.providerRequestEntries(
                 backStack.goBack()
             },
             onShowQrCode = {
-                // Handle QR code display
+                backStack.navigate(RequestRoutes.ScanQr(route.requestId))
             },
             onOpenChat = onOpenChat
+        )
+    }
+
+    entry<RequestRoutes.ScanQr> { route ->
+        ScanQrScreen(
+            requestId = route.requestId,
+            onBack = { backStack.goBack() },
+            onSuccess = { backStack.navigate(RequestRoutes.VisitCompleted(route.requestId)) }
         )
     }
 
