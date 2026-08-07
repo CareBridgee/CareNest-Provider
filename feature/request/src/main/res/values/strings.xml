@@ -117,6 +117,14 @@
     <string name="show_scan_qr">Show Scan QR Code </string>
     <string name="show_offer_details">View Offer Details</string>
     <string name="offer_confirmed_cancellation_info">You can cancel within 2 minutes after the visit starts. After that, a cancellation fee will apply.</string>
+    <string name="visit_code_generated">Visit code: %1$s</string>
+    <string name="not_available">—</string>
+    <string name="visit_rating_local_only">Rating saved locally. Backend support is not available yet.</string>
+    <string name="generic_error_message">Something went wrong. Please try again.</string>
+    <string name="chat_reservation_unavailable">Chat is unavailable because this contract has no reservation ID.</string>
+    <string name="patient_phone_unavailable">The backend did not provide a patient phone number.</string>
+    <string name="patient_report_unavailable">No patient report is available for this contract.</string>
+    <string name="patient_address_unavailable">No patient address is available for this contract.</string>
     <string name="service">Service</string>
     <string name="distance">Distance</string>
 </resources>
