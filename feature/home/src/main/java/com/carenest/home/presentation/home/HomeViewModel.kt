@@ -11,6 +11,10 @@ import com.carenest.provider.core.mvi.DefaultEffectPublisher
 import com.carenest.provider.core.mvi.DefaultStateHolder
 import com.carenest.provider.core.mvi.EffectPublisher
 import com.carenest.provider.core.mvi.StateHolder
+import com.carenest.home.domain.model.NurseRequest
+import com.carenest.home.domain.usecase.ListenReservationEventsUseCase
+import com.carenest.provider.core.network.socket.client.NurseSocketClient
+import com.carenest.provider.core.network.socket.model.ReservationEventType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
@@ -24,13 +28,16 @@ class HomeViewModel @Inject constructor(
     private val getIncomingRequests: GetIncomingRequestsUseCase,
     private val getEarningsSummary: GetEarningsSummaryUseCase,
     private val sendOfferToPatient: SendOfferToPatientUseCase,
+    private val listenReservationEvents: ListenReservationEventsUseCase,
     private val getNurseProfile: GetNurseProfileUseCase,
+    private val nurseSocketClient: NurseSocketClient,
 ) : ViewModel(),
     StateHolder<HomeUiState> by DefaultStateHolder(HomeUiState()),
     EffectPublisher<HomeEffect> by DefaultEffectPublisher() {
 
     private var fetchJob: Job? = null
-    private var offerTimerJob: Job? = null
+    private var socketJob: Job? = null
+    private var offerEventListenerJob: Job? = null
 
     init {
        getNurseData()
@@ -64,7 +71,8 @@ class HomeViewModel @Inject constructor(
 
     private fun handleOnlineToggle(isOnline: Boolean) {
         fetchJob?.cancel()
-        offerTimerJob?.cancel()
+        socketJob?.cancel()
+        offerEventListenerJob?.cancel()
 
         updateState {
             copy(
@@ -79,6 +87,38 @@ class HomeViewModel @Inject constructor(
         }
 
         if (isOnline) {
+            nurseSocketClient.connect()
+            viewModelScope.launch {
+                // TODO: Replace with real coordinates from a LocationManager
+                nurseSocketClient.updateAvailability(true, 30.0444, 31.2357)
+            }
+
+            // Stream real-time socket requests
+            socketJob = viewModelScope.launch {
+                nurseSocketClient.nearbyRequests.collect { socketReq ->
+                    val newRequest = NurseRequest(
+                        id = socketReq.serviceRequestId,
+                        patientName = socketReq.serviceName ?: "Patient Request",
+                        patientImage = "",
+                        serviceType = socketReq.serviceName ?: "Nursing Visit",
+                        serviceImage = "",
+                        baseRate = (socketReq.estimatedPrice ?: 50.0).toFloat(),
+                        distanceMiles = (socketReq.distanceKm ?: 0.0).toFloat(),
+                        status = RequestStatus.ESTIMATED
+                    )
+                    updateState {
+                        val updatedList = requests.toMutableList()
+                        val existingIndex = updatedList.indexOfFirst { it.id == newRequest.id }
+                        if (existingIndex != -1) {
+                            updatedList[existingIndex] = newRequest
+                        } else {
+                            updatedList.add(0, newRequest)
+                        }
+                        copy(requests = updatedList)
+                    }
+                }
+            }
+
             fetchJob = viewModelScope.launch {
                 coroutineScope {
                     val requestsDeferred = async { getIncomingRequests() }
@@ -90,7 +130,7 @@ class HomeViewModel @Inject constructor(
                     updateState {
                         copy(
                             isLoading = false,
-                            requests = requestsResult.getOrDefault(emptyList()),
+                            requests = (requestsResult.getOrDefault(emptyList()) + requests).distinctBy { it.id },
                             earnings = earningsSummary?.todayEarnings ?: earnings,
                             changePercent = earningsSummary?.changePercent ?: changePercent,
                             jobsToday = earningsSummary?.jobsToday ?: jobsToday,
@@ -99,9 +139,12 @@ class HomeViewModel @Inject constructor(
                     }
                 }
             }
+        } else {
+            viewModelScope.launch {
+                nurseSocketClient.updateAvailability(false)
+            }
         }
     }
-
 
     private fun handleCardClick(requestId: String) {
         val request = currentState.requests.find { it.id == requestId } ?: return
@@ -141,42 +184,61 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun startMakeOffer(requestId: String) {
-        val (willAccept, acceptAtSecond) = sendOfferToPatient(requestId)
+        val request = currentState.requests.find { it.id == requestId }
+        val price = (request?.baseRate ?: currentState.editRateDraft).toDouble()
 
-        offerTimerJob?.cancel()
         updateState {
             copy(
                 activeModal = ActiveModal.MakeOffer,
                 offerRequestId = requestId,
-                offerCountdown = OFFER_TIMEOUT_SECONDS,
-                offerWillAccept = willAccept,
-                offerAcceptAtSecond = acceptAtSecond,
                 selectedCardId = requestId,
             )
         }
 
-        offerTimerJob = viewModelScope.launch {
-            for (elapsedSecond in 1..OFFER_TIMEOUT_SECONDS) {
-                delay(1_000)
+        // Send real offer over socket & subscribe to reservation topic
+        viewModelScope.launch {
+            try {
+                sendOfferToPatient(
+                    requestId = requestId,
+                    proposedPrice = price,
+                    message = "Offer submitted by nurse"
+                )
+                nurseSocketClient.subscribeToReservation(requestId)
+            } catch (_: Exception) { }
+        }
 
-                if (willAccept && elapsedSecond == acceptAtSecond) {
-                    updateState { copy(activeModal = ActiveModal.OfferSuccess) }
-                    delay(SUCCESS_DISPLAY_MS)
-                    completeOfferAccepted(requestId)
-                    return@launch
-                }
-
-                updateState {
-                    copy(offerCountdown = OFFER_TIMEOUT_SECONDS - elapsedSecond)
+        // Listen for real-time reservation offer events from server
+        offerEventListenerJob?.cancel()
+        offerEventListenerJob = viewModelScope.launch {
+            listenReservationEvents(requestId).collect { event ->
+                when (event.eventType) {
+                    ReservationEventType.OFFER_ACCEPTED -> {
+                        updateState { copy(activeModal = ActiveModal.OfferSuccess) }
+                        delay(SUCCESS_DISPLAY_MS)
+                        completeOfferAccepted(requestId)
+                    }
+                    ReservationEventType.OFFER_COUNTERED -> {
+                        val offer = event.asOfferResponse()
+                        if (offer != null) {
+                            updateState {
+                                copy(
+                                    editRateDraft = offer.proposedPrice.toFloat(),
+                                    activeModal = ActiveModal.EditRate
+                                )
+                            }
+                        }
+                    }
+                    ReservationEventType.OFFER_REJECTED, ReservationEventType.REQUEST_CANCELLED -> {
+                        completeOfferTimeout(requestId)
+                    }
+                    else -> { }
                 }
             }
-
-            completeOfferTimeout(requestId)
         }
     }
 
     private fun completeOfferAccepted(requestId: String) {
-        offerTimerJob?.cancel()
+        offerEventListenerJob?.cancel()
         updateState {
             copy(
                 requests = requests.map { request ->
@@ -195,11 +257,12 @@ class HomeViewModel @Inject constructor(
                 selectedCardId = null,
             )
         }
+        sendEffect(HomeEffect.StartActiveReservationService(requestId))
         sendEffect(HomeEffect.NavigateToOfferConfirmed(requestId))
     }
 
     private fun completeOfferTimeout(requestId: String) {
-        offerTimerJob?.cancel()
+        offerEventListenerJob?.cancel()
         updateState {
             copy(
                 requests = requests.map { request ->
@@ -219,7 +282,7 @@ class HomeViewModel @Inject constructor(
 
     private fun dismissModal() {
         if (currentState.activeModal == ActiveModal.MakeOffer) {
-            offerTimerJob?.cancel()
+            offerEventListenerJob?.cancel()
         }
         updateState {
             copy(
@@ -233,7 +296,8 @@ class HomeViewModel @Inject constructor(
 
     override fun onCleared() {
         fetchJob?.cancel()
-        offerTimerJob?.cancel()
+        socketJob?.cancel()
+        offerEventListenerJob?.cancel()
         super.onCleared()
     }
 

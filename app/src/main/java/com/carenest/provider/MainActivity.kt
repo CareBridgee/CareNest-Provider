@@ -21,13 +21,23 @@ import com.carenest.provider.navigation.AppNavigation
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+import android.content.Intent
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.runtime.mutableStateOf
+import com.carenest.provider.core.network.socket.service.ActiveReservationService
+
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var appPreferences: AppPreferences
 
+    private var targetRequestId = mutableStateOf<String?>(null)
+
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        handleIntent(intent)
         enableEdgeToEdge()
         setContent {
             val preferences by appPreferences.state.collectAsState(
@@ -56,15 +66,36 @@ class MainActivity : AppCompatActivity() {
                 isDarkTheme = isDarkTheme,
                 languageCode = preferences.languageCode,
             ) {
-                CareNestApp(onExitApp = { finish() })
+                CareNestApp(
+                    initialRequestId = targetRequestId.value,
+                    onExitApp = { finish() }
+                )
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        val reqId = intent?.getStringExtra(ActiveReservationService.EXTRA_SERVICE_REQUEST_ID)
+        if (!reqId.isNullOrBlank()) {
+            targetRequestId.value = reqId
         }
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun CareNestApp(onExitApp: () -> Unit) {
+fun CareNestApp(
+    initialRequestId: String? = null,
+    onExitApp: () -> Unit
+) {
     AppNavigation(
+        initialRequestId = initialRequestId,
         onExitApp = onExitApp,
         modifier = Modifier.fillMaxSize(),
     )

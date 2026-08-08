@@ -45,4 +45,5 @@ sealed interface HomeIntent {
 sealed interface HomeEffect {
     data object NavigateToRequestList : HomeEffect
     data class NavigateToOfferConfirmed(val requestId: String) : HomeEffect
+    data class StartActiveReservationService(val requestId: String) : HomeEffect
 }

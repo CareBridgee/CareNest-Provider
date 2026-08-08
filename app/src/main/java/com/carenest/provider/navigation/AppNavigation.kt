@@ -33,7 +33,6 @@ import com.carenest.home.navigation.HomeRoutes
 import com.carenest.home.navigation.homeSerializers
 import com.carenest.home.navigation.providerHomeEntries
 import com.carenest.provider.R
-import com.carenest.provider.account.R as AccountR
 import com.carenest.provider.account.navigation.AccountRoutes
 import com.carenest.provider.account.navigation.accountNavigationSerializers
 import com.carenest.provider.account.navigation.providerAccountEntries
@@ -41,16 +40,15 @@ import com.carenest.provider.auth.domain.util.AuthenticationDestination
 import com.carenest.provider.auth.navigation.authNavigationSerializers
 import com.carenest.provider.auth.navigation.providerAuthEntries
 import com.carenest.provider.auth.navigation.providerAuthStartRoute
+import com.carenest.provider.core.datastore.AuthenticationSession
+import com.carenest.provider.core.datastore.AuthenticationSessionDestination
 import com.carenest.provider.core.navigation.goBack
 import com.carenest.provider.core.navigation.navigate
 import com.carenest.provider.core.navigation.replaceWith
-import com.carenest.provider.core.datastore.AuthenticationSession
-import com.carenest.provider.core.datastore.AuthenticationSessionDestination
-import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
-import com.carenest.provider.designsystem.components.topbar.TopBarLeading
 import com.carenest.provider.designsystem.components.bottomnav.BottomNavItem
 import com.carenest.provider.designsystem.components.bottomnav.SPBottomNavigation
-import com.carenest.provider.designsystem.R as DesignSystemR
+import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
+import com.carenest.provider.designsystem.components.topbar.TopBarLeading
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.earnings.navigation.EarningsRoutes
 import com.carenest.provider.earnings.navigation.earningsSerializers
@@ -70,6 +68,8 @@ import com.carenest.request.navigation.requestSerializers
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
+import com.carenest.provider.account.R as AccountR
+import com.carenest.provider.designsystem.R as DesignSystemR
 
 private val appNavigationSerializers = SerializersModule {
     include(onboardingNavigationSerializers)
@@ -95,6 +95,7 @@ private val appSavedStateConfiguration = SavedStateConfiguration {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation(
+    initialRequestId: String? = null,
     onExitApp: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -102,7 +103,15 @@ fun AppNavigation(
         serializer = SnapshotStateListSerializer(PolymorphicSerializer(NavKey::class)),
         configuration = appSavedStateConfiguration,
     ) {
-        mutableStateListOf<NavKey>().apply { navigate(providerOnboardingStartRoute()) }
+        mutableStateListOf<NavKey>().apply { navigate(providerOnboardingStartRoute()
+//            providerHomeStartRoute()
+        ) }
+    }
+
+    androidx.compose.runtime.LaunchedEffect(initialRequestId) {
+        if (!initialRequestId.isNullOrBlank()) {
+            backStack.navigate(RequestRoutes.RequestDetails(initialRequestId))
+        }
     }
 
     fun exitCurrentRoot() {
