@@ -1,86 +1,89 @@
 package com.carenest.home.data.datasource
 
-
 import com.carenest.home.domain.model.EarningsSummary
 import com.carenest.home.domain.model.NurseProfile
 import com.carenest.home.domain.model.NurseRequest
-import kotlinx.coroutines.delay
+import com.carenest.home.domain.model.RequestStatus
+import com.carenest.provider.core.network.socket.client.NurseSocketClient
+import com.carenest.provider.core.network.socket.model.NearbyNurseServiceRequestResponse
+import com.carenest.provider.core.network.socket.model.ReservationEvent
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.random.Random
 
 @Singleton
-class FakeNurseRequestsDataSource @Inject constructor() : NurseRequestsDataSource {
+class NurseRequestsDataSourceImpl @Inject constructor(
+    private val httpClient: HttpClient,
+    private val nurseSocketClient: NurseSocketClient
+) : NurseRequestsDataSource {
 
     override suspend fun getIncomingRequests(): List<NurseRequest> {
-        delay(REQUESTS_DELAY_MS)
-        return listOf(
-            NurseRequest(
-                id = "req-001",
-                patientName = "Sarah Mitchell",
-                serviceType = "Post-Surgery Wound Care",
-                baseRate = 45f,
-                distanceMiles = 2.4f,
-                patientImage = "",
-                serviceImage = "",
-            ),
-            NurseRequest(
-                id = "req-002",
-                patientName = "James Okonkwo",
-                serviceType = "IV Therapy & Monitoring",
-                baseRate = 55f,
-                distanceMiles = 4.1f,
-                patientImage = "",
-                serviceImage = "",
-            ),
-            NurseRequest(
-                id = "req-003",
-                patientName = "Emily Chen",
-                serviceType = "Elderly Mobility Support",
-                baseRate = 40f,
-                distanceMiles = 1.8f,
-                patientImage = "",
-                serviceImage = "",
-            ),
-            NurseRequest(
-                id = "req-004",
-                patientName = "Robert Alvarez",
-                serviceType = "Medication Administration",
-                baseRate = 50f,
-                distanceMiles = 5.6f,
-                patientImage = "",
-                serviceImage = "",
-            ),
+        return try {
+            val response = httpClient.get("api/v1/service-requests/nearby").body<List<NearbyNurseServiceRequestResponse>>()
+            response.map { item ->
+                NurseRequest(
+                    id = item.serviceRequestId,
+                    patientName = item.serviceName ?: "Patient Request",
+                    patientImage = "",
+                    serviceType = item.serviceName ?: "Nursing Visit",
+                    serviceImage = "",
+                    baseRate = (item.estimatedPrice ?: 50.0).toFloat(),
+                    distanceMiles = (item.distanceKm ?: 0.0).toFloat(),
+                    status = RequestStatus.ESTIMATED
+                )
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    override suspend fun createOffer(
+        serviceRequestId: String,
+        proposedPrice: Double,
+        proposedDate: String,
+        proposedTime: String,
+        message: String?
+    ) {
+        nurseSocketClient.createOffer(
+            serviceRequestId = serviceRequestId,
+            proposedPrice = proposedPrice,
+            proposedDate = proposedDate,
+            proposedTime = proposedTime,
+            message = message
         )
+    }
+
+    override fun listenReservationEvents(reservationId: String): Flow<ReservationEvent> {
+        return nurseSocketClient.reservationEvents.filter { event ->
+            event.reservationId == reservationId || event.reservationId.isNullOrEmpty()
+        }
     }
 
     override suspend fun getEarningsSummary(): EarningsSummary {
-        delay(EARNINGS_DELAY_MS)
-        return EarningsSummary(
-            todayEarnings = 240.0,
-            changePercent = 12.0,
-            jobsToday = 3,
-            rating = 4.9,
-        )
-    }
-
-    override fun sendOfferToPatient(requestId: String): Pair<Boolean, Int> {
-        val random = Random(requestId.hashCode())
-        val willAccept = random.nextInt(3) != 0
-        val acceptAtSecond = if (willAccept) random.nextInt(4, 9) else OFFER_TIMEOUT_SECONDS
-        return willAccept to acceptAtSecond
+        return try {
+            httpClient.get("api/v1/nurse/earnings").body<EarningsSummary>()
+        } catch (e: Exception) {
+            EarningsSummary(
+                todayEarnings = 0.0,
+                changePercent = 0.0,
+                jobsToday = 0,
+                rating = 5.0
+            )
+        }
     }
 
     override suspend fun getNurseProfile(): NurseProfile {
-        return NurseProfile(
-            name = "Dr. Sarah Johnson",
-            avatarUrl = "",
-        )
-    }
-
-    private companion object {
-        const val REQUESTS_DELAY_MS = 1_500L
-        const val EARNINGS_DELAY_MS = 800L
-        const val OFFER_TIMEOUT_SECONDS = 10
+        return try {
+            httpClient.get("api/v1/profile").body<NurseProfile>()
+        } catch (e: Exception) {
+            NurseProfile(
+                name = "Care Provider",
+                avatarUrl = ""
+            )
+        }
     }
 }
