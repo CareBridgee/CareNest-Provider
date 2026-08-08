@@ -17,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +42,7 @@ import com.carenest.provider.profile.presentation.ui.registration.ServicesUiStat
 fun ServicesSelectionComponent(
     state: ServicesUiState,
     onServiceToggle: (ServiceUi) -> Unit,
+    onRetry: () -> Unit = {},
     modifier: Modifier = Modifier,
     scrollState: ScrollState = rememberScrollState()
 ) {
@@ -74,11 +76,29 @@ fun ServicesSelectionComponent(
 
         Spacer(modifier = Modifier.height(Theme.spacing.extraLarge))
 
-        ServicesGrid(
-            services = state.availableServices,
-            selectedServices = state.selectedServices,
-            onServiceToggle = onServiceToggle
-        )
+        when {
+            state.isLoading -> CircularProgressIndicator(color = Theme.colors.primary)
+            state.errorMessage != null -> {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(Theme.spacing.medium),
+                ) {
+                    BasicText(
+                        text = state.errorMessage,
+                        style = Theme.typography.body.medium.copy(color = Theme.colors.error),
+                    )
+                    SecondaryButton(
+                        caption = stringResource(com.carenest.provider.profile.R.string.retry),
+                        onClick = onRetry,
+                    )
+                }
+            }
+            else -> ServicesGrid(
+                services = state.availableServices,
+                selectedServices = state.selectedServices,
+                onServiceToggle = onServiceToggle,
+            )
+        }
 
         Spacer(modifier = Modifier.height(Theme.spacing.large))
 

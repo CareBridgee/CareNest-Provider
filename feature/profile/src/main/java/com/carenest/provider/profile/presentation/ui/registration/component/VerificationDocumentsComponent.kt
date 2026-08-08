@@ -45,12 +45,15 @@ import com.carenest.provider.profile.presentation.ui.registration.VerificationDo
 @Composable
 fun VerificationDocumentsComponent(
     state: VerificationDocumentsUiState,
-    onNationalIdClick: () -> Unit,
+    onNationalIdFrontClick: () -> Unit,
+    onNationalIdBackClick: () -> Unit,
     onNursingLicenseClick: () -> Unit,
     onProfessionalCertificateClick: () -> Unit,
-    onRemoveNationalId: () -> Unit,
+    onRemoveNationalIdFront: () -> Unit,
+    onRemoveNationalIdBack: () -> Unit,
     onRemoveNursingLicense: () -> Unit,
     onRemoveProfessionalCertificate: () -> Unit,
+    onLicenseNumberChanged: (String) -> Unit,
     onYearsOfExpChanged: (String) -> Unit,
     onPrimarySpecialityChanged: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -87,23 +90,55 @@ fun VerificationDocumentsComponent(
         Spacer(modifier = Modifier.height(Theme.spacing.extraLarge))
 
         UploadCard(
-            title = stringResource(com.carenest.provider.profile.R.string.national_id_card_title),
-            description = stringResource(com.carenest.provider.profile.R.string.national_id_card_desc),
+            title = stringResource(com.carenest.provider.profile.R.string.national_id_front_title),
+            description = stringResource(com.carenest.provider.profile.R.string.national_id_front_desc),
             iconPainter = painterResource(id = R.drawable.ic_id_card),
-            isUploaded = state.nationalId != null,
+            isUploaded = state.nationalIdFront != null,
             uploadContent = {
-                UploadButton(onClick = onNationalIdClick)
+                UploadButton(onClick = onNationalIdFrontClick)
             },
             uploadedContent = {
-                state.nationalId?.let {
+                state.nationalIdFront?.let {
                     UploadedFileItem(
                         attachment = it,
-                        onReplace = onNationalIdClick,
-                        onRemove = onRemoveNationalId
+                        onReplace = onNationalIdFrontClick,
+                        onRemove = onRemoveNationalIdFront
                     )
                 }
             },
             modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(Theme.spacing.medium))
+
+        UploadCard(
+            title = stringResource(com.carenest.provider.profile.R.string.national_id_back_title),
+            description = stringResource(com.carenest.provider.profile.R.string.national_id_back_desc),
+            iconPainter = painterResource(id = R.drawable.ic_id_card),
+            isUploaded = state.nationalIdBack != null,
+            uploadContent = { UploadButton(onClick = onNationalIdBackClick) },
+            uploadedContent = {
+                state.nationalIdBack?.let {
+                    UploadedFileItem(
+                        attachment = it,
+                        onReplace = onNationalIdBackClick,
+                        onRemove = onRemoveNationalIdBack,
+                    )
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        Spacer(modifier = Modifier.height(Theme.spacing.medium))
+
+        CustomTextField(
+            text = state.licenseNumber,
+            onTextChange = onLicenseNumberChanged,
+            title = stringResource(com.carenest.provider.profile.R.string.license_number_label),
+            hint = stringResource(com.carenest.provider.profile.R.string.license_number_hint),
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         )
 
         Spacer(modifier = Modifier.height(Theme.spacing.medium))
@@ -327,12 +362,15 @@ fun VerificationDocumentsComponentPreview() {
     SpTheme {
         VerificationDocumentsComponent(
             state = VerificationDocumentsUiState(),
-            onNationalIdClick = {},
+            onNationalIdFrontClick = {},
+            onNationalIdBackClick = {},
             onNursingLicenseClick = {},
             onProfessionalCertificateClick = {},
-            onRemoveNationalId = {},
+            onRemoveNationalIdFront = {},
+            onRemoveNationalIdBack = {},
             onRemoveNursingLicense = {},
             onRemoveProfessionalCertificate = {},
+            onLicenseNumberChanged = {},
             onYearsOfExpChanged = {},
             onPrimarySpecialityChanged = {}
         )
@@ -346,11 +384,17 @@ fun VerificationDocumentsComponentWithDataPreview() {
 
         VerificationDocumentsComponent(
             state = VerificationDocumentsUiState(
-                nationalId = Attachment(
+                nationalIdFront = Attachment(
                     uri = Uri.EMPTY,
                     name = "national_id.pdf",
                     mimeType = "application/pdf"
                 ),
+                nationalIdBack = Attachment(
+                    uri = Uri.EMPTY,
+                    name = "national_id_back.pdf",
+                    mimeType = "application/pdf"
+                ),
+                licenseNumber = "RN-12345",
                 nursingLicense = Attachment(
                     uri = Uri.EMPTY,
                     name = "nursing_license.pdf",
@@ -359,12 +403,15 @@ fun VerificationDocumentsComponentWithDataPreview() {
                 yearsOfExp = 5,
                 primarySpeciality = "Pediatric Care"
             ),
-            onNationalIdClick = {},
+            onNationalIdFrontClick = {},
+            onNationalIdBackClick = {},
             onNursingLicenseClick = {},
             onProfessionalCertificateClick = {},
-            onRemoveNationalId = {},
+            onRemoveNationalIdFront = {},
+            onRemoveNationalIdBack = {},
             onRemoveNursingLicense = {},
             onRemoveProfessionalCertificate = {},
+            onLicenseNumberChanged = {},
             onYearsOfExpChanged = {},
             onPrimarySpecialityChanged = {}
         )
