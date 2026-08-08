@@ -49,9 +49,6 @@ class RegistrationViewmodel @Inject constructor(
             )
         }
         viewModelScope.launch {
-            authenticationSessionStore.save(
-                AuthenticationSession(AuthenticationSessionDestination.COMPLETE_PROFILE),
-            )
             val draft = draftStore.draft.first()
             if (draft != null) restoreDraft(draft)
             loadServices(draft?.selectedServiceIds.orEmpty())
@@ -189,7 +186,10 @@ class RegistrationViewmodel @Inject constructor(
             submitRegistration(submission).fold(
                 onSuccess = { nurse ->
                     draftStore.clear()
-                    authenticationSessionStore.save(nurse.toSavedSession())
+                    val currentSession = authenticationSessionStore.session.first()
+                    authenticationSessionStore.save(
+                        nurse.toSavedSession(currentSession?.phoneNumber),
+                    )
                     updateState { copy(isSubmitting = false) }
                     sendEffect(RegistrationEffect.SubmissionSucceeded(nurse.id, nurse.verificationStatus))
                 },
@@ -350,7 +350,9 @@ private fun Attachment.toDraft() = AttachmentDraft(uri.toString(), name, mimeTyp
 
 private fun AttachmentDraft.toAttachment() = Attachment(Uri.parse(uri), name, mimeType)
 
-private fun com.carenest.provider.profile.domain.model.NurseProfile.toSavedSession() =
+private fun com.carenest.provider.profile.domain.model.NurseProfile.toSavedSession(
+    phoneNumber: String?,
+) =
     AuthenticationSession(
         destination = when (verificationStatus) {
             VerificationStatus.UNDER_REVIEW -> AuthenticationSessionDestination.UNDER_REVIEW
@@ -358,6 +360,7 @@ private fun com.carenest.provider.profile.domain.model.NurseProfile.toSavedSessi
             VerificationStatus.REJECTED -> AuthenticationSessionDestination.REJECTED
         },
         nurseId = id,
+        phoneNumber = phoneNumber,
     )
 
 private fun String.toBackendDate(): String {

@@ -18,6 +18,7 @@ enum class AuthenticationSessionDestination {
 data class AuthenticationSession(
     val destination: AuthenticationSessionDestination,
     val nurseId: String? = null,
+    val phoneNumber: String? = null,
 )
 
 interface AuthenticationSessionStore {
@@ -37,6 +38,7 @@ class DataStoreAuthenticationSessionStore @Inject constructor(
         AuthenticationSession(
             destination = destination,
             nurseId = preferences[NURSE_ID_KEY],
+            phoneNumber = preferences[PHONE_NUMBER_KEY],
         )
     }
 
@@ -45,6 +47,8 @@ class DataStoreAuthenticationSessionStore @Inject constructor(
             preferences[DESTINATION_KEY] = session.destination.name
             session.nurseId?.let { preferences[NURSE_ID_KEY] = it }
                 ?: preferences.remove(NURSE_ID_KEY)
+            session.phoneNumber?.let { preferences[PHONE_NUMBER_KEY] = it }
+                ?: preferences.remove(PHONE_NUMBER_KEY)
         }
     }
 
@@ -52,11 +56,13 @@ class DataStoreAuthenticationSessionStore @Inject constructor(
         dataStore.edit { preferences ->
             preferences.remove(DESTINATION_KEY)
             preferences.remove(NURSE_ID_KEY)
+            preferences.remove(PHONE_NUMBER_KEY)
         }
     }
 
     private companion object {
         val DESTINATION_KEY = stringPreferencesKey("authenticated_destination")
         val NURSE_ID_KEY = stringPreferencesKey("authenticated_nurse_id")
+        val PHONE_NUMBER_KEY = stringPreferencesKey("authenticated_phone_number")
     }
 }

@@ -15,6 +15,7 @@ import com.carenest.provider.core.mvi.DefaultStateHolder
 import com.carenest.provider.core.mvi.EffectPublisher
 import com.carenest.provider.core.mvi.StateHolder
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -90,12 +91,20 @@ class OtpViewModel @Inject constructor(
     }
 
     private suspend fun resolveAuthenticatedDestination(nurse: AuthenticatedNurse?) {
+        val phoneNumber = currentState.phoneNumber.normalizedPhoneNumber()
+        val savedSession = authenticationSessionStore.session.first()
         resolveDestination(nurse).fold(
-            onSuccess = { destination ->
-                authenticationSessionStore.save(destination.toSavedSession())
+            onSuccess = { serverDestination ->
+                val destination = serverDestination.withSavedProgressFallback(
+                    savedSession = savedSession,
+                    phoneNumber = phoneNumber,
+                )
+                authenticationSessionStore.save(destination.toSavedSession(phoneNumber))
                 Log.d(
                     "AuthRouting",
-                    "nurseStatus=${nurse?.verificationStatus}, destination=${destination::class.simpleName}",
+                    "nurseStatus=${nurse?.verificationStatus}, " +
+                        "serverDestination=${serverDestination::class.simpleName}, " +
+                        "destination=${destination::class.simpleName}",
                 )
                 updateState {
                     copy(
@@ -119,20 +128,49 @@ class OtpViewModel @Inject constructor(
     }
 }
 
-private fun AuthenticationDestination.toSavedSession(): AuthenticationSession = when (this) {
+private fun AuthenticationDestination.toSavedSession(phoneNumber: String): AuthenticationSession = when (this) {
     AuthenticationDestination.CompleteProfile -> AuthenticationSession(
         destination = AuthenticationSessionDestination.COMPLETE_PROFILE,
+        phoneNumber = phoneNumber,
     )
     is AuthenticationDestination.UnderReview -> AuthenticationSession(
         destination = AuthenticationSessionDestination.UNDER_REVIEW,
         nurseId = nurseId,
+        phoneNumber = phoneNumber,
     )
     is AuthenticationDestination.Rejected -> AuthenticationSession(
         destination = AuthenticationSessionDestination.REJECTED,
         nurseId = nurseId,
+        phoneNumber = phoneNumber,
     )
     is AuthenticationDestination.Approved -> AuthenticationSession(
         destination = AuthenticationSessionDestination.APPROVED,
         nurseId = nurseId,
+        phoneNumber = phoneNumber,
     )
 }
+
+internal fun AuthenticationDestination.withSavedProgressFallback(
+    savedSession: AuthenticationSession?,
+    phoneNumber: String,
+): AuthenticationDestination {
+    if (this != AuthenticationDestination.CompleteProfile ||
+        savedSession?.phoneNumber != phoneNumber
+    ) {
+        return this
+    }
+
+    val nurseId = savedSession.nurseId ?: return this
+    return when (savedSession.destination) {
+        AuthenticationSessionDestination.COMPLETE_PROFILE -> this
+        AuthenticationSessionDestination.UNDER_REVIEW ->
+            AuthenticationDestination.UnderReview(nurseId)
+        AuthenticationSessionDestination.REJECTED ->
+            AuthenticationDestination.Rejected(nurseId)
+        AuthenticationSessionDestination.APPROVED ->
+            AuthenticationDestination.Approved(nurseId)
+    }
+}
+
+private fun String.normalizedPhoneNumber(): String =
+    "+${replace(Regex("[^0-9]"), "")}"

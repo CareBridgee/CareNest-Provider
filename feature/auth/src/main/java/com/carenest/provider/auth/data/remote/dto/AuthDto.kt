@@ -72,6 +72,7 @@ data class FailedStepDto(
 @Serializable
 data class CurrentUserDto(
     val profileCompleted: Boolean,
+    val nurse: NurseAuthDto? = null,
 )
 
 @Serializable

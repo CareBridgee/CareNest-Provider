@@ -11,7 +11,7 @@ class AuthenticationDestinationResolver @Inject constructor() {
         profileCompleted: Boolean,
         nurse: AuthenticatedNurse?,
     ): AuthenticationDestination {
-        if (!profileCompleted || nurse == null) {
+        if (nurse == null || (!profileCompleted && !nurse.hasSubmittedApplication)) {
             return AuthenticationDestination.CompleteProfile
         }
         return when (nurse.verificationStatus) {
@@ -30,7 +30,7 @@ class ResolveAuthenticationDestinationUseCase @Inject constructor(
         repository.getCurrentUser().map { user ->
             resolver.resolve(
                 profileCompleted = user.profileCompleted,
-                nurse = nurse,
+                nurse = nurse ?: user.nurse,
             )
         }
 }
