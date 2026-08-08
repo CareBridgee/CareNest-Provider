@@ -1,15 +1,5 @@
 package com.carenest.request.domain.model
 
-enum class CancellationReason {
-    VEHICLE_ISSUE,
-    PERSONAL_EMERGENCY,
-    LOCATION_INACCESSIBLE,
-    SAFETY_CONCERN,
-    INCORRECT_PATIENT_DETAILS,
-    INAPPROPRIATE_CONDUCT,
-    OTHER,
-}
-
 data class Offer(
     val offerId: String,
     val nurseOfferId: String? = null,

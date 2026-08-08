@@ -4,7 +4,6 @@ import com.carenest.request.data.datasource.NurseRequestsDataSource
 import com.carenest.request.data.mapper.toDomain
 import com.carenest.request.data.mapper.toDomainOffer
 import com.carenest.request.data.remote.RequestRemoteDataSource
-import com.carenest.request.domain.model.CancellationReason
 import com.carenest.request.domain.model.Offer
 import com.carenest.request.domain.model.Request
 import com.carenest.request.domain.model.VisitCode
@@ -63,13 +62,7 @@ class NurseRequestsRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun cancelRequest(
-        requestId: String,
-        reason: CancellationReason,
-        note: String
-    ): Boolean {
-        // The current OpenAPI operation has no cancellation request body, so reason/note
-        // remain presentation-only until the backend contract supports them.
+    override suspend fun cancelRequest(requestId: String): Boolean {
         remoteDataSource.cancelServiceRequest(requestId)
         return true
     }

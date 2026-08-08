@@ -1,6 +1,5 @@
 package com.carenest.request.presentation.ui.offerconfirmed
 
-import com.carenest.request.domain.model.CancellationReason
 import com.carenest.request.domain.model.Offer
 import com.carenest.request.domain.model.VisitCode
 import com.carenest.request.presentation.UiText
@@ -14,8 +13,6 @@ data class OfferConfirmedUiState(
 
 data class CancelDialogUiState(
     val isVisible: Boolean = false,
-    val selectedReason: CancellationReason? = null,
-    val note: String = "",
     val isSubmitting: Boolean = false,
 )
 
@@ -26,8 +23,6 @@ sealed interface OfferConfirmedIntent {
     data object CancelClicked : OfferConfirmedIntent
     data object OnMessageClicked : OfferConfirmedIntent
     data object OnCallClicked : OfferConfirmedIntent
-    data class ReasonSelected(val reason: CancellationReason) : OfferConfirmedIntent
-    data class NoteChanged(val note: String) : OfferConfirmedIntent
     data object DismissCancelDialog : OfferConfirmedIntent
     data object ConfirmCancelClicked : OfferConfirmedIntent
 }
