@@ -50,6 +50,7 @@
     <string name="estimated_price">السعر التقديري</string>
     <string name="requests_list_title">الطلبات</string>
     <string name="requests_list_pending_label">الطلبات المعلقة</string>
+    <string name="request_des">الرعاية المنزلية بعد العملية</string>
     <string name="requests_list_offers_count">%1$d عروض</string>
     <string name="offer_confirmed_title">تم تأكيد الطلب!</string>
     <string name="offer_confirmed_subtitle">وافق المريض على عرضك. أنت في طريقك لتقديم الرعاية.</string>

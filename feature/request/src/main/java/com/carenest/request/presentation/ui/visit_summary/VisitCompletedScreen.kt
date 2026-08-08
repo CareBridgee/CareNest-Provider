@@ -53,6 +53,7 @@ fun VisitCompletedScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val ratingSubmittedMessage = stringResource(R.string.visit_rating_local_only)
 
     LaunchedEffect(requestId) {
         viewModel.handleIntent(VisitCompletedIntent.LoadVisitSummary(requestId))
@@ -62,9 +63,8 @@ fun VisitCompletedScreen(
         when (effect) {
             VisitCompletedEffect.NavigateHome -> onNavigateHome()
             VisitCompletedEffect.RatingSubmitted -> {
-                val message = context.getString(R.string.visit_rating_local_only)
-                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-                onShowSnackbar(message)
+                Toast.makeText(context, ratingSubmittedMessage, Toast.LENGTH_LONG).show()
+                onShowSnackbar(ratingSubmittedMessage)
             }
             is VisitCompletedEffect.ShowError -> {
                 val message = effect.message.asString(context)
