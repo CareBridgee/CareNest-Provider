@@ -44,6 +44,8 @@ import com.carenest.provider.auth.navigation.providerAuthStartRoute
 import com.carenest.provider.core.navigation.goBack
 import com.carenest.provider.core.navigation.navigate
 import com.carenest.provider.core.navigation.replaceWith
+import com.carenest.provider.core.datastore.AuthenticationSession
+import com.carenest.provider.core.datastore.AuthenticationSessionDestination
 import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
 import com.carenest.provider.designsystem.components.topbar.TopBarLeading
 import com.carenest.provider.designsystem.components.bottomnav.BottomNavItem
@@ -109,12 +111,31 @@ fun AppNavigation(
         }
     }
 
+    fun restoreAuthenticatedSession(session: AuthenticationSession) {
+        when (session.destination) {
+            AuthenticationSessionDestination.COMPLETE_PROFILE ->
+                backStack.replaceWith(providerProfileCompletionStartRoute())
+            AuthenticationSessionDestination.UNDER_REVIEW,
+            AuthenticationSessionDestination.REJECTED -> {
+                val nurseId = session.nurseId
+                if (nurseId != null) {
+                    backStack.replaceWith(providerProfileReviewRoute(nurseId))
+                } else {
+                    backStack.replaceWith(providerAuthStartRoute())
+                }
+            }
+            AuthenticationSessionDestination.APPROVED ->
+                backStack.replaceWith(HomeRoutes.Home)
+        }
+    }
+
     val entryProvider: (NavKey) -> NavEntry<NavKey> = entryProvider {
         providerOnboardingEntries(
             backStack = backStack,
             onAuthenticationRequested = {
                 backStack.replaceWith(providerAuthStartRoute())
             },
+            onAuthenticatedSessionRestored = ::restoreAuthenticatedSession,
         )
         providerAuthEntries(
             backStack = backStack,

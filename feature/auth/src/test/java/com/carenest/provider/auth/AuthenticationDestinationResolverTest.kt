@@ -7,6 +7,9 @@ import com.carenest.provider.auth.domain.repository.NurseVerificationStatus
 import com.carenest.provider.auth.domain.usecase.AuthenticationDestinationResolver
 import com.carenest.provider.auth.domain.usecase.ResolveAuthenticationDestinationUseCase
 import com.carenest.provider.auth.domain.util.AuthenticationDestination
+import com.carenest.provider.auth.presentation.auth.otp.withSavedProgressFallback
+import com.carenest.provider.core.datastore.AuthenticationSession
+import com.carenest.provider.core.datastore.AuthenticationSessionDestination
 import com.carenest.provider.core.util.Resource
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -74,6 +77,61 @@ class AuthenticationDestinationResolverTest {
     }
 
     @Test
+    fun `submitted application routes to under review even when profile flag is stale`() {
+        val destination = resolver.resolve(
+            profileCompleted = false,
+            nurse = nurse(
+                status = NurseVerificationStatus.UNDER_REVIEW,
+                hasSubmittedApplication = true,
+            ),
+        )
+
+        assertEquals(AuthenticationDestination.UnderReview(NURSE_ID), destination)
+    }
+
+    @Test
+    fun `same phone restores submitted under review application when backend says complete profile`() {
+        val destination = AuthenticationDestination.CompleteProfile.withSavedProgressFallback(
+            savedSession = AuthenticationSession(
+                destination = AuthenticationSessionDestination.UNDER_REVIEW,
+                nurseId = NURSE_ID,
+                phoneNumber = PHONE_NUMBER,
+            ),
+            phoneNumber = PHONE_NUMBER,
+        )
+
+        assertEquals(AuthenticationDestination.UnderReview(NURSE_ID), destination)
+    }
+
+    @Test
+    fun `different phone does not inherit saved application progress`() {
+        val destination = AuthenticationDestination.CompleteProfile.withSavedProgressFallback(
+            savedSession = AuthenticationSession(
+                destination = AuthenticationSessionDestination.UNDER_REVIEW,
+                nurseId = NURSE_ID,
+                phoneNumber = PHONE_NUMBER,
+            ),
+            phoneNumber = "+201111111111",
+        )
+
+        assertEquals(AuthenticationDestination.CompleteProfile, destination)
+    }
+
+    @Test
+    fun `server status wins when it returns a concrete destination`() {
+        val destination = AuthenticationDestination.Rejected(NURSE_ID).withSavedProgressFallback(
+            savedSession = AuthenticationSession(
+                destination = AuthenticationSessionDestination.UNDER_REVIEW,
+                nurseId = NURSE_ID,
+                phoneNumber = PHONE_NUMBER,
+            ),
+            phoneNumber = PHONE_NUMBER,
+        )
+
+        assertEquals(AuthenticationDestination.Rejected(NURSE_ID), destination)
+    }
+
+    @Test
     fun `users me failure does not produce a guessed destination`() = runBlocking {
         val expected = IllegalStateException("current user unavailable")
         val useCase = ResolveAuthenticationDestinationUseCase(
@@ -107,8 +165,14 @@ class AuthenticationDestinationResolverTest {
         assertEquals(0, repository.verifyOtpCalls)
     }
 
-    private fun nurse(status: NurseVerificationStatus) =
-        AuthenticatedNurse(id = NURSE_ID, verificationStatus = status)
+    private fun nurse(
+        status: NurseVerificationStatus,
+        hasSubmittedApplication: Boolean = false,
+    ) = AuthenticatedNurse(
+        id = NURSE_ID,
+        verificationStatus = status,
+        hasSubmittedApplication = hasSubmittedApplication,
+    )
 
     private class FakeAuthRepository(
         private val currentUserResults: List<Result<AuthenticatedUser>>,
@@ -137,5 +201,6 @@ class AuthenticationDestinationResolverTest {
 
     private companion object {
         const val NURSE_ID = "9dcfd8af-c7e7-407d-b156-0f50b2298285"
+        const val PHONE_NUMBER = "+201000000000"
     }
 }

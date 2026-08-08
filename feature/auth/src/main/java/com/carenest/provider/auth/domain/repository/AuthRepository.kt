@@ -18,11 +18,13 @@ interface AuthRepository {
 
 data class AuthenticatedUser(
     val profileCompleted: Boolean,
+    val nurse: AuthenticatedNurse? = null,
 )
 
 data class AuthenticatedNurse(
     val id: String,
     val verificationStatus: NurseVerificationStatus,
+    val hasSubmittedApplication: Boolean = false,
 )
 
 enum class NurseVerificationStatus {

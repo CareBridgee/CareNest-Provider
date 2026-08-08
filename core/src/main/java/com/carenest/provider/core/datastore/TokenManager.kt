@@ -16,7 +16,7 @@ interface TokenManager {
 }
 
 class DataStoreTokenManager @Inject constructor(
-    @AuthDataStore private val dataStore: DataStore<Preferences>
+    @AuthDataStore private val dataStore: DataStore<Preferences>,
 ) : TokenManager {
 
     override val accessToken: Flow<String?> = dataStore.data.map { preferences ->

@@ -96,18 +96,7 @@ class AuthRepositoryImpl @Inject constructor(
                     refreshToken = refreshToken,
                 )
 
-                val nurse = authResponse.user?.nurse
-
-                Result.success(
-                    nurse?.let {
-                        AuthenticatedNurse(
-                            id = it.id,
-                            verificationStatus = NurseVerificationStatus.valueOf(
-                                it.verificationStatus,
-                            ),
-                        )
-                    },
-                )
+                Result.success(authResponse.user?.nurse?.toDomain())
             } else {
                 handleErrorResponse(response)
             }
@@ -131,6 +120,7 @@ class AuthRepositoryImpl @Inject constructor(
                 Result.success(
                     AuthenticatedUser(
                         profileCompleted = user.profileCompleted,
+                        nurse = user.nurse?.toDomain(),
                     ),
                 )
             } else {
@@ -202,3 +192,17 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 }
+
+private fun com.carenest.provider.auth.data.remote.dto.NurseAuthDto.toDomain() =
+    AuthenticatedNurse(
+        id = id,
+        verificationStatus = NurseVerificationStatus.valueOf(verificationStatus),
+        hasSubmittedApplication = listOf(
+            nationalId,
+            nationalIdFrontUrl,
+            nationalIdBackUrl,
+            licenseImageUrl,
+            professionalCertificateUrl,
+            specialization,
+        ).any { !it.isNullOrBlank() } || yearsOfExperience != null,
+    )

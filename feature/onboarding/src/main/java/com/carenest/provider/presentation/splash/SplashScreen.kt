@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carenest.provider.core.mvi.ObserveEffect
+import com.carenest.provider.core.datastore.AuthenticationSession
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.feature.onboarding.R
@@ -72,6 +73,7 @@ private const val LOGO_GLOW_INITIAL_ALPHA = 0.18f
 fun SplashScreen(
     onNavigateToOnboarding: () -> Unit,
     onNavigateToAuthentication: () -> Unit,
+    onNavigateToAuthenticatedSession: (AuthenticationSession) -> Unit,
     viewModel: SplashViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -80,6 +82,8 @@ fun SplashScreen(
         when (effect) {
             SplashEffect.NavigateToOnboarding -> onNavigateToOnboarding()
             SplashEffect.NavigateToAuthentication -> onNavigateToAuthentication()
+            is SplashEffect.NavigateToAuthenticatedSession ->
+                onNavigateToAuthenticatedSession(effect.session)
         }
     }
 

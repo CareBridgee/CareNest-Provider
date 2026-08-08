@@ -85,11 +85,9 @@ fun ApplicationReviewComponent(
             onEditClick = onEditPersonalInfo
         ) {
             InfoRow(label = stringResource(com.carenest.provider.profile.R.string.full_name_label), value = "${state.personalInfoState.firstName} ${state.personalInfoState.lastName}")
-            InfoRow(label = stringResource(com.carenest.provider.profile.R.string.email_label), value = state.personalInfoState.email)
             if (state.personalInfoState.phoneNumber.isNotBlank()) {
                 InfoRow(label = stringResource(com.carenest.provider.profile.R.string.phone_number_label), value = state.personalInfoState.phoneNumber)
             }
-            InfoRow(label = stringResource(com.carenest.provider.profile.R.string.location_label), value = state.personalInfoState.location)
         }
 
         Spacer(modifier = Modifier.height(Theme.spacing.medium))
