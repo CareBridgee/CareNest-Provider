@@ -184,11 +184,13 @@ class NurseSocketClientImpl @Inject constructor(
 
     private suspend fun collectIncomingFrames() {
         stompClient.incomingFrames.collect { frame ->
+            Log.d("NurseSocketClient", "Raw Frame Received: Command=${frame.command}, Headers=${frame.headers}")
+            
             if (frame.command == StompCommand.MESSAGE) {
                 val destination = frame.headers["destination"] ?: return@collect
                 val body = frame.body?.trim('\u0000') ?: return@collect
 
-                Log.d("NurseSocketClient", "Received frame: dest=$destination, body=$body")
+                Log.i("NurseSocketClient", "Message from $destination: $body")
 
                 try {
                     when {
@@ -198,10 +200,11 @@ class NurseSocketClientImpl @Inject constructor(
                         }
                         destination.contains("/queue/errors") -> {
                             val errorPayload = json.decodeFromString<SocketErrorPayload>(body)
+                            Log.e("NurseSocketClient", "Server Error on $destination: ${errorPayload.code} - ${errorPayload.message}")
                             _socketErrors.emit(errorPayload)
                         }
                         destination.contains("/queue/nearby-request") -> {
-                            Log.i("NurseSocketClient", "NEW NEARBY REQUEST RECEIVED!")
+                            Log.i("NurseSocketClient", "!!! MATCHED NEARBY REQUEST !!!")
                             val nearbyReq = json.decodeFromString<NearbyNurseServiceRequestResponse>(body)
                             _nearbyRequests.emit(nearbyReq)
                         }
@@ -214,14 +217,14 @@ class NurseSocketClientImpl @Inject constructor(
                             _chatMessages.emit(chatMessage)
                         }
                         else -> {
-                            Log.w("NurseSocketClient", "Unhandled destination: $destination")
+                            Log.w("NurseSocketClient", "No handler for destination: $destination")
                         }
                     }
                 } catch (e: Exception) {
-                    Log.e("NurseSocketClient", "Failed to parse frame body: $body", e)
+                    Log.e("NurseSocketClient", "Decoding failed for $destination", e)
                 }
             } else if (frame.command == StompCommand.ERROR) {
-                Log.e("NurseSocketClient", "STOMP ERROR received: ${frame.headers["message"]} - ${frame.body}")
+                Log.e("NurseSocketClient", "Terminal STOMP ERROR: ${frame.headers["message"]}")
             }
         }
     }

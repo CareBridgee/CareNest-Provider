@@ -1,5 +1,6 @@
 package com.carenest.home.presentation.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.carenest.home.domain.model.RequestStatus
@@ -89,8 +90,8 @@ class HomeViewModel @Inject constructor(
         if (isOnline) {
             nurseSocketClient.connect()
             viewModelScope.launch {
-                // TODO: Replace with real coordinates from a LocationManager
-                nurseSocketClient.updateAvailability(true, 30.0444, 31.2357)
+                // Testing coordinates provided by user
+                nurseSocketClient.updateAvailability(true, 30.2361926, 31.4790023)
             }
 
             // Stream real-time socket requests
@@ -120,6 +121,7 @@ class HomeViewModel @Inject constructor(
             }
 
             fetchJob = viewModelScope.launch {
+                Log.d("HomeViewModel", "Fetching initial requests via REST...")
                 coroutineScope {
                     val requestsDeferred = async { getIncomingRequests() }
                     val earningsDeferred = async { getEarningsSummary() }
@@ -127,10 +129,13 @@ class HomeViewModel @Inject constructor(
                     val requestsResult = requestsDeferred.await()
                     val earningsSummary = earningsDeferred.await().getOrNull()
 
+                    val fetchedRequests = requestsResult.getOrDefault(emptyList())
+                    Log.d("HomeViewModel", "REST fetch completed. Found ${fetchedRequests.size} requests.")
+
                     updateState {
                         copy(
                             isLoading = false,
-                            requests = (requestsResult.getOrDefault(emptyList()) + requests).distinctBy { it.id },
+                            requests = (fetchedRequests + requests).distinctBy { it.id },
                             earnings = earningsSummary?.todayEarnings ?: earnings,
                             changePercent = earningsSummary?.changePercent ?: changePercent,
                             jobsToday = earningsSummary?.jobsToday ?: jobsToday,
