@@ -3,10 +3,11 @@ package com.carenest.provider.auth
 import com.carenest.provider.auth.domain.repository.AuthRepository
 import com.carenest.provider.auth.domain.repository.AuthenticatedNurse
 import com.carenest.provider.auth.domain.repository.AuthenticatedUser
-import com.carenest.provider.auth.domain.repository.AuthenticationDestination
 import com.carenest.provider.auth.domain.repository.NurseVerificationStatus
 import com.carenest.provider.auth.domain.usecase.AuthenticationDestinationResolver
 import com.carenest.provider.auth.domain.usecase.ResolveAuthenticationDestinationUseCase
+import com.carenest.provider.auth.domain.util.AuthenticationDestination
+import com.carenest.provider.core.util.Resource
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -118,6 +119,9 @@ class AuthenticationDestinationResolverTest {
             private set
 
         override suspend fun login(phoneNumber: String): Result<Unit> = Result.success(Unit)
+        override suspend fun devLogin(phoneNumber: String): Resource<String> {
+            TODO("Not yet implemented")
+        }
 
         override suspend fun verifyOtp(
             phoneNumber: String,
