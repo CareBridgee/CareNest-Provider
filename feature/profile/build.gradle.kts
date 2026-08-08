@@ -55,6 +55,7 @@ dependencies {
 
     implementation(libs.bundles.ktor)
     implementation(libs.kotlinx.serialization)
+    implementation(libs.androidx.datastore.preferences)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)

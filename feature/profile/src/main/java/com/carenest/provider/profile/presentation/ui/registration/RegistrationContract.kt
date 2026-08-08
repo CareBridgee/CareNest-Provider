@@ -20,9 +20,7 @@ data class StepperState(
 data class PersonalInfoState(
     val firstName: String = "",
     val lastName: String = "",
-    val email: String = "",
     val phoneNumber: String = "",
-    val location: String = "",
     val dateOfBirth: String = "",
     val nationalId: String = "",
     val gender: Gender = Gender.UNKNOWN,
@@ -74,6 +72,7 @@ data class RegistrationUiState(
     val verificationDocumentsUiState: VerificationDocumentsUiState = VerificationDocumentsUiState(),
     val servicesUiState: ServicesUiState = ServicesUiState(),
     val applicationReviewUiState: ApplicationReviewUiState = ApplicationReviewUiState(),
+    val currentPage: Int = 0,
     val errorMessage: String? = null,
 ) {
     val hasError = errorMessage != null
@@ -115,8 +114,6 @@ sealed interface RegistrationIntent {
     data class OnProfilePhotoPicked(val attachment: Attachment) : RegistrationIntent
     data class OnFirstNameChanged(val firstName: String) : RegistrationIntent
     data class OnLastNameChanged(val lastName: String) : RegistrationIntent
-    data class OnEmailChanged(val email: String) : RegistrationIntent
-    data class OnLocationChanged(val location: String) : RegistrationIntent
     data class OnDateOfBirthChanged(val dateOfBirth: String) : RegistrationIntent
     data class OnNationalIdChanged(val nationalId: String) : RegistrationIntent
     data class OnGenderChanged(val gender: Gender) : RegistrationIntent
@@ -130,6 +127,7 @@ sealed interface RegistrationIntent {
     data class OnServiceToggle(val service: ServiceUi) : RegistrationIntent
     data class OnCertificationToggle(val isCertified: Boolean) : RegistrationIntent
     data class OnContinueClicked(val currentPage: Int) : RegistrationIntent
+    data class OnPageChanged(val page: Int) : RegistrationIntent
     data object OnBackClicked : RegistrationIntent
     data object OnSubmitApplication : RegistrationIntent
 }

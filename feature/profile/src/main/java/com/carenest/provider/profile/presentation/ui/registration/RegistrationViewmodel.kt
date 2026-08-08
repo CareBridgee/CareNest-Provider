@@ -1,7 +1,11 @@
 package com.carenest.provider.profile.presentation.ui.registration
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.carenest.provider.core.datastore.AuthenticationSession
+import com.carenest.provider.core.datastore.AuthenticationSessionDestination
+import com.carenest.provider.core.datastore.AuthenticationSessionStore
 import com.carenest.provider.core.mvi.DefaultEffectPublisher
 import com.carenest.provider.core.mvi.DefaultStateHolder
 import com.carenest.provider.core.mvi.EffectPublisher
@@ -9,9 +13,13 @@ import com.carenest.provider.core.mvi.StateHolder
 import com.carenest.provider.designsystem.R
 import com.carenest.provider.designsystem.components.toast.ToastType
 import com.carenest.provider.profile.data.file.ContentUriFileReader
+import com.carenest.provider.profile.data.local.AttachmentDraft
+import com.carenest.provider.profile.data.local.RegistrationDraft
+import com.carenest.provider.profile.data.local.RegistrationDraftStore
 import com.carenest.provider.profile.domain.model.NurseRegistration
 import com.carenest.provider.profile.domain.model.RegistrationSubmission
 import com.carenest.provider.profile.domain.model.UserUpdate
+import com.carenest.provider.profile.domain.model.VerificationStatus
 import com.carenest.provider.profile.domain.usecase.LoadServiceTypesUseCase
 import com.carenest.provider.profile.domain.usecase.SubmitRegistrationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,6 +27,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -27,6 +36,8 @@ class RegistrationViewmodel @Inject constructor(
     private val loadServiceTypes: LoadServiceTypesUseCase,
     private val submitRegistration: SubmitRegistrationUseCase,
     private val fileReader: ContentUriFileReader,
+    private val draftStore: RegistrationDraftStore,
+    private val authenticationSessionStore: AuthenticationSessionStore,
 ) : ViewModel(),
     StateHolder<RegistrationUiState> by DefaultStateHolder(RegistrationUiState()),
     EffectPublisher<RegistrationEffect> by DefaultEffectPublisher() {
@@ -37,15 +48,20 @@ class RegistrationViewmodel @Inject constructor(
                 stepperState = StepperState(4, 3, "step_personal_info"),
             )
         }
-        loadServices()
+        viewModelScope.launch {
+            authenticationSessionStore.save(
+                AuthenticationSession(AuthenticationSessionDestination.COMPLETE_PROFILE),
+            )
+            val draft = draftStore.draft.first()
+            if (draft != null) restoreDraft(draft)
+            loadServices(draft?.selectedServiceIds.orEmpty())
+        }
     }
 
     fun onIntent(intent: RegistrationIntent) {
         when (intent) {
             is RegistrationIntent.OnFirstNameChanged -> updatePersonal { copy(firstName = intent.firstName) }
             is RegistrationIntent.OnLastNameChanged -> updatePersonal { copy(lastName = intent.lastName) }
-            is RegistrationIntent.OnEmailChanged -> updatePersonal { copy(email = intent.email) }
-            is RegistrationIntent.OnLocationChanged -> updatePersonal { copy(location = intent.location) }
             is RegistrationIntent.OnDateOfBirthChanged -> updatePersonal { copy(dateOfBirth = intent.dateOfBirth) }
             is RegistrationIntent.OnNationalIdChanged -> updatePersonal { copy(nationalId = intent.nationalId) }
             is RegistrationIntent.OnGenderChanged -> updatePersonal { copy(gender = intent.gender) }
@@ -78,29 +94,50 @@ class RegistrationViewmodel @Inject constructor(
             is RegistrationIntent.OnPrimarySpecialityChanged -> updateDocuments {
                 copy(primarySpeciality = intent.speciality)
             }
-            is RegistrationIntent.OnServiceToggle -> updateState {
-                val selected = servicesUiState.selectedServices
-                val updated = if (selected.any { it.id == intent.service.id }) {
-                    selected.filterNot { it.id == intent.service.id }
-                } else selected + intent.service
-                copy(servicesUiState = servicesUiState.copy(selectedServices = updated))
+            is RegistrationIntent.OnServiceToggle -> {
+                updateState {
+                    val selected = servicesUiState.selectedServices
+                    val updated = if (selected.any { it.id == intent.service.id }) {
+                        selected.filterNot { it.id == intent.service.id }
+                    } else selected + intent.service
+                    copy(servicesUiState = servicesUiState.copy(selectedServices = updated))
+                }
+                persistDraft()
             }
-            is RegistrationIntent.OnCertificationToggle -> updateState {
-                copy(applicationReviewUiState = applicationReviewUiState.copy(isCertified = intent.isCertified))
+            is RegistrationIntent.OnCertificationToggle -> {
+                updateState {
+                    copy(applicationReviewUiState = applicationReviewUiState.copy(isCertified = intent.isCertified))
+                }
+                persistDraft()
             }
             is RegistrationIntent.OnContinueClicked -> {
                 if (validateCurrentStep(intent.currentPage)) {
                     updateStepperState(intent.currentPage + 1)
+                    updateState { copy(currentPage = (intent.currentPage + 1).coerceAtMost(3)) }
+                    persistDraft()
                     sendEffect(RegistrationEffect.NavigateToNextStep)
                 }
             }
-            RegistrationIntent.OnBackClicked -> sendEffect(RegistrationEffect.NavigateToPreviousStep)
+            is RegistrationIntent.OnPageChanged -> {
+                val page = intent.page.coerceIn(0, 3)
+                updateState { copy(currentPage = page) }
+                updateStepperState(page)
+                persistDraft()
+            }
+            RegistrationIntent.OnBackClicked -> {
+                if (currentState.currentPage > 0) {
+                    updateState { copy(currentPage = currentPage - 1) }
+                    updateStepperState(currentState.currentPage)
+                    persistDraft()
+                }
+                sendEffect(RegistrationEffect.NavigateToPreviousStep)
+            }
             RegistrationIntent.OnSubmitApplication -> submit()
             RegistrationIntent.OnRetryServices -> loadServices()
         }
     }
 
-    private fun loadServices() {
+    private fun loadServices(selectedServiceIds: List<String> = currentState.servicesUiState.selectedServices.map { it.id }) {
         if (currentState.servicesUiState.isLoading) return
         viewModelScope.launch {
             updateState {
@@ -115,6 +152,9 @@ class RegistrationViewmodel @Inject constructor(
                                 availableServices = services.map {
                                     ServiceUi(R.drawable.ic_services, it.name, it.id, it.description)
                                 },
+                                selectedServices = services
+                                    .filter { it.id in selectedServiceIds }
+                                    .map { ServiceUi(R.drawable.ic_services, it.name, it.id, it.description) },
                                 errorMessage = null,
                             )
                         )
@@ -148,6 +188,8 @@ class RegistrationViewmodel @Inject constructor(
 
             submitRegistration(submission).fold(
                 onSuccess = { nurse ->
+                    draftStore.clear()
+                    authenticationSessionStore.save(nurse.toSavedSession())
                     updateState { copy(isSubmitting = false) }
                     sendEffect(RegistrationEffect.SubmissionSucceeded(nurse.id, nurse.verificationStatus))
                 },
@@ -167,7 +209,6 @@ class RegistrationViewmodel @Inject constructor(
             user = UserUpdate(
                 firstName = personal.firstName.trim(),
                 lastName = personal.lastName.trim(),
-                email = personal.email.trim().takeIf(String::isNotEmpty),
                 dateOfBirth = personal.dateOfBirth.toBackendDate(),
                 gender = personal.gender.name,
                 profileImage = fileReader.readAttachment(requireNotNull(personal.profilePhoto)),
@@ -227,10 +268,12 @@ class RegistrationViewmodel @Inject constructor(
 
     private fun updatePersonal(transform: PersonalInfoState.() -> PersonalInfoState) {
         updateState { copy(personalInfoState = personalInfoState.transform()) }
+        persistDraft()
     }
 
     private fun updateDocuments(transform: VerificationDocumentsUiState.() -> VerificationDocumentsUiState) {
         updateState { copy(verificationDocumentsUiState = verificationDocumentsUiState.transform()) }
+        persistDraft()
     }
 
     private fun updateStepperState(page: Int) {
@@ -247,7 +290,75 @@ class RegistrationViewmodel @Inject constructor(
         return century + nid.substring(1, 3) == parts[2] &&
             nid.substring(3, 5) == parts[0] && nid.substring(5, 7) == parts[1]
     }
+
+    private fun restoreDraft(draft: RegistrationDraft) {
+        val page = draft.currentPage.coerceIn(0, 3)
+        updateState {
+            copy(
+                currentPage = page,
+                personalInfoState = PersonalInfoState(
+                    firstName = draft.firstName,
+                    lastName = draft.lastName,
+                    dateOfBirth = draft.dateOfBirth,
+                    nationalId = draft.nationalId,
+                    gender = runCatching { Gender.valueOf(draft.gender) }.getOrDefault(Gender.UNKNOWN),
+                    profilePhoto = draft.profilePhoto?.toAttachment(),
+                ),
+                verificationDocumentsUiState = VerificationDocumentsUiState(
+                    nationalIdFront = draft.nationalIdFront?.toAttachment(),
+                    nationalIdBack = draft.nationalIdBack?.toAttachment(),
+                    licenseNumber = draft.licenseNumber,
+                    nursingLicense = draft.nursingLicense?.toAttachment(),
+                    professionalCertificate = draft.professionalCertificate?.toAttachment(),
+                    yearsOfExp = draft.yearsOfExp,
+                    primarySpeciality = draft.primarySpeciality,
+                ),
+                applicationReviewUiState = ApplicationReviewUiState(
+                    isCertified = draft.isCertified,
+                ),
+            )
+        }
+        updateStepperState(page)
+    }
+
+    private fun persistDraft() {
+        val snapshot = currentState.toDraft()
+        viewModelScope.launch { draftStore.save(snapshot) }
+    }
 }
+
+private fun RegistrationUiState.toDraft() = RegistrationDraft(
+    currentPage = currentPage,
+    firstName = personalInfoState.firstName,
+    lastName = personalInfoState.lastName,
+    dateOfBirth = personalInfoState.dateOfBirth,
+    nationalId = personalInfoState.nationalId,
+    gender = personalInfoState.gender.name,
+    profilePhoto = personalInfoState.profilePhoto?.toDraft(),
+    nationalIdFront = verificationDocumentsUiState.nationalIdFront?.toDraft(),
+    nationalIdBack = verificationDocumentsUiState.nationalIdBack?.toDraft(),
+    licenseNumber = verificationDocumentsUiState.licenseNumber,
+    nursingLicense = verificationDocumentsUiState.nursingLicense?.toDraft(),
+    professionalCertificate = verificationDocumentsUiState.professionalCertificate?.toDraft(),
+    yearsOfExp = verificationDocumentsUiState.yearsOfExp,
+    primarySpeciality = verificationDocumentsUiState.primarySpeciality,
+    selectedServiceIds = servicesUiState.selectedServices.map { it.id },
+    isCertified = applicationReviewUiState.isCertified,
+)
+
+private fun Attachment.toDraft() = AttachmentDraft(uri.toString(), name, mimeType)
+
+private fun AttachmentDraft.toAttachment() = Attachment(Uri.parse(uri), name, mimeType)
+
+private fun com.carenest.provider.profile.domain.model.NurseProfile.toSavedSession() =
+    AuthenticationSession(
+        destination = when (verificationStatus) {
+            VerificationStatus.UNDER_REVIEW -> AuthenticationSessionDestination.UNDER_REVIEW
+            VerificationStatus.APPROVED -> AuthenticationSessionDestination.APPROVED
+            VerificationStatus.REJECTED -> AuthenticationSessionDestination.REJECTED
+        },
+        nurseId = id,
+    )
 
 private fun String.toBackendDate(): String {
     val source = SimpleDateFormat("MM/dd/yyyy", Locale.US).apply { isLenient = false }

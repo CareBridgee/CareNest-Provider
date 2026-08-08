@@ -36,6 +36,12 @@ abstract class TokenManagerModule {
     abstract fun bindTokenManager(
         implementation: DataStoreTokenManager
     ): TokenManager
+
+    @Binds
+    @Singleton
+    abstract fun bindAuthenticationSessionStore(
+        implementation: DataStoreAuthenticationSessionStore,
+    ): AuthenticationSessionStore
 }
 
 @Module

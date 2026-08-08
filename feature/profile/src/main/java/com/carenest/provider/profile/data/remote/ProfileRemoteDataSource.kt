@@ -35,7 +35,6 @@ class KtorProfileRemoteDataSource @Inject constructor(
             setBody(MultiPartFormDataContent(formData {
                 append("firstName", request.firstName)
                 append("lastName", request.lastName)
-                request.email?.takeIf(String::isNotBlank)?.let { append("email", it) }
                 append("dateOfBirth", request.dateOfBirth)
                 append("gender", request.gender)
                 request.profileImageUrl?.takeIf(String::isNotBlank)?.let {

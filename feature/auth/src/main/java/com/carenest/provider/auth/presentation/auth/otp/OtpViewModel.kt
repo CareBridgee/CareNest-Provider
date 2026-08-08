@@ -6,6 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.carenest.provider.auth.domain.usecase.VerifyOtpUseCase
 import com.carenest.provider.auth.domain.usecase.ResolveAuthenticationDestinationUseCase
 import com.carenest.provider.auth.domain.repository.AuthenticatedNurse
+import com.carenest.provider.auth.domain.util.AuthenticationDestination
+import com.carenest.provider.core.datastore.AuthenticationSession
+import com.carenest.provider.core.datastore.AuthenticationSessionDestination
+import com.carenest.provider.core.datastore.AuthenticationSessionStore
 import com.carenest.provider.core.mvi.DefaultEffectPublisher
 import com.carenest.provider.core.mvi.DefaultStateHolder
 import com.carenest.provider.core.mvi.EffectPublisher
@@ -18,6 +22,7 @@ import javax.inject.Inject
 class OtpViewModel @Inject constructor(
     private val verifyOtpUseCase: VerifyOtpUseCase,
     private val resolveDestination: ResolveAuthenticationDestinationUseCase,
+    private val authenticationSessionStore: AuthenticationSessionStore,
 ) : ViewModel(),
     StateHolder<OtpState> by DefaultStateHolder(OtpState()),
     EffectPublisher<OtpEffect> by DefaultEffectPublisher() {
@@ -87,6 +92,7 @@ class OtpViewModel @Inject constructor(
     private suspend fun resolveAuthenticatedDestination(nurse: AuthenticatedNurse?) {
         resolveDestination(nurse).fold(
             onSuccess = { destination ->
+                authenticationSessionStore.save(destination.toSavedSession())
                 Log.d(
                     "AuthRouting",
                     "nurseStatus=${nurse?.verificationStatus}, destination=${destination::class.simpleName}",
@@ -111,4 +117,22 @@ class OtpViewModel @Inject constructor(
             },
         )
     }
+}
+
+private fun AuthenticationDestination.toSavedSession(): AuthenticationSession = when (this) {
+    AuthenticationDestination.CompleteProfile -> AuthenticationSession(
+        destination = AuthenticationSessionDestination.COMPLETE_PROFILE,
+    )
+    is AuthenticationDestination.UnderReview -> AuthenticationSession(
+        destination = AuthenticationSessionDestination.UNDER_REVIEW,
+        nurseId = nurseId,
+    )
+    is AuthenticationDestination.Rejected -> AuthenticationSession(
+        destination = AuthenticationSessionDestination.REJECTED,
+        nurseId = nurseId,
+    )
+    is AuthenticationDestination.Approved -> AuthenticationSession(
+        destination = AuthenticationSessionDestination.APPROVED,
+        nurseId = nurseId,
+    )
 }

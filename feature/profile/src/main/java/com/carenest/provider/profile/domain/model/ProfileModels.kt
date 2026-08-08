@@ -9,7 +9,6 @@ data class UploadFile(
 data class UserUpdate(
     val firstName: String,
     val lastName: String,
-    val email: String?,
     val dateOfBirth: String,
     val gender: String,
     val profileImageUrl: String? = null,

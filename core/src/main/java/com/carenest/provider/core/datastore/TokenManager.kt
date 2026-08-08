@@ -16,7 +16,7 @@ interface TokenManager {
 }
 
 class DataStoreTokenManager @Inject constructor(
-    @AuthDataStore private val dataStore: DataStore<Preferences>
+    @AuthDataStore private val dataStore: DataStore<Preferences>,
 ) : TokenManager {
 
     override val accessToken: Flow<String?> = dataStore.data.map { preferences ->
@@ -38,11 +38,15 @@ class DataStoreTokenManager @Inject constructor(
         dataStore.edit { preferences ->
             preferences.remove(ACCESS_TOKEN_KEY)
             preferences.remove(REFRESH_TOKEN_KEY)
+            preferences.remove(AUTHENTICATED_DESTINATION_KEY)
+            preferences.remove(AUTHENTICATED_NURSE_ID_KEY)
         }
     }
 
     companion object {
         private val ACCESS_TOKEN_KEY = stringPreferencesKey("access_token")
         private val REFRESH_TOKEN_KEY = stringPreferencesKey("refresh_token")
+        private val AUTHENTICATED_DESTINATION_KEY = stringPreferencesKey("authenticated_destination")
+        private val AUTHENTICATED_NURSE_ID_KEY = stringPreferencesKey("authenticated_nurse_id")
     }
 }

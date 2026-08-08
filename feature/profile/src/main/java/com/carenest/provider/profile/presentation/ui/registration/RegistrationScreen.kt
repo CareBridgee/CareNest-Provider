@@ -1,6 +1,7 @@
 package com.carenest.provider.profile.presentation.ui.registration
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.activity.compose.BackHandler
@@ -10,11 +11,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -82,7 +85,7 @@ fun RegistrationScreen(
     registrationViewmodel: RegistrationViewmodel = hiltViewModel()
 ) {
     val state by registrationViewmodel.state.collectAsStateWithLifecycle()
-    val pagerState = rememberPagerState(pageCount = { 4 })
+    val pagerState = rememberPagerState(initialPage = state.currentPage, pageCount = { 4 })
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -90,6 +93,12 @@ fun RegistrationScreen(
     var showDatePicker by remember { mutableStateOf(false) }
     var showGenderSheet by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
+
+    LaunchedEffect(state.currentPage) {
+        if (pagerState.currentPage != state.currentPage) {
+            pagerState.scrollToPage(state.currentPage)
+        }
+    }
 
     BackHandler(enabled = pagerState.currentPage > 0) {
         registrationViewmodel.onIntent(RegistrationIntent.OnBackClicked)
@@ -158,9 +167,10 @@ fun RegistrationScreen(
     }
 
     val photoPicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
+        contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
         uri?.let {
+            persistReadPermission(context, it)
             registrationViewmodel.onIntent(
                 RegistrationIntent.OnProfilePhotoPicked(
                     Attachment(
@@ -174,9 +184,10 @@ fun RegistrationScreen(
     }
 
     val nidFrontPicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
+        contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
         uri?.let {
+            persistReadPermission(context, it)
             val fileName = getFileName(context, it)
             registrationViewmodel.onIntent(
                 RegistrationIntent.OnNationalIdFrontPicked(
@@ -191,9 +202,10 @@ fun RegistrationScreen(
     }
 
     val nidBackPicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
+        contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
         uri?.let {
+            persistReadPermission(context, it)
             registrationViewmodel.onIntent(
                 RegistrationIntent.OnNationalIdBackPicked(
                     Attachment(
@@ -207,9 +219,10 @@ fun RegistrationScreen(
     }
 
     val certificatePicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
+        contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
         uri?.let {
+            persistReadPermission(context, it)
             val fileName = getFileName(context, it)
             registrationViewmodel.onIntent(
                 RegistrationIntent.OnProfessionalCertificatePicked(
@@ -224,9 +237,10 @@ fun RegistrationScreen(
     }
 
     val licensePicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
+        contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
         uri?.let {
+            persistReadPermission(context, it)
             val fileName = getFileName(context, it)
             registrationViewmodel.onIntent(
                 RegistrationIntent.OnNursingLicensePicked(
@@ -259,23 +273,23 @@ fun RegistrationScreen(
             }
 
             RegistrationEffect.OpenProfilePhotoPicker -> {
-                photoPicker.launch("image/*")
+                photoPicker.launch(arrayOf("image/*"))
             }
 
             RegistrationEffect.OpenNationalIdFrontPicker -> {
-                nidFrontPicker.launch("*/*")
+                nidFrontPicker.launch(arrayOf("*/*"))
             }
 
             RegistrationEffect.OpenNationalIdBackPicker -> {
-                nidBackPicker.launch("*/*")
+                nidBackPicker.launch(arrayOf("*/*"))
             }
 
             RegistrationEffect.OpenCertificatePicker -> {
-                certificatePicker.launch("*/*")
+                certificatePicker.launch(arrayOf("*/*"))
             }
 
             RegistrationEffect.OpenLicensePicker -> {
-                licensePicker.launch("*/*")
+                licensePicker.launch(arrayOf("*/*"))
             }
 
             RegistrationEffect.OpenGenderSelection -> {
@@ -323,7 +337,9 @@ private fun RegistrationScreenContent(
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .imePadding(),
         topBar = {
             CareNestTopBar(
                 title = stringResource(ProfileR.string.registration_title),
@@ -528,10 +544,22 @@ fun RegistrationContent(
 
                     3 -> ApplicationReviewComponent(
                         state = state,
-                        onEditPersonalInfo = { scope.launch { pagerState.animateScrollToPage(0) } },
-                        onEditProfessionalInfo = { scope.launch { pagerState.animateScrollToPage(1) } },
-                        onEditServices = { scope.launch { pagerState.animateScrollToPage(2) } },
-                        onEditDocuments = { scope.launch { pagerState.animateScrollToPage(1) } },
+                        onEditPersonalInfo = {
+                            onIntent(RegistrationIntent.OnPageChanged(0))
+                            scope.launch { pagerState.animateScrollToPage(0) }
+                        },
+                        onEditProfessionalInfo = {
+                            onIntent(RegistrationIntent.OnPageChanged(1))
+                            scope.launch { pagerState.animateScrollToPage(1) }
+                        },
+                        onEditServices = {
+                            onIntent(RegistrationIntent.OnPageChanged(2))
+                            scope.launch { pagerState.animateScrollToPage(2) }
+                        },
+                        onEditDocuments = {
+                            onIntent(RegistrationIntent.OnPageChanged(1))
+                            scope.launch { pagerState.animateScrollToPage(1) }
+                        },
                         onCertificationToggle = {
                             onIntent(
                                 RegistrationIntent.OnCertificationToggle(
@@ -613,6 +641,15 @@ private fun getFileName(context: Context, uri: Uri): String {
         }
     }
     return result ?: "unknown"
+}
+
+private fun persistReadPermission(context: Context, uri: Uri) {
+    runCatching {
+        context.contentResolver.takePersistableUriPermission(
+            uri,
+            Intent.FLAG_GRANT_READ_URI_PERMISSION,
+        )
+    }
 }
 
 @Preview(showBackground = true, name = "Registration Light")
