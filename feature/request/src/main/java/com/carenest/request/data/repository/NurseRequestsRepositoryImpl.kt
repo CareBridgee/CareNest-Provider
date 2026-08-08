@@ -35,6 +35,9 @@ class NurseRequestsRepositoryImpl @Inject constructor(
         val assignedProfileDeferred = async {
             runCatching { remoteDataSource.getServiceRequestProfile(requestId) }.getOrNull()
         }
+        val nearbyOffersDeferred = async {
+            runCatching { remoteDataSource.getNearbyOffers(requestId) }.getOrDefault(emptyList())
+        }
         val detailsProfileId = details.profile?.id
         val reportDeferred = detailsProfileId?.let { profileId ->
             async {
@@ -42,13 +45,19 @@ class NurseRequestsRepositoryImpl @Inject constructor(
             }
         }
         val assignedProfile = assignedProfileDeferred.await()
+        val nearbyOffers = nearbyOffersDeferred.await()
+        val acceptedOfferWithDistance = embeddedAcceptedOffer?.id?.let { acceptedOfferId ->
+            nearbyOffers.firstOrNull { it.id == acceptedOfferId }
+        } ?: nearbyOffers.firstOrNull {
+            it.status.equals("ACCEPTED", ignoreCase = true)
+        } ?: embeddedAcceptedOffer
         val report = reportDeferred?.await() ?: assignedProfile?.patient?.profileId?.let { profileId ->
             runCatching { remoteDataSource.getPatientReport(profileId) }.getOrNull()
         }
 
         details.toDomainOffer(
             requestedServiceRequestId = requestId,
-            acceptedOffer = embeddedAcceptedOffer,
+            acceptedOffer = acceptedOfferWithDistance,
             assignedProfile = assignedProfile,
             patientReport = report,
         )

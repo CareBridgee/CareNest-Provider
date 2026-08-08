@@ -35,6 +35,7 @@ class RequestMapperTest {
             proposedDate = "2026-08-10",
             proposedTime = Json.parseToJsonElement("\"15:45:00\""),
             status = "ACCEPTED",
+            distanceKm = 10.0,
         )
 
         val result = details.toDomainOffer(
@@ -70,7 +71,7 @@ class RequestMapperTest {
         assertEquals("12 Nile Street", result.patientInfo.addressLine)
         assertEquals("4B, Dokki, Giza, Egypt", result.patientInfo.addressDetail)
         assertEquals("", result.patientInfo.image)
-        assertEquals(null, result.distanceMiles)
+        assertEquals(6.21f, result.distanceMiles ?: 0f, 0.01f)
         assertEquals(95f, result.totalAmount)
     }
 

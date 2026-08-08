@@ -50,11 +50,15 @@ data class ProfileSummaryDto(
 data class NurseOfferDto(
     val id: String? = null,
     val serviceRequestId: String? = null,
+    val nurseId: String? = null,
     val proposedPrice: Double? = null,
     val proposedDate: String? = null,
     val proposedTime: JsonElement? = null,
     val message: String? = null,
     val status: String? = null,
+    val nurseLatitude: Double? = null,
+    val nurseLongitude: Double? = null,
+    val distanceKm: Double? = null,
     val createdAt: String? = null,
     val updatedAt: String? = null,
 )

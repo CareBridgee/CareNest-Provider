@@ -29,6 +29,7 @@ fun ServiceRequestDetailsDto.toDomainOffer(
         patient?.firstName ?: summary?.firstName,
         patient?.lastName ?: summary?.lastName,
     ).joinNonBlank()
+    val distanceMiles = acceptedOffer?.distanceKm?.toMiles()
 
     return Offer(
         offerId = serviceRequestId ?: requestedServiceRequestId,
@@ -40,7 +41,7 @@ fun ServiceRequestDetailsDto.toDomainOffer(
             id = profileId,
             name = patientName,
             image = "",
-            distanceMiles = null,
+            distanceMiles = distanceMiles,
             age = patient?.dateOfBirth.toAgeOrNull(),
             phone = (assignedProfile?.patientPhoneNumber ?: summary?.phoneNumber).orEmpty(),
             addressLine = assignedProfile?.address.addressLine(),
@@ -59,7 +60,7 @@ fun ServiceRequestDetailsDto.toDomainOffer(
                 ?: assignedProfile?.preferredTime
                 ?: preferredTime
             ).toDisplayTime().orPlaceholder(),
-        distanceMiles = null,
+        distanceMiles = distanceMiles,
         estimatedArrival = PLACEHOLDER,
         estimatedDuration = durationMinutes?.let { "$it mins" } ?: PLACEHOLDER,
         totalAmount = (
@@ -142,4 +143,7 @@ private fun String?.toAgeOrNull(): Int? {
 
 private fun String?.orPlaceholder(): String = this?.takeIf(String::isNotBlank) ?: PLACEHOLDER
 
+private fun Double.toMiles(): Float = (this * KILOMETERS_TO_MILES).toFloat()
+
 private const val PLACEHOLDER = "\u2014"
+private const val KILOMETERS_TO_MILES = 0.621371192237334

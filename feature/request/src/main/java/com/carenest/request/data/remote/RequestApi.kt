@@ -4,6 +4,7 @@ import com.carenest.request.data.remote.dto.CompleteServiceRequestDto
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.patch
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
@@ -14,6 +15,11 @@ class RequestApi @Inject constructor(
 ) {
     suspend fun getServiceRequestDetails(serviceRequestId: String): HttpResponse =
         httpClient.get("/api/v1/service-requests/$serviceRequestId")
+
+    suspend fun getNearbyOffers(serviceRequestId: String): HttpResponse =
+        httpClient.get("/api/v1/nurse-offers/nearby") {
+            parameter("serviceRequestId", serviceRequestId)
+        }
 
     suspend fun acceptOffer(offerId: String): HttpResponse =
         httpClient.patch("/api/v1/nurse-offers/$offerId/accept")

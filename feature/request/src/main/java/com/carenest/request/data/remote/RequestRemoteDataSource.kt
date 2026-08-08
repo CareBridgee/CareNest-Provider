@@ -13,6 +13,7 @@ import javax.inject.Inject
 
 interface RequestRemoteDataSource {
     suspend fun getServiceRequestDetails(serviceRequestId: String): ServiceRequestDetailsDto
+    suspend fun getNearbyOffers(serviceRequestId: String): List<NurseOfferDto>
     suspend fun acceptOffer(offerId: String): NurseOfferDto
     suspend fun cancelServiceRequest(serviceRequestId: String)
     suspend fun generateVisitCode(serviceRequestId: String): VisitCodeDto
@@ -26,6 +27,9 @@ class KtorRequestRemoteDataSource @Inject constructor(
 ) : RequestRemoteDataSource {
     override suspend fun getServiceRequestDetails(serviceRequestId: String): ServiceRequestDetailsDto =
         api.getServiceRequestDetails(serviceRequestId).bodyOrThrow()
+
+    override suspend fun getNearbyOffers(serviceRequestId: String): List<NurseOfferDto> =
+        api.getNearbyOffers(serviceRequestId).bodyOrThrow()
 
     override suspend fun acceptOffer(offerId: String): NurseOfferDto =
         api.acceptOffer(offerId).bodyOrThrow()
