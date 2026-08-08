@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,7 +25,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -44,6 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carenest.provider.core.mvi.ObserveEffect
 import com.carenest.provider.designsystem.R
 import com.carenest.provider.designsystem.components.bottomnav.BottomNavItem
+import com.carenest.provider.designsystem.components.bottomnav.LocalBottomNavigationContentPadding
 import com.carenest.provider.designsystem.components.bottomnav.SPBottomNavigation
 import com.carenest.provider.designsystem.components.emptystate.EmptyState
 import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
@@ -80,67 +81,65 @@ fun EarningsScreenContent(
     onIntent: (EarningsIntent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        containerColor = Theme.colors.backGround,
-        topBar = {
-            CareNestTopBar(
-                title = stringResource(com.carenest.provider.earnings.R.string.top_bar_title),
-                trailingAvatarUrl = "https://picsum.photos/200/300"
-            )
-        },
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .background(Theme.colors.backGround)
-        ) {
-            when {
-                state.isLoading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(color = Theme.colors.primary)
-                    }
+    val bottomNavigationContentPadding = LocalBottomNavigationContentPadding.current
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Theme.colors.backGround),
+    ) {
+        CareNestTopBar(
+            title = stringResource(com.carenest.provider.earnings.R.string.top_bar_title),
+            trailingAvatarUrl = "https://picsum.photos/200/300",
+        )
+        when {
+            state.isLoading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator(color = Theme.colors.primary)
                 }
+            }
 
-                state.isError -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(Theme.spacing.medium),
-                        contentAlignment = Alignment.Center
+            state.isError -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(Theme.spacing.medium),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(Theme.spacing.medium),
                     ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(Theme.spacing.medium)
+                        BasicText(
+                            text = state.errorMessage ?: stringResource(com.carenest.provider.earnings.R.string.error_occurred),
+                            style = Theme.typography.body.large.copy(color = Theme.colors.error),
+                        )
+                        Button(
+                            onClick = { onIntent(EarningsIntent.RefreshClicked) },
+                            colors = ButtonDefaults.buttonColors(containerColor = Theme.colors.primary),
                         ) {
                             BasicText(
-                                text = state.errorMessage ?: stringResource(com.carenest.provider.earnings.R.string.error_occurred),
-                                style = Theme.typography.body.large.copy(color = Theme.colors.error)
+                                text = stringResource(com.carenest.provider.earnings.R.string.retry),
+                                style = Theme.typography.body.medium.copy(color = Color.White),
                             )
-                            Button(
-                                onClick = { onIntent(EarningsIntent.RefreshClicked) },
-                                colors = ButtonDefaults.buttonColors(containerColor = Theme.colors.primary)
-                            ) {
-                                BasicText(
-                                    text = stringResource(com.carenest.provider.earnings.R.string.retry),
-                                    style = Theme.typography.body.medium.copy(color = Color.White)
-                                )
-                            }
                         }
                     }
                 }
+            }
 
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = Theme.spacing.medium),
-                        verticalArrangement = Arrangement.spacedBy(Theme.spacing.medium)
-                    ) {
+            else -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = Theme.spacing.medium),
+                    contentPadding = PaddingValues(bottom = bottomNavigationContentPadding),
+                    verticalArrangement = Arrangement.spacedBy(Theme.spacing.medium),
+                ) {
                         item {
                             Spacer(modifier = Modifier.height(Theme.spacing.extraSmall))
                             TotalEarningsSummaryCard(
@@ -187,7 +186,6 @@ fun EarningsScreenContent(
                         item {
                             Spacer(modifier = Modifier.height(Theme.spacing.medium))
                         }
-                    }
                 }
             }
         }

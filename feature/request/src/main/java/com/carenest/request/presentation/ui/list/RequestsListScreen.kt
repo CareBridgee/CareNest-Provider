@@ -2,12 +2,13 @@ package com.carenest.request.presentation.ui.list
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -19,6 +20,7 @@ import com.carenest.provider.core.mvi.ObserveEffect
 import com.carenest.provider.designsystem.components.request.EditRateBottomSheet
 import com.carenest.provider.designsystem.components.request.MakeOfferDialog
 import com.carenest.provider.designsystem.components.request.NurseRequestsLoadingSkeleton
+import com.carenest.provider.designsystem.components.bottomnav.LocalBottomNavigationContentPadding
 import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
 import com.carenest.provider.designsystem.components.topbar.TopBarLeading
 import com.carenest.provider.designsystem.theme.SpTheme
@@ -61,22 +63,17 @@ fun RequestsListContent(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        containerColor = Theme.colors.backGround,
-        topBar = {
+    val bottomNavigationContentPadding = LocalBottomNavigationContentPadding.current
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Theme.colors.backGround),
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
             CareNestTopBar(
                 title = stringResource(R.string.requests_list_title),
                 leading = TopBarLeading.Back(onBack),
             )
-        },
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .background(Theme.colors.backGround),
-        ) {
             if (state.isLoading) {
                 Column(modifier = Modifier.padding(Theme.spacing.medium)) {
                     NurseRequestsLoadingSkeleton()
@@ -84,8 +81,9 @@ fun RequestsListContent(
             } else {
                 LazyColumn(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .weight(1f)
                         .padding(Theme.spacing.medium),
+                    contentPadding = PaddingValues(bottom = bottomNavigationContentPadding),
                     verticalArrangement = Arrangement.spacedBy(Theme.spacing.small),
                 ) {
                     item {
