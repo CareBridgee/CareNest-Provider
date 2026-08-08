@@ -26,12 +26,13 @@ fun EntryProviderScope<NavKey>.providerAuthEntries(
 ) {
     entry<LoginRoute> {
         LoginScreen(
-            onNavigateToOtp = { phone, _ -> backStack.navigate(OtpRoute(phone)) },
+            onNavigateToOtp = { phone, _, otp -> backStack.navigate(OtpRoute(phone, otp)) },
         )
     }
     entry<OtpRoute> { route ->
         OtpScreen(
             phone = route.phone,
+            otp = route.otp,
             onAuthenticationSuccess = onAuthenticationSuccess,
             onNavigateBack = { backStack.goBack() },
         )

@@ -1,10 +1,13 @@
 package com.carenest.provider.auth.data.repository
 
+import android.util.Log
 import com.carenest.provider.auth.data.remote.AuthRemoteDataSource
 import com.carenest.provider.auth.data.remote.dto.AuthResponseDto
 import com.carenest.provider.auth.data.remote.dto.ErrorResponseDto
 import com.carenest.provider.auth.domain.repository.AuthRepository
 import com.carenest.provider.core.datastore.TokenManager
+import com.carenest.provider.auth.data.remote.dto.DevLoginResponseDto
+import com.carenest.provider.core.util.Resource
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
@@ -15,12 +18,31 @@ class AuthRepositoryImpl @Inject constructor(
     private val dataSource: AuthRemoteDataSource,
     private val tokenManager: TokenManager
 ) : AuthRepository {
+    companion object{
+        private const val TAG = "AuthRepositoryImpl"
+    }
     override suspend fun login(phoneNumber: String): Result<Unit> {
         return try {
             val response = dataSource.login(phoneNumber)
+            Log.d(TAG, "login: ${response.bodyAsText()}")
             handleGenericResponse(response)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    override suspend fun devLogin(phoneNumber: String): Resource<String> {
+        return try {
+            val response = dataSource.devLogin(phoneNumber)
+            if (response.status.isSuccess()) {
+                val devResponse = response.body<DevLoginResponseDto>()
+                Resource.Success(devResponse.otp)
+            } else {
+                val errorBody = response.body<ErrorResponseDto>()
+                Resource.Error(errorBody.message ?: "Something went wrong")
+            }
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "An unexpected error occurred")
         }
     }
 

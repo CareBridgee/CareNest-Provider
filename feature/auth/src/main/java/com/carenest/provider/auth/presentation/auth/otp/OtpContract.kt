@@ -2,7 +2,7 @@ package com.carenest.provider.auth.presentation.auth.otp
 
 sealed interface OtpIntent {
     data class OtpCodeChanged(val otp: String) : OtpIntent
-    data class PhoneNumberChanged(val phone: String) : OtpIntent
+    data class PhoneNumberChanged(val phone: String, val otp: String? = null) : OtpIntent
     data object VerifyOtpClicked : OtpIntent
     data object BackClicked : OtpIntent
     data object ResendClicked : OtpIntent
