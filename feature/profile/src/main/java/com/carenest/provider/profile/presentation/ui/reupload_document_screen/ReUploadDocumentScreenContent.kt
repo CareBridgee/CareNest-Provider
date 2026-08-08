@@ -1,6 +1,7 @@
 package com.carenest.provider.profile.presentation.ui.reupload_document_screen
 
 import android.net.Uri
+import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +16,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.ui.platform.LocalContext
+import com.carenest.provider.designsystem.components.toast.SnackbarHost
+import com.carenest.provider.designsystem.components.toast.showSnack
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,12 +43,22 @@ import com.carenest.provider.profile.presentation.ui.reupload_document_screen.co
 
 @Composable
 fun ReUploadDocumentScreen(
+    nurseId: String,
+    documentField: String,
+    rejectionReason: String,
     modifier: Modifier = Modifier,
     viewModel: ReUploadDocumentViewModel = hiltViewModel(),
     onBackClick: () -> Unit = {},
     onUploadSuccess: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(nurseId, documentField, rejectionReason) {
+        viewModel.configure(nurseId, documentField, rejectionReason)
+    }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
@@ -48,7 +67,8 @@ fun ReUploadDocumentScreen(
             viewModel.onIntent(
                 ReUploadDocumentIntent.OnFileSelected(
                     uri = it,
-                    fileName = it.lastPathSegment ?: ""
+                    fileName = getDisplayName(context.contentResolver, it),
+                    mimeType = context.contentResolver.getType(it) ?: "application/octet-stream",
                 )
             )
         }
@@ -73,7 +93,12 @@ fun ReUploadDocumentScreen(
             }
 
             is ReUploadDocumentEvent.ShowError -> {
-                // TODO Show Snackbar
+                val message = context.resources.getIdentifier(
+                    effect.message,
+                    "string",
+                    context.packageName,
+                ).let { id -> if (id != 0) context.getString(id) else effect.message }
+                scope.launch { snackbarHostState.showSnack(message) }
             }
         }
     }
@@ -95,6 +120,7 @@ fun ReUploadDocumentScreen(
         onCancelClick = {
             viewModel.onIntent(ReUploadDocumentIntent.OnCancelClick)
         },
+        snackbarHostState = snackbarHostState,
         modifier = modifier
     )
 }
@@ -107,8 +133,9 @@ private fun ReUploadDocumentScreenContent(
     onRemoveFile: () -> Unit,
     onUpdateDocumentClick: () -> Unit,
     onCancelClick: () -> Unit,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     modifier: Modifier = Modifier,
-    avatarUrl: String? = "https://lh3.googleusercontent.com/aida-public/AB6AXuAQqWPNhilLviCWpwkLHvtNpvZb2FUBUFhqJNBzBCA400oeOgItrvFWLPLvQZoSqO3xdD3AuwtH-28itdW5f7zJUD-UN71OVeuj70RrAaVNwNW6yBl2-QNExskVgVVmytcCkAUJkBoP637unfp3JOkb55sRCWxF3q6elI22iqREqTPKBiWLcnFPJmxfKDNJ-4FKX6wPIBntGoUKJ1qN8rfcVGQtC2T9Ub-aRiU-UFL_VHJdDH_A5-Le"
+    avatarUrl: String? = null
 ) {
     val topBarTitle = if (state.documentType.isNotEmpty()) {
         stringResource(R.string.reupload_title, state.documentType)
@@ -126,6 +153,7 @@ private fun ReUploadDocumentScreenContent(
                 modifier = Modifier.fillMaxWidth()
             )
         },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = Theme.colors.backGround
     ) { innerPadding ->
         Column(
@@ -175,6 +203,16 @@ private fun ReUploadDocumentScreenContent(
             Spacer(modifier = Modifier.height(Theme.spacing.large))
         }
     }
+}
+
+private fun getDisplayName(resolver: android.content.ContentResolver, uri: Uri): String {
+    resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+        if (cursor.moveToFirst()) {
+            val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            if (index >= 0) return cursor.getString(index)
+        }
+    }
+    return uri.lastPathSegment ?: "upload"
 }
 
 

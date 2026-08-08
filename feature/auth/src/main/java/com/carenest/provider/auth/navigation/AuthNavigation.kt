@@ -3,6 +3,7 @@ package com.carenest.provider.auth.navigation
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
+import com.carenest.provider.auth.domain.util.AuthenticationDestination
 import com.carenest.provider.auth.presentation.auth.login.LoginScreen
 import com.carenest.provider.auth.presentation.auth.otp.OtpScreen
 import com.carenest.provider.core.navigation.goBack
@@ -22,7 +23,7 @@ fun providerAuthStartRoute(): NavKey = LoginRoute
 
 fun EntryProviderScope<NavKey>.providerAuthEntries(
     backStack: SnapshotStateList<NavKey>,
-    onAuthenticationSuccess: () -> Unit,
+    onAuthenticationSuccess: (AuthenticationDestination) -> Unit,
 ) {
     entry<LoginRoute> {
         LoginScreen(

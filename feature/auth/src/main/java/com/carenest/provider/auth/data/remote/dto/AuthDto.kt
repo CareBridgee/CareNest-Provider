@@ -36,7 +36,42 @@ data class UserDto(
     val createdAt: String,
     val updatedAt: String,
     val lastLoginAt: String? = null,
-    val defaultProfileId: String? = null
+    val defaultProfileId: String? = null,
+    val nurse: NurseAuthDto? = null
+)
+
+@Serializable
+data class NurseAuthDto(
+    val id: String,
+    val profileImageUrl: String? = null,
+    val nationalId: String? = null,
+    val nationalIdFrontUrl: String? = null,
+    val nationalIdBackUrl: String? = null,
+    val licenseImageUrl: String? = null,
+    val professionalCertificateUrl: String? = null,
+    val specialization: String? = null,
+    val yearsOfExperience: Int? = null,
+    val bio: String? = null,
+    val verificationStatus: String,
+    val rejectionReason: String? = null,
+    val rejectionDetails: NurseRejectionDetailsDto? = null,
+)
+
+@Serializable
+data class NurseRejectionDetailsDto(
+    val overallReason: String? = null,
+    val failedSteps: List<FailedStepDto> = emptyList(),
+)
+
+@Serializable
+data class FailedStepDto(
+    val step: String? = null,
+    val reason: String? = null,
+)
+
+@Serializable
+data class CurrentUserDto(
+    val profileCompleted: Boolean,
 )
 
 @Serializable

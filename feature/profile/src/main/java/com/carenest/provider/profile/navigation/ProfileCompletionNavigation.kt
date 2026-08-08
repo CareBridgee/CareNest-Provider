@@ -12,6 +12,7 @@ import com.carenest.provider.profile.presentation.ui.under_review_screen.UnderRe
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
+import com.carenest.provider.profile.domain.model.VerificationStatus
 
 val profileCompletionNavigationSerializers = SerializersModule {
     polymorphic(NavKey::class) {
@@ -22,6 +23,8 @@ val profileCompletionNavigationSerializers = SerializersModule {
 }
 
 fun providerProfileCompletionStartRoute(): NavKey = RegistrationRoute
+
+fun providerProfileReviewRoute(nurseId: String): NavKey = UnderReviewRoute(nurseId)
 
 fun EntryProviderScope<NavKey>.providerProfileCompletionEntries(
     backStack: SnapshotStateList<NavKey>,
@@ -39,26 +42,38 @@ fun EntryProviderScope<NavKey>.providerProfileCompletionEntries(
 
     entry<RegistrationRoute> {
         RegistrationScreen(
-            onNavigateToApplicationUnderReview = {
-                backStack.replaceWith(UnderReviewRoute)
+            onRegistrationComplete = { nurseId, status ->
+                if (status == VerificationStatus.APPROVED) {
+                    onOpenDashboard()
+                } else {
+                    backStack.replaceWith(UnderReviewRoute(nurseId))
+                }
             },
         )
     }
-    entry<UnderReviewRoute> {
+    entry<UnderReviewRoute> { route ->
         UnderReviewScreen(
+            nurseId = route.nurseId,
             onBackClick = ::navigateBack,
             onGoToHomeClick = onOpenDashboard,
             onContactSupportClick = onOpenContactSupport,
             onBackToLoginClick = onBackToAuthentication,
             onDashboardClick = onOpenDashboard,
             onCommunityGuidelinesClick = onOpenCommunityGuidelines,
-            onUploadAgainClick = { backStack.navigate(ReUploadDocumentRoute) },
+            onUploadAgainClick = { documentField, reason ->
+                backStack.navigate(
+                    ReUploadDocumentRoute(route.nurseId, documentField, reason)
+                )
+            },
         )
     }
-    entry<ReUploadDocumentRoute> {
+    entry<ReUploadDocumentRoute> { route ->
         ReUploadDocumentScreen(
+            nurseId = route.nurseId,
+            documentField = route.documentField,
+            rejectionReason = route.rejectionReason,
             onBackClick = ::navigateBack,
-            onUploadSuccess = { backStack.replaceWith(UnderReviewRoute) },
+            onUploadSuccess = { backStack.replaceWith(UnderReviewRoute(route.nurseId)) },
         )
     }
 }

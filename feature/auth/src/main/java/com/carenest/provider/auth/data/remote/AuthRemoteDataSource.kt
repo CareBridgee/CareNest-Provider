@@ -6,6 +6,7 @@ import com.carenest.provider.auth.data.remote.dto.VerifyOtpRequestDto
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
+import io.ktor.client.request.get
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
@@ -16,6 +17,7 @@ interface AuthRemoteDataSource {
     suspend fun login(phoneNumber: String): HttpResponse
     suspend fun devLogin(phoneNumber: String): HttpResponse
     suspend fun verifyOtp(phoneNumber: String, otp: String): HttpResponse
+    suspend fun getCurrentUser(): HttpResponse
 }
 
 class KtorAuthRemoteDataSource @Inject constructor(
@@ -42,4 +44,7 @@ class KtorAuthRemoteDataSource @Inject constructor(
             setBody(VerifyOtpRequestDto(phoneNumber, otp))
         }
     }
+
+    override suspend fun getCurrentUser(): HttpResponse =
+        httpClient.get("/api/v1/users/me")
 }

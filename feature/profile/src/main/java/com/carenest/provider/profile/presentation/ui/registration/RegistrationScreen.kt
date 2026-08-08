@@ -33,8 +33,11 @@ import com.carenest.provider.profile.presentation.ui.registration.component.Pers
 import com.carenest.provider.profile.presentation.ui.registration.component.ServicesSelectionComponent
 import com.carenest.provider.profile.presentation.ui.registration.component.VerificationDocumentsComponent
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
@@ -69,12 +72,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.carenest.provider.profile.R as ProfileR
 import com.carenest.provider.designsystem.R as DesignR
+import com.carenest.provider.profile.domain.model.VerificationStatus
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegistrationScreen(
     modifier: Modifier = Modifier,
-    onNavigateToApplicationUnderReview: () -> Unit,
+    onRegistrationComplete: (String, VerificationStatus) -> Unit,
     registrationViewmodel: RegistrationViewmodel = hiltViewModel()
 ) {
     val state by registrationViewmodel.state.collectAsStateWithLifecycle()
@@ -138,48 +142,64 @@ fun RegistrationScreen(
     }
 
     if (showDatePicker) {
-        DatePickerDialog(
+        RegistrationDatePickerDialog(
+            state = datePickerState,
             onDismissRequest = { showDatePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let { millis ->
-                        val sdf = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
-                        sdf.timeZone = TimeZone.getTimeZone("UTC")
-                        val date = sdf.format(Date(millis))
-                        registrationViewmodel.onIntent(RegistrationIntent.OnDateOfBirthChanged(date))
-                    }
-                    showDatePicker = false
-                }) {
-                    Text(stringResource(id = android.R.string.ok))
+            onConfirm = { selectedDateMillis ->
+                selectedDateMillis?.let { millis ->
+                    val sdf = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+                    sdf.timeZone = TimeZone.getTimeZone("UTC")
+                    val date = sdf.format(Date(millis))
+                    registrationViewmodel.onIntent(RegistrationIntent.OnDateOfBirthChanged(date))
                 }
+                showDatePicker = false
             },
-            dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
-                    Text(stringResource(id = android.R.string.cancel))
-                }
-            }
-        ) {
-            DatePicker(state = datePickerState)
-        }
+        )
     }
 
     val photoPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
-        uri?.let { registrationViewmodel.onIntent(RegistrationIntent.OnProfilePhotoPicked(it)) }
+        uri?.let {
+            registrationViewmodel.onIntent(
+                RegistrationIntent.OnProfilePhotoPicked(
+                    Attachment(
+                        uri = it,
+                        name = getFileName(context, it),
+                        mimeType = context.contentResolver.getType(it) ?: "application/octet-stream",
+                    )
+                )
+            )
+        }
     }
 
-    val nidPicker = rememberLauncherForActivityResult(
+    val nidFrontPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         uri?.let {
             val fileName = getFileName(context, it)
             registrationViewmodel.onIntent(
-                RegistrationIntent.OnNationalIdDocumentPicked(
+                RegistrationIntent.OnNationalIdFrontPicked(
                     Attachment(
                         it,
                         name = fileName,
                         mimeType = context.contentResolver.getType(it) ?: ""
+                    )
+                )
+            )
+        }
+    }
+
+    val nidBackPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            registrationViewmodel.onIntent(
+                RegistrationIntent.OnNationalIdBackPicked(
+                    Attachment(
+                        uri = it,
+                        name = getFileName(context, it),
+                        mimeType = context.contentResolver.getType(it) ?: "application/octet-stream",
                     )
                 )
             )
@@ -227,8 +247,6 @@ fun RegistrationScreen(
                     scope.launch {
                         pagerState.animateScrollToPage(pagerState.currentPage + 1)
                     }
-                } else {
-                    onNavigateToApplicationUnderReview()
                 }
             }
 
@@ -244,8 +262,12 @@ fun RegistrationScreen(
                 photoPicker.launch("image/*")
             }
 
-            RegistrationEffect.OpenNIDPicker -> {
-                nidPicker.launch("*/*")
+            RegistrationEffect.OpenNationalIdFrontPicker -> {
+                nidFrontPicker.launch("*/*")
+            }
+
+            RegistrationEffect.OpenNationalIdBackPicker -> {
+                nidBackPicker.launch("*/*")
             }
 
             RegistrationEffect.OpenCertificatePicker -> {
@@ -275,6 +297,10 @@ fun RegistrationScreen(
                     }
                     snackbarHostState.showSnack(message, it.type)
                 }
+            }
+
+            is RegistrationEffect.SubmissionSucceeded -> {
+                onRegistrationComplete(it.nurseId, it.verificationStatus)
             }
         }
     }
@@ -307,24 +333,16 @@ private fun RegistrationScreenContent(
                 modifier = Modifier.fillMaxWidth(),
             )
         },
-        snackbarHost = {
-            Box(modifier = Modifier.fillMaxSize()) {
-                SnackbarHost(
-                    hostState = snackbarHostState,
-                    modifier = Modifier
-                        .align(AlignmentUI.TopCenter)
-                        .padding(top = Theme.spacing.space36)
-                )
-            }
-        },
         bottomBar = {
             NavigationActions(
                 currentPage = pagerState.currentPage,
                 isNextDisabled = when (pagerState.currentPage) {
-                    2 -> state.servicesUiState.selectedServices.isEmpty()
-                    3 -> !state.applicationReviewUiState.isCertified
+                    2 -> state.servicesUiState.selectedServices.isEmpty() ||
+                        state.servicesUiState.isLoading || state.servicesUiState.errorMessage != null
+                    3 -> !state.applicationReviewUiState.isCertified || state.isSubmitting
                     else -> false
                 },
+                isLoading = state.isSubmitting,
                 onBackClick = {
                     if (pagerState.currentPage > 0) {
                         onIntent(RegistrationIntent.OnBackClicked)
@@ -341,13 +359,97 @@ private fun RegistrationScreenContent(
         },
         containerColor = Theme.colors.backGround
     ) { innerPadding ->
-        RegistrationContent(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
+                .padding(innerPadding)
+        ) {
+            RegistrationContent(
+                modifier = Modifier.fillMaxSize(),
+                state = state,
+                onIntent = onIntent,
+                pagerState = pagerState
+            )
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .align(AlignmentUI.TopCenter)
+                    .padding(
+                        horizontal = Theme.spacing.medium,
+                        vertical = Theme.spacing.small,
+                    )
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun RegistrationDatePickerDialog(
+    state: DatePickerState,
+    onDismissRequest: () -> Unit,
+    onConfirm: (Long?) -> Unit,
+) {
+    val colors = DatePickerDefaults.colors(
+        containerColor = Theme.colors.surface,
+        titleContentColor = Theme.colors.secondaryFont,
+        headlineContentColor = Theme.colors.primary,
+        weekdayContentColor = Theme.colors.secondaryFont,
+        subheadContentColor = Theme.colors.primaryFont,
+        navigationContentColor = Theme.colors.primary,
+        yearContentColor = Theme.colors.primaryFont,
+        disabledYearContentColor = Theme.colors.onDisable,
+        currentYearContentColor = Theme.colors.primary,
+        selectedYearContentColor = Theme.colors.onPrimary,
+        disabledSelectedYearContentColor = Theme.colors.onDisable,
+        selectedYearContainerColor = Theme.colors.primary,
+        disabledSelectedYearContainerColor = Theme.colors.disable,
+        dayContentColor = Theme.colors.primaryFont,
+        disabledDayContentColor = Theme.colors.onDisable,
+        selectedDayContentColor = Theme.colors.onPrimary,
+        disabledSelectedDayContentColor = Theme.colors.onDisable,
+        selectedDayContainerColor = Theme.colors.primary,
+        disabledSelectedDayContainerColor = Theme.colors.disable,
+        todayContentColor = Theme.colors.primary,
+        todayDateBorderColor = Theme.colors.primary,
+        dayInSelectionRangeContentColor = Theme.colors.onPrimaryContainer,
+        dayInSelectionRangeContainerColor = Theme.colors.primaryContainer,
+        dividerColor = Theme.colors.divider,
+    )
+    val actionButtonColors = ButtonDefaults.textButtonColors(
+        contentColor = Theme.colors.primary,
+    )
+
+    DatePickerDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm(state.selectedDateMillis) },
+                colors = actionButtonColors,
+            ) {
+                Text(
+                    text = stringResource(id = android.R.string.ok),
+                    style = Theme.typography.body.small,
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismissRequest,
+                colors = actionButtonColors,
+            ) {
+                Text(
+                    text = stringResource(id = android.R.string.cancel),
+                    style = Theme.typography.body.small,
+                )
+            }
+        },
+        shape = Theme.shapes.extraLarge,
+        colors = colors,
+    ) {
+        DatePicker(
             state = state,
-            onIntent = onIntent,
-            pagerState = pagerState
+            colors = colors,
         )
     }
 }
@@ -399,12 +501,15 @@ fun RegistrationContent(
 
                     1 -> VerificationDocumentsComponent(
                         state = state.verificationDocumentsUiState,
-                        onNationalIdClick = { onIntent(RegistrationIntent.OnNationalIdClick) },
+                        onNationalIdFrontClick = { onIntent(RegistrationIntent.OnNationalIdFrontClick) },
+                        onNationalIdBackClick = { onIntent(RegistrationIntent.OnNationalIdBackClick) },
                         onNursingLicenseClick = { onIntent(RegistrationIntent.OnNursingLicenseClick) },
                         onProfessionalCertificateClick = { onIntent(RegistrationIntent.OnProfessionalCertificateClick) },
-                        onRemoveNationalId = { onIntent(RegistrationIntent.OnRemoveNationalId) },
+                        onRemoveNationalIdFront = { onIntent(RegistrationIntent.OnRemoveNationalIdFront) },
+                        onRemoveNationalIdBack = { onIntent(RegistrationIntent.OnRemoveNationalIdBack) },
                         onRemoveNursingLicense = { onIntent(RegistrationIntent.OnRemoveNursingLicense) },
                         onRemoveProfessionalCertificate = { onIntent(RegistrationIntent.OnRemoveProfessionalCertificate) },
+                        onLicenseNumberChanged = { onIntent(RegistrationIntent.OnLicenseNumberChanged(it)) },
                         onYearsOfExpChanged = { onIntent(RegistrationIntent.OnYearsOfExpChanged(it)) },
                         onPrimarySpecialityChanged = {
                             onIntent(
@@ -417,7 +522,8 @@ fun RegistrationContent(
 
                     2 -> ServicesSelectionComponent(
                         state = state.servicesUiState,
-                        onServiceToggle = { onIntent(RegistrationIntent.OnServiceToggle(it)) }
+                        onServiceToggle = { onIntent(RegistrationIntent.OnServiceToggle(it)) },
+                        onRetry = { onIntent(RegistrationIntent.OnRetryServices) },
                     )
 
                     3 -> ApplicationReviewComponent(
@@ -444,6 +550,7 @@ fun RegistrationContent(
 private fun NavigationActions(
     currentPage: Int,
     isNextDisabled: Boolean,
+    isLoading: Boolean,
     onBackClick: () -> Unit,
     onNextClick: () -> Unit
 ) {
@@ -477,6 +584,7 @@ private fun NavigationActions(
                 onClick = onNextClick,
                 modifier = Modifier.weight(if (isFirstPage) 2f else 1f),
                 isDisabled = isNextDisabled,
+                isLoading = isLoading,
                 iconPainter = if (isLastPage) null else painterResource(id = DesignR.drawable.ic_chevron_right),
                 iconPosition = ButtonIconPosition.End
             )

@@ -86,7 +86,9 @@ fun ApplicationReviewComponent(
         ) {
             InfoRow(label = stringResource(com.carenest.provider.profile.R.string.full_name_label), value = "${state.personalInfoState.firstName} ${state.personalInfoState.lastName}")
             InfoRow(label = stringResource(com.carenest.provider.profile.R.string.email_label), value = state.personalInfoState.email)
-            InfoRow(label = stringResource(com.carenest.provider.profile.R.string.phone_number_label), value = state.personalInfoState.phoneNumber.ifEmpty { "+1 (555) 012-3456" })
+            if (state.personalInfoState.phoneNumber.isNotBlank()) {
+                InfoRow(label = stringResource(com.carenest.provider.profile.R.string.phone_number_label), value = state.personalInfoState.phoneNumber)
+            }
             InfoRow(label = stringResource(com.carenest.provider.profile.R.string.location_label), value = state.personalInfoState.location)
         }
 
@@ -118,7 +120,7 @@ fun ApplicationReviewComponent(
                             style = Theme.typography.body.small.copy(color = Theme.colors.secondaryFont)
                         )
                         BasicText(
-                            text = state.verificationDocumentsUiState.nursingLicense?.name ?: "",
+                            text = state.verificationDocumentsUiState.licenseNumber,
                             style = Theme.typography.body.medium.copy(color = Theme.colors.primaryFont, fontWeight = FontWeight.SemiBold)
                         )
                     }
@@ -166,7 +168,8 @@ fun ApplicationReviewComponent(
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(Theme.spacing.small)) {
                 state.verificationDocumentsUiState.nursingLicense?.let { DocumentItem(name = it.name) }
-                state.verificationDocumentsUiState.nationalId?.let { DocumentItem(name = it.name) }
+                state.verificationDocumentsUiState.nationalIdFront?.let { DocumentItem(name = it.name) }
+                state.verificationDocumentsUiState.nationalIdBack?.let { DocumentItem(name = it.name) }
                 state.verificationDocumentsUiState.professionalCertificate?.let { DocumentItem(name = it.name) }
             }
         }
