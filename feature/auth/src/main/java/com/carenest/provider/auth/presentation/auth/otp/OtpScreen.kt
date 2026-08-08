@@ -32,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.carenest.provider.auth.presentation.auth.otp.components.OtpTextField
+import com.carenest.provider.auth.domain.repository.AuthenticationDestination
 import com.carenest.provider.core.mvi.ObserveEffect
 import com.carenest.provider.designsystem.R
 import com.carenest.provider.designsystem.components.button.PrimaryButton
@@ -44,7 +45,7 @@ import com.carenest.provider.designsystem.theme.Theme
 fun OtpScreen(
     phone: String,
     viewModel: OtpViewModel = hiltViewModel(),
-    onAuthenticationSuccess: () -> Unit,
+    onAuthenticationSuccess: (AuthenticationDestination) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
@@ -55,7 +56,7 @@ fun OtpScreen(
 
     ObserveEffect(viewModel.effect) { effect ->
         when (effect) {
-            is OtpEffect.AuthenticationSucceeded -> onAuthenticationSuccess()
+            is OtpEffect.AuthenticationSucceeded -> onAuthenticationSuccess(effect.destination)
             is OtpEffect.NavigateBack -> onNavigateBack()
         }
     }
@@ -178,9 +179,21 @@ internal fun OtpScreenContent(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     PrimaryButton(
-                        caption = stringResource(R.string.otp_verify_btn),
+                        caption = stringResource(
+                            if (state.canRetryDestination) {
+                                R.string.otp_retry_routing_btn
+                            } else {
+                                R.string.otp_verify_btn
+                            }
+                        ),
                         onClick = {
-                            onEvent(OtpIntent.VerifyOtpClicked)
+                            onEvent(
+                                if (state.canRetryDestination) {
+                                    OtpIntent.RetryDestinationResolution
+                                } else {
+                                    OtpIntent.VerifyOtpClicked
+                                }
+                            )
                         },
                         isLoading = state.isLoading,
                         modifier = Modifier.fillMaxWidth()
