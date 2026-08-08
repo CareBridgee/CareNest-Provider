@@ -28,6 +28,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import javax.inject.Singleton
 
+import io.ktor.client.plugins.websocket.WebSockets
+
 @Serializable
 data class RefreshTokenRequest(val refreshToken: String)
 
@@ -53,6 +55,8 @@ object NetworkModule {
         json: Json,
         tokenManager: TokenManager
     ): HttpClient = HttpClient(OkHttp) {
+        install(WebSockets)
+
         install(ContentNegotiation) {
             json(json)
         }
