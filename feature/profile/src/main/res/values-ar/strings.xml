@@ -26,6 +26,12 @@
     <string name="verification_docs_subtitle">يرجى تحميل الوثائق التالية للتحقق من ملفك الشخصي وخبرتك.</string>
     <string name="national_id_card_title">بطاقة الرقم القومي</string>
     <string name="national_id_card_desc">قم بتحميل نسخة واضحة من بطاقة الهوية الحكومية أو جواز السفر.</string>
+    <string name="national_id_front_title">واجهة بطاقة الرقم القومي</string>
+    <string name="national_id_front_desc">حمّل صورة واضحة للوجه الأمامي من بطاقة الرقم القومي.</string>
+    <string name="national_id_back_title">ظهر بطاقة الرقم القومي</string>
+    <string name="national_id_back_desc">حمّل صورة واضحة للوجه الخلفي من بطاقة الرقم القومي.</string>
+    <string name="license_number_label">رقم ترخيص التمريض</string>
+    <string name="license_number_hint">أدخل رقم ترخيص التمريض</string>
     <string name="nursing_license_title">ترخيص التمريض</string>
     <string name="nursing_license_desc">قم بتحميل ترخيص التمريض الساري المفعول الصادر عن الجهة المختصة.</string>
     <string name="professional_cert_title">شهادة مهنية</string>
@@ -88,6 +94,16 @@
     <string name="error_upload_all_docs">يرجى تحميل جميع الوثائق وملء تفاصيل الخبرة</string>
     <string name="error_select_service">يرجى اختيار خدمة واحدة على الأقل</string>
     <string name="error_certify_information">يرجى الإقرار بصحة المعلومات</string>
+    <string name="error_services_unavailable">تعذر تحميل الخدمات. يرجى إعادة المحاولة.</string>
+    <string name="services_loading">لا يزال تحميل الخدمات جارياً</string>
+    <string name="retry">إعادة المحاولة</string>
+    <string name="profile_status_load_failed">تعذر تحديث حالة التحقق</string>
+    <string name="unsupported_rejected_document">لا يمكن ربط العنصر المرفوض بحقل مستند مدعوم.</string>
+    <string name="upload_failed">فشل رفع المستند</string>
+    <string name="error_file_too_large">يتجاوز الملف المحدد حد الرفع البالغ 10 ميجابايت</string>
+    <string name="error_file_open">تعذر فتح الملف المحدد</string>
+    <string name="error_file_empty">الملف المحدد فارغ</string>
+    <string name="error_unknown">حدث خطأ ما. يرجى إعادة المحاولة.</string>
 
     <!-- Step Titles -->
     <string name="step_personal_info">المعلومات الشخصية</string>

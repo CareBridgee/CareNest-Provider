@@ -105,6 +105,7 @@
     <string name="otp_title">Verify OTP</string>
     <string name="otp_subtitle">Enter the code sent to %1$s</string>
     <string name="otp_verify_btn">Verify</string>
+    <string name="otp_retry_routing_btn">Retry account check</string>
     <string name="otp_resend_timer">Resend code in 00:30</string>
     <string name="phone_header_brand">Secure Platform</string>
     <string name="phone_input_secure_care_desc">Your number is used only for
