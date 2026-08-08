@@ -2,8 +2,8 @@ package com.carenest.provider.auth.domain.usecase
 
 import com.carenest.provider.auth.domain.repository.AuthRepository
 import com.carenest.provider.auth.domain.repository.AuthenticatedNurse
-import com.carenest.provider.auth.domain.repository.AuthenticationDestination
 import com.carenest.provider.auth.domain.repository.NurseVerificationStatus
+import com.carenest.provider.auth.domain.util.AuthenticationDestination
 import javax.inject.Inject
 
 class AuthenticationDestinationResolver @Inject constructor() {

@@ -37,10 +37,10 @@ import com.carenest.provider.account.R as AccountR
 import com.carenest.provider.account.navigation.AccountRoutes
 import com.carenest.provider.account.navigation.accountNavigationSerializers
 import com.carenest.provider.account.navigation.providerAccountEntries
+import com.carenest.provider.auth.domain.util.AuthenticationDestination
 import com.carenest.provider.auth.navigation.authNavigationSerializers
 import com.carenest.provider.auth.navigation.providerAuthEntries
 import com.carenest.provider.auth.navigation.providerAuthStartRoute
-import com.carenest.provider.auth.domain.repository.AuthenticationDestination
 import com.carenest.provider.core.navigation.goBack
 import com.carenest.provider.core.navigation.navigate
 import com.carenest.provider.core.navigation.replaceWith

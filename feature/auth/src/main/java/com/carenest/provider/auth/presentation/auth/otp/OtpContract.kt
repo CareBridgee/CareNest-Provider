@@ -1,6 +1,7 @@
 package com.carenest.provider.auth.presentation.auth.otp
 
-import com.carenest.provider.auth.domain.repository.AuthenticationDestination
+import com.carenest.provider.auth.domain.util.AuthenticationDestination
+
 
 sealed interface OtpIntent {
     data class OtpCodeChanged(val otp: String) : OtpIntent
