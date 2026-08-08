@@ -52,6 +52,10 @@ dependencies {
     // Image loading
     implementation(libs.bundles.coil)
 
+    // Camera and Barcode Scanning
+    implementation(libs.bundles.camera)
+    implementation(libs.barcode.scanning)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)

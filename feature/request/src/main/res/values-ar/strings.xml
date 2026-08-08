@@ -116,4 +116,10 @@
     <string name="offer_confirmed_cancellation_info">يمكنك الإلغاء خلال دقيقتين من بدء الزيارة. بعد ذلك، سيتم تطبيق رسوم إلغاء.</string>
     <string name="service">الخدمة</string>
     <string name="distance">المسافة</string>
+
+    <!-- Scan QR -->
+    <string name="scan_qr_title">مسح رمز الاستجابة السريعة</string>
+    <string name="scan_qr_instruction">قم بمحاذاة رمز QR داخل الإطار للمسح</string>
+    <string name="scan_qr_scanning">جارٍ المسح…</string>
+    <string name="scan_qr_retry">حاول مرة أخرى</string>
 </resources>
