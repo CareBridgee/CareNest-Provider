@@ -136,6 +136,10 @@ fun OfferConfirmedContent(
 
         if (state.cancelDialog.isVisible) {
             CancelRequestDialog(
+                selectedReason = state.cancelDialog.selectedReason,
+                onReasonSelected = { onIntent(OfferConfirmedIntent.ReasonSelected(it)) },
+                note = state.cancelDialog.note,
+                onNoteChange = { onIntent(OfferConfirmedIntent.NoteChanged(it)) },
                 onDismiss = { onIntent(OfferConfirmedIntent.DismissCancelDialog) },
                 onConfirm = { onIntent(OfferConfirmedIntent.ConfirmCancelClicked) },
                 isSubmitting = state.cancelDialog.isSubmitting,

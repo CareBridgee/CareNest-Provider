@@ -4,6 +4,7 @@ import com.carenest.request.data.datasource.NurseRequestsDataSource
 import com.carenest.request.data.mapper.toDomain
 import com.carenest.request.data.mapper.toDomainOffer
 import com.carenest.request.data.remote.RequestRemoteDataSource
+import com.carenest.request.domain.model.CancellationReason
 import com.carenest.request.domain.model.Offer
 import com.carenest.request.domain.model.Request
 import com.carenest.request.domain.model.VisitCode
@@ -62,7 +63,13 @@ class NurseRequestsRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun cancelRequest(requestId: String): Boolean {
+    override suspend fun cancelRequest(
+        requestId: String,
+        reason: CancellationReason,
+        note: String,
+    ): Boolean {
+        // The backend cancellation operation has no request body yet. Keep the selected
+        // reason and note in presentation state so the existing UI remains functional.
         remoteDataSource.cancelServiceRequest(requestId)
         return true
     }

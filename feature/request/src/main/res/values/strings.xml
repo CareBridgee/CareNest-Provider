@@ -78,9 +78,19 @@
     <string name="request_call_patient">Call patient</string>
     <string name="request_message_patient">Message patient</string>
     <string name="cancel_request_title">Cancel Visit?</string>
-    <string name="cancel_request_message">Do you want to cancel this visit?</string>
-    <string name="cancel_request_dismiss">No</string>
-    <string name="cancel_request_confirm">Yes</string>
+    <string name="cancel_request_message">Cancelling a confirmed visit can impact patient care. Frequent or late cancellations may affect your rating.</string>
+    <string name="cancel_request_reason_label">REASON FOR CANCELLATION</string>
+    <string name="cancel_request_detail_label">Detailed Explanation</string>
+    <string name="cancel_request_detail_hint">Enter your detailed reason here…</string>
+    <string name="cancel_request_dismiss">Keep Visit</string>
+    <string name="cancel_request_confirm">Confirm</string>
+    <string name="cancel_reason_vehicle_issue">Vehicle / Transportation issue</string>
+    <string name="cancel_reason_personal_emergency">Personal / Family Emergency</string>
+    <string name="cancel_reason_location_inaccessible">Patient\'s Location is Inaccessible</string>
+    <string name="cancel_reason_safety_concern">Safety Concern at Patient Location</string>
+    <string name="cancel_reason_incorrect_details">Incorrect Patient Details</string>
+    <string name="cancel_reason_inappropriate_conduct">Inappropriate Patient Conduct</string>
+    <string name="cancel_reason_other">Other reason (please describe)</string>
 
     <!-- Visit Complete -->
     <string name="visit_completed_total_amount_label">You Will Receive</string>

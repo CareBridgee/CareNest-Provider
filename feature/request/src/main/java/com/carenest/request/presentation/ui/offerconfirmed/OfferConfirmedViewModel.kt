@@ -37,6 +37,12 @@ class OfferConfirmedViewModel @Inject constructor(
             OfferConfirmedIntent.CancelClicked -> {
                 updateState { copy(cancelDialog = cancelDialog.copy(isVisible = true)) }
             }
+            is OfferConfirmedIntent.ReasonSelected -> {
+                updateState { copy(cancelDialog = cancelDialog.copy(selectedReason = intent.reason)) }
+            }
+            is OfferConfirmedIntent.NoteChanged -> {
+                updateState { copy(cancelDialog = cancelDialog.copy(note = intent.note)) }
+            }
             is OfferConfirmedIntent.DismissCancelDialog -> {
                 updateState { copy(cancelDialog = CancelDialogUiState()) }
             }
@@ -71,10 +77,11 @@ class OfferConfirmedViewModel @Inject constructor(
 
     private fun confirmCancel() {
         val requestId = currentState.offer?.offerId ?: return
+        val reason = currentState.cancelDialog.selectedReason ?: return
 
         viewModelScope.launch {
             updateState { copy(cancelDialog = cancelDialog.copy(isSubmitting = true)) }
-            cancelRequest(requestId)
+            cancelRequest(requestId, reason, currentState.cancelDialog.note)
                 .onSuccess {
                     updateState { copy(cancelDialog = CancelDialogUiState()) }
                     sendEffect(OfferConfirmedEffect.NavigateBackToList)
