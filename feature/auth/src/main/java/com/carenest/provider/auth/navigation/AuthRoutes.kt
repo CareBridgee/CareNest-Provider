@@ -7,4 +7,7 @@ import kotlinx.serialization.Serializable
 internal data object LoginRoute : NavKey
 
 @Serializable
-internal data class OtpRoute(val phone: String) : NavKey
+internal data class OtpRoute(
+    val phone: String,
+    val otp: String? = null
+) : NavKey

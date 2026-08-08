@@ -40,6 +40,12 @@ data class UserDto(
 )
 
 @Serializable
+data class DevLoginResponseDto(
+    val phoneNumber: String,
+    val otp: String
+)
+
+@Serializable
 data class ErrorResponseDto(
     val timestamp: String? = null,
     val status: Int? = null,

@@ -14,6 +14,7 @@ import javax.inject.Inject
 
 interface AuthRemoteDataSource {
     suspend fun login(phoneNumber: String): HttpResponse
+    suspend fun devLogin(phoneNumber: String): HttpResponse
     suspend fun verifyOtp(phoneNumber: String, otp: String): HttpResponse
 }
 
@@ -21,14 +22,22 @@ class KtorAuthRemoteDataSource @Inject constructor(
     private val httpClient: HttpClient
 ) : AuthRemoteDataSource {
     override suspend fun login(phoneNumber: String): HttpResponse {
-        return httpClient.post("/api/v1/auth/nurse/login") {
+        return httpClient.post("api/v1/auth/nurse/login") {
             contentType(ContentType.Application.Json)
             setBody(LoginRequestDto(phoneNumber))
         }
     }
 
+    override suspend fun devLogin(phoneNumber: String): HttpResponse {
+        return httpClient.post("api/v1/auth/dev/request-otp") {
+            contentType(ContentType.Application.Json)
+            setBody(LoginRequestDto(phoneNumber))
+        }
+
+    }
+
     override suspend fun verifyOtp(phoneNumber: String, otp: String): HttpResponse {
-        return httpClient.post("/api/v1/auth/nurse/verify-otp") {
+        return httpClient.post("api/v1/auth/nurse/verify-otp") {
             contentType(ContentType.Application.Json)
             setBody(VerifyOtpRequestDto(phoneNumber, otp))
         }

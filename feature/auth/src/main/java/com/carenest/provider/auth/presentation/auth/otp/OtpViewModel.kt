@@ -22,7 +22,12 @@ class OtpViewModel @Inject constructor(
 
     fun onEvent(event: OtpIntent) {
         when (event) {
-            is OtpIntent.PhoneNumberChanged -> updateState { copy(phoneNumber = event.phone) }
+            is OtpIntent.PhoneNumberChanged -> updateState {
+                copy(
+                    phoneNumber = event.phone,
+                    otpCode = event.otp ?: otpCode
+                )
+            }
             is OtpIntent.OtpCodeChanged -> updateState { copy(otpCode = event.otp, errorMessage = null) }
             OtpIntent.VerifyOtpClicked -> verifyOtp()
             OtpIntent.BackClicked -> sendEffect(OtpEffect.NavigateBack)
