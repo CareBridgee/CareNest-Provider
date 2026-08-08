@@ -16,6 +16,7 @@ data class ServiceRequestDetailsDto(
     val status: String? = null,
     val latitude: Double? = null,
     val longitude: Double? = null,
+    val distanceKm: Double? = null,
     val createdAt: String? = null,
     val updatedAt: String? = null,
     val offers: List<NurseOfferDto> = emptyList(),
@@ -27,6 +28,7 @@ data class NurseSummaryDto(
     val firstName: String? = null,
     val lastName: String? = null,
     val phoneNumber: String? = null,
+    val profileImageUrl: String? = null,
     val ratingAvg: Double? = null,
     val totalReviews: Int? = null,
 )
@@ -36,6 +38,7 @@ data class ServiceTypeSummaryDto(
     val id: String? = null,
     val name: String? = null,
     val basePrice: Double? = null,
+    val estimatedDurationMinutes: Int? = null,
 )
 
 @Serializable
@@ -44,23 +47,38 @@ data class ProfileSummaryDto(
     val firstName: String? = null,
     val lastName: String? = null,
     val phoneNumber: String? = null,
+    val profileImageUrl: String? = null,
 )
 
 @Serializable
 data class NurseOfferDto(
     val id: String? = null,
     val serviceRequestId: String? = null,
-    val nurseId: String? = null,
+    val nurse: NurseSummaryDto? = null,
     val proposedPrice: Double? = null,
     val proposedDate: String? = null,
     val proposedTime: JsonElement? = null,
     val message: String? = null,
     val status: String? = null,
-    val nurseLatitude: Double? = null,
-    val nurseLongitude: Double? = null,
     val distanceKm: Double? = null,
+    val serviceTypeName: String? = null,
+    val estimatedDurationMinutes: Int? = null,
     val createdAt: String? = null,
     val updatedAt: String? = null,
+)
+
+@Serializable
+data class ServiceRequestNursePreviewDto(
+    val serviceRequestId: String? = null,
+    val serviceTypeId: String? = null,
+    val serviceName: String? = null,
+    val serviceDescription: String? = null,
+    val preferredDate: String? = null,
+    val preferredTime: JsonElement? = null,
+    val status: String? = null,
+    val estimatedPrice: Double? = null,
+    val createdAt: String? = null,
+    val patient: PatientMedicalSummaryDto? = null,
 )
 
 @Serializable
@@ -84,6 +102,7 @@ data class PatientMedicalSummaryDto(
     val profileId: String? = null,
     val firstName: String? = null,
     val lastName: String? = null,
+    val profileImageUrl: String? = null,
     val dateOfBirth: String? = null,
     val gender: String? = null,
     val bloodType: String? = null,
@@ -127,13 +146,6 @@ data class AddressSummaryDto(
     val street: String? = null,
     val buildingNumber: String? = null,
     val apartmentNumber: String? = null,
-)
-
-@Serializable
-data class VisitCodeDto(
-    val serviceRequestId: String? = null,
-    val code: String? = null,
-    val expiresAt: String? = null,
 )
 
 @Serializable

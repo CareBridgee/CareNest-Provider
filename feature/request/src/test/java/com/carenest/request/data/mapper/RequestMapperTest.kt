@@ -11,23 +11,30 @@ import com.carenest.request.data.remote.dto.ServiceRequestNurseProfileDto
 import com.carenest.request.data.remote.dto.ServiceTypeSummaryDto
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class RequestMapperTest {
     @Test
-    fun `maps contract data without inventing unavailable backend fields`() {
+    fun `maps new service request contract fields`() {
         val details = ServiceRequestDetailsDto(
             serviceRequestId = "request-id",
-            serviceType = ServiceTypeSummaryDto(name = "Wound care", basePrice = 80.0),
+            serviceType = ServiceTypeSummaryDto(
+                name = "Wound care",
+                basePrice = 80.0,
+                estimatedDurationMinutes = 50,
+            ),
             profile = ProfileSummaryDto(
                 id = "profile-id",
                 firstName = "Fallback",
                 lastName = "Name",
                 phoneNumber = "+201000000000",
+                profileImageUrl = "https://example.com/summary-patient.jpg",
             ),
             preferredDate = "2026-08-09",
             preferredTime = Json.parseToJsonElement("{\"hour\":14,\"minute\":30}"),
             durationMinutes = 45,
+            distanceKm = 10.0,
         )
         val offer = NurseOfferDto(
             id = "offer-id",
@@ -35,7 +42,8 @@ class RequestMapperTest {
             proposedDate = "2026-08-10",
             proposedTime = Json.parseToJsonElement("\"15:45:00\""),
             status = "ACCEPTED",
-            distanceKm = 10.0,
+            distanceKm = 20.0,
+            estimatedDurationMinutes = 60,
         )
 
         val result = details.toDomainOffer(
@@ -46,6 +54,7 @@ class RequestMapperTest {
                     profileId = "profile-id",
                     firstName = "Amina",
                     lastName = "Hassan",
+                    profileImageUrl = "https://example.com/profile-patient.jpg",
                     dateOfBirth = "2000-01-01",
                 ),
                 patientPhoneNumber = "+201111111111",
@@ -70,9 +79,56 @@ class RequestMapperTest {
         assertEquals("15:45", result.visitTime)
         assertEquals("12 Nile Street", result.patientInfo.addressLine)
         assertEquals("4B, Dokki, Giza, Egypt", result.patientInfo.addressDetail)
-        assertEquals("", result.patientInfo.image)
+        assertEquals("https://example.com/profile-patient.jpg", result.patientInfo.image)
         assertEquals(6.21f, result.distanceMiles ?: 0f, 0.01f)
+        assertEquals("50 mins", result.estimatedDuration)
         assertEquals(95f, result.totalAmount)
+    }
+
+    @Test
+    fun `falls back to embedded offer contract fields when request summaries omit them`() {
+        val details = ServiceRequestDetailsDto(
+            profile = ProfileSummaryDto(
+                profileImageUrl = "https://example.com/service-request-patient.jpg",
+            ),
+        )
+
+        val result = details.toDomainOffer(
+            requestedServiceRequestId = "request-id",
+            acceptedOffer = NurseOfferDto(
+                distanceKm = 4.0,
+                estimatedDurationMinutes = 30,
+            ),
+            assignedProfile = null,
+            patientReport = null,
+        )
+
+        assertEquals("https://example.com/service-request-patient.jpg", result.patientInfo.image)
+        assertEquals(2.49f, result.distanceMiles ?: 0f, 0.01f)
+        assertEquals("30 mins", result.estimatedDuration)
+    }
+
+    @Test
+    fun `keeps nullable new contract fields unavailable`() {
+        val result = ServiceRequestDetailsDto(
+            profile = ProfileSummaryDto(profileImageUrl = null),
+            serviceType = ServiceTypeSummaryDto(estimatedDurationMinutes = null),
+            distanceKm = null,
+        ).toDomainOffer(
+            requestedServiceRequestId = "request-id",
+            acceptedOffer = NurseOfferDto(
+                distanceKm = null,
+                estimatedDurationMinutes = null,
+            ),
+            assignedProfile = ServiceRequestNurseProfileDto(
+                patient = PatientMedicalSummaryDto(profileImageUrl = null),
+            ),
+            patientReport = null,
+        )
+
+        assertEquals("", result.patientInfo.image)
+        assertNull(result.distanceMiles)
+        assertEquals("\u2014", result.estimatedDuration)
     }
 
     @Test

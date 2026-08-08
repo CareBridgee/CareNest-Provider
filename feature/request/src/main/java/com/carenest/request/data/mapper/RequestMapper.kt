@@ -4,11 +4,10 @@ import com.carenest.request.data.remote.dto.AddressSummaryDto
 import com.carenest.request.data.remote.dto.NurseOfferDto
 import com.carenest.request.data.remote.dto.PatientReportDto
 import com.carenest.request.data.remote.dto.ServiceRequestDetailsDto
+import com.carenest.request.data.remote.dto.ServiceRequestNursePreviewDto
 import com.carenest.request.data.remote.dto.ServiceRequestNurseProfileDto
-import com.carenest.request.data.remote.dto.VisitCodeDto
 import com.carenest.request.domain.model.Offer
 import com.carenest.request.domain.model.PatientInfo
-import com.carenest.request.domain.model.VisitCode
 import com.carenest.request.domain.model.VisitSummary
 import java.util.Calendar
 import kotlinx.serialization.json.JsonElement
@@ -29,7 +28,12 @@ fun ServiceRequestDetailsDto.toDomainOffer(
         patient?.firstName ?: summary?.firstName,
         patient?.lastName ?: summary?.lastName,
     ).joinNonBlank()
-    val distanceMiles = acceptedOffer?.distanceKm?.toMiles()
+    val patientImageUrl = patient?.profileImageUrl
+        ?.takeIf(String::isNotBlank)
+        ?: summary?.profileImageUrl.orEmpty()
+    val distanceMiles = (distanceKm ?: acceptedOffer?.distanceKm)?.toMiles()
+    val estimatedDurationMinutes = serviceType?.estimatedDurationMinutes
+        ?: acceptedOffer?.estimatedDurationMinutes
 
     return Offer(
         offerId = serviceRequestId ?: requestedServiceRequestId,
@@ -40,7 +44,7 @@ fun ServiceRequestDetailsDto.toDomainOffer(
         patientInfo = PatientInfo(
             id = profileId,
             name = patientName,
-            image = "",
+            image = patientImageUrl,
             distanceMiles = distanceMiles,
             age = patient?.dateOfBirth.toAgeOrNull(),
             phone = (assignedProfile?.patientPhoneNumber ?: summary?.phoneNumber).orEmpty(),
@@ -62,7 +66,7 @@ fun ServiceRequestDetailsDto.toDomainOffer(
             ).toDisplayTime().orPlaceholder(),
         distanceMiles = distanceMiles,
         estimatedArrival = PLACEHOLDER,
-        estimatedDuration = durationMinutes?.let { "$it mins" } ?: PLACEHOLDER,
+        estimatedDuration = estimatedDurationMinutes?.let { "$it mins" } ?: PLACEHOLDER,
         totalAmount = (
             acceptedOffer?.proposedPrice
                 ?: assignedProfile?.estimatedPrice
@@ -72,6 +76,66 @@ fun ServiceRequestDetailsDto.toDomainOffer(
         serviceImage = "",
     )
 }
+
+fun ServiceRequestNursePreviewDto.toDomainOffer(
+    requestedServiceRequestId: String,
+    details: ServiceRequestDetailsDto?,
+    acceptedOffer: NurseOfferDto?,
+    patientReport: PatientReportDto?,
+): Offer {
+    val profile = ServiceRequestNurseProfileDto(
+        serviceRequestId = serviceRequestId,
+        serviceTypeId = serviceTypeId,
+        serviceName = serviceName,
+        serviceDescription = serviceDescription,
+        preferredDate = preferredDate,
+        preferredTime = preferredTime,
+        status = status,
+        estimatedPrice = estimatedPrice,
+        createdAt = createdAt,
+        patient = patient,
+    )
+    return (details ?: profile.toDetailsDto()).toDomainOffer(
+        requestedServiceRequestId = requestedServiceRequestId,
+        acceptedOffer = acceptedOffer,
+        assignedProfile = profile,
+        patientReport = patientReport,
+    )
+}
+
+fun ServiceRequestNurseProfileDto.toDomainOffer(
+    requestedServiceRequestId: String,
+    details: ServiceRequestDetailsDto?,
+    acceptedOffer: NurseOfferDto?,
+    patientReport: PatientReportDto?,
+): Offer = (details ?: toDetailsDto()).toDomainOffer(
+    requestedServiceRequestId = requestedServiceRequestId,
+    acceptedOffer = acceptedOffer,
+    assignedProfile = this,
+    patientReport = patientReport,
+)
+
+private fun ServiceRequestNurseProfileDto.toDetailsDto(): ServiceRequestDetailsDto =
+    ServiceRequestDetailsDto(
+        serviceRequestId = serviceRequestId,
+        serviceType = com.carenest.request.data.remote.dto.ServiceTypeSummaryDto(
+            id = serviceTypeId,
+            name = serviceName,
+            basePrice = estimatedPrice,
+        ),
+        profile = com.carenest.request.data.remote.dto.ProfileSummaryDto(
+            id = patient?.profileId,
+            firstName = patient?.firstName,
+            lastName = patient?.lastName,
+            phoneNumber = patientPhoneNumber,
+            profileImageUrl = patient?.profileImageUrl,
+        ),
+        serviceDescription = serviceDescription,
+        preferredDate = preferredDate,
+        preferredTime = preferredTime,
+        status = status,
+        createdAt = createdAt,
+    )
 
 fun ServiceRequestDetailsDto.toVisitSummary(
     requestedServiceRequestId: String,
@@ -92,12 +156,6 @@ fun ServiceRequestDetailsDto.toVisitSummary(
         isVerified = true,
     )
 }
-
-fun VisitCodeDto.toDomain(fallbackServiceRequestId: String): VisitCode = VisitCode(
-    serviceRequestId = serviceRequestId ?: fallbackServiceRequestId,
-    code = code.orEmpty(),
-    expiresAt = expiresAt,
-)
 
 private fun List<String?>.joinNonBlank(): String =
     mapNotNull { it?.trim()?.takeIf(String::isNotEmpty) }.joinToString(" ")

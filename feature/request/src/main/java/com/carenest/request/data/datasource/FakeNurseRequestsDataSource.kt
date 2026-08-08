@@ -20,7 +20,7 @@ class FakeNurseRequestsDataSource @Inject constructor() : NurseRequestsDataSourc
                 basePrice = 45f,
                 patientAddress = "2.4 mi",
                 serviceImage = "",
-                status = RequestStatus.ESTIMATED
+                status = RequestStatus.ESTIMATED,
             ),
             Request(
                 id = "req-002",
@@ -29,8 +29,8 @@ class FakeNurseRequestsDataSource @Inject constructor() : NurseRequestsDataSourc
                 basePrice = 55f,
                 patientAddress = "4.1 mi",
                 serviceImage = "",
-                status = RequestStatus.ESTIMATED
-            )
+                status = RequestStatus.ESTIMATED,
+            ),
         )
     }
 
@@ -40,5 +40,4 @@ class FakeNurseRequestsDataSource @Inject constructor() : NurseRequestsDataSourc
         val acceptAtSecond = if (willAccept) random.nextInt(4, 9) else 10
         return willAccept to acceptAtSecond
     }
-
 }

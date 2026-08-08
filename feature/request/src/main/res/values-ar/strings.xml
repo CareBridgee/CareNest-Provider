@@ -124,4 +124,10 @@
     <string name="patient_phone_unavailable">لم يرسل الخادم رقم هاتف المريض.</string>
     <string name="patient_report_unavailable">لا يوجد تقرير متاح للمريض في هذا العقد.</string>
     <string name="patient_address_unavailable">لا يوجد عنوان متاح للمريض في هذا العقد.</string>
+
+    <!-- Scan QR -->
+    <string name="scan_qr_title">مسح رمز الاستجابة السريعة</string>
+    <string name="scan_qr_instruction">قم بمحاذاة رمز QR داخل الإطار للمسح</string>
+    <string name="scan_qr_scanning">جارٍ المسح…</string>
+    <string name="scan_qr_retry">حاول مرة أخرى</string>
 </resources>

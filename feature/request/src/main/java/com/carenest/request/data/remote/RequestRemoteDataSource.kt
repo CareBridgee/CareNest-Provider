@@ -3,8 +3,8 @@ package com.carenest.request.data.remote
 import com.carenest.request.data.remote.dto.NurseOfferDto
 import com.carenest.request.data.remote.dto.PatientReportDto
 import com.carenest.request.data.remote.dto.ServiceRequestDetailsDto
+import com.carenest.request.data.remote.dto.ServiceRequestNursePreviewDto
 import com.carenest.request.data.remote.dto.ServiceRequestNurseProfileDto
-import com.carenest.request.data.remote.dto.VisitCodeDto
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
@@ -13,10 +13,9 @@ import javax.inject.Inject
 
 interface RequestRemoteDataSource {
     suspend fun getServiceRequestDetails(serviceRequestId: String): ServiceRequestDetailsDto
-    suspend fun getNearbyOffers(serviceRequestId: String): List<NurseOfferDto>
+    suspend fun getServiceRequestPreview(serviceRequestId: String): ServiceRequestNursePreviewDto
     suspend fun acceptOffer(offerId: String): NurseOfferDto
     suspend fun cancelServiceRequest(serviceRequestId: String)
-    suspend fun generateVisitCode(serviceRequestId: String): VisitCodeDto
     suspend fun completeServiceRequest(serviceRequestId: String, visitCode: String)
     suspend fun getServiceRequestProfile(serviceRequestId: String): ServiceRequestNurseProfileDto
     suspend fun getPatientReport(profileId: String): PatientReportDto
@@ -28,8 +27,10 @@ class KtorRequestRemoteDataSource @Inject constructor(
     override suspend fun getServiceRequestDetails(serviceRequestId: String): ServiceRequestDetailsDto =
         api.getServiceRequestDetails(serviceRequestId).bodyOrThrow()
 
-    override suspend fun getNearbyOffers(serviceRequestId: String): List<NurseOfferDto> =
-        api.getNearbyOffers(serviceRequestId).bodyOrThrow()
+    override suspend fun getServiceRequestPreview(
+        serviceRequestId: String,
+    ): ServiceRequestNursePreviewDto =
+        api.getServiceRequestPreview(serviceRequestId).bodyOrThrow()
 
     override suspend fun acceptOffer(offerId: String): NurseOfferDto =
         api.acceptOffer(offerId).bodyOrThrow()
@@ -37,9 +38,6 @@ class KtorRequestRemoteDataSource @Inject constructor(
     override suspend fun cancelServiceRequest(serviceRequestId: String) {
         api.cancelServiceRequest(serviceRequestId).requireSuccess()
     }
-
-    override suspend fun generateVisitCode(serviceRequestId: String): VisitCodeDto =
-        api.generateVisitCode(serviceRequestId).bodyOrThrow()
 
     override suspend fun completeServiceRequest(serviceRequestId: String, visitCode: String) {
         api.completeServiceRequest(serviceRequestId, visitCode).requireSuccess()

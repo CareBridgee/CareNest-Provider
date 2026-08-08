@@ -25,9 +25,3 @@ data class Offer(
     val serviceType: String,
     val serviceImage : String,
 )
-
-data class VisitCode(
-    val serviceRequestId: String,
-    val code: String,
-    val expiresAt: String?,
-)

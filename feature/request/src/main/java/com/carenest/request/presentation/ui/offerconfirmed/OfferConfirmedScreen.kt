@@ -73,14 +73,7 @@ fun OfferConfirmedScreen(
         when (effect) {
             is OfferConfirmedEffect.NavigateToDetails -> onViewDetails(effect.offerId)
             is OfferConfirmedEffect.NavigateToVisitCompleted -> onVisitCompleted(effect.requestId)
-            is OfferConfirmedEffect.NavigateToQrCode -> {
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.visit_code_generated, effect.visitCode.code),
-                    Toast.LENGTH_LONG,
-                ).show()
-                onShowQrCode()
-            }
+            OfferConfirmedEffect.NavigateToQrCode -> onShowQrCode()
             OfferConfirmedEffect.NavigateBackToList -> onCancelled()
             is OfferConfirmedEffect.ShowError -> {
                 Toast.makeText(context, effect.message.asString(context), Toast.LENGTH_LONG).show()
@@ -124,7 +117,6 @@ fun OfferConfirmedContent(
                 state.offer != null -> OfferConfirmedBody(
                     contract = state.offer,
                     isCancelling = state.cancelDialog.isSubmitting,
-                    isGeneratingVisitCode = state.isGeneratingVisitCode,
                     onIntent = onIntent,
                 )
                 else -> BasicText(
@@ -152,7 +144,6 @@ fun OfferConfirmedContent(
 private fun OfferConfirmedBody(
     contract: Offer,
     isCancelling: Boolean,
-    isGeneratingVisitCode: Boolean,
     onIntent: (OfferConfirmedIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -198,6 +189,7 @@ private fun OfferConfirmedBody(
 
         PatientCard(
             name = contract.patientInfo.name,
+            imageUrl = contract.patientInfo.image,
             estimatedArrivalTime = contract.estimatedArrival,
             onCallClick = {onIntent(OfferConfirmedIntent.OnCallClicked)},
             onMessageClick = {onIntent(OfferConfirmedIntent.OnMessageClicked)},
@@ -232,7 +224,6 @@ private fun OfferConfirmedBody(
             onCancelClick = { onIntent(OfferConfirmedIntent.CancelClicked) },
             onShowOfferDetailsClick = { onIntent(OfferConfirmedIntent.ViewDetailsClicked) },
             isCancelling = isCancelling,
-            isGeneratingVisitCode = isGeneratingVisitCode,
             modifier = Modifier.fillMaxWidth()
         )
     }

@@ -127,4 +127,10 @@
     <string name="patient_address_unavailable">No patient address is available for this contract.</string>
     <string name="service">Service</string>
     <string name="distance">Distance</string>
+
+    <!-- Scan QR -->
+    <string name="scan_qr_title">Scan QR Code</string>
+    <string name="scan_qr_instruction">Align the QR code within the frame to scan</string>
+    <string name="scan_qr_scanning">Scanning…</string>
+    <string name="scan_qr_retry">Try Again</string>
 </resources>

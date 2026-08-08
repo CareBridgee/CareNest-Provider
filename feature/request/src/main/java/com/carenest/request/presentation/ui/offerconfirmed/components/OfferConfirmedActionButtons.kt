@@ -23,7 +23,6 @@ fun OfferConfirmedActionButtons(
     onCancelClick: () -> Unit,
     onShowOfferDetailsClick: () -> Unit,
     isCancelling: Boolean,
-    isGeneratingVisitCode: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -41,8 +40,6 @@ fun OfferConfirmedActionButtons(
             caption = stringResource(R.string.show_scan_qr),
             onClick = onShowQrCodeClick,
             modifier = Modifier.fillMaxWidth(),
-            isDisabled = isGeneratingVisitCode,
-            isLoading = isGeneratingVisitCode,
         )
 
         PrimaryButton(
@@ -65,7 +62,6 @@ private fun Preview(){
             onShowQrCodeClick = {},
             onCancelClick = {},
             isCancelling = false,
-            isGeneratingVisitCode = false,
             onShowOfferDetailsClick = {}
         )
     }
