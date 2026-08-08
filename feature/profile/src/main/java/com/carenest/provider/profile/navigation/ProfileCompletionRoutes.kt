@@ -7,7 +7,11 @@ import kotlinx.serialization.Serializable
 internal data object RegistrationRoute : NavKey
 
 @Serializable
-internal data object UnderReviewRoute : NavKey
+internal data class UnderReviewRoute(val nurseId: String) : NavKey
 
 @Serializable
-internal data object ReUploadDocumentRoute : NavKey
+internal data class ReUploadDocumentRoute(
+    val nurseId: String,
+    val documentField: String,
+    val rejectionReason: String,
+) : NavKey

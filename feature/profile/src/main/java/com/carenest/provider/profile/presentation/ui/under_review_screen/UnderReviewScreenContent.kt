@@ -10,11 +10,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -23,6 +27,7 @@ import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
 import com.carenest.provider.designsystem.components.topbar.TopBarLeading
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
+import com.carenest.provider.designsystem.components.button.PrimaryButton
 import com.carenest.provider.profile.R
 import com.carenest.provider.profile.presentation.ui.under_review_screen.composable.ActionRequiredScreenContent
 import com.carenest.provider.profile.presentation.ui.under_review_screen.composable.ActionSection
@@ -34,6 +39,7 @@ import com.carenest.provider.profile.presentation.ui.under_review_screen.composa
 
 @Composable
 fun UnderReviewScreen(
+    nurseId: String,
     viewModel: UnderReviewViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
     onGoToHomeClick: () -> Unit,
@@ -41,10 +47,12 @@ fun UnderReviewScreen(
     onBackToLoginClick: () -> Unit ,
     onDashboardClick: () -> Unit,
     onCommunityGuidelinesClick: () -> Unit ,
-    onUploadAgainClick: () -> Unit
+    onUploadAgainClick: (String, String) -> Unit
 ) {
 
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(nurseId) { viewModel.load(nurseId) }
 
     ObserveEffect(viewModel.effect) { effect ->
         when (effect) {
@@ -71,7 +79,11 @@ fun UnderReviewScreen(
         },
         onDashboardClick = onDashboardClick,
         onCommunityGuidelinesClick = onCommunityGuidelinesClick,
-        onUploadAgainClick = onUploadAgainClick
+        onUploadAgainClick = {
+            val failed = state.failedSteps.firstOrNull()
+            onUploadAgainClick(failed?.step.orEmpty(), failed?.reason ?: state.rejectionReason)
+        },
+        onRetry = { viewModel.onIntent(UnderReviewIntent.OnRetry) },
     )
 }
 
@@ -85,9 +97,10 @@ private fun UnderReviewScreenContent(
     onDashboardClick: () -> Unit,
     onCommunityGuidelinesClick: () -> Unit,
     onUploadAgainClick: () -> Unit,
+    onRetry: () -> Unit = {},
     modifier: Modifier = Modifier,
-    avatarUrl: String? = "https://lh3.googleusercontent.com/aida-public/AB6AXuDoegGFZVcEdHy8-NusuyjiS-d6Mty4Z4EoczLydOs8RCH1zvj5FBvxfwB_Wl2j6kUh7deCM2rssQWpgYWQY6Oav8w0byJe0JalttPlE9e1EXlfaSDxKJKO1R6bKp12FmxlQpg6vVIu_pfxOZ-0ciCgcWtCnUzel2KkM7ZifGFYuxwLYAyu4xZnibHr2zhLco364uLun4eawcpEtsxS9WOY6FoAnls0O2B-56k4HrMkouY0q9fDVSNg"
 ) {
+    val context = LocalContext.current
     val isSuccess = state.underReviewState == ReviewState.Success
     val isError = state.underReviewState == ReviewState.Error
 
@@ -97,7 +110,7 @@ private fun UnderReviewScreenContent(
             CareNestTopBar(
                 title = stringResource(R.string.app_name),
                 leading = if (isSuccess) null else TopBarLeading.Back(onBackClick),
-                trailingAvatarUrl = avatarUrl,
+                trailingAvatarUrl = state.profileImageUrl,
                 modifier = Modifier.fillMaxWidth()
             )
         },
@@ -109,7 +122,33 @@ private fun UnderReviewScreenContent(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
-            if (isSuccess) {
+            if (state.isLoading) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(Theme.spacing.extraLarge),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    CircularProgressIndicator(color = Theme.colors.primary)
+                }
+            } else if (state.error != null) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(Theme.spacing.extraLarge),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(Theme.spacing.medium),
+                ) {
+                    BasicText(
+                        text = context.resources.getIdentifier(
+                            state.error,
+                            "string",
+                            context.packageName,
+                        ).let { id -> if (id != 0) context.getString(id) else state.error },
+                        style = Theme.typography.body.medium.copy(color = Theme.colors.error),
+                    )
+                    PrimaryButton(
+                        caption = stringResource(R.string.retry),
+                        onClick = onRetry,
+                    )
+                }
+            } else if (isSuccess) {
                 SuccessScreenContent(
                     onHomeClick = onDashboardClick,
                     onCommunityGuidelinesClick = onCommunityGuidelinesClick,
@@ -117,6 +156,7 @@ private fun UnderReviewScreenContent(
                 )
             } else if (isError) {
                 ActionRequiredScreenContent(
+                    rejectionReason = state.rejectionReason,
                     onUploadAgainClick = onUploadAgainClick,
                     onContactSupportClick = onContactSupportClick,
                     modifier = Modifier.fillMaxWidth()

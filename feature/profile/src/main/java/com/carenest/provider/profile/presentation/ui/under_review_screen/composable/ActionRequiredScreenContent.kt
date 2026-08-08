@@ -44,6 +44,7 @@ import com.carenest.provider.designsystem.R as RD
 
 @Composable
 fun ActionRequiredScreenContent(
+    rejectionReason: String,
     onUploadAgainClick: () -> Unit,
     onContactSupportClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -139,7 +140,7 @@ fun ActionRequiredScreenContent(
                 fontWeight = FontWeight.Bold
             )
 
-            val rejectedReason = stringResource(R.string.rejected_license_reason)
+            val rejectedReason = rejectionReason.ifBlank { stringResource(R.string.rejected_license_reason) }
             val annotatedReason = buildAnnotatedString {
                 val boldStart = "<b>"
                 val boldEnd = "</b>"
