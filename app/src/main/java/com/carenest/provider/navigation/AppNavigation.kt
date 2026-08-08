@@ -40,6 +40,7 @@ import com.carenest.provider.account.navigation.providerAccountEntries
 import com.carenest.provider.auth.navigation.authNavigationSerializers
 import com.carenest.provider.auth.navigation.providerAuthEntries
 import com.carenest.provider.auth.navigation.providerAuthStartRoute
+import com.carenest.provider.auth.domain.repository.AuthenticationDestination
 import com.carenest.provider.core.navigation.goBack
 import com.carenest.provider.core.navigation.navigate
 import com.carenest.provider.core.navigation.replaceWith
@@ -60,6 +61,7 @@ import com.carenest.provider.payouts.navigation.providerPayoutsStartRoute
 import com.carenest.provider.profile.navigation.profileCompletionNavigationSerializers
 import com.carenest.provider.profile.navigation.providerProfileCompletionEntries
 import com.carenest.provider.profile.navigation.providerProfileCompletionStartRoute
+import com.carenest.provider.profile.navigation.providerProfileReviewRoute
 import com.carenest.request.navigation.RequestRoutes
 import com.carenest.request.navigation.providerRequestEntries
 import com.carenest.request.navigation.requestSerializers
@@ -116,8 +118,17 @@ fun AppNavigation(
         )
         providerAuthEntries(
             backStack = backStack,
-            onAuthenticationSuccess = {
-                backStack.replaceWith(providerProfileCompletionStartRoute())
+            onAuthenticationSuccess = { destination ->
+                when (destination) {
+                    AuthenticationDestination.CompleteProfile ->
+                        backStack.replaceWith(providerProfileCompletionStartRoute())
+                    is AuthenticationDestination.UnderReview ->
+                        backStack.replaceWith(providerProfileReviewRoute(destination.nurseId))
+                    is AuthenticationDestination.Rejected ->
+                        backStack.replaceWith(providerProfileReviewRoute(destination.nurseId))
+                    is AuthenticationDestination.Approved ->
+                        backStack.replaceWith(HomeRoutes.Home)
+                }
             },
         )
         providerProfileCompletionEntries(

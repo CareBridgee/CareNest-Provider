@@ -1,9 +1,14 @@
 package com.carenest.provider.auth.data.repository
 
+import android.util.Log
 import com.carenest.provider.auth.data.remote.AuthRemoteDataSource
 import com.carenest.provider.auth.data.remote.dto.AuthResponseDto
 import com.carenest.provider.auth.data.remote.dto.ErrorResponseDto
+import com.carenest.provider.auth.data.remote.dto.CurrentUserDto
 import com.carenest.provider.auth.domain.repository.AuthRepository
+import com.carenest.provider.auth.domain.repository.AuthenticatedNurse
+import com.carenest.provider.auth.domain.repository.AuthenticatedUser
+import com.carenest.provider.auth.domain.repository.NurseVerificationStatus
 import com.carenest.provider.core.datastore.TokenManager
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
@@ -24,19 +29,46 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun verifyOtp(phoneNumber: String, otp: String): Result<Unit> {
+    override suspend fun verifyOtp(phoneNumber: String, otp: String): Result<AuthenticatedNurse?> {
         return try {
             val response = dataSource.verifyOtp(phoneNumber, otp)
             if (response.status.isSuccess()) {
                 val authResponse = response.body<AuthResponseDto>()
-                tokenManager.saveTokens(authResponse.accessToken, authResponse.refreshToken)
-                Result.success(Unit)
+                val accessToken = requireNotNull(authResponse.accessToken) {
+                    "Authentication response did not contain an access token"
+                }
+                val refreshToken = requireNotNull(authResponse.refreshToken) {
+                    "Authentication response did not contain a refresh token"
+                }
+                tokenManager.saveTokens(accessToken, refreshToken)
+                val nurse = authResponse.user?.nurse
+                Result.success(
+                    nurse?.let {
+                        AuthenticatedNurse(
+                            id = it.id,
+                            verificationStatus = NurseVerificationStatus.valueOf(it.verificationStatus),
+                        )
+                    }
+                )
             } else {
                 handleErrorResponse(response)
             }
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    override suspend fun getCurrentUser(): Result<AuthenticatedUser> = try {
+        val response = dataSource.getCurrentUser()
+        if (response.status.isSuccess()) {
+            val user = response.body<CurrentUserDto>()
+            Log.d("AuthRouting", "profileCompleted=${user.profileCompleted}")
+            Result.success(AuthenticatedUser(profileCompleted = user.profileCompleted))
+        } else {
+            handleErrorResponse(response)
+        }
+    } catch (error: Exception) {
+        Result.failure(error)
     }
 
     private suspend fun handleGenericResponse(response: HttpResponse): Result<Unit> {
@@ -47,7 +79,7 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
-    private suspend fun handleErrorResponse(response: HttpResponse): Result<Unit> {
+    private suspend fun <T> handleErrorResponse(response: HttpResponse): Result<T> {
         val statusCode = response.status.value
         return try {
             val errorBody = response.body<ErrorResponseDto>()
