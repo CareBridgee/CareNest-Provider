@@ -1,17 +1,24 @@
 package com.carenest.request.data.datasource
 
+import com.carenest.request.data.dto.CompleteRequest
 import com.carenest.request.domain.model.CancellationReason
 import com.carenest.request.domain.model.Offer
 import com.carenest.request.domain.model.PatientInfo
 import com.carenest.request.domain.model.Request
 import com.carenest.request.domain.model.RequestStatus
+import io.ktor.client.HttpClient
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.delay
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.random.Random
 
 @Singleton
-class FakeNurseRequestsDataSource @Inject constructor() : NurseRequestsDataSource {
+class NurseRequestsDataSourceImpl @Inject constructor(
+    private val httpClient: HttpClient
+) : NurseRequestsDataSource {
 
     override suspend fun getIncomingRequests(): List<Request> {
         delay(1000)
@@ -77,5 +84,12 @@ class FakeNurseRequestsDataSource @Inject constructor() : NurseRequestsDataSourc
     ): Boolean {
         delay(500)
         return true
+    }
+
+    override suspend fun completeRequest(serviceRequestId: String, visitCode: String): Boolean {
+        val response = httpClient.post("/api/v1/service-requests/$serviceRequestId/complete") {
+            setBody(CompleteRequest(visitCode))
+        }
+        return response.status.isSuccess()
     }
 }

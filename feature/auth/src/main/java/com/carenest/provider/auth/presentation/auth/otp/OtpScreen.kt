@@ -44,14 +44,15 @@ import com.carenest.provider.designsystem.theme.Theme
 @Composable
 fun OtpScreen(
     phone: String,
+    otp: String? = null,
     viewModel: OtpViewModel = hiltViewModel(),
     onAuthenticationSuccess: (AuthenticationDestination) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
 
-    LaunchedEffect(phone) {
-        viewModel.onEvent(OtpIntent.PhoneNumberChanged(phone))
+    LaunchedEffect(phone, otp) {
+        viewModel.onEvent(OtpIntent.PhoneNumberChanged(phone, otp))
     }
 
     ObserveEffect(viewModel.effect) { effect ->

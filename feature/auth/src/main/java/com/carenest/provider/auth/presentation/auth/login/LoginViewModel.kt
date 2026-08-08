@@ -3,18 +3,21 @@ package com.carenest.provider.auth.presentation.auth.login
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.carenest.provider.auth.domain.usecase.DevLoginUseCase
 import com.carenest.provider.auth.domain.usecase.LoginWithPhoneUseCase
 import com.carenest.provider.core.mvi.DefaultEffectPublisher
 import com.carenest.provider.core.mvi.DefaultStateHolder
 import com.carenest.provider.core.mvi.EffectPublisher
 import com.carenest.provider.core.mvi.StateHolder
+import com.carenest.provider.core.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val loginWithPhoneUseCase: LoginWithPhoneUseCase
+    private val loginWithPhoneUseCase: LoginWithPhoneUseCase,
+    private val devLoginUseCase: DevLoginUseCase
 ) : ViewModel(),
     StateHolder<LoginState> by DefaultStateHolder(LoginState()),
     EffectPublisher<LoginEffect> by DefaultEffectPublisher() {
@@ -80,29 +83,36 @@ class LoginViewModel @Inject constructor(
 
             updateState { copy(isLoading = true, errorMessage = null) }
 
-            val result = loginWithPhoneUseCase(fullPhoneNumber)
+            // Using DevLoginUseCase for development purposes as requested
+            val result = devLoginUseCase(fullPhoneNumber)
 
             updateState { copy(isLoading = false) }
 
-            result.fold(
-                onSuccess = {
-                    Log.d(TAG, "requestOtp success")
+            when (result) {
+                is Resource.Success -> {
+                    Log.d(TAG, "requestOtp success with dev OTP: ${result.data}")
                     sendEffect(
                         LoginEffect.NavigateToOtp(
                             fullPhoneNumber,
-                            currentState.selectedOtpMethod
+                            currentState.selectedOtpMethod,
+                            result.data
                         )
                     )
-                },
-                onFailure = { error ->
-                    Log.e(TAG, "requestOtp failed: ${error.message}", error)
+                }
+
+                is Resource.Error -> {
+                    Log.e(TAG, "requestOtp failed: ${result.message}")
                     updateState {
                         copy(
-                            errorMessage = error.message ?: "Something went wrong. Please try again."
+                            errorMessage = result.message ?: "Something went wrong. Please try again."
                         )
                     }
                 }
-            )
+
+                is Resource.Loading -> {
+                    // Handled by isLoading flag above
+                }
+            }
         }
     }
 }

@@ -4,7 +4,7 @@ import com.carenest.provider.auth.domain.repository.AuthenticationDestination
 
 sealed interface OtpIntent {
     data class OtpCodeChanged(val otp: String) : OtpIntent
-    data class PhoneNumberChanged(val phone: String) : OtpIntent
+    data class PhoneNumberChanged(val phone: String, val otp: String? = null) : OtpIntent
     data object VerifyOtpClicked : OtpIntent
     data object RetryDestinationResolution : OtpIntent
     data object BackClicked : OtpIntent

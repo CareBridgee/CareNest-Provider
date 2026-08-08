@@ -27,4 +27,7 @@ class NurseRequestsRepositoryImpl @Inject constructor(
         reason: CancellationReason,
         note: String
     ): Boolean = dataSource.cancelRequest(requestId, reason, note)
+
+    override suspend fun completeRequest(serviceRequestId: String, visitCode: String): Boolean =
+        dataSource.completeRequest(serviceRequestId, visitCode)
 }

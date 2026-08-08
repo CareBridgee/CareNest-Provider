@@ -13,7 +13,7 @@ import com.carenest.provider.auth.presentation.auth.login.components.PhoneInputS
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
-    onNavigateToOtp: (String, OtpDeliveryMethod) -> Unit
+    onNavigateToOtp: (String, OtpDeliveryMethod, String?) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -23,7 +23,7 @@ fun LoginScreen(
 
     ObserveEffect(viewModel.effect) { effect ->
         when (effect) {
-            is LoginEffect.NavigateToOtp -> onNavigateToOtp(effect.phone, effect.method)
+            is LoginEffect.NavigateToOtp -> onNavigateToOtp(effect.phone, effect.method, effect.otp)
         }
     }
 
