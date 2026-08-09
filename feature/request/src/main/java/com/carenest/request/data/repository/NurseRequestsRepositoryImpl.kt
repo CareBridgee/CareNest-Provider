@@ -24,9 +24,6 @@ class NurseRequestsRepositoryImpl @Inject constructor(
     override suspend fun fetchIncomingRequests(): List<Request> =
         dataSource.getIncomingRequests()
 
-    override fun sendOfferToPatient(requestId: String): Pair<Boolean, Int> =
-        dataSource.sendOfferToPatient(requestId)
-
     override suspend fun fetchRequestContract(requestId: String): Offer = coroutineScope {
         val detailsDeferred = async {
             runCatching { remoteDataSource.getServiceRequestDetails(requestId) }.getOrNull()
@@ -81,8 +78,10 @@ class NurseRequestsRepositoryImpl @Inject constructor(
         return true
     }
 
-    override suspend fun completeRequest(serviceRequestId: String, visitCode: String): Boolean =
-        dataSource.completeRequest(serviceRequestId, visitCode)
+    override suspend fun completeRequest(serviceRequestId: String, visitCode: String): Boolean {
+        remoteDataSource.completeServiceRequest(serviceRequestId, visitCode)
+        return true
+    }
 
     override suspend fun createOffer(requestId: String, proposedPrice: Double, message: String?) {
         dataSource.createOffer(requestId, proposedPrice, message)
@@ -94,10 +93,6 @@ class NurseRequestsRepositoryImpl @Inject constructor(
 
     override fun listenReservationEvents(reservationId: String): Flow<ReservationEvent> =
         dataSource.listenReservationEvents(reservationId)
-    override suspend fun completeRequest(requestId: String, visitCode: String): Boolean {
-        remoteDataSource.completeServiceRequest(requestId, visitCode)
-        return true
-    }
 }
 
 private fun ServiceRequestDetailsDto?.acceptedOffer() = this?.offers?.firstOrNull {

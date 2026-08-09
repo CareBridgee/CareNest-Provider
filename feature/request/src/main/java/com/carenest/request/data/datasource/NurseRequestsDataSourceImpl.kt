@@ -2,22 +2,17 @@ package com.carenest.request.data.datasource
 
 import com.carenest.provider.core.network.socket.client.NurseSocketClient
 import com.carenest.provider.core.network.socket.model.ReservationEvent
-import com.carenest.request.data.dto.CompleteRequest
 import com.carenest.request.domain.model.CancellationReason
 import com.carenest.request.domain.model.Offer
 import com.carenest.request.domain.model.PatientInfo
 import com.carenest.request.domain.model.Request
 import com.carenest.request.domain.model.RequestStatus
 import io.ktor.client.HttpClient
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.isSuccess
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.random.Random
 
 @Singleton
 class NurseRequestsDataSourceImpl @Inject constructor(
@@ -48,7 +43,6 @@ class NurseRequestsDataSourceImpl @Inject constructor(
             )
         )
     }
-
 
     override suspend fun getRequestContract(requestId: String): Offer {
         delay(800)
@@ -86,10 +80,8 @@ class NurseRequestsDataSourceImpl @Inject constructor(
     }
 
     override suspend fun completeRequest(serviceRequestId: String, visitCode: String): Boolean {
-        val response = httpClient.post("/api/v1/service-requests/$serviceRequestId/complete") {
-            setBody(CompleteRequest(visitCode))
-        }
-        return response.status.isSuccess()
+        delay(300)
+        return true
     }
 
     override suspend fun createOffer(requestId: String, proposedPrice: Double, message: String?) {
