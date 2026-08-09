@@ -8,6 +8,7 @@ import com.carenest.provider.auth.domain.usecase.ResolveAuthenticationDestinatio
 import com.carenest.provider.auth.domain.repository.AuthenticatedNurse
 import com.carenest.provider.auth.domain.util.AuthenticationDestination
 import com.carenest.provider.core.datastore.AuthenticationSession
+import com.carenest.provider.core.datastore.AuthenticationCredentials
 import com.carenest.provider.core.datastore.AuthenticationSessionDestination
 import com.carenest.provider.core.datastore.AuthenticationSessionStore
 import com.carenest.provider.core.mvi.DefaultEffectPublisher
@@ -29,7 +30,7 @@ class OtpViewModel @Inject constructor(
     EffectPublisher<OtpEffect> by DefaultEffectPublisher() {
 
     private var verifiedNurse: AuthenticatedNurse? = null
-    private var otpVerified: Boolean = false
+    private var verifiedCredentials: AuthenticationCredentials? = null
 
 
     fun onEvent(event: OtpIntent) {
@@ -59,14 +60,12 @@ class OtpViewModel @Inject constructor(
 
             val digitsOnly = currentState.phoneNumber.replace(Regex("[^0-9]"), "")
             val sanitizedPhone = "+$digitsOnly"
-            Log.d("OtpViewModel", "Verifying OTP for phone: $sanitizedPhone")
-            
             val result = verifyOtpUseCase(sanitizedPhone, currentState.otpCode)
 
             result.fold(
                 onSuccess = { nurse ->
                     verifiedNurse = nurse
-                    otpVerified = true
+                    verifiedCredentials = authenticationSessionStore.state.first().credentials
                     resolveAuthenticatedDestination(nurse)
                 },
                 onFailure = { error ->
@@ -83,11 +82,8 @@ class OtpViewModel @Inject constructor(
     }
 
     private fun retryDestinationResolution() {
-        if (!otpVerified || currentState.isLoading) return
-        viewModelScope.launch {
-            updateState { copy(isLoading = true, errorMessage = null) }
-            resolveAuthenticatedDestination(verifiedNurse)
-        }
+        if (currentState.isLoading) return
+        verifyOtp()
     }
 
     private suspend fun resolveAuthenticatedDestination(nurse: AuthenticatedNurse?) {
@@ -99,7 +95,35 @@ class OtpViewModel @Inject constructor(
                     savedSession = savedSession,
                     phoneNumber = phoneNumber,
                 )
-                authenticationSessionStore.save(destination.toSavedSession(phoneNumber))
+                val expectedCredentials = verifiedCredentials
+                if (expectedCredentials == null) {
+                    authenticationSessionStore.clearSession()
+                    updateState {
+                        copy(
+                            isLoading = false,
+                            canRetryDestination = false,
+                            errorMessage = "Unable to initialize the authenticated session",
+                        )
+                    }
+                    return@fold
+                }
+                val completed = authenticationSessionStore.completeAuthentication(
+                    expectedCredentials = expectedCredentials,
+                    session = destination.toSavedSession(phoneNumber),
+                )
+                if (!completed) {
+                    authenticationSessionStore.clearSession()
+                    verifiedNurse = null
+                    verifiedCredentials = null
+                    updateState {
+                        copy(
+                            isLoading = false,
+                            canRetryDestination = false,
+                            errorMessage = "Unable to initialize the authenticated session",
+                        )
+                    }
+                    return@fold
+                }
                 Log.d(
                     "AuthRouting",
                     "nurseStatus=${nurse?.verificationStatus}, " +
@@ -116,6 +140,9 @@ class OtpViewModel @Inject constructor(
                 sendEffect(OtpEffect.AuthenticationSucceeded(destination))
             },
             onFailure = { error ->
+                authenticationSessionStore.clearSession()
+                verifiedNurse = null
+                verifiedCredentials = null
                 updateState {
                     copy(
                         isLoading = false,

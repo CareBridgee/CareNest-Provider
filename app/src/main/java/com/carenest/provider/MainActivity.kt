@@ -1,36 +1,39 @@
 package com.carenest.provider
 
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatDelegate
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.core.os.LocaleListCompat
 import com.carenest.provider.core.datastore.AppPreferences
 import com.carenest.provider.core.datastore.AppPreferencesState
 import com.carenest.provider.core.datastore.AppThemeMode
+import com.carenest.provider.core.datastore.AuthenticationSessionStore
+import com.carenest.provider.core.network.socket.service.ActiveReservationService
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.navigation.AppNavigation
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-import android.content.Intent
-import android.os.Build
-import androidx.annotation.RequiresApi
-import androidx.compose.runtime.mutableStateOf
-import com.carenest.provider.core.network.socket.service.ActiveReservationService
-
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var appPreferences: AppPreferences
+
+    @Inject
+    lateinit var authenticationSessionStore: AuthenticationSessionStore
 
     private var targetRequestId = mutableStateOf<String?>(null)
 
@@ -67,8 +70,8 @@ class MainActivity : AppCompatActivity() {
                 languageCode = preferences.languageCode,
             ) {
                 CareNestApp(
-                    initialRequestId = targetRequestId.value,
-                    onExitApp = { finish() }
+                    authenticationSessionStore = authenticationSessionStore,
+                    onExitApp = { finish() },
                 )
             }
         }
@@ -87,15 +90,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CareNestApp(
-    initialRequestId: String? = null,
-    onExitApp: () -> Unit
+    authenticationSessionStore: AuthenticationSessionStore,
+    onExitApp: () -> Unit,
 ) {
     AppNavigation(
-        initialRequestId = initialRequestId,
+        authenticationState = authenticationSessionStore.state,
         onExitApp = onExitApp,
         modifier = Modifier.fillMaxSize(),
     )
