@@ -84,7 +84,6 @@ import kotlinx.serialization.modules.polymorphic
 import com.carenest.provider.designsystem.R as DesignSystemR
 import com.carenest.provider.account.R as AccountR
 
-
 private val appNavigationSerializers = SerializersModule {
     include(onboardingNavigationSerializers)
     include(authNavigationSerializers)

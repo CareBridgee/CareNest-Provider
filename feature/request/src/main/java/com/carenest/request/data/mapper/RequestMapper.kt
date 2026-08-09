@@ -149,6 +149,9 @@ fun ServiceRequestDetailsDto.toVisitSummary(
         professionalName = listOf(nurse?.firstName, nurse?.lastName)
             .joinNonBlank()
             .orPlaceholder(),
+        patientName = listOf(profile?.firstName, profile?.lastName)
+            .joinNonBlank()
+            .takeIf { it.isNotBlank() },
         serviceType = serviceType?.name.orPlaceholder(),
         durationMinutes = durationMinutes,
         completedDate = updatedAt?.substringBefore('T').orPlaceholder(),

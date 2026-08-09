@@ -17,6 +17,7 @@ import com.carenest.provider.core.network.socket.model.LocationUpdateRequest
 import com.carenest.provider.core.network.socket.model.NearbyNurseServiceRequestResponse
 import com.carenest.provider.core.network.socket.model.NotificationResponse
 import com.carenest.provider.core.network.socket.model.ReservationEvent
+import com.carenest.provider.core.network.socket.model.ReservationEventType
 import com.carenest.provider.core.network.socket.model.SendChatMessageRequest
 import com.carenest.provider.core.network.socket.model.SocketConnectionState
 import com.carenest.provider.core.network.socket.model.SocketErrorPayload
@@ -154,28 +155,52 @@ class NurseSocketClientImpl @Inject constructor(
 
             when (connectResult) {
                 StompConnectResult.CONNECTED -> {
-                Log.i("NurseSocketClient", "Successfully connected to STOMP")
-                attempt = 0
-                onConnected()
-                // Wait until state changes from Connected
-                val disconnectedState = stompClient.connectionState.first {
-                    it != SocketConnectionState.Connected
-                }
-                Log.w("NurseSocketClient", "Socket connection lost, restarting lifecycle")
-                heartbeatJob?.cancel()
-                heartbeatJob = null
-                activeSocketCredentials = null
-
-                if (
-                    disconnectedState is SocketConnectionState.Error &&
-                    disconnectedState.message.indicatesSocketAuthenticationFailure()
-                ) {
-                    val recovered = recoverSocketAuthentication(credentials)
-                    if (!recovered) {
-                        attempt++
-                        delay(connectionBackoff(attempt))
+                    Log.i("NurseSocketClient", "Successfully connected to STOMP")
+                    val connectedAt = System.currentTimeMillis()
+                    onConnected()
+                    // Wait until state changes from Connected
+                    val disconnectedState = stompClient.connectionState.first {
+                        it != SocketConnectionState.Connected
                     }
-                }
+                    val connectionDuration = System.currentTimeMillis() - connectedAt
+                    Log.w("NurseSocketClient", "Socket connection lost after ${connectionDuration}ms, restarting lifecycle")
+
+                    heartbeatJob?.cancel()
+                    heartbeatJob = null
+                    activeSocketCredentials = null
+
+                    if (disconnectedState is SocketConnectionState.Error) {
+                        _socketErrors.emit(
+                            SocketErrorPayload(
+                                code = "SOCKET_DISCONNECTED",
+                                message = disconnectedState.message
+                            )
+                        )
+                    }
+
+                    if (connectionDuration < 5000L) {
+                        attempt++
+                    } else {
+                        attempt = 1
+                    }
+
+                    if (
+                        disconnectedState is SocketConnectionState.Error &&
+                        disconnectedState.message.indicatesSocketAuthenticationFailure()
+                    ) {
+                        val recovered = recoverSocketAuthentication(credentials)
+                        if (!recovered) {
+                            val backoffMs = connectionBackoff(attempt)
+                            Log.w("NurseSocketClient", "Auth recovery failed; waiting ${backoffMs}ms before retry")
+                            delay(backoffMs)
+                        } else {
+                            attempt = 0
+                        }
+                    } else {
+                        val backoffMs = connectionBackoff(attempt)
+                        Log.w("NurseSocketClient", "Reconnecting; backing off ${backoffMs}ms before attempt $attempt")
+                        delay(backoffMs)
+                    }
                 }
 
                 StompConnectResult.AUTHENTICATION_FAILED -> {
@@ -263,25 +288,27 @@ class NurseSocketClientImpl @Inject constructor(
     private suspend fun onConnected() {
         Log.d("NurseSocketClient", "onConnected: Subscribing to default topics")
         // Subscribe to default nurse topics
-        stompClient.subscribe(DEST_USER_NOTIFICATIONS)
-        stompClient.subscribe(DEST_USER_ERRORS)
-        stompClient.subscribe(DEST_USER_NEARBY_REQUEST)
+        runCatching { stompClient.subscribe(DEST_USER_NOTIFICATIONS) }
+        runCatching { stompClient.subscribe(DEST_USER_ERRORS) }
+        runCatching { stompClient.subscribe(DEST_USER_NEARBY_REQUEST) }
 
         // Restore dynamic topic subscriptions
-        activeReservationSubscriptions.forEach { reservationId ->
+        val reservationSubs = activeReservationSubscriptions.toList()
+        reservationSubs.forEach { reservationId ->
             Log.d("NurseSocketClient", "Restoring reservation subscription: $reservationId")
-            stompClient.subscribe("$DEST_TOPIC_RESERVATION_PREFIX/$reservationId")
+            runCatching { stompClient.subscribe("$DEST_TOPIC_RESERVATION_PREFIX/$reservationId") }
         }
 
-        activeChatSubscriptions.forEach { reservationId ->
+        val chatSubs = activeChatSubscriptions.toList()
+        chatSubs.forEach { reservationId ->
             Log.d("NurseSocketClient", "Restoring chat subscription: $reservationId")
-            stompClient.subscribe("$DEST_TOPIC_CHAT_PREFIX/$reservationId")
+            runCatching { stompClient.subscribe("$DEST_TOPIC_CHAT_PREFIX/$reservationId") }
         }
 
         if (isAvailableState) {
             Log.d("NurseSocketClient", "Restoring availability state: $isAvailableState")
             val payload = json.encodeToString(AvailabilityRequest(true, lastKnownLat, lastKnownLng))
-            stompClient.send(DEST_APP_AVAILABILITY, payload)
+            runCatching { stompClient.send(DEST_APP_AVAILABILITY, payload) }
         }
 
         // Start heartbeat ticker (~30s)
@@ -324,6 +351,17 @@ class NurseSocketClientImpl @Inject constructor(
                         destination.contains("reservation") -> {
                             val reservationEvent = json.decodeFromString<ReservationEvent>(body)
                             _reservationEvents.emit(reservationEvent)
+
+                            val resId = reservationEvent.effectiveReservationId
+                            if (!resId.isNullOrEmpty() && (
+                                reservationEvent.eventType == ReservationEventType.COMPLETED ||
+                                reservationEvent.eventType == ReservationEventType.REQUEST_CANCELLED ||
+                                reservationEvent.eventType == ReservationEventType.OFFER_REJECTED
+                            )) {
+                                activeReservationSubscriptions.remove(resId)
+                                activeChatSubscriptions.remove(resId)
+                                Log.i("NurseSocketClient", "Pruned completed/cancelled reservation topic: $resId")
+                            }
                         }
                         destination.contains("/topic/chat/") -> {
                             val chatMessage = json.decodeFromString<ChatMessageResponse>(body)

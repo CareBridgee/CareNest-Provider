@@ -109,8 +109,9 @@ class OfferConfirmedViewModel @Inject constructor(
     }
 
     private fun onMessageNurseClicked() {
-        val reservationId = currentState.offer?.reservationId
-        if (reservationId.isNullOrBlank()) {
+        val targetId = currentState.offer?.reservationId.takeIf { !it.isNullOrBlank() }
+            ?: currentState.offer?.offerId
+        if (targetId.isNullOrBlank()) {
             sendEffect(
                 OfferConfirmedEffect.ShowError(
                     UiText.StringResource(R.string.chat_reservation_unavailable)
@@ -118,7 +119,7 @@ class OfferConfirmedViewModel @Inject constructor(
             )
             return
         }
-        sendEffect(OfferConfirmedEffect.OpenChat(reservationId))
+        sendEffect(OfferConfirmedEffect.OpenChat(targetId))
     }
 
 }

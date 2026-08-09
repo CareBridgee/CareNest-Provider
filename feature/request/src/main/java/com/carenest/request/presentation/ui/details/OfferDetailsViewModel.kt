@@ -40,15 +40,16 @@ class OfferDetailsViewModel @Inject constructor(
                 }
             }
             OfferDetailsIntent.MessageClicked -> {
-                val reservationId = currentState.offer?.reservationId
-                if (reservationId.isNullOrBlank()) {
+                val targetId = currentState.offer?.reservationId.takeIf { !it.isNullOrBlank() }
+                    ?: currentState.offer?.offerId
+                if (targetId.isNullOrBlank()) {
                     sendEffect(
                         OfferDetailsEffect.ShowError(
                             UiText.StringResource(R.string.chat_reservation_unavailable)
                         )
                     )
                 } else {
-                    sendEffect(OfferDetailsEffect.OpenChat(reservationId))
+                    sendEffect(OfferDetailsEffect.OpenChat(targetId))
                 }
             }
             OfferDetailsIntent.CopyAddressClicked -> {
