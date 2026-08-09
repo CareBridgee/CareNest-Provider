@@ -2,7 +2,7 @@ package com.carenest.provider.core.network.socket.client
 
 import android.util.Log
 import com.carenest.provider.core.BuildConfig
-import com.carenest.provider.core.datastore.TokenManager
+import com.carenest.provider.core.datastore.AuthenticationSessionStore
 import com.carenest.provider.core.network.socket.model.AcceptOfferRequest
 import com.carenest.provider.core.network.socket.model.AvailabilityRequest
 import com.carenest.provider.core.network.socket.model.CancelReservationRequest
@@ -12,7 +12,6 @@ import com.carenest.provider.core.network.socket.model.ListOffersRequest
 import com.carenest.provider.core.network.socket.model.LocationUpdateRequest
 import com.carenest.provider.core.network.socket.model.NearbyNurseServiceRequestResponse
 import com.carenest.provider.core.network.socket.model.NotificationResponse
-import com.carenest.provider.core.network.socket.model.NurseOfferResponse
 import com.carenest.provider.core.network.socket.model.ReservationEvent
 import com.carenest.provider.core.network.socket.model.SendChatMessageRequest
 import com.carenest.provider.core.network.socket.model.SocketConnectionState
@@ -32,7 +31,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
@@ -42,7 +40,7 @@ import kotlin.time.Duration.Companion.milliseconds
 @Singleton
 class NurseSocketClientImpl @Inject constructor(
     private val stompClient: StompClient,
-    private val tokenManager: TokenManager,
+    private val tokenManager: AuthenticationSessionStore,
     private val json: Json
 ) : NurseSocketClient {
 
@@ -113,10 +111,10 @@ class NurseSocketClientImpl @Inject constructor(
         val wsUrl = resolveWebSocketUrl(BuildConfig.BASE_URL)
 
         while (!isExplicitlyDisconnected) {
-            val token = tokenManager.accessToken.first()
-            if (token.isNullOrBlank()) {
+            val token = tokenManager.state.first().credentials?.accessToken.orEmpty()
+            if (token.isBlank()) {
                 Log.w("NurseSocketClient", "No access token available, waiting...")
-                delay(2000)
+                delay(2000.milliseconds)
                 continue
             }
 
