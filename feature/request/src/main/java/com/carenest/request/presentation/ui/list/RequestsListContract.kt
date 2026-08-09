@@ -18,6 +18,8 @@ data class RequestsListUiState(
     val editPriceDraft: Float = 0f,
     val offerRequestId: String? = null,
     val offerCountdown: Int? = null,
+    val socketErrorMessage: String? = null,
+    val socketErrorCode: String? = null,
 )
 
 sealed interface RequestsListIntent {

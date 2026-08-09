@@ -38,6 +38,20 @@ class RequestsListViewModel @Inject constructor(
 
     init {
         loadRequests()
+        observeSocketErrors()
+    }
+
+    private fun observeSocketErrors() {
+        viewModelScope.launch {
+            nurseSocketClient.socketErrors.collect { errorPayload ->
+                updateState {
+                    copy(
+                        socketErrorMessage = errorPayload.message,
+                        socketErrorCode = errorPayload.code
+                    )
+                }
+            }
+        }
     }
 
     fun onIntent(intent: RequestsListIntent) {
@@ -249,6 +263,8 @@ class RequestsListViewModel @Inject constructor(
                 editingRequestId = null,
                 offerRequestId = null,
                 offerCountdown = null,
+                socketErrorMessage = null,
+                socketErrorCode = null,
             )
         }
     }

@@ -167,6 +167,14 @@ fun RequestsListContent(
                 onDismiss = { onIntent(RequestsListIntent.DismissModal) },
             )
         }
+
+        if (state.socketErrorMessage != null) {
+            com.carenest.provider.designsystem.components.request.SocketErrorDialog(
+                errorMessage = state.socketErrorMessage,
+                errorCode = state.socketErrorCode,
+                onDismiss = { onIntent(RequestsListIntent.DismissModal) },
+            )
+        }
     }
 }
 

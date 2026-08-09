@@ -42,7 +42,21 @@ class HomeViewModel @Inject constructor(
     private var offerTimerJob: Job? = null
 
     init {
-       getNurseData()
+        getNurseData()
+        observeSocketErrors()
+    }
+
+    private fun observeSocketErrors() {
+        viewModelScope.launch {
+            nurseSocketClient.socketErrors.collect { errorPayload ->
+                updateState {
+                    copy(
+                        socketErrorMessage = errorPayload.message,
+                        socketErrorCode = errorPayload.code
+                    )
+                }
+            }
+        }
     }
 
     fun onIntent(intent: HomeIntent) {
@@ -325,6 +339,8 @@ class HomeViewModel @Inject constructor(
                 editingRequestId = null,
                 offerRequestId = null,
                 offerCountdown = null,
+                socketErrorMessage = null,
+                socketErrorCode = null,
             )
         }
     }

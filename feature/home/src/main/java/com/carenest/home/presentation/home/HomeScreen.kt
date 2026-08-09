@@ -260,6 +260,14 @@ fun HomeContent(
                 onDismiss = { onIntent(HomeIntent.DismissModal) },
             )
         }
+
+        if (state.socketErrorMessage != null) {
+            com.carenest.provider.designsystem.components.request.SocketErrorDialog(
+                errorMessage = state.socketErrorMessage,
+                errorCode = state.socketErrorCode,
+                onDismiss = { onIntent(HomeIntent.DismissModal) },
+            )
+        }
     }
 }
 
