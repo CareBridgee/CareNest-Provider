@@ -30,13 +30,7 @@ annotation class AppSettingsDataStore
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class TokenManagerModule {
-    @Binds
-    @Singleton
-    abstract fun bindTokenManager(
-        implementation: DataStoreTokenManager
-    ): TokenManager
-
+abstract class AuthenticationSessionStoreModule {
     @Binds
     @Singleton
     abstract fun bindAuthenticationSessionStore(

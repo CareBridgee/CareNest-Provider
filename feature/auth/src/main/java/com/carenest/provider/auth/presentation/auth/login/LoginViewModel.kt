@@ -1,6 +1,5 @@
 package com.carenest.provider.auth.presentation.auth.login
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.carenest.provider.auth.domain.usecase.DevLoginUseCase
@@ -21,10 +20,6 @@ class LoginViewModel @Inject constructor(
 ) : ViewModel(),
     StateHolder<LoginState> by DefaultStateHolder(LoginState()),
     EffectPublisher<LoginEffect> by DefaultEffectPublisher() {
-
-    companion object {
-        private const val TAG = "LoginViewModel"
-    }
 
     fun onEvent(event: LoginIntent) {
         when (event) {
@@ -79,8 +74,6 @@ class LoginViewModel @Inject constructor(
             val rawPhoneNumber = "${currentState.selectedCountry.code}${currentState.phoneNumber}"
             val digitsOnly = rawPhoneNumber.replace(Regex("[^0-9]"), "")
             val fullPhoneNumber = "+$digitsOnly"
-            Log.d(TAG, "requestOtp: $fullPhoneNumber")
-
             updateState { copy(isLoading = true, errorMessage = null) }
 
             // Using DevLoginUseCase for development purposes as requested
@@ -90,7 +83,6 @@ class LoginViewModel @Inject constructor(
 
             when (result) {
                 is Resource.Success -> {
-                    Log.d(TAG, "requestOtp success with dev OTP: ${result.data}")
                     sendEffect(
                         LoginEffect.NavigateToOtp(
                             fullPhoneNumber,
@@ -101,7 +93,6 @@ class LoginViewModel @Inject constructor(
                 }
 
                 is Resource.Error -> {
-                    Log.e(TAG, "requestOtp failed: ${result.message}")
                     updateState {
                         copy(
                             errorMessage = result.message ?: "Something went wrong. Please try again."
