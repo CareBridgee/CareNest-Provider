@@ -1,0 +1,268 @@
+package com.carenest.provider.core.network
+
+import com.carenest.provider.core.datastore.AuthenticationCredentials
+import com.carenest.provider.core.datastore.AuthenticationSession
+import com.carenest.provider.core.datastore.AuthenticationSessionDestination
+import com.carenest.provider.core.datastore.AuthenticationSessionStore
+import com.carenest.provider.core.datastore.AuthenticationState
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.MockRequestHandleScope
+import io.ktor.client.engine.mock.respond
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.request.get
+import io.ktor.client.request.HttpRequestData
+import io.ktor.client.request.post
+import io.ktor.client.request.HttpResponseData
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.headersOf
+import io.ktor.serialization.kotlinx.json.json
+import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class DynamicAuthenticationPluginTest {
+
+    @Test
+    fun protectedRequestRefreshesOnceAndRetriesWithRotatedTokenPair() = runBlocking {
+        val store = FakeAuthenticationSessionStore().apply {
+            authenticate("old-access", "old-refresh", "nurse-a")
+        }
+        val refreshCalls = AtomicInteger(0)
+        val protectedAuthorizationHeaders = mutableListOf<String?>()
+        val client = testClient(store) { request ->
+            when (request.url.encodedPath) {
+                "/api/v1/auth/refresh" -> {
+                    refreshCalls.incrementAndGet()
+                    respondJson(
+                        """{"accessToken":"new-access","refreshToken":"new-refresh"}""",
+                    )
+                }
+                "/api/v1/users/me" -> {
+                    val authorization = request.headers[HttpHeaders.Authorization]
+                    protectedAuthorizationHeaders += authorization
+                    if (authorization == "Bearer new-access") {
+                        respondJson("{}")
+                    } else {
+                        respond("", HttpStatusCode.Unauthorized)
+                    }
+                }
+                else -> error("Unexpected path ${request.url.encodedPath}")
+            }
+        }
+
+        val response = client.get("/api/v1/users/me")
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(1, refreshCalls.get())
+        assertEquals(listOf("Bearer old-access", "Bearer new-access"), protectedAuthorizationHeaders)
+        val credentials = store.state.value.credentials
+        assertEquals("new-access", credentials?.accessToken)
+        assertEquals("new-refresh", credentials?.refreshToken)
+        assertTrue(store.state.value.isAuthenticated)
+        client.close()
+    }
+
+    @Test
+    fun failedRefreshClearsEntireSession() = runBlocking {
+        val store = FakeAuthenticationSessionStore().apply {
+            authenticate("expired-access", "invalid-refresh", "nurse-a")
+        }
+        val client = testClient(store) { request ->
+            when (request.url.encodedPath) {
+                "/api/v1/auth/refresh" -> respond("", HttpStatusCode.Unauthorized)
+                "/api/v1/users/me" -> respond("", HttpStatusCode.Unauthorized)
+                else -> error("Unexpected path ${request.url.encodedPath}")
+            }
+        }
+
+        val response = client.get("/api/v1/users/me")
+
+        assertEquals(HttpStatusCode.Unauthorized, response.status)
+        assertFalse(store.state.value.isAuthenticated)
+        assertNull(store.state.value.credentials)
+        assertNull(store.state.value.session)
+        client.close()
+    }
+
+    @Test
+    fun missingRefreshTokenClearsInvalidSessionWithoutRefreshLoop() = runBlocking {
+        val store = FakeAuthenticationSessionStore().apply {
+            setState(
+                AuthenticationState(
+                    credentials = AuthenticationCredentials(
+                        accessToken = "expired-access",
+                        refreshToken = null,
+                        sessionId = "session-1",
+                    ),
+                    session = AuthenticationSession(
+                        destination = AuthenticationSessionDestination.APPROVED,
+                        nurseId = "nurse-a",
+                    ),
+                ),
+            )
+        }
+        val refreshCalls = AtomicInteger(0)
+        val client = testClient(store) { request ->
+            if (request.url.encodedPath == "/api/v1/auth/refresh") {
+                refreshCalls.incrementAndGet()
+            }
+            respond("", HttpStatusCode.Unauthorized)
+        }
+
+        client.get("/api/v1/users/me")
+
+        assertEquals(0, refreshCalls.get())
+        assertNull(store.state.value.credentials)
+        assertNull(store.state.value.session)
+        client.close()
+    }
+
+    @Test
+    fun everyProtectedRequestReadsTheLatestAccountToken() = runBlocking {
+        val store = FakeAuthenticationSessionStore().apply {
+            authenticate("access-a", "refresh-a", "nurse-a")
+        }
+        val authorizationHeaders = mutableListOf<String?>()
+        val client = testClient(store) { request ->
+            authorizationHeaders += request.headers[HttpHeaders.Authorization]
+            respondJson("{}")
+        }
+
+        client.get("/api/v1/users/me")
+        store.authenticate("access-b", "refresh-b", "nurse-b")
+        client.get("/api/v1/users/me")
+
+        assertEquals(listOf("Bearer access-a", "Bearer access-b"), authorizationHeaders)
+        client.close()
+    }
+
+    @Test
+    fun publicAuthenticationRequestsNeverReceiveBearerHeader() = runBlocking {
+        val store = FakeAuthenticationSessionStore().apply {
+            authenticate("current-access", "current-refresh", "nurse-a")
+        }
+        var authorizationHeader: String? = "not-called"
+        val client = testClient(store) { request ->
+            authorizationHeader = request.headers[HttpHeaders.Authorization]
+            respondJson("{}")
+        }
+
+        client.post("/api/v1/auth/nurse/login")
+
+        assertNull(authorizationHeader)
+        client.close()
+    }
+
+    private fun testClient(
+        store: AuthenticationSessionStore,
+        handler: suspend MockRequestHandleScope.(HttpRequestData) -> HttpResponseData,
+    ): HttpClient = HttpClient(MockEngine { request -> handler(request) }) {
+        install(ContentNegotiation) {
+            json(Json { ignoreUnknownKeys = true })
+        }
+        install(DynamicAuthenticationPlugin) {
+            sessionStore = store
+            baseUrl = TEST_BASE_URL
+        }
+        defaultRequest { url(TEST_BASE_URL) }
+    }
+
+    private fun MockRequestHandleScope.respondJson(body: String) = respond(
+        content = body,
+        status = HttpStatusCode.OK,
+        headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString()),
+    )
+
+    private class FakeAuthenticationSessionStore : AuthenticationSessionStore {
+        private val mutableState = MutableStateFlow(AuthenticationState())
+        override val state = mutableState.asStateFlow()
+        override val session: Flow<AuthenticationSession?> = MutableStateFlow(null)
+        private var generation = 0
+
+        fun setState(state: AuthenticationState) {
+            mutableState.value = state
+        }
+
+        suspend fun authenticate(accessToken: String, refreshToken: String, nurseId: String) {
+            beginAuthentication(accessToken, refreshToken)
+            val credentials = requireNotNull(mutableState.value.credentials)
+            completeAuthentication(
+                expectedCredentials = credentials,
+                session = AuthenticationSession(
+                    destination = AuthenticationSessionDestination.APPROVED,
+                    nurseId = nurseId,
+                ),
+            )
+        }
+
+        override suspend fun beginAuthentication(accessToken: String, refreshToken: String) {
+            generation += 1
+            mutableState.value = AuthenticationState(
+                credentials = AuthenticationCredentials(accessToken, refreshToken, "session-$generation"),
+            )
+        }
+
+        override suspend fun completeAuthentication(
+            expectedCredentials: AuthenticationCredentials,
+            session: AuthenticationSession,
+        ): Boolean {
+            val current = mutableState.value
+            if (current.credentials != expectedCredentials || !expectedCredentials.isComplete) return false
+            mutableState.value = current.copy(session = session)
+            return true
+        }
+
+        override suspend fun replaceCredentials(
+            expectedCredentials: AuthenticationCredentials,
+            accessToken: String,
+            refreshToken: String,
+        ): Boolean {
+            val current = mutableState.value
+            if (current.credentials != expectedCredentials) return false
+            mutableState.value = current.copy(
+                credentials = expectedCredentials.copy(
+                    accessToken = accessToken,
+                    refreshToken = refreshToken,
+                ),
+            )
+            return true
+        }
+
+        override suspend fun clearSession() {
+            mutableState.value = AuthenticationState()
+        }
+
+        override suspend fun clearInvalidSession(): Boolean {
+            val current = mutableState.value
+            if ((current.credentials != null || current.session != null) && !current.isAuthenticated) {
+                clearSession()
+                return true
+            }
+            return false
+        }
+
+        override suspend fun clearSessionIfCurrent(
+            expectedCredentials: AuthenticationCredentials,
+        ): Boolean {
+            if (mutableState.value.credentials != expectedCredentials) return false
+            clearSession()
+            return true
+        }
+    }
+
+    private companion object {
+        const val TEST_BASE_URL = "https://provider.test/"
+    }
+}
