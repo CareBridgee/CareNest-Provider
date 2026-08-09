@@ -78,6 +78,7 @@ fun ChatScreen(
         topBar = {
             ChatTopBar(
                 participantName = state.participant?.name.orEmpty(),
+                photoUrl = state.participant?.photoUrl,
                 isOnline = state.participant?.isOnline == true,
                 onBackClick = { viewModel.handleIntent(ChatIntent.OnBackClicked) },
                 onCallClick = { viewModel.handleIntent(ChatIntent.OnCallClicked) },

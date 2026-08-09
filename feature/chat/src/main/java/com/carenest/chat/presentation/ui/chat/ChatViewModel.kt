@@ -8,6 +8,7 @@ import com.carenest.chat.domain.model.MessageSender
 import com.carenest.chat.domain.model.MessageStatus
 import com.carenest.chat.domain.usecase.GetChatSessionUseCase
 import com.carenest.chat.domain.usecase.SendMessageUseCase
+import com.carenest.provider.core.datastore.AuthenticationSessionStore
 import com.carenest.provider.core.mvi.DefaultEffectPublisher
 import com.carenest.provider.core.mvi.DefaultStateHolder
 import com.carenest.provider.core.mvi.EffectPublisher
@@ -15,6 +16,7 @@ import com.carenest.provider.core.mvi.StateHolder
 import com.carenest.provider.core.network.socket.client.NurseSocketClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,6 +25,7 @@ class ChatViewModel @Inject constructor(
     private val getChatSessionUseCase: GetChatSessionUseCase,
     private val sendMessageUseCase: SendMessageUseCase,
     private val nurseSocketClient: NurseSocketClient,
+    private val sessionStore: AuthenticationSessionStore,
 ) : ViewModel(), EffectPublisher<ChatEffect> by DefaultEffectPublisher(),
     StateHolder<ChatState> by DefaultStateHolder(ChatState()) {
 
@@ -71,21 +74,52 @@ class ChatViewModel @Inject constructor(
     private fun observeSocketMessages(requestId: String) {
         socketMessagesJob?.cancel()
         socketMessagesJob = viewModelScope.launch {
+            val currentNurseId = sessionStore.state.first().session?.nurseId
             nurseSocketClient.chatMessages.collect { socketMsg ->
                 if (socketMsg.serviceRequestId == requestId || socketMsg.serviceRequestId.isEmpty()) {
-                    val isNurseSender = socketMsg.senderName?.contains("Nurse", ignoreCase = true) == true ||
-                            socketMsg.senderUserId.contains("nurse", ignoreCase = true)
+                    val trimmedContent = socketMsg.content.trim()
+
+                    // Check if any message in state was already sent by nurse with matching text
+                    val matchesExistingNurseMessage = currentState.messages.any {
+                        it.senderType == MessageSender.NURSE && it.text.trim() == trimmedContent
+                    }
+
+                    val isNurseSender = matchesExistingNurseMessage ||
+                        (!currentNurseId.isNullOrBlank() && socketMsg.senderUserId.equals(currentNurseId, ignoreCase = true)) ||
+                        (socketMsg.senderName?.contains("Nurse", ignoreCase = true) == true) ||
+                        (socketMsg.senderUserId.contains("nurse", ignoreCase = true))
+
+                    val senderType = if (isNurseSender) MessageSender.NURSE else MessageSender.PATIENT
+                    val messageType = if (isNurseSender) ChatMessageType.OUTGOING else ChatMessageType.INCOMING
+
                     val newMsg = ChatMessage(
                         id = socketMsg.id,
-                        type = if (isNurseSender) ChatMessageType.OUTGOING else ChatMessageType.INCOMING,
+                        type = messageType,
                         text = socketMsg.content,
-                        senderType = if (isNurseSender) MessageSender.NURSE else MessageSender.PATIENT,
+                        senderType = senderType,
                         sentAtEpochMillis = System.currentTimeMillis(),
                         status = MessageStatus.DELIVERED
                     )
+
                     updateState {
-                        if (messages.any { it.id == newMsg.id || (it.text == newMsg.text && it.senderType == newMsg.senderType) }) {
-                            this
+                        val isDuplicate = messages.any { existing ->
+                            existing.id == newMsg.id ||
+                                    (existing.text.trim() == trimmedContent && (
+                                            existing.senderType == newMsg.senderType ||
+                                                    (existing.senderType == MessageSender.NURSE && newMsg.senderType == MessageSender.NURSE)
+                                            ))
+                        }
+
+                        if (isDuplicate) {
+                            // Update existing temporary local message ID with real socket message ID
+                            val updatedMessages = messages.map { existing ->
+                                if (existing.text.trim() == trimmedContent && existing.senderType == MessageSender.NURSE) {
+                                    newMsg
+                                } else {
+                                    existing
+                                }
+                            }
+                            copy(messages = updatedMessages)
                         } else {
                             copy(messages = messages + newMsg)
                         }
@@ -107,7 +141,10 @@ class ChatViewModel @Inject constructor(
             sendMessageUseCase(id, text)
                 .onSuccess { message ->
                     updateState {
-                        if (messages.any { it.id == message.id }) {
+                        val isAlreadyPresent = messages.any {
+                            it.id == message.id || (it.text.trim() == message.text.trim() && it.senderType == MessageSender.NURSE)
+                        }
+                        if (isAlreadyPresent) {
                             copy(isSending = false)
                         } else {
                             copy(isSending = false, messages = messages + message)

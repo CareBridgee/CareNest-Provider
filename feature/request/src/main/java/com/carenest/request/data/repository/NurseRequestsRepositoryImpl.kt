@@ -49,19 +49,34 @@ class NurseRequestsRepositoryImpl @Inject constructor(
 
         val preview = runCatching {
             remoteDataSource.getServiceRequestPreview(requestId)
-        }.getOrElse { previewError ->
-            profileResult.exceptionOrNull()?.let(previewError::addSuppressed)
-            throw previewError
+        }.getOrNull()
+
+        if (preview != null) {
+            val report = preview.patient?.profileId?.let { profileId ->
+                runCatching { remoteDataSource.getPatientReport(profileId) }.getOrNull()
+            }
+            return@coroutineScope preview.toDomainOffer(
+                requestedServiceRequestId = requestId,
+                details = details,
+                acceptedOffer = acceptedOffer,
+                patientReport = report,
+            )
         }
-        val report = preview.patient?.profileId?.let { profileId ->
-            runCatching { remoteDataSource.getPatientReport(profileId) }.getOrNull()
+
+        if (details != null) {
+            val report = details.profile?.id?.let { profileId ->
+                runCatching { remoteDataSource.getPatientReport(profileId) }.getOrNull()
+            }
+            return@coroutineScope details.toDomainOffer(
+                requestedServiceRequestId = requestId,
+                acceptedOffer = acceptedOffer,
+                assignedProfile = null,
+                patientReport = report,
+            )
         }
-        preview.toDomainOffer(
-            requestedServiceRequestId = requestId,
-            details = details,
-            acceptedOffer = acceptedOffer,
-            patientReport = report,
-        )
+
+        throw profileResult.exceptionOrNull()
+            ?: IllegalStateException("Could not load request contract for $requestId")
     }
 
     override suspend fun cancelRequest(
