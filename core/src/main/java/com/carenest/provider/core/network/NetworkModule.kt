@@ -2,47 +2,30 @@ package com.carenest.provider.core.network
 
 import android.util.Log
 import com.carenest.provider.core.BuildConfig
-import com.carenest.provider.core.datastore.AuthenticationCredentials
 import com.carenest.provider.core.datastore.AuthenticationSessionStore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.api.Send
 import io.ktor.client.plugins.api.createClientPlugin
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.accept
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.Url
 import io.ktor.http.contentType
-import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.AttributeKey
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-
-import io.ktor.client.plugins.websocket.WebSockets
-
-@Serializable
-data class RefreshTokenRequest(val refreshToken: String)
-
-@Serializable
-data class RefreshTokenResponse(
-    val accessToken: String,
-    val refreshToken: String,
-)
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -62,6 +45,7 @@ object NetworkModule {
     fun provideHttpClient(
         json: Json,
         authenticationSessionStore: AuthenticationSessionStore,
+        authenticationRefreshCoordinator: AuthenticationRefreshCoordinator,
     ): HttpClient = HttpClient(OkHttp) {
         install(WebSockets)
 
@@ -71,6 +55,7 @@ object NetworkModule {
 
         install(DynamicAuthenticationPlugin) {
             sessionStore = authenticationSessionStore
+            refreshCoordinator = authenticationRefreshCoordinator
             baseUrl = BASE_URL
         }
 
@@ -89,6 +74,7 @@ object NetworkModule {
 
 internal class DynamicAuthenticationPluginConfig {
     lateinit var sessionStore: AuthenticationSessionStore
+    lateinit var refreshCoordinator: AuthenticationRefreshCoordinator
     lateinit var baseUrl: String
 }
 
@@ -97,36 +83,8 @@ internal val DynamicAuthenticationPlugin = createClientPlugin(
     createConfiguration = ::DynamicAuthenticationPluginConfig,
 ) {
     val sessionStore = pluginConfig.sessionStore
+    val refreshCoordinator = pluginConfig.refreshCoordinator
     val backendHost = Url(pluginConfig.baseUrl).host
-    val refreshMutex = Mutex()
-
-    suspend fun refreshCurrentCredentials(
-        credentials: AuthenticationCredentials,
-        refreshToken: String,
-    ): Boolean {
-        val refreshedTokens = runCatching {
-            val response = client.post("/api/v1/auth/refresh") {
-                contentType(ContentType.Application.Json)
-                setBody(RefreshTokenRequest(refreshToken))
-            }
-            if (!response.status.isSuccess()) return@runCatching null
-
-            response.body<RefreshTokenResponse>().takeIf {
-                it.accessToken.isNotBlank() && it.refreshToken.isNotBlank()
-            }
-        }.getOrNull()
-
-        if (refreshedTokens == null) {
-            sessionStore.clearSessionIfCurrent(credentials)
-            return false
-        }
-
-        return sessionStore.replaceCredentials(
-            expectedCredentials = credentials,
-            accessToken = refreshedTokens.accessToken,
-            refreshToken = refreshedTokens.refreshToken,
-        )
-    }
 
     onRequest { request, _ ->
         if (!request.isProtectedBackendRequest(backendHost)) return@onRequest
@@ -168,8 +126,8 @@ internal val DynamicAuthenticationPlugin = createClientPlugin(
         }
 
         val shouldRecover = responseStatus == 401 &&
-                request.isProtectedBackendRequest(backendHost) &&
-                request.attributes.getOrNull(AuthenticationRetryKey) != true
+            request.isProtectedBackendRequest(backendHost) &&
+            request.attributes.getOrNull(AuthenticationRetryKey) != true
 
         if (!shouldRecover) return@on originalCall
 
@@ -178,28 +136,19 @@ internal val DynamicAuthenticationPlugin = createClientPlugin(
             return@on originalCall
         }
 
-        val canRetry = refreshMutex.withLock {
-            val currentCredentials = sessionStore.state.first().credentials
-                ?: return@withLock false
-
-            if (currentCredentials.sessionId != requestAuthentication.sessionId) {
-                return@withLock false
-            }
-
-            if (currentCredentials.accessToken != requestAuthentication.accessToken) {
-                return@withLock currentCredentials.isComplete
-            }
-
-            val refreshToken = currentCredentials.refreshToken?.takeIf(String::isNotBlank)
-            if (refreshToken == null) {
-                sessionStore.clearSessionIfCurrent(currentCredentials)
-                return@withLock false
-            }
-
-            refreshCurrentCredentials(
-                credentials = currentCredentials,
-                refreshToken = refreshToken,
-            )
+        val currentCredentials = sessionStore.state.first().credentials
+        val failedCredentials = currentCredentials?.copy(
+            accessToken = requestAuthentication.accessToken,
+        )
+        val canRetry = if (
+            failedCredentials != null &&
+            failedCredentials.sessionId == requestAuthentication.sessionId
+        ) {
+            refreshCoordinator.recover(failedCredentials) { refreshToken ->
+                client.requestTokenRefresh(refreshToken)
+            } == AuthenticationRecoveryResult.RECOVERED
+        } else {
+            false
         }
 
         if (!canRetry) return@on originalCall
@@ -243,7 +192,7 @@ private fun HttpRequestBuilder.isCurrentSessionIdentityRequest(
 
     val path = url.build().encodedPath.normalizedPath()
     return path == "/api/v1/users/me" ||
-            (!nurseId.isNullOrBlank() && path == "/api/v1/nurses/$nurseId")
+        (!nurseId.isNullOrBlank() && path == "/api/v1/nurses/$nurseId")
 }
 
 private fun String.normalizedPath(): String {

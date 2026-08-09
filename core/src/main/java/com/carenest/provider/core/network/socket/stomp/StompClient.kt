@@ -29,6 +29,30 @@ import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Singleton
 
+internal enum class StompConnectResult {
+    CONNECTED,
+    AUTHENTICATION_FAILED,
+    FAILED,
+}
+
+internal fun String?.indicatesSocketAuthenticationFailure(): Boolean {
+    val value = this?.lowercase().orEmpty()
+    return SOCKET_AUTHENTICATION_MARKERS.any(value::contains)
+}
+
+private val SOCKET_AUTHENTICATION_MARKERS = listOf(
+    "401",
+    "403",
+    "unauthorized",
+    "forbidden",
+    "authentication",
+    "access denied",
+    "invalid token",
+    "expired token",
+    "invalid jwt",
+    "expired jwt",
+)
+
 @Singleton
 class StompClient @Inject constructor(
     private val httpClient: HttpClient
@@ -47,10 +71,10 @@ class StompClient @Inject constructor(
     private val sendMutex = Mutex()
     private val subIdCounter = AtomicInteger(1)
 
-    suspend fun connect(wsUrl: String, accessToken: String): Boolean {
+    internal suspend fun connect(wsUrl: String, accessToken: String): StompConnectResult {
         if (_connectionState.value == SocketConnectionState.Connected) {
             Log.d("StompClient", "Already connected to $wsUrl")
-            return true
+            return StompConnectResult.CONNECTED
         }
 
         Log.i("StompClient", "Connecting to $wsUrl...")
@@ -77,22 +101,23 @@ class StompClient @Inject constructor(
             sendFrameDirect(connectFrame)
 
             // Start listening loop and wait for CONNECTED
-            val connectedChannel = Channel<Boolean>(1)
+            val connectedChannel = Channel<StompConnectResult>(1)
 
             readJob?.cancel()
             readJob = scope.launch {
                 listenIncomingFrames(socketSession, connectedChannel)
             }
 
-            val success = connectedChannel.receiveCatching().getOrNull() == true
-            if (success) {
+            val result = connectedChannel.receiveCatching().getOrNull()
+                ?: StompConnectResult.FAILED
+            if (result == StompConnectResult.CONNECTED) {
                 Log.i("StompClient", "STOMP Handshake SUCCESSFUL")
                 _connectionState.value = SocketConnectionState.Connected
-                return true
+                return StompConnectResult.CONNECTED
             } else {
                 Log.e("StompClient", "STOMP Handshake FAILED")
                 disconnectInternal("Failed STOMP CONNECT handshake")
-                return false
+                return result
             }
         } catch (e: Exception) {
             Log.e("StompClient", "Connection attempt FAILED: ${e.message}", e)
@@ -101,7 +126,11 @@ class StompClient @Inject constructor(
                 cause = e
             )
             disconnectInternal(e.localizedMessage ?: "Connection error")
-            return false
+            return if (e.message.indicatesSocketAuthenticationFailure()) {
+                StompConnectResult.AUTHENTICATION_FAILED
+            } else {
+                StompConnectResult.FAILED
+            }
         }
     }
 
@@ -164,7 +193,7 @@ class StompClient @Inject constructor(
 
     private suspend fun listenIncomingFrames(
         socketSession: DefaultClientWebSocketSession,
-        connectedChannel: Channel<Boolean>
+        connectedChannel: Channel<StompConnectResult>
     ) {
         var handshakeCompleted = false
 
@@ -178,9 +207,18 @@ class StompClient @Inject constructor(
                         if (!handshakeCompleted) {
                             if (stompFrame.command == StompCommand.CONNECTED) {
                                 handshakeCompleted = true
-                                connectedChannel.send(true)
+                                connectedChannel.trySend(StompConnectResult.CONNECTED)
                             } else if (stompFrame.command == StompCommand.ERROR) {
-                                connectedChannel.send(false)
+                                val errorMessage = listOfNotNull(
+                                    stompFrame.headers["message"],
+                                    stompFrame.body,
+                                ).joinToString(" ")
+                                val result = if (errorMessage.indicatesSocketAuthenticationFailure()) {
+                                    StompConnectResult.AUTHENTICATION_FAILED
+                                } else {
+                                    StompConnectResult.FAILED
+                                }
+                                connectedChannel.trySend(result)
                                 return@forEach
                             }
                         }
@@ -206,7 +244,7 @@ class StompClient @Inject constructor(
             }
         } finally {
             if (!handshakeCompleted) {
-                connectedChannel.send(false)
+                connectedChannel.trySend(StompConnectResult.FAILED)
             }
             disconnectInternal("Socket stream finished")
         }

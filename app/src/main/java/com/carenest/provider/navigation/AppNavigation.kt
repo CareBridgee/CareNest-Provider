@@ -81,8 +81,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
-import com.carenest.provider.account.R as AccountR
-import com.carenest.provider.designsystem.R as DesignSystemR
+
 
 private val appNavigationSerializers = SerializersModule {
     include(onboardingNavigationSerializers)

@@ -75,6 +75,54 @@ class DynamicAuthenticationPluginTest {
     }
 
     @Test
+    fun currentProviderForbiddenResponseClearsSessionWithoutRefresh() = runBlocking {
+        val store = FakeAuthenticationSessionStore().apply {
+            authenticate("old-access", "old-refresh", "nurse-a")
+        }
+        val refreshCalls = AtomicInteger(0)
+        val client = testClient(store) { request ->
+            when (request.url.encodedPath) {
+                "/api/v1/auth/refresh" -> {
+                    refreshCalls.incrementAndGet()
+                    respondJson("{}")
+                }
+                "/api/v1/nurses/nurse-a" -> respond("", HttpStatusCode.Forbidden)
+                else -> error("Unexpected path ${request.url.encodedPath}")
+            }
+        }
+
+        val response = client.get("/api/v1/nurses/nurse-a")
+
+        assertEquals(HttpStatusCode.Forbidden, response.status)
+        assertEquals(0, refreshCalls.get())
+        assertFalse(store.state.value.isAuthenticated)
+        assertNull(store.state.value.credentials)
+        assertNull(store.state.value.session)
+        client.close()
+    }
+
+    @Test
+    fun ordinaryForbiddenResponseDoesNotRefreshOrClearValidSession() = runBlocking {
+        val store = FakeAuthenticationSessionStore().apply {
+            authenticate("current-access", "current-refresh", "nurse-a")
+        }
+        val refreshCalls = AtomicInteger(0)
+        val client = testClient(store) { request ->
+            if (request.url.encodedPath == "/api/v1/auth/refresh") {
+                refreshCalls.incrementAndGet()
+            }
+            respond("", HttpStatusCode.Forbidden)
+        }
+
+        val response = client.get("/api/v1/nurses/another-nurse")
+
+        assertEquals(HttpStatusCode.Forbidden, response.status)
+        assertEquals(0, refreshCalls.get())
+        assertTrue(store.state.value.isAuthenticated)
+        client.close()
+    }
+
+    @Test
     fun failedRefreshClearsEntireSession() = runBlocking {
         val store = FakeAuthenticationSessionStore().apply {
             authenticate("expired-access", "invalid-refresh", "nurse-a")
@@ -93,6 +141,28 @@ class DynamicAuthenticationPluginTest {
         assertFalse(store.state.value.isAuthenticated)
         assertNull(store.state.value.credentials)
         assertNull(store.state.value.session)
+        client.close()
+    }
+
+    @Test
+    fun temporaryRefreshServerFailurePreservesSession() = runBlocking {
+        val store = FakeAuthenticationSessionStore().apply {
+            authenticate("expired-access", "valid-refresh", "nurse-a")
+        }
+        val client = testClient(store) { request ->
+            when (request.url.encodedPath) {
+                "/api/v1/auth/refresh" -> respond("", HttpStatusCode.InternalServerError)
+                "/api/v1/users/me" -> respond("", HttpStatusCode.Unauthorized)
+                else -> error("Unexpected path ${request.url.encodedPath}")
+            }
+        }
+
+        val response = client.get("/api/v1/users/me")
+
+        assertEquals(HttpStatusCode.Unauthorized, response.status)
+        assertTrue(store.state.value.isAuthenticated)
+        assertEquals("expired-access", store.state.value.credentials?.accessToken)
+        assertEquals("valid-refresh", store.state.value.credentials?.refreshToken)
         client.close()
     }
 
@@ -174,6 +244,7 @@ class DynamicAuthenticationPluginTest {
         }
         install(DynamicAuthenticationPlugin) {
             sessionStore = store
+            refreshCoordinator = AuthenticationRefreshCoordinator(store)
             baseUrl = TEST_BASE_URL
         }
         defaultRequest { url(TEST_BASE_URL) }
