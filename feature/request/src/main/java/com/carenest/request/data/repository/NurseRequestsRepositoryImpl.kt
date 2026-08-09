@@ -18,8 +18,6 @@ class NurseRequestsRepositoryImpl @Inject constructor(
     override suspend fun fetchIncomingRequests(): List<Request> =
         dataSource.getIncomingRequests()
 
-    override fun sendOfferToPatient(requestId: String): Pair<Boolean, Int> =
-        dataSource.sendOfferToPatient(requestId)
 
     override suspend fun fetchRequestContract(requestId: String): Offer =
         dataSource.getRequestContract(requestId)
@@ -32,6 +30,10 @@ class NurseRequestsRepositoryImpl @Inject constructor(
 
     override suspend fun completeRequest(serviceRequestId: String, visitCode: String): Boolean =
         dataSource.completeRequest(serviceRequestId, visitCode)
+
+    override suspend fun createOffer(requestId: String, proposedPrice: Double, message: String?) {
+        dataSource.createOffer(requestId, proposedPrice, message)
+    }
 
     override suspend fun withdrawOffer(offerId: String) {
         dataSource.withdrawOffer(offerId)

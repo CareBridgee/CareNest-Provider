@@ -39,6 +39,7 @@ class HomeViewModel @Inject constructor(
     private var fetchJob: Job? = null
     private var socketJob: Job? = null
     private var offerEventListenerJob: Job? = null
+    private var offerTimerJob: Job? = null
 
     init {
        getNurseData()
@@ -74,6 +75,7 @@ class HomeViewModel @Inject constructor(
         fetchJob?.cancel()
         socketJob?.cancel()
         offerEventListenerJob?.cancel()
+        stopOfferTimer()
 
         updateState {
             copy(
@@ -196,6 +198,7 @@ class HomeViewModel @Inject constructor(
             copy(
                 activeModal = ActiveModal.MakeOffer,
                 offerRequestId = requestId,
+                offerCountdown = OFFER_TIMEOUT_SECONDS,
                 selectedCardId = requestId,
             )
         }
@@ -218,11 +221,13 @@ class HomeViewModel @Inject constructor(
             listenReservationEvents(requestId).collect { event ->
                 when (event.eventType) {
                     ReservationEventType.OFFER_ACCEPTED -> {
+                        stopOfferTimer()
                         updateState { copy(activeModal = ActiveModal.OfferSuccess) }
                         delay(SUCCESS_DISPLAY_MS)
                         completeOfferAccepted(requestId)
                     }
                     ReservationEventType.OFFER_COUNTERED -> {
+                        stopOfferTimer()
                         val offer = event.asOfferResponse()
                         if (offer != null) {
                             updateState {
@@ -234,16 +239,39 @@ class HomeViewModel @Inject constructor(
                         }
                     }
                     ReservationEventType.OFFER_REJECTED, ReservationEventType.REQUEST_CANCELLED -> {
+                        stopOfferTimer()
                         completeOfferTimeout(requestId)
                     }
                     else -> { }
                 }
             }
         }
+
+        startOfferCountdown(requestId)
+    }
+
+    private fun startOfferCountdown(requestId: String) {
+        offerTimerJob?.cancel()
+        offerTimerJob = viewModelScope.launch {
+            for (remainingSeconds in OFFER_TIMEOUT_SECONDS downTo 0) {
+                updateState { copy(offerCountdown = remainingSeconds) }
+                if (remainingSeconds == 0) {
+                    completeOfferTimeout(requestId)
+                    return@launch
+                }
+                delay(1000L)
+            }
+        }
+    }
+
+    private fun stopOfferTimer() {
+        offerTimerJob?.cancel()
+        offerTimerJob = null
     }
 
     private fun completeOfferAccepted(requestId: String) {
         offerEventListenerJob?.cancel()
+        stopOfferTimer()
         updateState {
             copy(
                 requests = requests.map { request ->
@@ -268,6 +296,7 @@ class HomeViewModel @Inject constructor(
 
     private fun completeOfferTimeout(requestId: String) {
         offerEventListenerJob?.cancel()
+        stopOfferTimer()
         updateState {
             copy(
                 requests = requests.map { request ->
@@ -286,6 +315,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun dismissModal() {
+        stopOfferTimer()
         if (currentState.activeModal == ActiveModal.MakeOffer) {
             offerEventListenerJob?.cancel()
         }
@@ -303,11 +333,12 @@ class HomeViewModel @Inject constructor(
         fetchJob?.cancel()
         socketJob?.cancel()
         offerEventListenerJob?.cancel()
+        stopOfferTimer()
         super.onCleared()
     }
 
     private companion object {
-        const val OFFER_TIMEOUT_SECONDS = 10
+        const val OFFER_TIMEOUT_SECONDS = 20
         const val SUCCESS_DISPLAY_MS = 1_200L
     }
 }

@@ -208,7 +208,7 @@ class NurseSocketClientImpl @Inject constructor(
                             val nearbyReq = json.decodeFromString<NearbyNurseServiceRequestResponse>(body)
                             _nearbyRequests.emit(nearbyReq)
                         }
-                        destination.contains("/topic/reservation/") -> {
+                        destination.contains("reservation") -> {
                             val reservationEvent = json.decodeFromString<ReservationEvent>(body)
                             _reservationEvents.emit(reservationEvent)
                         }

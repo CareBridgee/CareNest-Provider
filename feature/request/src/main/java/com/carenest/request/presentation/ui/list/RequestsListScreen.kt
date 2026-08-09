@@ -26,6 +26,8 @@ import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.request.R
 import com.carenest.request.domain.model.Request
 import com.carenest.request.domain.model.RequestStatus
+import androidx.compose.ui.platform.LocalContext
+import com.carenest.provider.core.network.socket.service.ActiveReservationService
 import com.carenest.request.presentation.ui.list.components.PatientRequestCard
 import com.carenest.request.presentation.ui.list.components.RequestsListHeader
 
@@ -37,11 +39,18 @@ fun RequestsListScreen(
     modifier: Modifier = Modifier,
     viewModel: RequestsListViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     ObserveEffect(viewModel.effect) { effect ->
         when (effect) {
-            is RequestsListEffect.NavigateToOfferConfirmed -> onOfferConfirmed(effect.requestId)
+            is RequestsListEffect.StartActiveReservationService -> {
+                ActiveReservationService.startService(context, effect.requestId)
+            }
+            is RequestsListEffect.NavigateToOfferConfirmed -> {
+                ActiveReservationService.startService(context, effect.requestId)
+                onOfferConfirmed(effect.requestId)
+            }
             is RequestsListEffect.NavigateToRequestDetails -> onViewDetails(effect.requestId)
         }
     }
@@ -120,10 +129,10 @@ fun RequestsListContent(
             )
         }
 
-        if (state.activeModal == RequestsListModal.MakeOffer) {
+        if (state.activeModal == RequestsListModal.MakeOffer || state.activeModal == RequestsListModal.OfferSuccess) {
             MakeOfferDialog(
                 countdownSeconds = state.offerCountdown ?: 0,
-                isSuccess = false,
+                isSuccess = state.activeModal == RequestsListModal.OfferSuccess,
                 onDismiss = { onIntent(RequestsListIntent.DismissModal) },
             )
         }

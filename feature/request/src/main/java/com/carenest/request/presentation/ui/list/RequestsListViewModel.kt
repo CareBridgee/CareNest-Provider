@@ -6,10 +6,11 @@ import com.carenest.provider.core.mvi.DefaultEffectPublisher
 import com.carenest.provider.core.mvi.DefaultStateHolder
 import com.carenest.provider.core.mvi.EffectPublisher
 import com.carenest.provider.core.mvi.StateHolder
+import com.carenest.provider.core.network.socket.model.ReservationEventType
 import com.carenest.request.domain.model.RequestStatus
+import com.carenest.request.domain.usecase.CreateOfferUseCase
 import com.carenest.request.domain.usecase.GetIncomingRequestsUseCase
 import com.carenest.request.domain.usecase.ListenReservationEventsUseCase
-import com.carenest.request.domain.usecase.SendOfferToPatientUseCase
 import com.carenest.request.domain.usecase.WithdrawOfferUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlin.time.Duration.Companion.seconds
@@ -21,8 +22,8 @@ import javax.inject.Inject
 @HiltViewModel
 class RequestsListViewModel @Inject constructor(
     private val getIncomingRequests: GetIncomingRequestsUseCase,
-    private val sendOfferToPatient: SendOfferToPatientUseCase,
     private val withdrawOffer: WithdrawOfferUseCase,
+    private val createOffer: CreateOfferUseCase,
     private val listenReservationEvents: ListenReservationEventsUseCase,
 ) : ViewModel(),
     StateHolder<RequestsListUiState> by DefaultStateHolder(RequestsListUiState()),
@@ -40,13 +41,9 @@ class RequestsListViewModel @Inject constructor(
         when (intent) {
             is RequestsListIntent.CardClicked -> handleCardClick(intent.requestId)
             is RequestsListIntent.EditRateClicked -> openEditRateModal(intent.requestId)
-            is RequestsListIntent.MakeOfferClicked -> startMakeOffer(intent.requestId)
-            is RequestsListIntent.EditRateChanged -> {
-                updateState { copy(editPriceDraft = intent.rate) }
-            }
-            is RequestsListIntent.ViewDetailsClicked -> sendEffect(
-                RequestsListEffect.NavigateToRequestDetails(intent.requestId)
-            )
+            is RequestsListIntent.MakeOfferClicked -> handleMakeOffer(intent.requestId)
+            is RequestsListIntent.EditRateChanged -> updateEditPriceDraft(intent.rate)
+            is RequestsListIntent.ViewDetailsClicked -> navigateToDetails(intent.requestId)
             RequestsListIntent.SaveRateClicked -> saveEditedPrice()
             RequestsListIntent.DismissModal -> dismissModal()
         }
@@ -78,6 +75,14 @@ class RequestsListViewModel @Inject constructor(
         }
     }
 
+    private fun updateEditPriceDraft(rate: Float) {
+        updateState { copy(editPriceDraft = rate) }
+    }
+
+    private fun navigateToDetails(requestId: String) {
+        sendEffect(RequestsListEffect.NavigateToRequestDetails(requestId))
+    }
+
     private fun saveEditedPrice() {
         val requestId = currentState.editingRequestId ?: return
         val newPrice = currentState.editPriceDraft
@@ -92,9 +97,23 @@ class RequestsListViewModel @Inject constructor(
         }
     }
 
-    private fun startMakeOffer(requestId: String) {
-        val (willAccept, acceptAtSecond) = sendOfferToPatient(requestId)
+    private fun handleMakeOffer(requestId: String) {
+        val request = currentState.requests.find { it.id == requestId }
+        val price = (request?.basePrice ?: currentState.editPriceDraft).toDouble()
 
+        setupOfferUiState(requestId)
+
+        viewModelScope.launch {
+            try {
+                createOffer(requestId, price)
+            } catch (_: Exception) { }
+        }
+
+        startReservationEventListener(requestId)
+        startOfferCountdown(requestId)
+    }
+
+    private fun setupOfferUiState(requestId: String) {
         updateState {
             copy(
                 activeModal = RequestsListModal.MakeOffer,
@@ -103,66 +122,82 @@ class RequestsListViewModel @Inject constructor(
                 selectedCardId = requestId,
             )
         }
+    }
 
-        // Listen for socket events to handle real-time acceptance/rejection
+    private fun startReservationEventListener(requestId: String) {
         eventListenerJob?.cancel()
         eventListenerJob = viewModelScope.launch {
-            listenReservationEvents(requestId).collect { _ ->
-                // Handled in timer loop for mock logic, or real events here
+            listenReservationEvents(requestId).collect { event ->
+                when (event.eventType) {
+                    ReservationEventType.OFFER_ACCEPTED -> {
+                        handleOfferAccepted(requestId)
+                    }
+                    ReservationEventType.OFFER_REJECTED, ReservationEventType.REQUEST_CANCELLED -> {
+                        handleOfferTimeout(requestId)
+                    }
+                    else -> { }
+                }
             }
         }
+    }
 
+    private fun startOfferCountdown(requestId: String) {
         offerTimerJob?.cancel()
         offerTimerJob = viewModelScope.launch {
-            for (i in OFFER_TIMEOUT_SECONDS downTo 0) {
-                updateState { copy(offerCountdown = i) }
-                if (i == acceptAtSecond && willAccept) {
-                    completeOfferAccepted(requestId)
-                    break
+            for (remainingSeconds in OFFER_TIMEOUT_SECONDS downTo 0) {
+                updateState { copy(offerCountdown = remainingSeconds) }
+                
+                if (remainingSeconds == 0) {
+                    handleOfferTimeout(requestId)
+                    return@launch
                 }
-                if (i == 0) {
-                    completeOfferTimeout(requestId)
-                }
-                delay(1.seconds)
+                
+                delay(1000L)
             }
         }
     }
 
-    private fun completeOfferAccepted(requestId: String) {
-        offerTimerJob?.cancel()
-        eventListenerJob?.cancel()
-        updateState {
-            copy(
-                requests = requests.map { request ->
-                    if (request.id == requestId) request.copy(status = RequestStatus.ACCEPTED) else request
-                },
-                activeModal = RequestsListModal.None,
-                offerRequestId = null,
-                offerCountdown = null,
-                selectedCardId = null,
-            )
+    private fun handleOfferAccepted(requestId: String) {
+        viewModelScope.launch {
+            stopActiveOfferJobs()
+            updateState { copy(activeModal = RequestsListModal.OfferSuccess) }
+            delay(1500)
+            updateRequestsStatus(requestId, RequestStatus.ACCEPTED)
+            clearOfferState()
+            sendEffect(RequestsListEffect.StartActiveReservationService(requestId))
+            sendEffect(RequestsListEffect.NavigateToOfferConfirmed(requestId))
         }
-        sendEffect(RequestsListEffect.NavigateToOfferConfirmed(requestId))
     }
 
-    private fun completeOfferTimeout(requestId: String) {
-        offerTimerJob?.cancel()
-        eventListenerJob?.cancel()
-        
-        // Use the captured offerId or fallback to requestId if server allows
+    private fun handleOfferTimeout(requestId: String) {
+        stopActiveOfferJobs()
+        performWithdrawal(requestId)
+        updateRequestsStatus(requestId, RequestStatus.CANCELED)
+        clearOfferState()
+    }
+
+    private fun performWithdrawal(requestId: String) {
         val idToWithdraw = currentOfferId ?: requestId
-        
         viewModelScope.launch {
             try {
                 withdrawOffer(idToWithdraw)
             } catch (_: Exception) {}
         }
+    }
 
+    private fun updateRequestsStatus(requestId: String, status: RequestStatus) {
         updateState {
             copy(
                 requests = requests.map { request ->
-                    if (request.id == requestId) request.copy(status = RequestStatus.CANCELED) else request
-                },
+                    if (request.id == requestId) request.copy(status = status) else request
+                }
+            )
+        }
+    }
+
+    private fun clearOfferState() {
+        updateState {
+            copy(
                 activeModal = RequestsListModal.None,
                 offerRequestId = null,
                 offerCountdown = null,
@@ -172,8 +207,7 @@ class RequestsListViewModel @Inject constructor(
     }
 
     private fun dismissModal() {
-        offerTimerJob?.cancel()
-        eventListenerJob?.cancel()
+        stopActiveOfferJobs()
         updateState {
             copy(
                 activeModal = RequestsListModal.None,
@@ -184,9 +218,13 @@ class RequestsListViewModel @Inject constructor(
         }
     }
 
-    override fun onCleared() {
+    private fun stopActiveOfferJobs() {
         offerTimerJob?.cancel()
         eventListenerJob?.cancel()
+    }
+
+    override fun onCleared() {
+        stopActiveOfferJobs()
         super.onCleared()
     }
 

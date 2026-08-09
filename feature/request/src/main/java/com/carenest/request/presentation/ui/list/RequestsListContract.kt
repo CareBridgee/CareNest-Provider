@@ -6,6 +6,7 @@ enum class RequestsListModal {
     None,
     EditRate,
     MakeOffer,
+    OfferSuccess,
 }
 
 data class RequestsListUiState(
@@ -31,6 +32,7 @@ sealed interface RequestsListIntent {
 }
 
 sealed interface RequestsListEffect {
+    data class StartActiveReservationService(val requestId: String) : RequestsListEffect
     data class NavigateToOfferConfirmed(val requestId: String) : RequestsListEffect
     data class NavigateToRequestDetails(val requestId: String) : RequestsListEffect
 }

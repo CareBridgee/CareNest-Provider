@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface NurseRequestsDataSource {
     suspend fun getIncomingRequests(): List<Request>
-    fun sendOfferToPatient(requestId: String): Pair<Boolean, Int>
     suspend fun getRequestContract(requestId: String): Offer
     suspend fun cancelRequest(
         requestId: String,
@@ -17,6 +16,7 @@ interface NurseRequestsDataSource {
     ): Boolean
 
     suspend fun completeRequest(serviceRequestId: String, visitCode: String): Boolean
+    suspend fun createOffer(requestId: String, proposedPrice: Double, message: String? = null)
     suspend fun withdrawOffer(offerId: String)
     fun listenReservationEvents(reservationId: String): Flow<ReservationEvent>
 }

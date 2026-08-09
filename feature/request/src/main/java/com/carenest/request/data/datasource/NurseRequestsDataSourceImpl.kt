@@ -49,12 +49,6 @@ class NurseRequestsDataSourceImpl @Inject constructor(
         )
     }
 
-    override fun sendOfferToPatient(requestId: String): Pair<Boolean, Int> {
-        val random = Random(requestId.hashCode())
-        val willAccept = random.nextInt(3) != 0
-        val acceptAtSecond = if (willAccept) random.nextInt(4, 9) else 10
-        return willAccept to acceptAtSecond
-    }
 
     override suspend fun getRequestContract(requestId: String): Offer {
         delay(800)
@@ -98,13 +92,26 @@ class NurseRequestsDataSourceImpl @Inject constructor(
         return response.status.isSuccess()
     }
 
+    override suspend fun createOffer(requestId: String, proposedPrice: Double, message: String?) {
+        nurseSocketClient.connect()
+        nurseSocketClient.subscribeToReservation(requestId)
+        nurseSocketClient.createOffer(
+            serviceRequestId = requestId,
+            proposedPrice = proposedPrice,
+            proposedDate = "2026-08-15",
+            proposedTime = "10:00",
+            message = message ?: "Offer submitted by nurse"
+        )
+    }
+
     override suspend fun withdrawOffer(offerId: String) {
         nurseSocketClient.withdrawOffer(offerId)
     }
 
     override fun listenReservationEvents(reservationId: String): Flow<ReservationEvent> {
         return nurseSocketClient.reservationEvents.filter { event ->
-            event.reservationId == reservationId || event.reservationId.isNullOrEmpty()
+            val id = event.effectiveReservationId
+            id == reservationId
         }
     }
 }
