@@ -5,18 +5,25 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.absolutePadding
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
@@ -49,6 +56,7 @@ import com.carenest.provider.core.datastore.AuthenticationSessionDestination
 import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
 import com.carenest.provider.designsystem.components.topbar.TopBarLeading
 import com.carenest.provider.designsystem.components.bottomnav.BottomNavItem
+import com.carenest.provider.designsystem.components.bottomnav.LocalBottomNavigationContentPadding
 import com.carenest.provider.designsystem.components.bottomnav.SPBottomNavigation
 import com.carenest.provider.designsystem.R as DesignSystemR
 import com.carenest.provider.designsystem.theme.Theme
@@ -260,11 +268,15 @@ fun AppNavigation(
     }
 
     val currentRoute = backStack.lastOrNull()
-    val isAuthenticatedRoute =
-        currentRoute is HomeRoutes || currentRoute is AccountRoutes || currentRoute is EarningsRoutes || currentRoute is PayoutsRoutes
+    val isBottomNavigationRoute =
+        currentRoute == HomeRoutes.Home ||
+            currentRoute == RequestRoutes.RequestList ||
+            currentRoute == EarningsRoutes.ServiceEarnings ||
+            currentRoute == AccountRoutes.ProfileMenu
     val selectedBottomNavIndex = when (currentRoute) {
-        is EarningsRoutes, is PayoutsRoutes -> 4
-        is AccountRoutes -> 2
+        is RequestRoutes -> 1
+        is EarningsRoutes, is PayoutsRoutes -> 2
+        is AccountRoutes -> 3
         else -> 0
     }
     val navEntries = rememberDecoratedNavEntries(
@@ -275,12 +287,16 @@ fun AppNavigation(
             rememberViewModelStoreNavEntryDecorator(),
         ),
     )
+    val layoutDirection = LocalLayoutDirection.current
+    val navigationBarBottomInset = WindowInsets.navigationBars
+        .asPaddingValues()
+        .calculateBottomPadding()
 
     Scaffold(
         modifier = modifier,
         containerColor = Theme.colors.backGround,
         bottomBar = {
-            if (isAuthenticatedRoute) {
+            if (isBottomNavigationRoute) {
                 ProviderBottomNavigation(
                     selectedIndex = selectedBottomNavIndex,
                     onItemSelected = { index ->
@@ -288,11 +304,14 @@ fun AppNavigation(
                             0 -> if (currentRoute !is HomeRoutes.Home) {
                                 backStack.replaceWith(HomeRoutes.Home)
                             }
-                            2 -> if (currentRoute != AccountRoutes.ProfileMenu) {
-                                backStack.replaceWith(AccountRoutes.ProfileMenu)
+                            1 -> if (currentRoute != RequestRoutes.RequestList) {
+                                backStack.replaceWith(RequestRoutes.RequestList)
                             }
-                            4 -> if (currentRoute !is EarningsRoutes) {
+                            2 -> if (currentRoute !is EarningsRoutes) {
                                 backStack.replaceWith(providerEarningsStartRoute())
+                            }
+                            3 -> if (currentRoute != AccountRoutes.ProfileMenu) {
+                                backStack.replaceWith(AccountRoutes.ProfileMenu)
                             }
                         }
                     },
@@ -300,13 +319,25 @@ fun AppNavigation(
             }
         },
     ) { innerPadding ->
-        NavDisplay(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            entries = navEntries,
-            onBack = ::exitCurrentRoot,
-        )
+        val bottomNavigationContentPadding =
+            (innerPadding.calculateBottomPadding() - navigationBarBottomInset)
+                .coerceAtLeast(0.dp)
+        CompositionLocalProvider(
+            LocalBottomNavigationContentPadding provides bottomNavigationContentPadding,
+        ) {
+            NavDisplay(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .absolutePadding(
+                        left = innerPadding.calculateLeftPadding(layoutDirection),
+                        top = innerPadding.calculateTopPadding(),
+                        right = innerPadding.calculateRightPadding(layoutDirection),
+                        bottom = navigationBarBottomInset,
+                    ),
+                entries = navEntries,
+                onBack = ::exitCurrentRoot,
+            )
+        }
     }
 }
 
@@ -319,22 +350,22 @@ private fun ProviderBottomNavigation(
         BottomNavItem(
             label = stringResource(AccountR.string.bottom_nav_home),
             iconRes = DesignSystemR.drawable.ic_home,
+            selectedIconRes = DesignSystemR.drawable.ic_home_selected,
         ),
         BottomNavItem(
-            label = stringResource(AccountR.string.bottom_nav_support),
-            iconRes = DesignSystemR.drawable.ic_info,
+            label = stringResource(AccountR.string.bottom_nav_active_jobs),
+            iconRes = DesignSystemR.drawable.ic_work_outline,
+            selectedIconRes = DesignSystemR.drawable.ic_work,
+        ),
+        BottomNavItem(
+            label = stringResource(AccountR.string.bottom_nav_earnings),
+            iconRes = DesignSystemR.drawable.ic_wallet_outline,
+            selectedIconRes = DesignSystemR.drawable.ic_wallet,
         ),
         BottomNavItem(
             label = stringResource(AccountR.string.bottom_nav_profile),
             iconRes = DesignSystemR.drawable.ic_profile,
-        ),
-        BottomNavItem(
-            label = stringResource(AccountR.string.bottom_nav_active_jobs),
-            iconRes = DesignSystemR.drawable.ic_work,
-        ),
-        BottomNavItem(
-            label = stringResource(AccountR.string.bottom_nav_earnings),
-            iconRes = DesignSystemR.drawable.ic_wallet,
+            selectedIconRes = DesignSystemR.drawable.ic_profile_selected,
         ),
     )
     SPBottomNavigation(
