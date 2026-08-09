@@ -15,6 +15,7 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -53,6 +54,7 @@ import com.carenest.provider.core.navigation.navigate
 import com.carenest.provider.core.navigation.replaceWith
 import com.carenest.provider.core.datastore.AuthenticationSession
 import com.carenest.provider.core.datastore.AuthenticationSessionDestination
+import com.carenest.provider.core.datastore.AuthenticationState
 import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
 import com.carenest.provider.designsystem.components.topbar.TopBarLeading
 import com.carenest.provider.designsystem.components.bottomnav.BottomNavItem
@@ -76,6 +78,7 @@ import com.carenest.request.navigation.RequestRoutes
 import com.carenest.request.navigation.providerRequestEntries
 import com.carenest.request.navigation.requestSerializers
 import kotlinx.serialization.PolymorphicSerializer
+import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 
@@ -103,6 +106,7 @@ private val appSavedStateConfiguration = SavedStateConfiguration {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation(
+    authenticationState: Flow<AuthenticationState>,
     onExitApp: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -111,6 +115,18 @@ fun AppNavigation(
         configuration = appSavedStateConfiguration,
     ) {
         mutableStateListOf<NavKey>().apply { navigate(providerOnboardingStartRoute()) }
+    }
+
+    LaunchedEffect(authenticationState) {
+        var hadAuthenticatedSession = false
+        authenticationState.collect { state ->
+            if (state.isAuthenticated) {
+                hadAuthenticatedSession = true
+            } else if (hadAuthenticatedSession) {
+                hadAuthenticatedSession = false
+                backStack.replaceWith(providerAuthStartRoute())
+            }
+        }
     }
 
     fun exitCurrentRoot() {

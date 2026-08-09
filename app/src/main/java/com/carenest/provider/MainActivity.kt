@@ -16,6 +16,7 @@ import androidx.core.os.LocaleListCompat
 import com.carenest.provider.core.datastore.AppPreferences
 import com.carenest.provider.core.datastore.AppPreferencesState
 import com.carenest.provider.core.datastore.AppThemeMode
+import com.carenest.provider.core.datastore.AuthenticationSessionStore
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.navigation.AppNavigation
 import dagger.hilt.android.AndroidEntryPoint
@@ -25,6 +26,9 @@ import javax.inject.Inject
 class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var appPreferences: AppPreferences
+
+    @Inject
+    lateinit var authenticationSessionStore: AuthenticationSessionStore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,15 +60,22 @@ class MainActivity : AppCompatActivity() {
                 isDarkTheme = isDarkTheme,
                 languageCode = preferences.languageCode,
             ) {
-                CareNestApp(onExitApp = { finish() })
+                CareNestApp(
+                    authenticationSessionStore = authenticationSessionStore,
+                    onExitApp = { finish() },
+                )
             }
         }
     }
 }
 
 @Composable
-fun CareNestApp(onExitApp: () -> Unit) {
+fun CareNestApp(
+    authenticationSessionStore: AuthenticationSessionStore,
+    onExitApp: () -> Unit,
+) {
     AppNavigation(
+        authenticationState = authenticationSessionStore.state,
         onExitApp = onExitApp,
         modifier = Modifier.fillMaxSize(),
     )
