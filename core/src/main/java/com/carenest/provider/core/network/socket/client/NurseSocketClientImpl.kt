@@ -3,6 +3,10 @@ package com.carenest.provider.core.network.socket.client
 import android.util.Log
 import com.carenest.provider.core.BuildConfig
 import com.carenest.provider.core.datastore.AuthenticationSessionStore
+import com.carenest.provider.core.datastore.AuthenticationCredentials
+import com.carenest.provider.core.network.AuthenticationRecoveryResult
+import com.carenest.provider.core.network.AuthenticationRefreshCoordinator
+import com.carenest.provider.core.network.requestTokenRefresh
 import com.carenest.provider.core.network.socket.model.AcceptOfferRequest
 import com.carenest.provider.core.network.socket.model.AvailabilityRequest
 import com.carenest.provider.core.network.socket.model.CancelReservationRequest
@@ -20,6 +24,9 @@ import com.carenest.provider.core.network.socket.model.UpdateOfferRequest
 import com.carenest.provider.core.network.socket.model.WithdrawOfferRequest
 import com.carenest.provider.core.network.socket.stomp.StompClient
 import com.carenest.provider.core.network.socket.stomp.StompCommand
+import com.carenest.provider.core.network.socket.stomp.StompConnectResult
+import com.carenest.provider.core.network.socket.stomp.indicatesSocketAuthenticationFailure
+import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -30,6 +37,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.util.concurrent.ConcurrentHashMap
@@ -41,6 +50,8 @@ import kotlin.time.Duration.Companion.milliseconds
 class NurseSocketClientImpl @Inject constructor(
     private val stompClient: StompClient,
     private val tokenManager: AuthenticationSessionStore,
+    private val authenticationRefreshCoordinator: AuthenticationRefreshCoordinator,
+    private val httpClient: HttpClient,
     private val json: Json
 ) : NurseSocketClient {
 
@@ -69,8 +80,11 @@ class NurseSocketClientImpl @Inject constructor(
     private var connectionManagerJob: Job? = null
     private var heartbeatJob: Job? = null
     private var frameCollectorJob: Job? = null
+    private var sessionObserverJob: Job? = null
 
     private var isExplicitlyDisconnected = false
+    @Volatile
+    private var activeSocketCredentials: AuthenticationCredentials? = null
 
     override fun connect() {
         Log.i("NurseSocketClient", "Connect requested (isExplicitlyDisconnected=$isExplicitlyDisconnected)")
@@ -79,6 +93,8 @@ class NurseSocketClientImpl @Inject constructor(
             Log.d("NurseSocketClient", "Connection manager already active")
             return
         }
+
+        startSessionObserver()
 
         connectionManagerJob = scope.launch {
             manageConnectionLifecycle()
@@ -101,6 +117,10 @@ class NurseSocketClientImpl @Inject constructor(
         connectionManagerJob?.cancel()
         connectionManagerJob = null
 
+        sessionObserverJob?.cancel()
+        sessionObserverJob = null
+        activeSocketCredentials = null
+
         scope.launch {
             stompClient.disconnect()
         }
@@ -111,7 +131,8 @@ class NurseSocketClientImpl @Inject constructor(
         val wsUrl = resolveWebSocketUrl(BuildConfig.BASE_URL)
 
         while (!isExplicitlyDisconnected) {
-            val token = tokenManager.state.first().credentials?.accessToken.orEmpty()
+            val credentials = tokenManager.state.first().credentials
+            val token = credentials?.accessToken.orEmpty()
             if (token.isBlank()) {
                 Log.w("NurseSocketClient", "No access token available, waiting...")
                 delay(2000.milliseconds)
@@ -119,25 +140,119 @@ class NurseSocketClientImpl @Inject constructor(
             }
 
             Log.d("NurseSocketClient", "Attempting connection (attempt=$attempt)")
-            val success = stompClient.connect(wsUrl, token)
-            if (success) {
+            activeSocketCredentials = credentials
+            val connectResult = stompClient.connect(wsUrl, token)
+            val latestCredentials = tokenManager.state.first().credentials
+            if (latestCredentials != credentials) {
+                if (latestCredentials?.sessionId != credentials?.sessionId) {
+                    clearSessionBoundSocketState()
+                }
+                activeSocketCredentials = null
+                stompClient.disconnect()
+                continue
+            }
+
+            when (connectResult) {
+                StompConnectResult.CONNECTED -> {
                 Log.i("NurseSocketClient", "Successfully connected to STOMP")
                 attempt = 0
                 onConnected()
                 // Wait until state changes from Connected
-                stompClient.connectionState.first { it != SocketConnectionState.Connected }
+                val disconnectedState = stompClient.connectionState.first {
+                    it != SocketConnectionState.Connected
+                }
                 Log.w("NurseSocketClient", "Socket connection lost, restarting lifecycle")
                 heartbeatJob?.cancel()
                 heartbeatJob = null
-            } else {
-                attempt++
-                val backoffMs = (1000L * (1 shl minOf(attempt, 5))).coerceAtMost(30000L)
-                Log.e("NurseSocketClient", "Connection failed, retrying in ${backoffMs}ms")
-                delay(backoffMs)
+                activeSocketCredentials = null
+
+                if (
+                    disconnectedState is SocketConnectionState.Error &&
+                    disconnectedState.message.indicatesSocketAuthenticationFailure()
+                ) {
+                    val recovered = recoverSocketAuthentication(credentials)
+                    if (!recovered) {
+                        attempt++
+                        delay(connectionBackoff(attempt))
+                    }
+                }
+                }
+
+                StompConnectResult.AUTHENTICATION_FAILED -> {
+                    activeSocketCredentials = null
+                    val recovered = recoverSocketAuthentication(credentials)
+                    if (!recovered) {
+                        attempt++
+                        delay(connectionBackoff(attempt))
+                    } else {
+                        attempt = 0
+                    }
+                }
+
+                StompConnectResult.FAILED -> {
+                    activeSocketCredentials = null
+                    attempt++
+                    val backoffMs = connectionBackoff(attempt)
+                    Log.e("NurseSocketClient", "Connection failed, retrying in ${backoffMs}ms")
+                    delay(backoffMs)
+                }
             }
         }
         Log.i("NurseSocketClient", "Connection manager lifecycle ended (explicitly disconnected)")
     }
+
+    private fun startSessionObserver() {
+        if (sessionObserverJob?.isActive == true) return
+
+        sessionObserverJob = scope.launch {
+            tokenManager.state
+                .map { it.credentials }
+                .distinctUntilChanged()
+                .collect { currentCredentials ->
+                    val socketCredentials = activeSocketCredentials ?: return@collect
+                    if (currentCredentials == socketCredentials) return@collect
+
+                    val accountChanged = currentCredentials?.sessionId != socketCredentials.sessionId
+                    if (currentCredentials == null || accountChanged) {
+                        clearSessionBoundSocketState()
+                    }
+
+                    Log.i("NurseSocketClient", "Authentication changed; reconnecting socket")
+                    stompClient.disconnect()
+                }
+        }
+    }
+
+    private suspend fun recoverSocketAuthentication(
+        failedCredentials: AuthenticationCredentials?,
+    ): Boolean {
+        if (failedCredentials == null) return false
+
+        return when (
+            authenticationRefreshCoordinator.recover(failedCredentials) { refreshToken ->
+                httpClient.requestTokenRefresh(refreshToken)
+            }
+        ) {
+            AuthenticationRecoveryResult.RECOVERED,
+            AuthenticationRecoveryResult.SESSION_CHANGED,
+            -> true
+
+            AuthenticationRecoveryResult.REJECTED,
+            AuthenticationRecoveryResult.TEMPORARILY_UNAVAILABLE,
+            -> false
+        }
+    }
+
+    private fun clearSessionBoundSocketState() {
+        activeReservationSubscriptions.clear()
+        activeChatSubscriptions.clear()
+        isAvailableState = false
+        lastKnownLat = null
+        lastKnownLng = null
+    }
+
+    private fun connectionBackoff(attempt: Int): Long =
+        (1000L * (1 shl minOf(attempt, 5))).coerceAtMost(30_000L)
 
     private fun String?.isNull_OrEmpty(): Boolean = this == null || this.trim().isEmpty()
 
