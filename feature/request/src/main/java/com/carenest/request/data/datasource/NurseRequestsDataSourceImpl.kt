@@ -1,5 +1,7 @@
 package com.carenest.request.data.datasource
 
+import com.carenest.provider.core.network.socket.client.NurseSocketClient
+import com.carenest.provider.core.network.socket.model.ReservationEvent
 import com.carenest.request.data.dto.CompleteRequest
 import com.carenest.request.domain.model.CancellationReason
 import com.carenest.request.domain.model.Offer
@@ -11,13 +13,16 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.random.Random
 
 @Singleton
 class NurseRequestsDataSourceImpl @Inject constructor(
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
+    private val nurseSocketClient: NurseSocketClient
 ) : NurseRequestsDataSource {
 
     override suspend fun getIncomingRequests(): List<Request> {
@@ -91,5 +96,15 @@ class NurseRequestsDataSourceImpl @Inject constructor(
             setBody(CompleteRequest(visitCode))
         }
         return response.status.isSuccess()
+    }
+
+    override suspend fun withdrawOffer(offerId: String) {
+        nurseSocketClient.withdrawOffer(offerId)
+    }
+
+    override fun listenReservationEvents(reservationId: String): Flow<ReservationEvent> {
+        return nurseSocketClient.reservationEvents.filter { event ->
+            event.reservationId == reservationId || event.reservationId.isNullOrEmpty()
+        }
     }
 }

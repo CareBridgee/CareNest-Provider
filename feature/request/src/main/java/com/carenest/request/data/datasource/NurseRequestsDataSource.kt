@@ -3,7 +3,8 @@ package com.carenest.request.data.datasource
 import com.carenest.request.domain.model.CancellationReason
 import com.carenest.request.domain.model.Offer
 import com.carenest.request.domain.model.Request
-import kotlinx.serialization.Serializable
+import com.carenest.provider.core.network.socket.model.ReservationEvent
+import kotlinx.coroutines.flow.Flow
 
 interface NurseRequestsDataSource {
     suspend fun getIncomingRequests(): List<Request>
@@ -16,4 +17,6 @@ interface NurseRequestsDataSource {
     ): Boolean
 
     suspend fun completeRequest(serviceRequestId: String, visitCode: String): Boolean
+    suspend fun withdrawOffer(offerId: String)
+    fun listenReservationEvents(reservationId: String): Flow<ReservationEvent>
 }

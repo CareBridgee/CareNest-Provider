@@ -1,10 +1,12 @@
 package com.carenest.request.data.repository
 
+import com.carenest.provider.core.network.socket.model.ReservationEvent
 import com.carenest.request.data.datasource.NurseRequestsDataSource
 import com.carenest.request.domain.model.CancellationReason
 import com.carenest.request.domain.model.Offer
 import com.carenest.request.domain.model.Request
 import com.carenest.request.domain.repository.NurseRequestsRepository
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -30,4 +32,11 @@ class NurseRequestsRepositoryImpl @Inject constructor(
 
     override suspend fun completeRequest(serviceRequestId: String, visitCode: String): Boolean =
         dataSource.completeRequest(serviceRequestId, visitCode)
+
+    override suspend fun withdrawOffer(offerId: String) {
+        dataSource.withdrawOffer(offerId)
+    }
+
+    override fun listenReservationEvents(reservationId: String): Flow<ReservationEvent> =
+        dataSource.listenReservationEvents(reservationId)
 }
