@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,6 +39,7 @@ import com.carenest.provider.account.presentation.model.MenuItemId
 import com.carenest.provider.core.mvi.ObserveEffect
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
+import com.carenest.provider.designsystem.components.bottomnav.LocalBottomNavigationContentPadding
 
 @Composable
 fun ProfileMenuRoute(
@@ -76,6 +78,7 @@ fun ProfileMenuContent(
     onIntent: (ProfileMenuIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val bottomNavigationContentPadding = LocalBottomNavigationContentPadding.current
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -91,7 +94,12 @@ fun ProfileMenuContent(
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(Theme.spacing.medium),
+                contentPadding = PaddingValues(
+                    start = Theme.spacing.medium,
+                    top = Theme.spacing.medium,
+                    end = Theme.spacing.medium,
+                    bottom = Theme.spacing.medium + bottomNavigationContentPadding,
+                ),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
             item {

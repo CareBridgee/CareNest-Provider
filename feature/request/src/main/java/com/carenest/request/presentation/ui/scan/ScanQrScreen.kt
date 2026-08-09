@@ -150,7 +150,7 @@ fun ScanQrContent(
                 if (hasPermission) {
                     QrCameraScanner(
                         onCodeScanned = { code ->
-                            if (!state.isLoading && !state.isSuccess) {
+                            if (!state.isLoading && !state.isSuccess && state.scannedCode == null) {
                                 onIntent(ScanQrIntent.QrScanned(code))
                             }
                         })

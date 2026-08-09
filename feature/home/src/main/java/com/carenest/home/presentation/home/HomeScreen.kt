@@ -7,7 +7,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,6 +44,9 @@ import com.carenest.provider.core.network.socket.service.ActiveReservationServic
 import com.carenest.provider.designsystem.components.request.EditRateBottomSheet
 import com.carenest.provider.designsystem.components.request.MakeOfferDialog
 import com.carenest.provider.designsystem.components.request.NurseRequestsLoadingSkeleton
+import com.carenest.provider.designsystem.components.bottomnav.BottomNavItem
+import com.carenest.provider.designsystem.components.bottomnav.LocalBottomNavigationContentPadding
+import com.carenest.provider.designsystem.components.bottomnav.SPBottomNavigation
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
 
@@ -117,12 +122,19 @@ fun HomeContent(
         modifier = modifier.fillMaxSize(),
         containerColor = Theme.colors.backGround,
         topBar = {
+    val bottomNavigationContentPadding = LocalBottomNavigationContentPadding.current
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Theme.colors.backGround),
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
             HomeGreetingBar(
                 name = state.nurseName,
                 avatarUrl = "https://picsum.photos/200/300",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = Theme.spacing.medium)
+                    .padding(horizontal = Theme.spacing.medium),
             )
         },
     ) { innerPadding ->
@@ -135,8 +147,9 @@ fun HomeContent(
 
             LazyColumn(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .weight(1f)
                     .padding(horizontal = Theme.spacing.medium),
+                contentPadding = PaddingValues(bottom = bottomNavigationContentPadding),
                 verticalArrangement = Arrangement.spacedBy(Theme.spacing.small),
             ) {
                 item {
@@ -255,7 +268,7 @@ fun HomeContent(
 }
 
 private enum class ContentPhase {
-    Offline, Loading, Empty, List,
+    Offline, Loading, List,
 }
 
 @Preview(showBackground = true, heightDp = 800)

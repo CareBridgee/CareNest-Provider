@@ -56,6 +56,10 @@ dependencies {
     implementation(libs.bundles.camera)
     implementation(libs.barcode.scanning)
 
+    // Networking
+    implementation(libs.bundles.ktor)
+    implementation(libs.kotlinx.serialization)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)

@@ -6,25 +6,28 @@ import com.carenest.provider.core.mvi.DefaultEffectPublisher
 import com.carenest.provider.core.mvi.DefaultStateHolder
 import com.carenest.provider.core.mvi.EffectPublisher
 import com.carenest.provider.core.mvi.StateHolder
-import com.carenest.request.domain.usecase.CompleteRequestUseCase
+import com.carenest.request.domain.usecase.CompleteServiceRequestUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ScanQrViewModel @Inject constructor(
-    private val completeRequestUseCase: CompleteRequestUseCase
+    private val completeRequestUseCase: CompleteServiceRequestUseCase
 ) : ViewModel(),
     StateHolder<ScanQrUiState> by DefaultStateHolder(ScanQrUiState()),
     EffectPublisher<ScanQrEffect> by DefaultEffectPublisher() {
 
     private var requestId: String? = null
+    private var isScanLocked = false
 
     private fun handleQrScanned(code: String) {
         val currentRequestId = requestId ?: return
+        if (isScanLocked) return
+        isScanLocked = true
         viewModelScope.launch {
             updateState { copy(isLoading = true, error = null, scannedCode = code) }
-            
+
             completeRequestUseCase(currentRequestId, code)
                 .onSuccess {
                     updateState { copy(isLoading = false, isSuccess = true) }
@@ -42,7 +45,10 @@ class ScanQrViewModel @Inject constructor(
             is ScanQrIntent.Load -> this.requestId = intent.requestId
             is ScanQrIntent.QrScanned -> handleQrScanned(intent.code)
             ScanQrIntent.BackClicked -> sendEffect(ScanQrEffect.NavigateBack)
-            ScanQrIntent.Retry -> updateState { copy(error = null, scannedCode = null) }
+            ScanQrIntent.Retry -> {
+                isScanLocked = false
+                updateState { copy(error = null, scannedCode = null) }
+            }
         }
     }
 }

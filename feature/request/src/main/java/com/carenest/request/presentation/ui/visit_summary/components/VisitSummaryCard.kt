@@ -89,10 +89,9 @@ fun VisitSummaryCard(summary: VisitSummary, modifier: Modifier = Modifier) {
         ) {
             SummaryField(
                 label = stringResource(R.string.visit_completed_duration_label),
-                value = stringResource(
-                    R.string.visit_completed_duration_value,
-                    summary.durationMinutes
-                ),
+                value = summary.durationMinutes?.let {
+                    stringResource(R.string.visit_completed_duration_value, it)
+                } ?: stringResource(R.string.not_available),
                 modifier = Modifier.weight(1f),
                 icon = painterResource(RD.drawable.ic_clock)
             )

@@ -18,4 +18,5 @@ interface NurseRequestsRepository {
     suspend fun createOffer(requestId: String, proposedPrice: Double, message: String? = null)
     suspend fun withdrawOffer(offerId: String)
     fun listenReservationEvents(reservationId: String): Flow<ReservationEvent>
+    suspend fun acceptOffer(offerId: String): Boolean
 }
