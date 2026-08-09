@@ -147,13 +147,32 @@ internal val DynamicAuthenticationPlugin = createClientPlugin(
 
     on(Send) { request ->
         val originalCall = proceed(request)
-        val shouldRecover = originalCall.response.status.value == 401 &&
-            request.isProtectedBackendRequest(backendHost) &&
-            request.attributes.getOrNull(AuthenticationRetryKey) != true
+        val responseStatus = originalCall.response.status.value
+        val requestAuthentication = request.attributes.getOrNull(RequestAuthenticationKey)
+
+        if (responseStatus == 403 && request.isCurrentSessionIdentityRequest(
+                backendHost = backendHost,
+                nurseId = sessionStore.state.first().session?.nurseId,
+            )
+        ) {
+            val currentCredentials = sessionStore.state.first().credentials
+            if (
+                currentCredentials != null &&
+                currentCredentials.sessionId == requestAuthentication?.sessionId
+            ) {
+                sessionStore.clearSessionIfCurrent(currentCredentials)
+            } else {
+                sessionStore.clearInvalidSession()
+            }
+            return@on originalCall
+        }
+
+        val shouldRecover = responseStatus == 401 &&
+                request.isProtectedBackendRequest(backendHost) &&
+                request.attributes.getOrNull(AuthenticationRetryKey) != true
 
         if (!shouldRecover) return@on originalCall
 
-        val requestAuthentication = request.attributes.getOrNull(RequestAuthenticationKey)
         if (requestAuthentication == null) {
             sessionStore.clearInvalidSession()
             return@on originalCall
@@ -216,6 +235,17 @@ private fun HttpRequestBuilder.isProtectedBackendRequest(backendHost: String): B
     return isBackendHost && path.startsWith("/api/v1/") && path !in PUBLIC_AUTH_PATHS
 }
 
+private fun HttpRequestBuilder.isCurrentSessionIdentityRequest(
+    backendHost: String,
+    nurseId: String?,
+): Boolean {
+    if (!isProtectedBackendRequest(backendHost)) return false
+
+    val path = url.build().encodedPath.normalizedPath()
+    return path == "/api/v1/users/me" ||
+            (!nurseId.isNullOrBlank() && path == "/api/v1/nurses/$nurseId")
+}
+
 private fun String.normalizedPath(): String {
     val withLeadingSlash = if (startsWith('/')) this else "/$this"
     return if (withLeadingSlash.length > 1) withLeadingSlash.trimEnd('/') else withLeadingSlash
@@ -238,7 +268,7 @@ private val SafeNetworkLogging = createClientPlugin("SafeNetworkLogging") {
         Log.d(
             NETWORK_LOG_TAG,
             "response method=${request.method.value} path=${request.url.encodedPath} " +
-                "status=${response.status.value}",
+                    "status=${response.status.value}",
         )
     }
 }

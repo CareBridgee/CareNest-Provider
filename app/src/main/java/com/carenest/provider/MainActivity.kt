@@ -71,6 +71,7 @@ class MainActivity : AppCompatActivity() {
             ) {
                 CareNestApp(
                     authenticationSessionStore = authenticationSessionStore,
+                    targetRequestId = targetRequestId.value,
                     onExitApp = { finish() },
                 )
             }
@@ -85,8 +86,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleIntent(intent: Intent?) {
         val reqId = intent?.getStringExtra(ActiveReservationService.EXTRA_SERVICE_REQUEST_ID)
-        if (!reqId.isNullOrBlank()) {
-            targetRequestId.value = reqId
+        val activeReqId = if (!reqId.isNullOrBlank()) {
+            reqId
+        } else {
+            ActiveReservationService.getActiveReservationId(this)
+        }
+        if (!activeReqId.isNullOrBlank()) {
+            targetRequestId.value = activeReqId
         }
     }
 }
@@ -94,10 +100,12 @@ class MainActivity : AppCompatActivity() {
 @Composable
 fun CareNestApp(
     authenticationSessionStore: AuthenticationSessionStore,
+    targetRequestId: String? = null,
     onExitApp: () -> Unit,
 ) {
     AppNavigation(
         authenticationState = authenticationSessionStore.state,
+        targetRequestId = targetRequestId,
         onExitApp = onExitApp,
         modifier = Modifier.fillMaxSize(),
     )

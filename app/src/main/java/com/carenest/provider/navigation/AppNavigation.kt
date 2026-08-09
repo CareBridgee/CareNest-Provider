@@ -21,6 +21,7 @@ import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -41,7 +42,6 @@ import com.carenest.home.navigation.HomeRoutes
 import com.carenest.home.navigation.homeSerializers
 import com.carenest.home.navigation.providerHomeEntries
 import com.carenest.provider.R
-import com.carenest.provider.account.R as AccountR
 import com.carenest.provider.account.navigation.AccountRoutes
 import com.carenest.provider.account.navigation.accountNavigationSerializers
 import com.carenest.provider.account.navigation.providerAccountEntries
@@ -49,18 +49,18 @@ import com.carenest.provider.auth.domain.util.AuthenticationDestination
 import com.carenest.provider.auth.navigation.authNavigationSerializers
 import com.carenest.provider.auth.navigation.providerAuthEntries
 import com.carenest.provider.auth.navigation.providerAuthStartRoute
-import com.carenest.provider.core.navigation.goBack
-import com.carenest.provider.core.navigation.navigate
-import com.carenest.provider.core.navigation.replaceWith
 import com.carenest.provider.core.datastore.AuthenticationSession
 import com.carenest.provider.core.datastore.AuthenticationSessionDestination
 import com.carenest.provider.core.datastore.AuthenticationState
-import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
-import com.carenest.provider.designsystem.components.topbar.TopBarLeading
+import com.carenest.provider.core.navigation.goBack
+import com.carenest.provider.core.navigation.navigate
+import com.carenest.provider.core.navigation.replaceWith
+import com.carenest.provider.core.network.socket.service.ActiveReservationService
 import com.carenest.provider.designsystem.components.bottomnav.BottomNavItem
 import com.carenest.provider.designsystem.components.bottomnav.LocalBottomNavigationContentPadding
 import com.carenest.provider.designsystem.components.bottomnav.SPBottomNavigation
-import com.carenest.provider.designsystem.R as DesignSystemR
+import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
+import com.carenest.provider.designsystem.components.topbar.TopBarLeading
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.earnings.navigation.EarningsRoutes
 import com.carenest.provider.earnings.navigation.earningsSerializers
@@ -77,8 +77,8 @@ import com.carenest.provider.profile.navigation.providerProfileReviewRoute
 import com.carenest.request.navigation.RequestRoutes
 import com.carenest.request.navigation.providerRequestEntries
 import com.carenest.request.navigation.requestSerializers
-import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import com.carenest.provider.account.R as AccountR
@@ -109,9 +109,11 @@ private val appSavedStateConfiguration = SavedStateConfiguration {
 @Composable
 fun AppNavigation(
     authenticationState: Flow<AuthenticationState>,
+    targetRequestId: String? = null,
     onExitApp: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
     val backStack: SnapshotStateList<NavKey> = rememberSerializable(
         serializer = SnapshotStateListSerializer(PolymorphicSerializer(NavKey::class)),
         configuration = appSavedStateConfiguration,
@@ -127,6 +129,15 @@ fun AppNavigation(
             } else if (hadAuthenticatedSession) {
                 hadAuthenticatedSession = false
                 backStack.replaceWith(providerAuthStartRoute())
+            }
+        }
+    }
+
+    LaunchedEffect(targetRequestId) {
+        if (!targetRequestId.isNullOrBlank()) {
+            val currentRoute = backStack.lastOrNull()
+            if (currentRoute !is RequestRoutes.RequestDetails || (currentRoute as RequestRoutes.RequestDetails).requestId != targetRequestId) {
+                backStack.navigate(RequestRoutes.RequestDetails(targetRequestId))
             }
         }
     }
@@ -150,8 +161,18 @@ fun AppNavigation(
                     backStack.replaceWith(providerAuthStartRoute())
                 }
             }
-            AuthenticationSessionDestination.APPROVED ->
-                backStack.replaceWith(HomeRoutes.Home)
+            AuthenticationSessionDestination.APPROVED -> {
+                val activeId = if (!targetRequestId.isNullOrBlank()) {
+                    targetRequestId
+                } else {
+                    ActiveReservationService.getActiveReservationId(context)
+                }
+                if (!activeId.isNullOrBlank()) {
+                    backStack.replaceWith(RequestRoutes.RequestDetails(activeId))
+                } else {
+                    backStack.replaceWith(HomeRoutes.Home)
+                }
+            }
         }
     }
 

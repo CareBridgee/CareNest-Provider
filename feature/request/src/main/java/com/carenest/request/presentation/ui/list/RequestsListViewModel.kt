@@ -6,14 +6,15 @@ import com.carenest.provider.core.mvi.DefaultEffectPublisher
 import com.carenest.provider.core.mvi.DefaultStateHolder
 import com.carenest.provider.core.mvi.EffectPublisher
 import com.carenest.provider.core.mvi.StateHolder
+import com.carenest.provider.core.network.socket.client.NurseSocketClient
 import com.carenest.provider.core.network.socket.model.ReservationEventType
+import com.carenest.request.domain.model.Request
 import com.carenest.request.domain.model.RequestStatus
 import com.carenest.request.domain.usecase.CreateOfferUseCase
 import com.carenest.request.domain.usecase.GetIncomingRequestsUseCase
 import com.carenest.request.domain.usecase.ListenReservationEventsUseCase
 import com.carenest.request.domain.usecase.WithdrawOfferUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -25,12 +26,14 @@ class RequestsListViewModel @Inject constructor(
     private val withdrawOffer: WithdrawOfferUseCase,
     private val createOffer: CreateOfferUseCase,
     private val listenReservationEvents: ListenReservationEventsUseCase,
+    private val nurseSocketClient: NurseSocketClient,
 ) : ViewModel(),
     StateHolder<RequestsListUiState> by DefaultStateHolder(RequestsListUiState()),
     EffectPublisher<RequestsListEffect> by DefaultEffectPublisher() {
 
     private var offerTimerJob: Job? = null
     private var eventListenerJob: Job? = null
+    private var socketJob: Job? = null
     private var currentOfferId: String? = null
 
     init {
@@ -50,9 +53,41 @@ class RequestsListViewModel @Inject constructor(
     }
 
     private fun loadRequests() {
+        nurseSocketClient.connect()
+
+        socketJob?.cancel()
+        socketJob = viewModelScope.launch {
+            nurseSocketClient.nearbyRequests.collect { socketReq ->
+                val newRequest = Request(
+                    id = socketReq.serviceRequestId,
+                    patientName = socketReq.serviceName ?: "Patient Request",
+                    serviceName = socketReq.serviceName ?: "Nursing Visit",
+                    basePrice = (socketReq.estimatedPrice ?: 50.0).toFloat(),
+                    patientAddress = socketReq.distanceKm?.let { "$it km" } ?: "Nearby",
+                    serviceImage = "",
+                    status = RequestStatus.ESTIMATED
+                )
+                updateState {
+                    val updatedList = requests.toMutableList()
+                    val existingIndex = updatedList.indexOfFirst { it.id == newRequest.id }
+                    if (existingIndex != -1) {
+                        updatedList[existingIndex] = newRequest
+                    } else {
+                        updatedList.add(0, newRequest)
+                    }
+                    copy(isLoading = false, requests = updatedList)
+                }
+            }
+        }
+
         viewModelScope.launch {
-            getIncomingRequests().onSuccess { requests ->
-                updateState { copy(isLoading = false, requests = requests) }
+            getIncomingRequests().onSuccess { initialRequests ->
+                updateState {
+                    val combined = (initialRequests + requests).distinctBy { it.id }
+                    copy(isLoading = false, requests = combined)
+                }
+            }.onFailure {
+                updateState { copy(isLoading = false) }
             }
         }
     }
@@ -224,6 +259,7 @@ class RequestsListViewModel @Inject constructor(
     }
 
     override fun onCleared() {
+        socketJob?.cancel()
         stopActiveOfferJobs()
         super.onCleared()
     }

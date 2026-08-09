@@ -51,6 +51,7 @@ class ActiveReservationService : Service() {
         val requestId = intent?.getStringExtra(EXTRA_SERVICE_REQUEST_ID)
         if (!requestId.isNullOrBlank()) {
             currentServiceRequestId = requestId
+            setActiveReservationId(this, requestId)
             val notification = buildNotification(
                 title = "Active Reservation",
                 content = "Monitoring real-time reservation updates",
@@ -170,12 +171,14 @@ class ActiveReservationService : Service() {
                 } catch (_: Exception) { }
             }
         }
+        setActiveReservationId(this, null)
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        setActiveReservationId(this, null)
         eventCollectorJob?.cancel()
         serviceScope.cancel()
     }
@@ -192,6 +195,34 @@ class ActiveReservationService : Service() {
         private const val NOTIFICATION_ID = 1001
         private const val PENDING_INTENT_REQUEST_CODE = 2001
         private const val CHANNEL_ID = "active_reservation_channel"
+
+        private const val PREFS_NAME = "carenest_active_reservation_prefs"
+        private const val KEY_ACTIVE_RESERVATION_ID = "KEY_ACTIVE_RESERVATION_ID"
+
+        @Volatile
+        var activeReservationId: String? = null
+            private set
+
+        fun getActiveReservationId(context: Context): String? {
+            if (!activeReservationId.isNullOrBlank()) return activeReservationId
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val storedId = prefs.getString(KEY_ACTIVE_RESERVATION_ID, null)
+            return if (storedId.isNullOrBlank()) null else storedId
+        }
+
+        fun isServiceRunning(context: Context): Boolean {
+            return getActiveReservationId(context) != null
+        }
+
+        private fun setActiveReservationId(context: Context, id: String?) {
+            activeReservationId = id
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            if (id.isNullOrBlank()) {
+                prefs.edit().remove(KEY_ACTIVE_RESERVATION_ID).apply()
+            } else {
+                prefs.edit().putString(KEY_ACTIVE_RESERVATION_ID, id).apply()
+            }
+        }
 
         fun startService(context: Context, serviceRequestId: String) {
             val intent = Intent(context, ActiveReservationService::class.java).apply {
