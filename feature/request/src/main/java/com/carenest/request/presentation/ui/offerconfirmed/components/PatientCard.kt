@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,12 +17,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.request.R
@@ -34,6 +35,7 @@ import com.carenest.provider.designsystem.R as RD
 @Composable
 fun PatientCard(
     name: String,
+    imageUrl: String,
     estimatedArrivalTime: String,
     onCallClick: () -> Unit,
     onMessageClick: () -> Unit,
@@ -49,7 +51,7 @@ fun PatientCard(
             .padding(16.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            PatientAvatar()
+            PatientAvatar(imageUrl = imageUrl)
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -103,23 +105,17 @@ fun PatientCard(
 }
 
 @Composable
-private fun PatientAvatar(modifier: Modifier = Modifier) {
-    Row(
+private fun PatientAvatar(imageUrl: String, modifier: Modifier = Modifier) {
+    AsyncImage(
+        model = imageUrl,
+        contentDescription = null,
         modifier = modifier
             .size(56.dp)
-            .background(
-                color = Theme.colors.primaryContainer,
-                shape = RoundedCornerShape(14.dp),
-            ),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            imageVector = Icons.Filled.Person,
-            contentDescription = null,
-            tint = Theme.colors.onPrimaryContainer,
-        )
-    }
+            .clip(RoundedCornerShape(14.dp)),
+        placeholder = painterResource(RD.drawable.patient),
+        error = painterResource(RD.drawable.patient),
+        contentScale = ContentScale.Crop,
+    )
 }
 
 @Composable
@@ -152,6 +148,7 @@ private fun Preview() {
     SpTheme {
         PatientCard(
             name = "Mark Harrison",
+            imageUrl = "",
             estimatedArrivalTime = "9:05 am",
             onCallClick = {},
             onMessageClick = {},

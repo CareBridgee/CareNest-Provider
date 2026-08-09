@@ -24,13 +24,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.carenest.request.domain.model.CancellationReason
 import com.carenest.provider.designsystem.components.button.PrimaryButton
 import com.carenest.provider.designsystem.components.button.SecondaryButton
 import com.carenest.provider.designsystem.components.textfield.CustomTextField
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.request.R
+import com.carenest.request.domain.model.CancellationReason
 
 @Composable
 fun cancellationReasonLabel(reason: CancellationReason): String = when (reason) {

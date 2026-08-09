@@ -5,8 +5,8 @@ data class VisitSummary(
     val requestId: String,
     val professionalName: String,
     val serviceType: String,
-    val durationMinutes: Int,
+    val durationMinutes: Int?,
     val completedDate: String,
-    val totalAmount: Double,
+    val totalAmount: Double?,
     val isVerified: Boolean,
 )

@@ -2,6 +2,7 @@ package com.carenest.request.presentation.ui.details
 
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -45,6 +46,7 @@ import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.request.R
 import com.carenest.request.domain.model.Offer
 import com.carenest.request.domain.model.PatientInfo
+import com.carenest.request.presentation.asString
 import com.carenest.request.presentation.ui.details.composable.LocationSection
 import com.carenest.request.presentation.ui.details.composable.PatientSection
 import com.carenest.request.presentation.ui.details.composable.PaymentSection
@@ -56,6 +58,7 @@ fun OfferDetailsScreen(
     requestId: String,
     onBack: () -> Unit,
     onOpenChat: (String) -> Unit,
+    onVisitCompleted: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: OfferDetailsViewModel = hiltViewModel(),
 ) {
@@ -71,6 +74,7 @@ fun OfferDetailsScreen(
     ObserveEffect(viewModel.effect) { effect ->
         when (effect) {
             OfferDetailsEffect.NavigateBack -> onBack()
+            is OfferDetailsEffect.NavigateToVisitCompleted -> onVisitCompleted(effect.requestId)
             is OfferDetailsEffect.InitiateCall -> {
                 val intent = Intent(Intent.ACTION_DIAL).apply {
                     data = Uri.parse("tel:${effect.phone}")
@@ -87,7 +91,7 @@ fun OfferDetailsScreen(
             }
 
             is OfferDetailsEffect.ShowSummary -> {
-                // Show summary dialog or bottom sheet
+                Toast.makeText(context, effect.summary, Toast.LENGTH_LONG).show()
             }
 
             is OfferDetailsEffect.OpenMaps -> {
@@ -100,6 +104,10 @@ fun OfferDetailsScreen(
                     val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/maps/search/?api=1&query=${Uri.encode(effect.address)}"))
                     context.startActivity(browserIntent)
                 }
+            }
+
+            is OfferDetailsEffect.ShowError -> {
+                Toast.makeText(context, effect.message.asString(context), Toast.LENGTH_LONG).show()
             }
         }
     }

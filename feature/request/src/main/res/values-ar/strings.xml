@@ -50,6 +50,7 @@
     <string name="estimated_price">السعر التقديري</string>
     <string name="requests_list_title">الطلبات</string>
     <string name="requests_list_pending_label">الطلبات المعلقة</string>
+    <string name="request_des">الرعاية المنزلية بعد العملية</string>
     <string name="requests_list_offers_count">%1$d عروض</string>
     <string name="offer_confirmed_title">تم تأكيد الطلب!</string>
     <string name="offer_confirmed_subtitle">وافق المريض على عرضك. أنت في طريقك لتقديم الرعاية.</string>
@@ -116,6 +117,14 @@
     <string name="offer_confirmed_cancellation_info">يمكنك الإلغاء خلال دقيقتين من بدء الزيارة. بعد ذلك، سيتم تطبيق رسوم إلغاء.</string>
     <string name="service">الخدمة</string>
     <string name="distance">المسافة</string>
+    <string name="visit_code_generated">رمز الزيارة: %1$s</string>
+    <string name="not_available">—</string>
+    <string name="visit_rating_local_only">تم حفظ التقييم محليًا. دعم الخادم غير متاح حاليًا.</string>
+    <string name="generic_error_message">حدث خطأ ما. يرجى المحاولة مرة أخرى.</string>
+    <string name="chat_reservation_unavailable">المحادثة غير متاحة لأن العقد لا يحتوي على رقم حجز.</string>
+    <string name="patient_phone_unavailable">لم يرسل الخادم رقم هاتف المريض.</string>
+    <string name="patient_report_unavailable">لا يوجد تقرير متاح للمريض في هذا العقد.</string>
+    <string name="patient_address_unavailable">لا يوجد عنوان متاح للمريض في هذا العقد.</string>
 
     <!-- Scan QR -->
     <string name="scan_qr_title">مسح رمز الاستجابة السريعة</string>
