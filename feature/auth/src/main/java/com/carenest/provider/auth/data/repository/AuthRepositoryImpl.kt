@@ -101,6 +101,8 @@ class AuthRepositoryImpl @Inject constructor(
 
             if (response.status.isSuccess()) {
                 val user = response.body<CurrentUserDto>()
+                val userNurse = user.nurse?.toDomain()
+                val topLevelId = user.id ?: user.nurseId ?: user.profileId ?: user.userId
 
                 Result.success(
                     AuthenticatedUser(
