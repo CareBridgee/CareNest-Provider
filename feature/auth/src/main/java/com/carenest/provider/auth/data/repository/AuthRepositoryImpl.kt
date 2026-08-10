@@ -181,7 +181,7 @@ class AuthRepositoryImpl @Inject constructor(
 private fun com.carenest.provider.auth.data.remote.dto.NurseAuthDto.toDomain() =
     AuthenticatedNurse(
         id = id,
-        verificationStatus = NurseVerificationStatus.valueOf(verificationStatus),
+        verificationStatus = verificationStatus.toNurseVerificationStatus(),
         hasSubmittedApplication = listOf(
             nationalId,
             nationalIdFrontUrl,
@@ -191,3 +191,9 @@ private fun com.carenest.provider.auth.data.remote.dto.NurseAuthDto.toDomain() =
             specialization,
         ).any { !it.isNullOrBlank() } || yearsOfExperience != null,
     )
+
+private fun String.toNurseVerificationStatus(): NurseVerificationStatus = when (uppercase()) {
+    "VERIFIED", "APPROVED" -> NurseVerificationStatus.APPROVED
+    "REJECTED" -> NurseVerificationStatus.REJECTED
+    else -> NurseVerificationStatus.UNDER_REVIEW
+}

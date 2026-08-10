@@ -106,17 +106,17 @@ fun ProfessionalDocumentsContent(
                 ProfessionalDocumentCard(
                     document = document,
                     title = stringResource(document.titleRes),
-                    uploadedDate = stringResource(document.uploadedDateRes),
-                    actionLabel = stringResource(
-                        if (document.status == DocumentStatus.Verified) {
-                            R.string.documents_view
-                        } else {
-                            R.string.documents_edit
-                        },
-                    ),
+                    supportingText = stringResource(document.uploadedDateRes),
+                    viewLabel = stringResource(R.string.documents_view),
+                    replaceLabel = stringResource(R.string.documents_edit),
                     verifiedLabel = stringResource(R.string.documents_verified),
                     pendingLabel = stringResource(R.string.documents_pending),
-                    onClick = {
+                    rejectedLabel = stringResource(R.string.documents_rejected),
+                    isUploading = false,
+                    onViewClick = {
+                        onIntent(ProfessionalDocumentsIntent.DocumentClicked(document.id))
+                    },
+                    onReplaceClick = {
                         onIntent(ProfessionalDocumentsIntent.DocumentClicked(document.id))
                     },
                 )

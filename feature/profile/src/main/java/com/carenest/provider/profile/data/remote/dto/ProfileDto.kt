@@ -16,10 +16,26 @@ data class ServiceTypeResponseDto(
 @Serializable
 data class NurseResponseDto(
     val id: String,
+    val userId: String? = null,
+    val firstName: String? = null,
+    val lastName: String? = null,
+    val phoneNumber: String? = null,
     val profileImageUrl: String? = null,
-    val verificationStatus: String,
+    val nationalId: String? = null,
+    val licenseNumber: String? = null,
+    val nationalIdFrontUrl: String? = null,
+    val nationalIdBackUrl: String? = null,
+    val licenseImageUrl: String? = null,
+    val professionalCertificateUrl: String? = null,
+    val specialization: String? = null,
+    val yearsOfExperience: Int? = null,
+    val bio: String? = null,
+    val ratingAvg: Double? = null,
+    val totalReviews: Int? = null,
+    val verificationStatus: String = "UNDER_REVIEW",
     val rejectionReason: String? = null,
     val rejectionDetails: NurseRejectionDetailsDto? = null,
+    val services: List<NurseServiceResponseDto> = emptyList(),
 )
 
 @Serializable
@@ -47,6 +63,10 @@ data class NurseServiceBatchResultDto(
 data class NurseServiceResponseDto(
     val id: String? = null,
     val serviceTypeId: String,
+    val serviceName: String? = null,
+    val serviceDescription: String? = null,
+    val basePrice: Double? = null,
+    val isActive: Boolean? = null,
 )
 
 @Serializable

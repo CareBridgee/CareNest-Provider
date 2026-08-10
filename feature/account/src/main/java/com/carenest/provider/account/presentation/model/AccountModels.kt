@@ -25,6 +25,7 @@ enum class MenuItemId {
 enum class DocumentStatus {
     Verified,
     Pending,
+    Rejected,
 }
 
 data class ProfessionalDocumentUiModel(
@@ -33,6 +34,14 @@ data class ProfessionalDocumentUiModel(
     @StringRes val uploadedDateRes: Int,
     @DrawableRes val iconRes: Int,
     val status: DocumentStatus,
+    val primaryUrl: String? = null,
+    val secondaryUrl: String? = null,
+    val replacementTargets: List<DocumentReplacementTarget> = emptyList(),
+)
+
+data class DocumentReplacementTarget(
+    val field: String,
+    @StringRes val labelRes: Int,
 )
 
 enum class ReviewFilter {

@@ -10,6 +10,7 @@ import com.carenest.provider.profile.data.remote.dto.UserResponseDto
 import com.carenest.provider.profile.domain.model.FailedStep
 import com.carenest.provider.profile.domain.model.NurseProfile
 import com.carenest.provider.profile.domain.model.NurseRegistration
+import com.carenest.provider.profile.domain.model.NurseService
 import com.carenest.provider.profile.domain.model.NurseServiceBatchResult
 import com.carenest.provider.profile.domain.model.NurseUpdate
 import com.carenest.provider.profile.domain.model.ServiceFailure
@@ -94,11 +95,43 @@ class ProfileRepositoryImpl @Inject constructor(
 
 private fun NurseResponseDto.toDomain(): NurseProfile = NurseProfile(
     id = id,
+    userId = userId,
+    firstName = firstName,
+    lastName = lastName,
+    phoneNumber = phoneNumber,
     profileImageUrl = profileImageUrl,
-    verificationStatus = VerificationStatus.valueOf(verificationStatus),
+    nationalId = nationalId,
+    licenseNumber = licenseNumber,
+    nationalIdFrontUrl = nationalIdFrontUrl,
+    nationalIdBackUrl = nationalIdBackUrl,
+    licenseImageUrl = licenseImageUrl,
+    professionalCertificateUrl = professionalCertificateUrl,
+    specialization = specialization,
+    yearsOfExperience = yearsOfExperience,
+    bio = bio,
+    ratingAvg = ratingAvg,
+    totalReviews = totalReviews,
+    verificationStatus = verificationStatus.toVerificationStatus(),
     rejectionReason = rejectionDetails?.overallReason ?: rejectionReason,
     failedSteps = rejectionDetails?.failedSteps.orEmpty().mapNotNull { item ->
         val step = item.step ?: return@mapNotNull null
         FailedStep(step, item.reason.orEmpty())
     },
+    services = services.mapNotNull { service ->
+        val serviceTypeId = service.serviceTypeId.takeIf(String::isNotBlank) ?: return@mapNotNull null
+        NurseService(
+            id = service.id.orEmpty(),
+            serviceTypeId = serviceTypeId,
+            serviceName = service.serviceName ?: serviceTypeId,
+            serviceDescription = service.serviceDescription,
+            basePrice = service.basePrice,
+            isActive = service.isActive ?: true,
+        )
+    },
 )
+
+private fun String.toVerificationStatus(): VerificationStatus = when (uppercase()) {
+    "VERIFIED", "APPROVED" -> VerificationStatus.APPROVED
+    "REJECTED" -> VerificationStatus.REJECTED
+    else -> VerificationStatus.UNDER_REVIEW
+}
