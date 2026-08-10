@@ -200,8 +200,9 @@ fun ProfessionalDocumentCard(
                                     onReplaceClick(file.target)
                                 },
                             )
-    }
-}
+                        }
+                    }
+                }
             }
         }
     }
