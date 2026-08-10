@@ -49,6 +49,26 @@ fun RatingStars(
 }
 
 @Composable
+fun StarRatingRow(
+    rating: Double,
+    modifier: Modifier = Modifier,
+    iconSize: Int = 24,
+) {
+    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        repeat(5) { index ->
+            val starLevel = index + 1
+            val isFilled = rating >= (starLevel - 0.25)
+            Icon(
+                imageVector = if (isFilled) Icons.Rounded.Star else Icons.Rounded.StarBorder,
+                contentDescription = null,
+                tint = if (isFilled) Theme.colors.warning else Theme.colors.track,
+                modifier = Modifier.size(iconSize.dp),
+            )
+        }
+    }
+}
+
+@Composable
 fun RatingDistributionRow(
     star: Int,
     progress: Float,

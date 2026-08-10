@@ -27,8 +27,5 @@ class KtorReviewsRemoteDataSource @Inject constructor(
         parameter("page", page)
         parameter("size", size)
         parameter("sort", sort)
-        parameter("pageable.page", page)
-        parameter("pageable.size", size)
-        parameter("pageable.sort", sort)
     }
 }

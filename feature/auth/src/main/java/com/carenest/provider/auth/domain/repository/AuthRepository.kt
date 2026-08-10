@@ -17,6 +17,7 @@ interface AuthRepository {
 }
 
 data class AuthenticatedUser(
+    val id: String? = null,
     val profileCompleted: Boolean,
     val nurse: AuthenticatedNurse? = null,
 )

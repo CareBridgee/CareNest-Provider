@@ -8,6 +8,7 @@ data class RatingsAndReviewsUiState(
     val isLoadingMore: Boolean = false,
     val error: String? = null,
     val totalReviews: Int = 0,
+    val averageRating: Double = 0.0,
     val selectedFilter: ReviewFilter = ReviewFilter.MostRecent,
     val distribution: List<RatingDistributionUiModel> = emptyList(),
     val reviews: List<ReviewUiModel> = emptyList(),

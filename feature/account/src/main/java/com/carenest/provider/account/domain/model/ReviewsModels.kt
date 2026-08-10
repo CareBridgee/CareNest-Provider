@@ -2,14 +2,15 @@ package com.carenest.provider.account.domain.model
 
 data class NurseReview(
     val id: String,
-    val bookingId: String?,
-    val profileId: String?,
-    val nurseId: String,
-    val rating: Int,
-    val reviewText: String,
-    val isAnonymous: Boolean,
-    val createdAt: String,
-    val updatedAt: String?,
+    val serviceRequestId: String? = null,
+    val bookingId: String? = null,
+    val profileId: String? = null,
+    val nurseId: String? = null,
+    val rating: Int = 0,
+    val reviewText: String = "",
+    val isAnonymous: Boolean = false,
+    val createdAt: String? = null,
+    val updatedAt: String? = null,
 )
 
 data class NurseReviewsPage(

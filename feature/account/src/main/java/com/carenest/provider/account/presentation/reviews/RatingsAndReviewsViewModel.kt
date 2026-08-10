@@ -20,6 +20,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -58,17 +59,7 @@ class RatingsAndReviewsViewModel @Inject constructor(
                 .fold(
                     onSuccess = { pageData ->
                         allFetchedReviews.addAll(pageData.reviews)
-                        val displayReviews = applyFilter(allFetchedReviews, currentState.selectedFilter)
-                        updateState {
-                            copy(
-                                isLoading = false,
-                                reviews = displayReviews,
-                                totalReviews = pageData.totalElements,
-                                currentPage = 0,
-                                isLastPage = pageData.isLast,
-                                error = null,
-                            )
-                        }
+                        updateReviewsState(pageData, isMore = false)
                     },
                     onFailure = { error ->
                         updateState {
@@ -94,21 +85,51 @@ class RatingsAndReviewsViewModel @Inject constructor(
                 .fold(
                     onSuccess = { pageData ->
                         allFetchedReviews.addAll(pageData.reviews)
-                        val displayReviews = applyFilter(allFetchedReviews, currentState.selectedFilter)
-                        updateState {
-                            copy(
-                                isLoadingMore = false,
-                                reviews = displayReviews,
-                                totalReviews = pageData.totalElements,
-                                currentPage = nextPage,
-                                isLastPage = pageData.isLast,
-                            )
-                        }
+                        updateReviewsState(pageData, isMore = true, nextPage = nextPage)
                     },
                     onFailure = {
                         updateState { copy(isLoadingMore = false) }
                     },
                 )
+        }
+    }
+
+    private fun updateReviewsState(
+        pageData: com.carenest.provider.account.domain.model.NurseReviewsPage,
+        isMore: Boolean,
+        nextPage: Int = 0,
+    ) {
+        val displayReviews = applyFilter(allFetchedReviews, currentState.selectedFilter)
+        val calculatedAvg = if (allFetchedReviews.isNotEmpty()) {
+            allFetchedReviews.map { it.rating }.average()
+        } else {
+            0.0
+        }
+        val totalCount = allFetchedReviews.size
+        val distributionModels = (5 downTo 1).map { stars ->
+            val countForStar = allFetchedReviews.count { it.rating == stars }
+            val progress = if (totalCount > 0) countForStar.toFloat() / totalCount else 0f
+            val percentage = (progress * 100).roundToInt()
+            RatingDistributionUiModel(
+                stars = stars,
+                progress = progress,
+                percentage = percentage,
+            )
+        }
+        val count = if (pageData.totalElements > 0) pageData.totalElements else allFetchedReviews.size
+
+        updateState {
+            copy(
+                isLoading = false,
+                isLoadingMore = false,
+                reviews = displayReviews,
+                totalReviews = count,
+                averageRating = calculatedAvg,
+                distribution = distributionModels,
+                currentPage = if (isMore) nextPage else 0,
+                isLastPage = pageData.isLast,
+                error = null,
+            )
         }
     }
 
@@ -146,8 +167,8 @@ class RatingsAndReviewsViewModel @Inject constructor(
         )
     }
 
-    private fun formatDate(isoTimestamp: String): String {
-        if (isoTimestamp.isBlank()) return ""
+    private fun formatDate(isoTimestamp: String?): String {
+        if (isoTimestamp.isNullOrBlank()) return ""
         return try {
             val instant = Instant.parse(isoTimestamp)
             val formatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.getDefault())

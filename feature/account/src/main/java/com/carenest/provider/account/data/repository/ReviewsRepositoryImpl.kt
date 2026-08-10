@@ -78,7 +78,8 @@ private fun ReviewsPageResponseDto.toDomain(): NurseReviewsPage = NurseReviewsPa
 
 private fun NurseReviewDto.toDomain(): NurseReview = NurseReview(
     id = id,
-    bookingId = bookingId,
+    serviceRequestId = serviceRequestId ?: bookingId,
+    bookingId = bookingId ?: serviceRequestId,
     profileId = profileId,
     nurseId = nurseId,
     rating = rating,

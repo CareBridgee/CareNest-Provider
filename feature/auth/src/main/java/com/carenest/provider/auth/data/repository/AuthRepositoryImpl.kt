@@ -117,10 +117,19 @@ class AuthRepositoryImpl @Inject constructor(
                     "profileCompleted=${user.profileCompleted}",
                 )
 
+                val userNurse = user.nurse?.toDomain()
+                val topLevelId = user.id ?: user.nurseId ?: user.profileId ?: user.userId
                 Result.success(
                     AuthenticatedUser(
+                        id = topLevelId ?: userNurse?.id,
                         profileCompleted = user.profileCompleted,
-                        nurse = user.nurse?.toDomain(),
+                        nurse = userNurse ?: if (!topLevelId.isNullOrBlank()) {
+                            AuthenticatedNurse(
+                                id = topLevelId,
+                                verificationStatus = NurseVerificationStatus.APPROVED,
+                                hasSubmittedApplication = true,
+                            )
+                        } else null,
                     ),
                 )
             } else {
@@ -195,8 +204,10 @@ class AuthRepositoryImpl @Inject constructor(
 
 private fun com.carenest.provider.auth.data.remote.dto.NurseAuthDto.toDomain() =
     AuthenticatedNurse(
-        id = id,
-        verificationStatus = NurseVerificationStatus.valueOf(verificationStatus),
+        id = id ?: nurseId ?: profileId ?: userId ?: "",
+        verificationStatus = runCatching {
+            NurseVerificationStatus.valueOf((verificationStatus ?: "APPROVED").uppercase())
+        }.getOrDefault(NurseVerificationStatus.APPROVED),
         hasSubmittedApplication = listOf(
             nationalId,
             nationalIdFrontUrl,

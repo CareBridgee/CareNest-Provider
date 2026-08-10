@@ -26,7 +26,7 @@ class GetNurseReviewsUseCase @Inject constructor(
             return Result.failure(IllegalStateException(formattedMsg, error))
         }
 
-        val nurseId = user.nurse?.id?.trim()
+        val nurseId = user.nurse?.id?.trim()?.ifBlank { null } ?: user.id?.trim()?.ifBlank { null }
         if (nurseId.isNullOrBlank() || !isValidUuid(nurseId)) {
             return Result.failure(
                 IllegalStateException("Nurse profile is incomplete or nurse ID is invalid.")
