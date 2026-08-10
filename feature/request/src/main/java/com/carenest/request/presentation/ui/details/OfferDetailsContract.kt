@@ -6,6 +6,7 @@ import com.carenest.request.presentation.UiText
 data class OfferDetailsUiState(
     val isLoading: Boolean = true,
     val offer: Offer? = null,
+    val isRequestCancelledByPatient: Boolean = false,
 )
 
 sealed interface OfferDetailsIntent {
@@ -17,6 +18,7 @@ sealed interface OfferDetailsIntent {
     data object ViewSummaryClicked : OfferDetailsIntent
     data object OpenInMapsClicked : OfferDetailsIntent
     data object MoreClicked : OfferDetailsIntent
+    data object DismissRequestCancelledNotice : OfferDetailsIntent
 }
 
 sealed interface OfferDetailsEffect {
