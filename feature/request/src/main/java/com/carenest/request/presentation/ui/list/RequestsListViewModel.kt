@@ -2,67 +2,125 @@ package com.carenest.request.presentation.ui.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.carenest.request.domain.model.RequestStatus
-import com.carenest.request.domain.usecase.GetIncomingRequestsUseCase
-import com.carenest.request.domain.usecase.SendOfferToPatientUseCase
 import com.carenest.provider.core.mvi.DefaultEffectPublisher
 import com.carenest.provider.core.mvi.DefaultStateHolder
 import com.carenest.provider.core.mvi.EffectPublisher
 import com.carenest.provider.core.mvi.StateHolder
+import com.carenest.provider.core.network.socket.client.NurseSocketClient
+import com.carenest.provider.core.network.socket.model.ReservationEventType
+import com.carenest.request.domain.model.Request
+import com.carenest.request.domain.model.RequestStatus
+import com.carenest.request.domain.usecase.CreateOfferUseCase
+import com.carenest.request.domain.usecase.GetIncomingRequestsUseCase
+import com.carenest.request.domain.usecase.ListenReservationEventsUseCase
+import com.carenest.request.domain.usecase.WithdrawOfferUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class RequestsListViewModel @Inject constructor(
     private val getIncomingRequests: GetIncomingRequestsUseCase,
-    private val sendOfferToPatient: SendOfferToPatientUseCase,
+    private val withdrawOffer: WithdrawOfferUseCase,
+    private val createOffer: CreateOfferUseCase,
+    private val listenReservationEvents: ListenReservationEventsUseCase,
+    private val nurseSocketClient: NurseSocketClient,
 ) : ViewModel(),
     StateHolder<RequestsListUiState> by DefaultStateHolder(RequestsListUiState()),
     EffectPublisher<RequestsListEffect> by DefaultEffectPublisher() {
 
     private var offerTimerJob: Job? = null
+    private var eventListenerJob: Job? = null
+    private var socketJob: Job? = null
+    private var currentOfferId: String? = null
 
     init {
         loadRequests()
+        observeSocketErrors()
+        observeNotifications()
+    }
+
+    private fun observeSocketErrors() {
+        viewModelScope.launch {
+            nurseSocketClient.socketErrors.collect { errorPayload ->
+                updateState {
+                    copy(
+                        socketErrorMessage = errorPayload.message,
+                        socketErrorCode = errorPayload.code
+                    )
+                }
+            }
+        }
+    }
+
+    private fun observeNotifications() {
+        viewModelScope.launch {
+            nurseSocketClient.notifications.collect { notification ->
+                val reqId = notification.relatedEntityId
+                if (!reqId.isNullOrEmpty() &&
+                    (notification.title.contains("Accepted", ignoreCase = true) || notification.message.contains("accepted", ignoreCase = true))
+                ) {
+                    handleOfferAccepted(reqId)
+                }
+            }
+        }
     }
 
     fun onIntent(intent: RequestsListIntent) {
         when (intent) {
             is RequestsListIntent.CardClicked -> handleCardClick(intent.requestId)
-            is RequestsListIntent.ViewDetailsClicked -> {
-                sendEffect(RequestsListEffect.NavigateToRequestDetails(intent.requestId))
-            }
             is RequestsListIntent.EditRateClicked -> openEditRateModal(intent.requestId)
-            is RequestsListIntent.MakeOfferClicked -> startMakeOffer(intent.requestId)
-            is RequestsListIntent.EditRateChanged -> {
-                updateState { copy(editPriceDraft = intent.rate) }
-            }
+            is RequestsListIntent.MakeOfferClicked -> handleMakeOffer(intent.requestId)
+            is RequestsListIntent.EditRateChanged -> updateEditPriceDraft(intent.rate)
+            is RequestsListIntent.ViewDetailsClicked -> navigateToDetails(intent.requestId)
             RequestsListIntent.SaveRateClicked -> saveEditedPrice()
             RequestsListIntent.DismissModal -> dismissModal()
         }
     }
 
     private fun loadRequests() {
+        nurseSocketClient.connect()
+
+        socketJob?.cancel()
+        socketJob = viewModelScope.launch {
+            nurseSocketClient.nearbyRequests.collect { socketReq ->
+                val newRequest = Request(
+                    id = socketReq.serviceRequestId,
+                    patientName = socketReq.serviceName ?: "Patient Request",
+                    serviceName = socketReq.serviceName ?: "Nursing Visit",
+                    basePrice = (socketReq.estimatedPrice ?: 50.0).toFloat(),
+                    patientAddress = socketReq.distanceKm?.let { "$it km" } ?: "Nearby",
+                    serviceImage = "",
+                    status = RequestStatus.ESTIMATED
+                )
+                updateState {
+                    val updatedList = requests.toMutableList()
+                    val existingIndex = updatedList.indexOfFirst { it.id == newRequest.id }
+                    if (existingIndex != -1) {
+                        updatedList[existingIndex] = newRequest
+                    } else {
+                        updatedList.add(0, newRequest)
+                    }
+                    copy(isLoading = false, requests = updatedList)
+                }
+            }
+        }
+
         viewModelScope.launch {
-            updateState { copy(isLoading = true) }
-            val requests = getIncomingRequests().getOrDefault(emptyList())
-            updateState { copy(isLoading = false, requests = requests) }
+            getIncomingRequests().onSuccess { initialRequests ->
+                updateState {
+                    val combined = (initialRequests + requests).distinctBy { it.id }
+                    copy(isLoading = false, requests = combined)
+                }
+            }.onFailure {
+                updateState { copy(isLoading = false) }
+            }
         }
     }
 
     private fun handleCardClick(requestId: String) {
-        val request = currentState.requests.find { it.id == requestId } ?: return
-        
-        if (request.status == RequestStatus.ACCEPTED) {
-            sendEffect(RequestsListEffect.NavigateToRequestDetails(requestId))
-            return
-        }
-
-        if (request.status != RequestStatus.ESTIMATED) return
-
         updateState {
             copy(selectedCardId = if (selectedCardId == requestId) null else requestId)
         }
@@ -70,7 +128,6 @@ class RequestsListViewModel @Inject constructor(
 
     private fun openEditRateModal(requestId: String) {
         val request = currentState.requests.find { it.id == requestId } ?: return
-
         updateState {
             copy(
                 activeModal = RequestsListModal.EditRate,
@@ -81,10 +138,17 @@ class RequestsListViewModel @Inject constructor(
         }
     }
 
+    private fun updateEditPriceDraft(rate: Float) {
+        updateState { copy(editPriceDraft = rate) }
+    }
+
+    private fun navigateToDetails(requestId: String) {
+        sendEffect(RequestsListEffect.NavigateToRequestDetails(requestId))
+    }
+
     private fun saveEditedPrice() {
         val requestId = currentState.editingRequestId ?: return
         val newPrice = currentState.editPriceDraft
-
         updateState {
             copy(
                 requests = requests.map { request ->
@@ -96,10 +160,23 @@ class RequestsListViewModel @Inject constructor(
         }
     }
 
-    private fun startMakeOffer(requestId: String) {
-        val (willAccept, acceptAtSecond) = sendOfferToPatient(requestId)
+    private fun handleMakeOffer(requestId: String) {
+        val request = currentState.requests.find { it.id == requestId }
+        val price = (request?.basePrice ?: currentState.editPriceDraft).toDouble()
 
-        offerTimerJob?.cancel()
+        setupOfferUiState(requestId)
+
+        viewModelScope.launch {
+            try {
+                createOffer(requestId, price)
+            } catch (_: Exception) { }
+        }
+
+        startReservationEventListener(requestId)
+        startOfferCountdown(requestId)
+    }
+
+    private fun setupOfferUiState(requestId: String) {
         updateState {
             copy(
                 activeModal = RequestsListModal.MakeOffer,
@@ -108,52 +185,82 @@ class RequestsListViewModel @Inject constructor(
                 selectedCardId = requestId,
             )
         }
+    }
 
-        offerTimerJob = viewModelScope.launch {
-            for (elapsedSecond in 1..OFFER_TIMEOUT_SECONDS) {
-                delay(1_000)
-
-                if (willAccept && elapsedSecond == acceptAtSecond) {
-                    completeOfferAccepted(requestId)
-                    return@launch
-                }
-
-                updateState {
-                    copy(offerCountdown = OFFER_TIMEOUT_SECONDS - elapsedSecond)
+    private fun startReservationEventListener(requestId: String) {
+        eventListenerJob?.cancel()
+        eventListenerJob = viewModelScope.launch {
+            listenReservationEvents(requestId).collect { event ->
+                when (event.eventType) {
+                    ReservationEventType.OFFER_ACCEPTED -> {
+                        handleOfferAccepted(requestId)
+                    }
+                    ReservationEventType.OFFER_REJECTED, ReservationEventType.REQUEST_CANCELLED -> {
+                        handleOfferTimeout(requestId)
+                    }
+                    else -> { }
                 }
             }
-
-            completeOfferTimeout(requestId)
         }
     }
 
-    private fun completeOfferAccepted(requestId: String) {
+    private fun startOfferCountdown(requestId: String) {
         offerTimerJob?.cancel()
+        offerTimerJob = viewModelScope.launch {
+            for (remainingSeconds in OFFER_TIMEOUT_SECONDS downTo 0) {
+                updateState { copy(offerCountdown = remainingSeconds) }
+                
+                if (remainingSeconds == 0) {
+                    handleOfferTimeout(requestId)
+                    return@launch
+                }
+                
+                delay(1000L)
+            }
+        }
+    }
+
+    private fun handleOfferAccepted(requestId: String) {
+        viewModelScope.launch {
+            stopActiveOfferJobs()
+            updateState { copy(activeModal = RequestsListModal.OfferSuccess) }
+            delay(1500)
+            updateRequestsStatus(requestId, RequestStatus.ACCEPTED)
+            clearOfferState()
+            sendEffect(RequestsListEffect.StartActiveReservationService(requestId))
+            sendEffect(RequestsListEffect.NavigateToOfferConfirmed(requestId))
+        }
+    }
+
+    private fun handleOfferTimeout(requestId: String) {
+        stopActiveOfferJobs()
+        performWithdrawal(requestId)
+        updateRequestsStatus(requestId, RequestStatus.CANCELED)
+        clearOfferState()
+    }
+
+    private fun performWithdrawal(requestId: String) {
+        val idToWithdraw = currentOfferId ?: requestId
+        viewModelScope.launch {
+            try {
+                withdrawOffer(idToWithdraw)
+            } catch (_: Exception) {}
+        }
+    }
+
+    private fun updateRequestsStatus(requestId: String, status: RequestStatus) {
         updateState {
             copy(
                 requests = requests.map { request ->
-                    if (request.id == requestId) {
-                        request.copy(status = RequestStatus.ACCEPTED)
-                    } else {
-                        request
-                    }
-                },
-                activeModal = RequestsListModal.None,
-                offerRequestId = null,
-                offerCountdown = null,
-                selectedCardId = null,
+                    if (request.id == requestId) request.copy(status = status) else request
+                }
             )
         }
-        sendEffect(RequestsListEffect.NavigateToOfferConfirmed(requestId))
     }
 
-    private fun completeOfferTimeout(requestId: String) {
-        offerTimerJob?.cancel()
+    private fun clearOfferState() {
         updateState {
             copy(
-                requests = requests.map { request ->
-                    if (request.id == requestId) request.copy(status = RequestStatus.CANCELED) else request
-                },
                 activeModal = RequestsListModal.None,
                 offerRequestId = null,
                 offerCountdown = null,
@@ -163,25 +270,31 @@ class RequestsListViewModel @Inject constructor(
     }
 
     private fun dismissModal() {
-        if (currentState.activeModal == RequestsListModal.MakeOffer) {
-            offerTimerJob?.cancel()
-        }
+        stopActiveOfferJobs()
         updateState {
             copy(
                 activeModal = RequestsListModal.None,
                 editingRequestId = null,
                 offerRequestId = null,
                 offerCountdown = null,
+                socketErrorMessage = null,
+                socketErrorCode = null,
             )
         }
     }
 
-    override fun onCleared() {
+    private fun stopActiveOfferJobs() {
         offerTimerJob?.cancel()
+        eventListenerJob?.cancel()
+    }
+
+    override fun onCleared() {
+        socketJob?.cancel()
+        stopActiveOfferJobs()
         super.onCleared()
     }
 
     private companion object {
-        const val OFFER_TIMEOUT_SECONDS = 10
+        const val OFFER_TIMEOUT_SECONDS = 20
     }
 }

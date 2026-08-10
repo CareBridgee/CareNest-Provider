@@ -6,6 +6,7 @@ enum class RequestsListModal {
     None,
     EditRate,
     MakeOffer,
+    OfferSuccess,
 }
 
 data class RequestsListUiState(
@@ -17,6 +18,8 @@ data class RequestsListUiState(
     val editPriceDraft: Float = 0f,
     val offerRequestId: String? = null,
     val offerCountdown: Int? = null,
+    val socketErrorMessage: String? = null,
+    val socketErrorCode: String? = null,
 )
 
 sealed interface RequestsListIntent {
@@ -31,6 +34,7 @@ sealed interface RequestsListIntent {
 }
 
 sealed interface RequestsListEffect {
+    data class StartActiveReservationService(val requestId: String) : RequestsListEffect
     data class NavigateToOfferConfirmed(val requestId: String) : RequestsListEffect
     data class NavigateToRequestDetails(val requestId: String) : RequestsListEffect
 }

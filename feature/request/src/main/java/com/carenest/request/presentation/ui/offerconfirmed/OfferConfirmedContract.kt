@@ -8,6 +8,7 @@ data class OfferConfirmedUiState(
     val isLoading: Boolean = true,
     val offer: Offer? = null,
     val cancelDialog: CancelDialogUiState = CancelDialogUiState(),
+    val isRequestCancelledByPatient: Boolean = false,
 )
 
 data class CancelDialogUiState(
@@ -28,6 +29,7 @@ sealed interface OfferConfirmedIntent {
     data class NoteChanged(val note: String) : OfferConfirmedIntent
     data object DismissCancelDialog : OfferConfirmedIntent
     data object ConfirmCancelClicked : OfferConfirmedIntent
+    data object DismissRequestCancelledNotice : OfferConfirmedIntent
 }
 
 sealed interface OfferConfirmedEffect {

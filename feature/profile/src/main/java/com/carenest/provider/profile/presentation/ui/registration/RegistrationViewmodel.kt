@@ -186,10 +186,27 @@ class RegistrationViewmodel @Inject constructor(
             submitRegistration(submission).fold(
                 onSuccess = { nurse ->
                     draftStore.clear()
-                    val currentSession = authenticationSessionStore.session.first()
-                    authenticationSessionStore.save(
-                        nurse.toSavedSession(currentSession?.phoneNumber),
+                    val authenticationState = authenticationSessionStore.state.first()
+                    val currentSession = authenticationState.session
+                    val credentials = authenticationState.credentials
+                    if (credentials == null) {
+                        authenticationSessionStore.clearSession()
+                        val message = "Unable to initialize the authenticated session"
+                        updateState { copy(isSubmitting = false, errorMessage = message) }
+                        sendEffect(RegistrationEffect.ShowMessage(message))
+                        return@fold
+                    }
+                    val completed = authenticationSessionStore.completeAuthentication(
+                        expectedCredentials = credentials,
+                        session = nurse.toSavedSession(currentSession?.phoneNumber),
                     )
+                    if (!completed) {
+                        authenticationSessionStore.clearSession()
+                        val message = "Unable to initialize the authenticated session"
+                        updateState { copy(isSubmitting = false, errorMessage = message) }
+                        sendEffect(RegistrationEffect.ShowMessage(message))
+                        return@fold
+                    }
                     updateState { copy(isSubmitting = false) }
                     sendEffect(RegistrationEffect.SubmissionSucceeded(nurse.id, nurse.verificationStatus))
                 },

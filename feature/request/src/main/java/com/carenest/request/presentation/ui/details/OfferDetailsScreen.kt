@@ -157,6 +157,17 @@ private fun OfferDetailsContent(
                     modifier = Modifier.align(Alignment.Center),
                 )
             }
+
+            if (state.isRequestCancelledByPatient) {
+                com.carenest.provider.designsystem.components.dialog.CareNestDialog(
+                    title = stringResource(R.string.cancellation_dialog_title),
+                    message = stringResource(R.string.cancellation_dialog_message),
+                    confirmText = stringResource(R.string.cancellation_dialog_ok),
+                    dismissText = null,
+                    onConfirm = { onIntent(OfferDetailsIntent.DismissRequestCancelledNotice) },
+                    onDismiss = { onIntent(OfferDetailsIntent.DismissRequestCancelledNotice) },
+                )
+            }
         }
     }
 }

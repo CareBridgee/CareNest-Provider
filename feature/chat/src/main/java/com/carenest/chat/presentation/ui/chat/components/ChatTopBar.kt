@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -22,10 +23,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.carenest.chat.R
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
@@ -33,6 +36,7 @@ import com.carenest.provider.designsystem.theme.Theme
 @Composable
 fun ChatTopBar(
     participantName: String,
+    photoUrl: String? = null,
     isOnline: Boolean,
     onBackClick: () -> Unit,
     onCallClick: () -> Unit,
@@ -55,14 +59,24 @@ fun ChatTopBar(
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .background(Theme.colors.primaryContainer, CircleShape),
+                .clip(CircleShape)
+                .background(Theme.colors.primaryContainer),
         ) {
-            Icon(
-                imageVector = Icons.Filled.Person,
-                contentDescription = null,
-                tint = Theme.colors.onPrimaryContainer,
-                modifier = Modifier.align(Alignment.Center),
-            )
+            if (!photoUrl.isNullOrBlank()) {
+                AsyncImage(
+                    model = photoUrl,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Filled.Person,
+                    contentDescription = null,
+                    tint = Theme.colors.onPrimaryContainer,
+                    modifier = Modifier.align(Alignment.Center),
+                )
+            }
 
             if (isOnline) {
                 Box(
@@ -70,7 +84,7 @@ fun ChatTopBar(
                         .size(8.dp)
                         .background(Theme.colors.success, CircleShape)
                         .align(Alignment.BottomEnd),
-                ) {}
+                )
             }
         }
 
@@ -80,7 +94,7 @@ fun ChatTopBar(
             Text(
                 text = participantName,
                 style = Theme.typography.body.medium.copy(
-                   fontWeight =  FontWeight.Bold
+                    fontWeight = FontWeight.Bold
                 ),
                 color = Theme.colors.primaryFont,
             )
@@ -94,7 +108,6 @@ fun ChatTopBar(
                 style = Theme.typography.hint.small,
                 color = Theme.colors.secondaryFont,
             )
-
         }
 
         Box(
@@ -116,10 +129,11 @@ fun ChatTopBar(
 
 @Preview(showBackground = true)
 @Composable
-private fun Preview(){
+private fun Preview() {
     SpTheme {
         ChatTopBar(
             participantName = "Elena Vance",
+            photoUrl = null,
             isOnline = true,
             onBackClick = {},
             onCallClick = {},

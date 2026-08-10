@@ -31,6 +31,7 @@ import com.carenest.chat.presentation.ui.chat.components.ChatInputBar
 import com.carenest.chat.presentation.ui.chat.components.ChatTopBar
 import com.carenest.chat.presentation.ui.chat.components.DateSeparatorPill
 import com.carenest.chat.presentation.ui.chat.components.MessageBubble
+import com.carenest.chat.domain.model.ChatMessage
 import com.carenest.chat.presentation.util.dayKey
 import com.carenest.chat.presentation.util.dialPhoneNumber
 import com.carenest.chat.presentation.util.formatDateSeparator
@@ -78,6 +79,7 @@ fun ChatScreen(
         topBar = {
             ChatTopBar(
                 participantName = state.participant?.name.orEmpty(),
+                photoUrl = state.participant?.photoUrl,
                 isOnline = state.participant?.isOnline == true,
                 onBackClick = { viewModel.handleIntent(ChatIntent.OnBackClicked) },
                 onCallClick = { viewModel.handleIntent(ChatIntent.OnCallClicked) },
@@ -94,6 +96,7 @@ fun ChatScreen(
         ChatScreenContent(
             state = state,
             listState = listState,
+            onRetryMessage = { msg -> viewModel.handleIntent(ChatIntent.OnRetrySendMessageClicked(msg)) },
             modifier = Modifier.padding(paddingValues),
         )
     }
@@ -104,6 +107,7 @@ fun ChatScreen(
 private fun ChatScreenContent(
     state: ChatState,
     listState: LazyListState,
+    onRetryMessage: (ChatMessage) -> Unit = {},
     modifier: Modifier = Modifier,
 ){
     Box(
@@ -136,7 +140,10 @@ private fun ChatScreenContent(
                         items = messagesForDay.asReversed(),
                         key = { message -> message.id },
                     ) { message ->
-                        MessageBubble(message = message)
+                        MessageBubble(
+                            message = message,
+                            onRetryClick = { onRetryMessage(message) },
+                        )
                     }
 
                     val firstMessage = messagesForDay.first()

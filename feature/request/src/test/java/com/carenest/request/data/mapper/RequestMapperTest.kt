@@ -137,6 +137,7 @@ class RequestMapperTest {
             serviceRequestId = "request-id",
             serviceType = ServiceTypeSummaryDto(name = "Wound care", basePrice = 80.0),
             nurse = NurseSummaryDto(firstName = "Sara", lastName = "Ali"),
+            profile = ProfileSummaryDto(firstName = "John", lastName = "Doe"),
             durationMinutes = 60,
             status = "COMPLETED",
             updatedAt = "2026-08-07T17:30:00Z",
@@ -149,6 +150,7 @@ class RequestMapperTest {
 
         assertEquals("request-id", result.requestId)
         assertEquals("Sara Ali", result.professionalName)
+        assertEquals("John Doe", result.patientName)
         assertEquals("Wound care", result.serviceType)
         assertEquals(60, result.durationMinutes)
         assertEquals("2026-08-07", result.completedDate)
