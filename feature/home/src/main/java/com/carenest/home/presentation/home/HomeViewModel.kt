@@ -44,6 +44,7 @@ class HomeViewModel @Inject constructor(
     init {
         getNurseData()
         observeSocketErrors()
+        observeNotifications()
     }
 
     private fun observeSocketErrors() {
@@ -54,6 +55,19 @@ class HomeViewModel @Inject constructor(
                         socketErrorMessage = errorPayload.message,
                         socketErrorCode = errorPayload.code
                     )
+                }
+            }
+        }
+    }
+
+    private fun observeNotifications() {
+        viewModelScope.launch {
+            nurseSocketClient.notifications.collect { notification ->
+                val reqId = notification.relatedEntityId
+                if (!reqId.isNullOrEmpty() &&
+                    (notification.title.contains("Accepted", ignoreCase = true) || notification.message.contains("accepted", ignoreCase = true))
+                ) {
+                    completeOfferAccepted(reqId)
                 }
             }
         }
@@ -217,7 +231,7 @@ class HomeViewModel @Inject constructor(
             )
         }
 
-        // Send real offer over socket & subscribe to reservation topic
+        // Send real offer over socket
         viewModelScope.launch {
             try {
                 sendOfferToPatient(
@@ -225,7 +239,6 @@ class HomeViewModel @Inject constructor(
                     proposedPrice = price,
                     message = "Offer submitted by nurse"
                 )
-                nurseSocketClient.subscribeToReservation(requestId)
             } catch (_: Exception) { }
         }
 

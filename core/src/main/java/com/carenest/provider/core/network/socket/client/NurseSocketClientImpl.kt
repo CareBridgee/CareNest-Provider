@@ -180,6 +180,9 @@ class NurseSocketClientImpl @Inject constructor(
 
                     if (connectionDuration < 5000L) {
                         attempt++
+                        Log.w("NurseSocketClient", "Rapid disconnect detected (${connectionDuration}ms); purging pending dynamic topic subscriptions to prevent reconnect loops")
+                        activeReservationSubscriptions.clear()
+                        activeChatSubscriptions.clear()
                     } else {
                         attempt = 1
                     }
@@ -353,14 +356,24 @@ class NurseSocketClientImpl @Inject constructor(
                             _reservationEvents.emit(reservationEvent)
 
                             val resId = reservationEvent.effectiveReservationId
-                            if (!resId.isNullOrEmpty() && (
-                                reservationEvent.eventType == ReservationEventType.COMPLETED ||
-                                reservationEvent.eventType == ReservationEventType.REQUEST_CANCELLED ||
-                                reservationEvent.eventType == ReservationEventType.OFFER_REJECTED
-                            )) {
-                                activeReservationSubscriptions.remove(resId)
-                                activeChatSubscriptions.remove(resId)
-                                Log.i("NurseSocketClient", "Pruned completed/cancelled reservation topic: $resId")
+                            if (!resId.isNullOrEmpty()) {
+                                when (reservationEvent.eventType) {
+                                    ReservationEventType.OFFER_CREATED,
+                                    ReservationEventType.OFFER_UPDATED,
+                                    ReservationEventType.OFFER_COUNTERED,
+                                    ReservationEventType.OFFER_ACCEPTED -> {
+                                        activeReservationSubscriptions.add(resId)
+                                    }
+                                    ReservationEventType.OFFER_WITHDRAWN,
+                                    ReservationEventType.OFFER_REJECTED,
+                                    ReservationEventType.REQUEST_CANCELLED,
+                                    ReservationEventType.COMPLETED -> {
+                                        activeReservationSubscriptions.remove(resId)
+                                        activeChatSubscriptions.remove(resId)
+                                        Log.i("NurseSocketClient", "Pruned completed/cancelled/rejected reservation topic: $resId")
+                                    }
+                                    else -> {}
+                                }
                             }
                         }
                         destination.contains("/topic/chat/") -> {
@@ -439,6 +452,8 @@ class NurseSocketClientImpl @Inject constructor(
     }
 
     override suspend fun cancelReservation(serviceRequestId: String) {
+        activeReservationSubscriptions.remove(serviceRequestId)
+        activeChatSubscriptions.remove(serviceRequestId)
         val req = CancelReservationRequest(serviceRequestId)
         stompClient.send(DEST_APP_CANCEL, json.encodeToString(req))
     }

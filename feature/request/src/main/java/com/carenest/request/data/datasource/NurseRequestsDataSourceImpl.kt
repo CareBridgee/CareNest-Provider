@@ -87,7 +87,6 @@ class NurseRequestsDataSourceImpl @Inject constructor(
 
     override suspend fun createOffer(requestId: String, proposedPrice: Double, message: String?) {
         nurseSocketClient.connect()
-        nurseSocketClient.subscribeToReservation(requestId)
         nurseSocketClient.createOffer(
             serviceRequestId = requestId,
             proposedPrice = proposedPrice,

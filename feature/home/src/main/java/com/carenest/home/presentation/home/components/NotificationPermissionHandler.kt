@@ -6,14 +6,12 @@ import android.os.Build
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.carenest.provider.designsystem.components.dialog.CareNestDialog
 
 @Composable
 fun NotificationPermissionHandler(
@@ -43,23 +41,16 @@ fun NotificationPermissionHandler(
     }
 
     if (showRationale) {
-        AlertDialog(
-            onDismissRequest = onRationaleDismissed,
-            title = { Text("Notification Permission Required") },
-            text = { Text("This app needs notification access to alert you in real-time when new patient care requests arrive or reservation updates occur.") },
-            confirmButton = {
-                TextButton(onClick = {
-                    launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                    onRationaleDismissed()
-                }) {
-                    Text("Allow")
-                }
+        CareNestDialog(
+            title = "Notification Permission Required",
+            message = "This app needs notification access to alert you in real-time when new patient care requests arrive or reservation updates occur.",
+            confirmText = "Allow",
+            dismissText = "Deny",
+            onConfirm = {
+                launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                onRationaleDismissed()
             },
-            dismissButton = {
-                TextButton(onClick = onRationaleDismissed) {
-                    Text("Deny")
-                }
-            }
+            onDismiss = onRationaleDismissed,
         )
     } else {
         LaunchedEffect(Unit) {

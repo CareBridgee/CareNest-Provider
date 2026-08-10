@@ -39,6 +39,7 @@ class RequestsListViewModel @Inject constructor(
     init {
         loadRequests()
         observeSocketErrors()
+        observeNotifications()
     }
 
     private fun observeSocketErrors() {
@@ -49,6 +50,19 @@ class RequestsListViewModel @Inject constructor(
                         socketErrorMessage = errorPayload.message,
                         socketErrorCode = errorPayload.code
                     )
+                }
+            }
+        }
+    }
+
+    private fun observeNotifications() {
+        viewModelScope.launch {
+            nurseSocketClient.notifications.collect { notification ->
+                val reqId = notification.relatedEntityId
+                if (!reqId.isNullOrEmpty() &&
+                    (notification.title.contains("Accepted", ignoreCase = true) || notification.message.contains("accepted", ignoreCase = true))
+                ) {
+                    handleOfferAccepted(reqId)
                 }
             }
         }

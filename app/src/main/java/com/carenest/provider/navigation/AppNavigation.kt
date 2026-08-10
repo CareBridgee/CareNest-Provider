@@ -136,8 +136,8 @@ fun AppNavigation(
     LaunchedEffect(targetRequestId) {
         if (!targetRequestId.isNullOrBlank()) {
             val currentRoute = backStack.lastOrNull()
-            if (currentRoute !is RequestRoutes.RequestDetails || (currentRoute as RequestRoutes.RequestDetails).requestId != targetRequestId) {
-                backStack.navigate(RequestRoutes.RequestDetails(targetRequestId))
+            if (currentRoute !is RequestRoutes.OfferConfirmed || (currentRoute as RequestRoutes.OfferConfirmed).requestId != targetRequestId) {
+                backStack.navigate(RequestRoutes.OfferConfirmed(targetRequestId))
             }
         }
     }
@@ -168,7 +168,7 @@ fun AppNavigation(
                     ActiveReservationService.getActiveReservationId(context)
                 }
                 if (!activeId.isNullOrBlank()) {
-                    backStack.replaceWith(RequestRoutes.RequestDetails(activeId))
+                    backStack.replaceWith(RequestRoutes.OfferConfirmed(activeId))
                 } else {
                     backStack.replaceWith(HomeRoutes.Home)
                 }

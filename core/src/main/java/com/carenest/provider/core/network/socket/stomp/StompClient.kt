@@ -225,6 +225,7 @@ class StompClient @Inject constructor(
 
                         if (stompFrame.command == StompCommand.ERROR) {
                             // Server ERROR frame is terminal
+                            _incomingFrames.emit(stompFrame)
                             _connectionState.value = SocketConnectionState.Error(
                                 message = stompFrame.headers["message"] ?: stompFrame.body ?: "Server ERROR frame received"
                             )
