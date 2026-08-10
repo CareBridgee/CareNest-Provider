@@ -2,6 +2,8 @@ package com.carenest.chat.data.di
 
 import com.carenest.chat.data.datasource.ChatDataSource
 import com.carenest.chat.data.datasource.ChatDataSourceImp
+import com.carenest.chat.data.remote.ChatRemoteDataSource
+import com.carenest.chat.data.remote.KtorChatRemoteDataSource
 import com.carenest.chat.data.repository.ChatRepositoryImpl
 import com.carenest.chat.domain.repository.ChatRepository
 import dagger.Binds
@@ -12,7 +14,11 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class ChatModule{
+abstract class ChatModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindChatRemoteDataSource(impl: KtorChatRemoteDataSource): ChatRemoteDataSource
 
     @Binds
     @Singleton
@@ -21,5 +27,4 @@ abstract class ChatModule{
     @Binds
     @Singleton
     abstract fun bindChatRepository(impl: ChatRepositoryImpl): ChatRepository
-
 }

@@ -2,16 +2,17 @@ package com.carenest.chat.domain.model
 
 enum class ChatMessageType { INCOMING, OUTGOING, SYSTEM_TIP }
 
-enum class MessageStatus { SENDING, SENT, DELIVERED, SEEN }
+enum class MessageStatus { SENDING, SENT, DELIVERED, SEEN, FAILED }
 enum class MessageSender { NURSE, PATIENT }
 
 data class ChatMessage(
     val id: String,
     val type: ChatMessageType,
     val text: String,
-    val senderType : MessageSender,
+    val senderType: MessageSender,
     val sentAtEpochMillis: Long,
     val status: MessageStatus = MessageStatus.SENT,
+    val createdAtIso: String? = null,
 )
 
 data class ChatParticipant(
