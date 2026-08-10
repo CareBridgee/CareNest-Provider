@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -26,7 +25,6 @@ import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.request.R
 import com.carenest.request.domain.model.VisitSummary
 import com.carenest.provider.designsystem.R as RD
-
 
 @Composable
 fun VisitSummaryCard(summary: VisitSummary, modifier: Modifier = Modifier) {
@@ -53,9 +51,10 @@ fun VisitSummaryCard(summary: VisitSummary, modifier: Modifier = Modifier) {
                     text = stringResource(R.string.visit_completed_verified_badge),
                     style = Theme.typography.hint.small,
                     color = Theme.colors.primary,
-                    modifier = Modifier.background(
-                        Theme.colors.primaryContainer, RoundedCornerShape(20.dp)
-                    )
+                    modifier = Modifier
+                        .background(
+                            Theme.colors.primaryContainer, RoundedCornerShape(20.dp)
+                        )
                         .padding(Theme.spacing.space10, Theme.spacing.extraSmall),
                 )
             }
@@ -63,9 +62,10 @@ fun VisitSummaryCard(summary: VisitSummary, modifier: Modifier = Modifier) {
 
         HorizontalDivider(modifier = Modifier.padding(top = Theme.spacing.medium))
 
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = Theme.spacing.medium),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = Theme.spacing.medium),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             SummaryField(
@@ -75,18 +75,25 @@ fun VisitSummaryCard(summary: VisitSummary, modifier: Modifier = Modifier) {
                 icon = painterResource(RD.drawable.ic_personality)
             )
             SummaryField(
+                label = stringResource(R.string.nurse_requests_patient),
+                value = summary.patientName ?: stringResource(R.string.not_available),
+                modifier = Modifier.weight(1f),
+                icon = painterResource(RD.drawable.ic_personality)
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 14.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            SummaryField(
                 label = stringResource(R.string.visit_completed_service_type_label),
                 value = summary.serviceType,
                 modifier = Modifier.weight(1f),
                 icon = painterResource(RD.drawable.ic_service)
             )
-        }
-
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 14.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
             SummaryField(
                 label = stringResource(R.string.visit_completed_duration_label),
                 value = summary.durationMinutes?.let {
@@ -95,6 +102,14 @@ fun VisitSummaryCard(summary: VisitSummary, modifier: Modifier = Modifier) {
                 modifier = Modifier.weight(1f),
                 icon = painterResource(RD.drawable.ic_clock)
             )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 14.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             SummaryField(
                 label = stringResource(R.string.visit_completed_date_label),
                 value = summary.completedDate,
@@ -153,6 +168,7 @@ private fun Preview() {
             summary = VisitSummary(
                 requestId = "",
                 professionalName = "Professional Name",
+                patientName = "Sarah Mitchell",
                 serviceType = "Service Type",
                 durationMinutes = 60,
                 completedDate = "30 jun",

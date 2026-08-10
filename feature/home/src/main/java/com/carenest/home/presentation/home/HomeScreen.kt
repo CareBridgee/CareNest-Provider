@@ -7,7 +7,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -18,30 +17,39 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.runtime.remember
 import com.carenest.home.R
-import com.carenest.provider.core.mvi.ObserveEffect
 import com.carenest.home.presentation.home.components.AvailableRequestsHeader
 import com.carenest.home.presentation.home.components.EarningsSection
 import com.carenest.home.presentation.home.components.HomeGreetingBar
+import com.carenest.home.presentation.home.components.NoRequestsEmptyState
+import com.carenest.home.presentation.home.components.NotificationPermissionHandler
 import com.carenest.home.presentation.home.components.NurseRequestCard
 import com.carenest.home.presentation.home.components.OfflineEmptyState
 import com.carenest.home.presentation.home.components.OnlineToggleCard
+import com.carenest.provider.core.mvi.ObserveEffect
+import com.carenest.provider.core.network.socket.service.ActiveReservationService
 import com.carenest.provider.designsystem.components.request.EditRateBottomSheet
 import com.carenest.provider.designsystem.components.request.MakeOfferDialog
 import com.carenest.provider.designsystem.components.request.NurseRequestsLoadingSkeleton
-import com.carenest.provider.designsystem.components.bottomnav.BottomNavItem
 import com.carenest.provider.designsystem.components.bottomnav.LocalBottomNavigationContentPadding
-import com.carenest.provider.designsystem.components.bottomnav.SPBottomNavigation
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
+
+private enum class ContentPhase {
+    Offline, Loading, Empty, List,
+}
 
 @Composable
 fun HomeScreen(
@@ -50,12 +58,19 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     ObserveEffect(viewModel.effect) { effect ->
         when (effect) {
             HomeEffect.NavigateToRequestList -> onNavigateToRequests()
-            is HomeEffect.NavigateToOfferConfirmed -> onOfferConfirmed(effect.requestId)
+            is HomeEffect.StartActiveReservationService -> {
+                ActiveReservationService.startService(context, effect.requestId)
+            }
+            is HomeEffect.NavigateToOfferConfirmed -> {
+                ActiveReservationService.startService(context, effect.requestId)
+                onOfferConfirmed(effect.requestId)
+            }
         }
     }
 
@@ -72,13 +87,44 @@ fun HomeContent(
     onIntent: (HomeIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var requestNotificationPermission by remember { mutableStateOf(false) }
+    var showPermissionRationale by remember { mutableStateOf(false) }
+
+    val handleToggleOnline: (Boolean) -> Unit = { isOnline ->
+        if (isOnline) {
+            requestNotificationPermission = true
+        } else {
+            requestNotificationPermission = false
+            showPermissionRationale = false
+            onIntent(HomeIntent.OnlineToggled(false))
+        }
+    }
+
+    if (requestNotificationPermission) {
+        NotificationPermissionHandler(
+            onPermissionGranted = {
+                requestNotificationPermission = false
+                showPermissionRationale = false
+                onIntent(HomeIntent.OnlineToggled(true))
+            },
+            onPermissionDenied = {
+                showPermissionRationale = true
+            },
+            showRationale = showPermissionRationale,
+            onRationaleDismissed = {
+                showPermissionRationale = false
+                requestNotificationPermission = false
+                onIntent(HomeIntent.OnlineToggled(true))
+            }
+        )
+    }
+
     val bottomNavigationContentPadding = LocalBottomNavigationContentPadding.current
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Theme.colors.backGround),
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        containerColor = Theme.colors.backGround,
+        topBar = {
             HomeGreetingBar(
                 name = state.nurseName,
                 avatarUrl = "https://picsum.photos/200/300",
@@ -86,6 +132,14 @@ fun HomeContent(
                     .fillMaxWidth()
                     .padding(horizontal = Theme.spacing.medium),
             )
+        },
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .background(Theme.colors.backGround),
+        ) {
 
             LazyColumn(
                 modifier = Modifier
@@ -98,7 +152,7 @@ fun HomeContent(
                     Spacer(Modifier.height(Theme.spacing.extraSmall))
                     OnlineToggleCard(
                         isOnline = state.isOnline,
-                        onToggle = { onIntent(HomeIntent.OnlineToggled(it)) },
+                        onToggle = handleToggleOnline,
                     )
                 }
 
@@ -117,6 +171,7 @@ fun HomeContent(
                         targetState = when {
                             !state.isOnline -> ContentPhase.Offline
                             state.isLoading -> ContentPhase.Loading
+                            state.requests.isEmpty() -> ContentPhase.Empty
                             else -> ContentPhase.List
                         },
                         transitionSpec = {
@@ -140,6 +195,19 @@ fun HomeContent(
                                 NurseRequestsLoadingSkeleton()
                             }
 
+                            ContentPhase.Empty -> Column(
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                AvailableRequestsHeader(
+                                    onViewAllClick = { onIntent(HomeIntent.ViewAllRequestsClicked) },
+                                    modifier = Modifier.padding(
+                                        top = Theme.spacing.extraSmall,
+                                        bottom = Theme.spacing.small,
+                                    ),
+                                )
+                                NoRequestsEmptyState()
+                            }
+
                             ContentPhase.List -> Column(
                                 modifier = Modifier.fillMaxWidth(),
                             ) {
@@ -155,7 +223,7 @@ fun HomeContent(
                     }
                 }
 
-                if (state.isOnline && !state.isLoading) {
+                if (state.isOnline && !state.isLoading && state.requests.isNotEmpty()) {
                     items(
                         items = state.requests,
                         key = { it.id },
@@ -192,11 +260,15 @@ fun HomeContent(
                 onDismiss = { onIntent(HomeIntent.DismissModal) },
             )
         }
-    }
-}
 
-private enum class ContentPhase {
-    Offline, Loading, List,
+        if (state.socketErrorMessage != null) {
+            com.carenest.provider.designsystem.components.request.SocketErrorDialog(
+                errorMessage = state.socketErrorMessage,
+                errorCode = state.socketErrorCode,
+                onDismiss = { onIntent(HomeIntent.DismissModal) },
+            )
+        }
+    }
 }
 
 @Preview(showBackground = true, heightDp = 800)

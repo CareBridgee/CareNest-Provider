@@ -133,4 +133,9 @@
     <string name="scan_qr_instruction">Align the QR code within the frame to scan</string>
     <string name="scan_qr_scanning">Scanning…</string>
     <string name="scan_qr_retry">Try Again</string>
+
+    <!-- Cancellation Notice -->
+    <string name="cancellation_dialog_title">Service Request Cancelled</string>
+    <string name="cancellation_dialog_message">This service request has been cancelled by the patient.</string>
+    <string name="cancellation_dialog_ok">OK</string>
 </resources>

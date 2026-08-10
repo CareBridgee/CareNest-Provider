@@ -44,4 +44,6 @@
     <string name="nav_services">Services</string>
     <string name="nav_booking">Booking</string>
     <string name="nav_profile">Profile</string>
+    <string name="nurse_requests_no_requests_title">No requests nearby</string>
+    <string name="nurse_requests_no_requests_description">Stay online. New patient care requests in your area will appear here automatically.</string>
 </resources>

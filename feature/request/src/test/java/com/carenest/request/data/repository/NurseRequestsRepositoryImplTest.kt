@@ -1,5 +1,6 @@
 package com.carenest.request.data.repository
 
+import com.carenest.provider.core.network.socket.model.ReservationEvent
 import com.carenest.request.data.datasource.NurseRequestsDataSource
 import com.carenest.request.data.remote.RequestRemoteDataSource
 import com.carenest.request.data.remote.dto.AddressSummaryDto
@@ -10,8 +11,13 @@ import com.carenest.request.data.remote.dto.ServiceRequestDetailsDto
 import com.carenest.request.data.remote.dto.ServiceRequestNursePreviewDto
 import com.carenest.request.data.remote.dto.ServiceRequestNurseProfileDto
 import com.carenest.request.data.remote.dto.ServiceTypeSummaryDto
+import com.carenest.request.domain.model.CancellationReason
+import com.carenest.request.domain.model.Offer
 import com.carenest.request.domain.model.Request
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -114,7 +120,12 @@ class NurseRequestsRepositoryImplTest {
 
 private object NoOpNurseRequestsDataSource : NurseRequestsDataSource {
     override suspend fun getIncomingRequests(): List<Request> = emptyList()
-    override fun sendOfferToPatient(requestId: String): Pair<Boolean, Int> = false to 0
+    override suspend fun getRequestContract(requestId: String): Offer = error("Not implemented")
+    override suspend fun cancelRequest(requestId: String, reason: CancellationReason, note: String): Boolean = true
+    override suspend fun completeRequest(serviceRequestId: String, visitCode: String): Boolean = true
+    override suspend fun createOffer(requestId: String, proposedPrice: Double, message: String?) {}
+    override suspend fun withdrawOffer(offerId: String) {}
+    override fun listenReservationEvents(reservationId: String): Flow<ReservationEvent> = emptyFlow()
 }
 
 private class FakeRequestRemoteDataSource : RequestRemoteDataSource {

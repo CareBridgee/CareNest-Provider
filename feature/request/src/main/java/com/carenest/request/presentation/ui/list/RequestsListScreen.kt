@@ -5,22 +5,31 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carenest.provider.core.mvi.ObserveEffect
+import com.carenest.provider.core.network.socket.service.ActiveReservationService
+import com.carenest.provider.designsystem.components.bottomnav.LocalBottomNavigationContentPadding
 import com.carenest.provider.designsystem.components.request.EditRateBottomSheet
 import com.carenest.provider.designsystem.components.request.MakeOfferDialog
 import com.carenest.provider.designsystem.components.request.NurseRequestsLoadingSkeleton
-import com.carenest.provider.designsystem.components.bottomnav.LocalBottomNavigationContentPadding
 import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
 import com.carenest.provider.designsystem.components.topbar.TopBarLeading
 import com.carenest.provider.designsystem.theme.SpTheme
@@ -39,11 +48,18 @@ fun RequestsListScreen(
     modifier: Modifier = Modifier,
     viewModel: RequestsListViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     ObserveEffect(viewModel.effect) { effect ->
         when (effect) {
-            is RequestsListEffect.NavigateToOfferConfirmed -> onOfferConfirmed(effect.requestId)
+            is RequestsListEffect.StartActiveReservationService -> {
+                ActiveReservationService.startService(context, effect.requestId)
+            }
+            is RequestsListEffect.NavigateToOfferConfirmed -> {
+                ActiveReservationService.startService(context, effect.requestId)
+                onOfferConfirmed(effect.requestId)
+            }
             is RequestsListEffect.NavigateToRequestDetails -> onViewDetails(effect.requestId)
         }
     }
@@ -88,20 +104,46 @@ fun RequestsListContent(
                 ) {
                     item {
                         RequestsListHeader(
-                            pendingCount = state.requests.count { it.status == RequestStatus.ESTIMATED })
+                            pendingCount = state.requests.count { it.status == RequestStatus.ESTIMATED }
+                        )
                     }
 
-                    items(items = state.requests, key = { it.id }) { request: Request ->
-                        PatientRequestCard(
-                            request = request,
-                            isExpanded = state.selectedCardId == request.id,
-                            onClick = { onIntent(RequestsListIntent.CardClicked(request.id)) },
-                            onEditClick = { onIntent(RequestsListIntent.EditRateClicked(request.id)) },
-                            onMakeOfferClick = {
-                                onIntent(RequestsListIntent.MakeOfferClicked(request.id))
-                            },
-                            modifier = Modifier.padding(top = Theme.spacing.space12)
-                        )
+                    if (state.requests.isEmpty()) {
+                        item {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = Theme.spacing.large),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "No Requests Available",
+                                    style = Theme.typography.body.large.copy(
+                                        color = Theme.colors.secondaryFont,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                )
+                                Spacer(modifier = Modifier.height(Theme.spacing.extraSmall))
+                                Text(
+                                    text = "Incoming requests from nearby patients will appear here in real-time.",
+                                    style = Theme.typography.body.medium.copy(color = Theme.colors.hint),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    } else {
+                        items(items = state.requests, key = { it.id }) { request: Request ->
+                            PatientRequestCard(
+                                request = request,
+                                isExpanded = state.selectedCardId == request.id,
+                                onClick = { onIntent(RequestsListIntent.CardClicked(request.id)) },
+                                onEditClick = { onIntent(RequestsListIntent.EditRateClicked(request.id)) },
+                                onMakeOfferClick = {
+                                    onIntent(RequestsListIntent.MakeOfferClicked(request.id))
+                                },
+                                modifier = Modifier.padding(top = Theme.spacing.space12)
+                            )
+                        }
                     }
                 }
             }
@@ -118,10 +160,18 @@ fun RequestsListContent(
             )
         }
 
-        if (state.activeModal == RequestsListModal.MakeOffer) {
+        if (state.activeModal == RequestsListModal.MakeOffer || state.activeModal == RequestsListModal.OfferSuccess) {
             MakeOfferDialog(
                 countdownSeconds = state.offerCountdown ?: 0,
-                isSuccess = false,
+                isSuccess = state.activeModal == RequestsListModal.OfferSuccess,
+                onDismiss = { onIntent(RequestsListIntent.DismissModal) },
+            )
+        }
+
+        if (state.socketErrorMessage != null) {
+            com.carenest.provider.designsystem.components.request.SocketErrorDialog(
+                errorMessage = state.socketErrorMessage,
+                errorCode = state.socketErrorCode,
                 onDismiss = { onIntent(RequestsListIntent.DismissModal) },
             )
         }

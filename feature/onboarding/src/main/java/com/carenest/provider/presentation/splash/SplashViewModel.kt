@@ -8,7 +8,6 @@ import com.carenest.provider.core.mvi.EffectPublisher
 import com.carenest.provider.core.mvi.StateHolder
 import com.carenest.provider.core.datastore.AuthenticationSession
 import com.carenest.provider.core.datastore.AuthenticationSessionStore
-import com.carenest.provider.core.datastore.TokenManager
 import com.carenest.provider.feature.onboarding.domain.usecase.GetOnboardingStatusUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -22,7 +21,6 @@ internal const val SPLASH_MINIMUM_DURATION_MILLIS = 2_500L
 @HiltViewModel
 class SplashViewModel @Inject constructor(
     private val getOnboardingStatus: GetOnboardingStatusUseCase,
-    private val tokenManager: TokenManager,
     private val authenticationSessionStore: AuthenticationSessionStore,
 ) : ViewModel(),
     StateHolder<SplashState> by DefaultStateHolder(SplashState()),
@@ -47,13 +45,15 @@ class SplashViewModel @Inject constructor(
 
         viewModelScope.launch {
             val onboardingStatus = async { getOnboardingStatus().first() }
-            val accessToken = async { tokenManager.accessToken.first() }
-            val authenticatedSession = async { authenticationSessionStore.session.first() }
+            val authenticationState = async { authenticationSessionStore.state.first() }
             delay(SPLASH_MINIMUM_DURATION_MILLIS)
             val isCompleted = onboardingStatus.await()
-            val savedAccessToken = accessToken.await()
-            val savedSession = authenticatedSession.await()
-                .takeIf { !savedAccessToken.isNullOrBlank() }
+            val savedAuthenticationState = authenticationState.await()
+            val savedSession = savedAuthenticationState.session
+                .takeIf { savedAuthenticationState.isAuthenticated }
+            if (!savedAuthenticationState.isAuthenticated) {
+                authenticationSessionStore.clearInvalidSession()
+            }
 
             updateState {
                 copy(

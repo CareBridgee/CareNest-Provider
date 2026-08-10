@@ -28,6 +28,8 @@ data class HomeUiState(
     val jobsToday : Int = 0,
     val rating : Double = 0.0,
     val selectedTab: Int = 0,
+    val socketErrorMessage: String? = null,
+    val socketErrorCode: String? = null,
 )
 
 sealed interface HomeIntent {
@@ -45,4 +47,5 @@ sealed interface HomeIntent {
 sealed interface HomeEffect {
     data object NavigateToRequestList : HomeEffect
     data class NavigateToOfferConfirmed(val requestId: String) : HomeEffect
+    data class StartActiveReservationService(val requestId: String) : HomeEffect
 }

@@ -1,6 +1,5 @@
 package com.carenest.provider.auth.data.repository
 
-import android.util.Log
 import com.carenest.provider.auth.data.remote.AuthRemoteDataSource
 import com.carenest.provider.auth.data.remote.dto.AuthResponseDto
 import com.carenest.provider.auth.data.remote.dto.CurrentUserDto
@@ -10,7 +9,7 @@ import com.carenest.provider.auth.domain.repository.AuthRepository
 import com.carenest.provider.auth.domain.repository.AuthenticatedNurse
 import com.carenest.provider.auth.domain.repository.AuthenticatedUser
 import com.carenest.provider.auth.domain.repository.NurseVerificationStatus
-import com.carenest.provider.core.datastore.TokenManager
+import com.carenest.provider.core.datastore.AuthenticationSessionStore
 import com.carenest.provider.core.util.Resource
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
@@ -20,23 +19,14 @@ import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
     private val dataSource: AuthRemoteDataSource,
-    private val tokenManager: TokenManager,
+    private val authenticationSessionStore: AuthenticationSessionStore,
 ) : AuthRepository {
-
-    companion object {
-        private const val TAG = "AuthRepositoryImpl"
-    }
 
     override suspend fun login(
         phoneNumber: String,
     ): Result<Unit> {
         return try {
             val response = dataSource.login(phoneNumber)
-
-            Log.d(
-                TAG,
-                "login: ${response.bodyAsText()}",
-            )
 
             handleGenericResponse(response)
         } catch (e: Exception) {
@@ -91,7 +81,7 @@ class AuthRepositoryImpl @Inject constructor(
                     "Authentication response did not contain a refresh token"
                 }
 
-                tokenManager.saveTokens(
+                authenticationSessionStore.beginAuthentication(
                     accessToken = accessToken,
                     refreshToken = refreshToken,
                 )
@@ -112,13 +102,6 @@ class AuthRepositoryImpl @Inject constructor(
             if (response.status.isSuccess()) {
                 val user = response.body<CurrentUserDto>()
 
-                Log.d(
-                    "AuthRouting",
-                    "profileCompleted=${user.profileCompleted}",
-                )
-
-                val userNurse = user.nurse?.toDomain()
-                val topLevelId = user.id ?: user.nurseId ?: user.profileId ?: user.userId
                 Result.success(
                     AuthenticatedUser(
                         id = topLevelId ?: userNurse?.id,

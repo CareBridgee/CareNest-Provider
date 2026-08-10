@@ -1,5 +1,6 @@
 package com.carenest.request.data.repository
 
+import com.carenest.provider.core.network.socket.model.ReservationEvent
 import com.carenest.request.data.datasource.NurseRequestsDataSource
 import com.carenest.request.data.mapper.toDomainOffer
 import com.carenest.request.data.remote.RequestRemoteDataSource
@@ -8,6 +9,7 @@ import com.carenest.request.domain.model.CancellationReason
 import com.carenest.request.domain.model.Offer
 import com.carenest.request.domain.model.Request
 import com.carenest.request.domain.repository.NurseRequestsRepository
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.async
@@ -21,9 +23,6 @@ class NurseRequestsRepositoryImpl @Inject constructor(
 
     override suspend fun fetchIncomingRequests(): List<Request> =
         dataSource.getIncomingRequests()
-
-    override fun sendOfferToPatient(requestId: String): Pair<Boolean, Int> =
-        dataSource.sendOfferToPatient(requestId)
 
     override suspend fun fetchRequestContract(requestId: String): Offer = coroutineScope {
         val detailsDeferred = async {
@@ -50,19 +49,34 @@ class NurseRequestsRepositoryImpl @Inject constructor(
 
         val preview = runCatching {
             remoteDataSource.getServiceRequestPreview(requestId)
-        }.getOrElse { previewError ->
-            profileResult.exceptionOrNull()?.let(previewError::addSuppressed)
-            throw previewError
+        }.getOrNull()
+
+        if (preview != null) {
+            val report = preview.patient?.profileId?.let { profileId ->
+                runCatching { remoteDataSource.getPatientReport(profileId) }.getOrNull()
+            }
+            return@coroutineScope preview.toDomainOffer(
+                requestedServiceRequestId = requestId,
+                details = details,
+                acceptedOffer = acceptedOffer,
+                patientReport = report,
+            )
         }
-        val report = preview.patient?.profileId?.let { profileId ->
-            runCatching { remoteDataSource.getPatientReport(profileId) }.getOrNull()
+
+        if (details != null) {
+            val report = details.profile?.id?.let { profileId ->
+                runCatching { remoteDataSource.getPatientReport(profileId) }.getOrNull()
+            }
+            return@coroutineScope details.toDomainOffer(
+                requestedServiceRequestId = requestId,
+                acceptedOffer = acceptedOffer,
+                assignedProfile = null,
+                patientReport = report,
+            )
         }
-        preview.toDomainOffer(
-            requestedServiceRequestId = requestId,
-            details = details,
-            acceptedOffer = acceptedOffer,
-            patientReport = report,
-        )
+
+        throw profileResult.exceptionOrNull()
+            ?: IllegalStateException("Could not load request contract for $requestId")
     }
 
     override suspend fun cancelRequest(
@@ -79,10 +93,21 @@ class NurseRequestsRepositoryImpl @Inject constructor(
         return true
     }
 
-    override suspend fun completeRequest(requestId: String, visitCode: String): Boolean {
-        remoteDataSource.completeServiceRequest(requestId, visitCode)
+    override suspend fun completeRequest(serviceRequestId: String, visitCode: String): Boolean {
+        remoteDataSource.completeServiceRequest(serviceRequestId, visitCode)
         return true
     }
+
+    override suspend fun createOffer(requestId: String, proposedPrice: Double, message: String?) {
+        dataSource.createOffer(requestId, proposedPrice, message)
+    }
+
+    override suspend fun withdrawOffer(offerId: String) {
+        dataSource.withdrawOffer(offerId)
+    }
+
+    override fun listenReservationEvents(reservationId: String): Flow<ReservationEvent> =
+        dataSource.listenReservationEvents(reservationId)
 }
 
 private fun ServiceRequestDetailsDto?.acceptedOffer() = this?.offers?.firstOrNull {
