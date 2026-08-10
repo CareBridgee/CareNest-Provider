@@ -37,17 +37,15 @@ data class ProfessionalDocumentUiModel(
 
 enum class ReviewFilter {
     MostRecent,
-    TopRated,
     Critical,
-    WithPhotos,
 }
 
 data class ReviewUiModel(
     val id: String,
-    @StringRes val authorRes: Int,
-    @StringRes val dateRes: Int,
-    @StringRes val bodyRes: Int,
-    @StringRes val serviceRes: Int,
+    val authorName: String,
+    val dateText: String,
+    val bodyText: String,
+    val serviceName: String? = null,
     val initials: String,
     val rating: Int,
 )

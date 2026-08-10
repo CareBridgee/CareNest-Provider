@@ -11,13 +11,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -30,17 +32,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carenest.provider.account.R
 import com.carenest.provider.account.presentation.components.ProviderAccountTopBar
-import com.carenest.provider.account.presentation.components.RatingsAndReviewsLoadingSkeleton
 import com.carenest.provider.account.presentation.components.RatingDistributionRow
-import com.carenest.provider.account.presentation.components.RatingStars
+import com.carenest.provider.account.presentation.components.RatingsAndReviewsLoadingSkeleton
 import com.carenest.provider.account.presentation.components.ReviewCard
 import com.carenest.provider.account.presentation.components.ReviewFilterChip
 import com.carenest.provider.account.presentation.model.ReviewFilter
+import com.carenest.provider.account.presentation.model.ReviewUiModel
 import com.carenest.provider.core.mvi.ObserveEffect
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
@@ -56,7 +57,6 @@ fun RatingsAndReviewsRoute(
     ObserveEffect(viewModel.effect) { effect ->
         when (effect) {
             RatingsAndReviewsEffect.NavigateBack -> onNavigateBack()
-            RatingsAndReviewsEffect.LoadMoreReviews -> onLoadMore()
         }
     }
     RatingsAndReviewsContent(state, viewModel::onIntent, modifier)
@@ -76,63 +76,40 @@ fun RatingsAndReviewsContent(
         ProviderAccountTopBar(onNavigateBack = { onIntent(RatingsAndReviewsIntent.BackClicked) })
         if (state.isLoading) {
             RatingsAndReviewsLoadingSkeleton()
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(vertical = Theme.spacing.medium),
-                verticalArrangement = Arrangement.spacedBy(Theme.spacing.medium),
+        } else if (state.error != null && state.reviews.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(Theme.spacing.medium),
+                contentAlignment = Alignment.Center,
             ) {
-            item {
-                RatingSummaryCard(
-                    state = state,
-                    modifier = Modifier.padding(horizontal = Theme.spacing.medium),
-                )
-            }
-            item {
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = Theme.spacing.medium),
-                    horizontalArrangement = Arrangement.spacedBy(Theme.spacing.small),
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(Theme.spacing.medium),
                 ) {
-                    items(ReviewFilter.entries) { filter ->
-                        ReviewFilterChip(
-                            label = stringResource(filter.labelRes()),
-                            selected = filter == state.selectedFilter,
-                            onClick = {
-                                onIntent(RatingsAndReviewsIntent.FilterSelected(filter))
-                            },
-                        )
-                    }
-                }
-            }
-            items(state.reviews, key = { it.id }) { review ->
-                ReviewCard(
-                    review = review,
-                    modifier = Modifier.padding(horizontal = Theme.spacing.medium),
-                )
-            }
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = Theme.spacing.medium),
-                    contentAlignment = Alignment.Center,
-                ) {
+                    BasicText(
+                        text = state.error,
+                        style = Theme.typography.body.medium.copy(
+                            color = Theme.colors.error,
+                            textAlign = TextAlign.Center,
+                        ),
+                    )
                     OutlinedButton(
-                        onClick = { onIntent(RatingsAndReviewsIntent.LoadMoreClicked) },
+                        onClick = { onIntent(RatingsAndReviewsIntent.RetryClicked) },
                         modifier = Modifier
                             .width(208.dp)
                             .height(44.dp),
                         shape = Theme.shapes.extraLarge,
                         border = androidx.compose.foundation.BorderStroke(
                             1.dp,
-                            Theme.colors.tint.copy(alpha = .25f),
+                            Theme.colors.tint.copy(alpha = 0.5f),
                         ),
                         colors = ButtonDefaults.outlinedButtonColors(
                             contentColor = Theme.colors.tint,
                         ),
                     ) {
                         BasicText(
-                            text = stringResource(R.string.reviews_load_more),
+                            text = stringResource(R.string.reviews_error_retry),
                             style = Theme.typography.body.small.copy(
                                 color = Theme.colors.tint,
                                 fontWeight = FontWeight.Medium,
@@ -141,6 +118,118 @@ fun RatingsAndReviewsContent(
                     }
                 }
             }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(vertical = Theme.spacing.medium),
+                verticalArrangement = Arrangement.spacedBy(Theme.spacing.medium),
+            ) {
+                item {
+                    RatingSummaryCard(
+                        state = state,
+                        modifier = Modifier.padding(horizontal = Theme.spacing.medium),
+                    )
+                }
+                item {
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = Theme.spacing.medium),
+                        horizontalArrangement = Arrangement.spacedBy(Theme.spacing.small),
+                    ) {
+                        items(ReviewFilter.entries) { filter ->
+                            ReviewFilterChip(
+                                label = stringResource(filter.labelRes()),
+                                selected = filter == state.selectedFilter,
+                                onClick = {
+                                    onIntent(RatingsAndReviewsIntent.FilterSelected(filter))
+                                },
+                            )
+                        }
+                    }
+                }
+                if (state.reviews.isEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = Theme.spacing.large),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                BasicText(
+                                    text = stringResource(
+                                        if (state.selectedFilter == ReviewFilter.Critical) R.string.reviews_no_critical_title
+                                        else R.string.reviews_empty_title,
+                                    ),
+                                    style = Theme.typography.title.copy(
+                                        color = Theme.colors.primaryFont,
+                                        fontWeight = FontWeight.Bold,
+                                        textAlign = TextAlign.Center,
+                                    ),
+                                )
+                                Spacer(Modifier.height(Theme.spacing.small))
+                                BasicText(
+                                    text = stringResource(
+                                        if (state.selectedFilter == ReviewFilter.Critical) R.string.reviews_no_critical_subtitle
+                                        else R.string.reviews_empty_subtitle,
+                                    ),
+                                    style = Theme.typography.body.small.copy(
+                                        color = Theme.colors.secondaryFont,
+                                        textAlign = TextAlign.Center,
+                                    ),
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    items(state.reviews, key = { it.id }) { review ->
+                        ReviewCard(
+                            review = review,
+                            modifier = Modifier.padding(horizontal = Theme.spacing.medium),
+                        )
+                    }
+                }
+                if (!state.isLastPage && state.reviews.isNotEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = Theme.spacing.medium),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            OutlinedButton(
+                                onClick = { onIntent(RatingsAndReviewsIntent.LoadMoreClicked) },
+                                enabled = !state.isLoadingMore,
+                                modifier = Modifier
+                                    .width(208.dp)
+                                    .height(44.dp),
+                                shape = Theme.shapes.extraLarge,
+                                border = androidx.compose.foundation.BorderStroke(
+                                    1.dp,
+                                    Theme.colors.tint.copy(alpha = .25f),
+                                ),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    contentColor = Theme.colors.tint,
+                                ),
+                            ) {
+                                if (state.isLoadingMore) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        color = Theme.colors.tint,
+                                        strokeWidth = 2.dp,
+                                    )
+                                } else {
+                                    BasicText(
+                                        text = stringResource(R.string.reviews_load_more),
+                                        style = Theme.typography.body.small.copy(
+                                            color = Theme.colors.tint,
+                                            fontWeight = FontWeight.Medium,
+                                        ),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -170,31 +259,23 @@ private fun RatingSummaryCard(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             BasicText(
-                text = stringResource(R.string.account_rating_value),
-                style = Theme.typography.display.copy(
-                    color = Theme.colors.tint,
-                    fontSize = 46.sp,
-                    fontWeight = FontWeight.Normal,
-                    textAlign = TextAlign.Center,
-                ),
-            )
-            RatingStars(rating = 5, iconSize = 20)
-            BasicText(
                 text = pluralStringResource(
                     R.plurals.reviews_count,
                     state.totalReviews,
                     state.totalReviews,
                 ),
-                style = Theme.typography.body.small.copy(
-                    color = Theme.colors.secondaryFont,
-                    fontWeight = FontWeight.Normal,
+                style = Theme.typography.title.copy(
+                    color = Theme.colors.tint,
+                    fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                 ),
             )
         }
-        Column(verticalArrangement = Arrangement.spacedBy(Theme.spacing.small)) {
-            state.distribution.forEach {
-                RatingDistributionRow(it.stars, it.progress, it.percentage)
+        if (state.distribution.isNotEmpty()) {
+            Column(verticalArrangement = Arrangement.spacedBy(Theme.spacing.small)) {
+                state.distribution.forEach {
+                    RatingDistributionRow(it.stars, it.progress, it.percentage)
+                }
             }
         }
     }
@@ -202,16 +283,30 @@ private fun RatingSummaryCard(
 
 private fun ReviewFilter.labelRes(): Int = when (this) {
     ReviewFilter.MostRecent -> R.string.reviews_filter_recent
-    ReviewFilter.TopRated -> R.string.reviews_filter_top
     ReviewFilter.Critical -> R.string.reviews_filter_critical
-    ReviewFilter.WithPhotos -> R.string.reviews_filter_photos
 }
 
 @Preview(showBackground = true, heightDp = 1000)
 @Composable
 private fun RatingsLightPreview() {
     SpTheme(isDarkTheme = false) {
-        RatingsAndReviewsContent(RatingsAndReviewsUiState(), {})
+        RatingsAndReviewsContent(
+            state = RatingsAndReviewsUiState(
+                totalReviews = 2,
+                reviews = listOf(
+                    ReviewUiModel(
+                        id = "1",
+                        authorName = "Anonymous Patient",
+                        dateText = "Aug 10, 2026",
+                        bodyText = "Great service!",
+                        serviceName = null,
+                        initials = "A",
+                        rating = 5,
+                    ),
+                ),
+            ),
+            onIntent = {},
+        )
     }
 }
 
@@ -219,7 +314,23 @@ private fun RatingsLightPreview() {
 @Composable
 private fun RatingsDarkPreview() {
     SpTheme(isDarkTheme = true) {
-        RatingsAndReviewsContent(RatingsAndReviewsUiState(), {})
+        RatingsAndReviewsContent(
+            state = RatingsAndReviewsUiState(
+                totalReviews = 2,
+                reviews = listOf(
+                    ReviewUiModel(
+                        id = "1",
+                        authorName = "Anonymous Patient",
+                        dateText = "Aug 10, 2026",
+                        bodyText = "Great service!",
+                        serviceName = null,
+                        initials = "A",
+                        rating = 5,
+                    ),
+                ),
+            ),
+            onIntent = {},
+        )
     }
 }
 

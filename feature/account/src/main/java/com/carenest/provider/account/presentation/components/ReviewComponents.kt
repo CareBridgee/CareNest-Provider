@@ -128,7 +128,7 @@ fun ReviewCard(
             Spacer(Modifier.width(Theme.spacing.medium))
             Column(Modifier.weight(1f)) {
                 BasicText(
-                    text = stringResource(review.authorRes),
+                    text = review.authorName,
                     style = Theme.typography.body.small.copy(
                         color = Theme.colors.primaryFont,
                         fontWeight = FontWeight.Medium,
@@ -137,35 +137,39 @@ fun ReviewCard(
                 RatingStars(rating = review.rating, iconSize = 18)
             }
             BasicText(
-                text = stringResource(review.dateRes),
-                    style = Theme.typography.hint.large.copy(
+                text = review.dateText,
+                style = Theme.typography.hint.large.copy(
                     color = Theme.colors.hint,
                     fontWeight = FontWeight.Normal,
                 ),
             )
         }
-        BasicText(
-            text = stringResource(review.bodyRes),
-            style = Theme.typography.body.small.copy(
-                color = Theme.colors.primaryFont,
-                fontWeight = FontWeight.Normal,
-            ),
-        )
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Rounded.MedicalServices,
-                contentDescription = null,
-                tint = Theme.colors.tint,
-                modifier = Modifier.size(18.dp),
-            )
-            Spacer(Modifier.width(Theme.spacing.small))
+        if (review.bodyText.isNotBlank()) {
             BasicText(
-                text = stringResource(review.serviceRes),
+                text = review.bodyText,
                 style = Theme.typography.body.small.copy(
-                    color = Theme.colors.tint,
-                    fontWeight = FontWeight.Medium,
+                    color = Theme.colors.primaryFont,
+                    fontWeight = FontWeight.Normal,
                 ),
             )
+        }
+        if (!review.serviceName.isNullOrBlank()) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Rounded.MedicalServices,
+                    contentDescription = null,
+                    tint = Theme.colors.tint,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(Modifier.width(Theme.spacing.small))
+                BasicText(
+                    text = review.serviceName,
+                    style = Theme.typography.body.small.copy(
+                        color = Theme.colors.tint,
+                        fontWeight = FontWeight.Medium,
+                    ),
+                )
+            }
         }
     }
 }

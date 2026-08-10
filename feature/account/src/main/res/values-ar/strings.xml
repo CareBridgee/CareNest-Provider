@@ -99,6 +99,14 @@
     <string name="reviews_michael_service">إدارة الحالات المزمنة</string>
     <string name="reviews_load_more">تحميل المزيد من التقييمات</string>
     <string name="reviews_percentage">%1$d%%</string>
+    <string name="reviews_anonymous_patient">مريض مجهول</string>
+    <string name="reviews_verified_patient">مريض موثق</string>
+    <string name="reviews_empty_title">لا توجد تقييمات بعد</string>
+    <string name="reviews_empty_subtitle">لم تتلق أي تقييمات من المرضى حتى الآن.</string>
+    <string name="reviews_error_title">فشل في تحميل التقييمات</string>
+    <string name="reviews_error_retry">إعادة المحاولة</string>
+    <string name="reviews_no_critical_title">لا توجد تقييمات انتقادية</string>
+    <string name="reviews_no_critical_subtitle">لا توجد تقييمات من نجمتين أو أقل في العناصر المحملة.</string>
 
     <string name="wallet_title">طرق استلام الأرباح</string>
     <string name="wallet_subtitle">إدارة المكان الذي تستلم فيه أرباحك</string>

@@ -95,6 +95,14 @@
     <string name="reviews_michael_service">Chronic Condition Management</string>
     <string name="reviews_load_more">Load More Reviews</string>
     <string name="reviews_percentage">%1$d%%</string>
+    <string name="reviews_anonymous_patient">Anonymous Patient</string>
+    <string name="reviews_verified_patient">Verified Patient</string>
+    <string name="reviews_empty_title">No Reviews Yet</string>
+    <string name="reviews_empty_subtitle">You haven’t received any patient reviews yet.</string>
+    <string name="reviews_error_title">Failed to load reviews</string>
+    <string name="reviews_error_retry">Retry</string>
+    <string name="reviews_no_critical_title">No Critical Reviews</string>
+    <string name="reviews_no_critical_subtitle">No reviews with 2 stars or lower in loaded items.</string>
 
     <string name="wallet_title">Payout Methods</string>
     <string name="wallet_subtitle">Manage where you receive your earnings</string>
