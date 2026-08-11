@@ -1,6 +1,5 @@
 package com.carenest.provider.auth.presentation.auth.otp
 
-import android.os.CountDownTimer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -22,13 +21,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -216,7 +211,7 @@ internal fun OtpScreenContent(
             Spacer(modifier = Modifier.height(24.dp))
 
             OtpResendCountdown(
-                resetKey = state.countdownGeneration,
+                remainingSeconds = state.remainingSeconds,
                 isResending = state.isResending,
                 onResend = { onEvent(OtpIntent.ResendClicked) },
             )
@@ -228,41 +223,23 @@ internal fun OtpScreenContent(
 
 @Composable
 private fun OtpResendCountdown(
-    resetKey: Int,
+    remainingSeconds: Int,
     isResending: Boolean,
     onResend: () -> Unit,
 ) {
-    var displayedSeconds by remember(resetKey) {
-        mutableIntStateOf(RESEND_SECONDS)
-    }
-
-    DisposableEffect(resetKey) {
-        val timer = object : CountDownTimer(RESEND_DURATION_MILLIS, ONE_SECOND_MILLIS) {
-            override fun onTick(millisUntilFinished: Long) {
-                displayedSeconds = ((millisUntilFinished + 999L) / ONE_SECOND_MILLIS)
-                    .toInt()
-                    .coerceIn(0, RESEND_SECONDS)
-            }
-
-            override fun onFinish() {
-                displayedSeconds = 0
-            }
-        }.start()
-
-        onDispose(timer::cancel)
-    }
-
+    val displayedSeconds = remainingSeconds.coerceAtLeast(0)
     val canResend = displayedSeconds == 0 && !isResending
+
     BasicText(
         text = if (displayedSeconds > 0) {
             val minutes = displayedSeconds / 60
             val seconds = displayedSeconds % 60
             stringResource(
-                R.string.otp_resend_timer,
+                R.string.auth_otp_resend_timer,
                 "%02d:%02d".format(minutes, seconds),
             )
         } else {
-            stringResource(R.string.otp_resend_code)
+            stringResource(R.string.auth_otp_resend_code)
         },
         modifier = Modifier.clickable(enabled = canResend, onClick = onResend),
         style = Theme.typography.body.large.copy(
@@ -271,10 +248,6 @@ private fun OtpResendCountdown(
         ),
     )
 }
-
-private const val RESEND_SECONDS = 30
-private const val ONE_SECOND_MILLIS = 1_000L
-private const val RESEND_DURATION_MILLIS = RESEND_SECONDS * ONE_SECOND_MILLIS
 
 @Preview(showBackground = true)
 @Composable
