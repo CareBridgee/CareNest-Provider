@@ -109,7 +109,7 @@
     <string name="phone_input_next_btn">التالي</string>
 
     <string name="otp_title">التحقق من رمز OTP</string>
-    <string name="otp_subtitle">أدخل الرمز المُرسل إلى %1$s</string>
+    <string name="otp_subtitle">أدخل الرمز المُرسل إلى </string>
     <string name="otp_verify_btn">تحقق</string>
     <string name="otp_retry_routing_btn">إعادة التحقق من الحساب</string>
     <string name="otp_app_name">CareConnect</string>

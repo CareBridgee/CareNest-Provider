@@ -134,11 +134,19 @@ internal fun OtpScreenContent(
             Spacer(modifier = Modifier.height(12.dp))
 
             BasicText(
-                text = stringResource(
-                    R.string.otp_subtitle,
-                    PhoneValidator.formatInternationalNumber(state.phoneNumber)
-                ),
-                modifier = Modifier.padding(horizontal = 16.dp),
+                text = stringResource(R.string.otp_subtitle),
+                modifier = Modifier.fillMaxWidth(),
+                style = Theme.typography.body.large.copy(
+                    color = Theme.colors.secondaryFont,
+                    textAlign = TextAlign.Center
+                )
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            BasicText(
+                text = PhoneValidator.formatInternationalNumber(state.phoneNumber),
+                modifier = Modifier.fillMaxWidth(),
                 style = Theme.typography.body.large.copy(
                     color = Theme.colors.secondaryFont,
                     textAlign = TextAlign.Center

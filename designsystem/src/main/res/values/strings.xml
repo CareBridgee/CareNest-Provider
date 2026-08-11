@@ -106,7 +106,7 @@
     <string name="phone_input_subtitle">We\'ll text a code to verify your \n phone.</string>
     <string name="phone_input_next_btn">Next</string>
     <string name="otp_title">Verify OTP</string>
-    <string name="otp_subtitle">Enter the code sent to %1$s</string>
+    <string name="otp_subtitle">Enter the code sent to </string>
     <string name="otp_verify_btn">Verify</string>
     <string name="otp_retry_routing_btn">Retry account check</string>
     <string name="otp_app_name">CareConnect</string>
