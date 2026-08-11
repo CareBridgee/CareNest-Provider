@@ -60,6 +60,7 @@ fun PhoneInputScreen(state: LoginState, onEvent: (LoginIntent) -> Unit) {
                 isDropdownExpanded = state.isCountryDropdownExpanded,
                 onCountryClick = { onEvent(LoginIntent.ToggleCountryDropdown) },
                 onCountrySelect = { onEvent(LoginIntent.CountryCodeChanged(it)) },
+                validationError = state.phoneValidationError,
                 errorMessage = state.errorMessage
             )
 
@@ -69,17 +70,14 @@ fun PhoneInputScreen(state: LoginState, onEvent: (LoginIntent) -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            OtpMethodSelector(
-                selectedMethod = state.selectedOtpMethod,
-                onMethodSelect = { onEvent(LoginIntent.OtpMethodChanged(it)) }
-            )
+            OtpDeliveryInfoCards()
 
             Spacer(modifier = Modifier.weight(1f))
             Spacer(modifier = Modifier.height(24.dp))
 
             NextButton(
                 isLoading = state.isLoading,
-                isEnabled = state.phoneNumber.isNotBlank() && state.errorMessage == null,
+                isEnabled = state.isPhoneValid && state.errorMessage == null,
                 onClick = { onEvent(LoginIntent.RequestOtpClicked) }
             )
 

@@ -4,9 +4,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -29,6 +37,40 @@ import com.carenest.provider.designsystem.R as DR
 
 @Composable
 fun AuthLandingScreen(onEvent: (LoginIntent) -> Unit) {
+    var showGoogleUnavailableDialog by rememberSaveable { mutableStateOf(false) }
+
+    if (showGoogleUnavailableDialog) {
+        AlertDialog(
+            onDismissRequest = { showGoogleUnavailableDialog = false },
+            shape = RoundedCornerShape(24.dp),
+            containerColor = Theme.colors.surface,
+            tonalElevation = 0.dp,
+            title = {
+                Text(
+                    text = stringResource(R.string.auth_google_unavailable_title),
+                    style = Theme.typography.title.copy(fontWeight = FontWeight.Bold),
+                    color = Theme.colors.primaryFont,
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.auth_google_unavailable_message),
+                    style = Theme.typography.body.medium,
+                    color = Theme.colors.secondaryFont,
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { showGoogleUnavailableDialog = false }) {
+                    Text(
+                        text = stringResource(R.string.auth_google_unavailable_action),
+                        style = Theme.typography.body.medium.copy(fontWeight = FontWeight.SemiBold),
+                        color = Theme.colors.primary,
+                    )
+                }
+            },
+        )
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -99,7 +141,7 @@ fun AuthLandingScreen(onEvent: (LoginIntent) -> Unit) {
                     caption = stringResource(R.string.auth_continue_google),
                     iconPainter = painterResource(id = DR.drawable.ic_google),
                     changeIconColor = false,
-                    onClick = { /* Simulated */ },
+                    onClick = { showGoogleUnavailableDialog = true },
                     modifier = Modifier.fillMaxWidth().height(56.dp)
                 )
 

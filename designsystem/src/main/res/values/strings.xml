@@ -97,6 +97,9 @@
     <string name="app_name_careconnect">CareConnect Provider</string>
     <string name="app_auth_description">Welcome back! Please login or register</string>
     <string name="auth_continue_google">Continue with Google</string>
+    <string name="auth_google_unavailable_title">Google sign-in is coming soon</string>
+    <string name="auth_google_unavailable_message">Google sign-in isn\'t available yet. Please continue with your phone number.</string>
+    <string name="auth_google_unavailable_action">Got it</string>
     <string name="auth_continue_phone">Continue with Phone</string>
     <string name="auth_terms_agreement">By continuing, you agree to our Terms and Privacy Policy</string>
     <string name="phone_input_topbar_title">Join us via phone number</string>
@@ -106,7 +109,9 @@
     <string name="otp_subtitle">Enter the code sent to %1$s</string>
     <string name="otp_verify_btn">Verify</string>
     <string name="otp_retry_routing_btn">Retry account check</string>
-    <string name="otp_resend_timer">Resend code in 00:30</string>
+    <string name="otp_app_name">CareConnect</string>
+    <string name="otp_resend_timer">Resend code in %1$s</string>
+    <string name="otp_resend_code">Resend code</string>
     <string name="phone_header_brand">Secure Platform</string>
     <string name="phone_input_secure_care_desc">Your number is used only for
 verification and secure
@@ -114,7 +119,28 @@ coordination of services.</string>
     <string name="phone_input_via_sms">SMS</string>
     <string name="phone_input_via_whatsapp">WhatsApp</string>
     <string name="phone_input_label">Phone Number</string>
+    <string name="phone_country_egypt">Egypt</string>
+    <string name="phone_country_saudi_arabia">Saudi Arabia</string>
+    <string name="phone_country_uae">UAE</string>
     <string name="phone_input_carrier_charges">Carrier charges may apply for SMS.</string>
+    <string name="phone_input_feature_instant_sms">Instant SMS</string>
+    <string name="phone_input_feature_verified_private">Verified Private</string>
+    <string name="validation_phone_required">Enter your phone number.</string>
+    <string name="login_validation_phone_length">Enter exactly %1$d digits after %2$s.</string>
+    <string name="login_validation_egypt_phone_prefix">Enter an Egyptian mobile number starting with 10, 11, 12, or 15 after +20.</string>
+    <string name="login_validation_saudi_phone_prefix">Enter a Saudi mobile number starting with 5 after +966.</string>
+    <string name="login_validation_uae_phone_prefix">Enter a UAE mobile number starting with 50, 52, 54, 55, 56, or 58 after +971.</string>
+    <string name="auth_error_invalid_phone">This phone number is not valid. Check the country and number, then try again.</string>
+    <string name="auth_error_otp_incomplete">Enter the complete 6-digit verification code.</string>
+    <string name="auth_error_invalid_otp">The verification code is incorrect. Check the code and try again.</string>
+    <string name="auth_error_expired_otp">This verification code has expired. Request a new code.</string>
+    <string name="auth_error_network">No internet connection. Check your connection and try again.</string>
+    <string name="auth_error_too_many_requests">Too many attempts. Please wait a moment before trying again.</string>
+    <string name="auth_error_service_unavailable">The authentication service is temporarily unavailable. Please try again shortly.</string>
+    <string name="auth_error_send_code">We couldn\'t send the verification code. Please try again.</string>
+    <string name="auth_error_resend_code">We couldn\'t resend the verification code. Please try again.</string>
+    <string name="auth_error_verification">We couldn\'t verify the code. Please try again.</string>
+    <string name="auth_error_profile_load">Your phone was verified, but we couldn\'t load your account. Please try again.</string>
     <string name="back">Back</string>
 
     <!-- Request -->

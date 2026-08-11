@@ -98,6 +98,9 @@
     <string name="app_name_careconnect">كير كونيكت لمقدمي الرعاية</string>
     <string name="app_auth_description">مرحبًا بعودتك! يُرجى تسجيل الدخول أو إنشاء حساب.</string>
     <string name="auth_continue_google">المتابعة باستخدام Google</string>
+    <string name="auth_google_unavailable_title">تسجيل الدخول عبر Google قريبًا</string>
+    <string name="auth_google_unavailable_message">تسجيل الدخول عبر Google غير متاح حاليًا. يمكنك المتابعة باستخدام رقم هاتفك.</string>
+    <string name="auth_google_unavailable_action">حسنًا</string>
     <string name="auth_continue_phone">المتابعة باستخدام رقم الهاتف</string>
     <string name="auth_terms_agreement">بالمتابعة، فإنك توافق على الشروط وسياسة الخصوصية الخاصة بنا.</string>
 
@@ -109,7 +112,9 @@
     <string name="otp_subtitle">أدخل الرمز المُرسل إلى %1$s</string>
     <string name="otp_verify_btn">تحقق</string>
     <string name="otp_retry_routing_btn">إعادة التحقق من الحساب</string>
-    <string name="otp_resend_timer">إعادة إرسال الرمز خلال 00:30</string>
+    <string name="otp_app_name">CareConnect</string>
+    <string name="otp_resend_timer">إعادة إرسال الرمز خلال %1$s</string>
+    <string name="otp_resend_code">إعادة إرسال الرمز</string>
 
     <string name="phone_header_brand">منصة آمنة</string>
     <string name="phone_input_secure_care_desc">يُستخدم رقم هاتفك فقط للتحقق من هويتك والتنسيق الآمن للخدمات.</string>
@@ -117,7 +122,28 @@
     <string name="phone_input_via_sms">رسالة نصية (SMS)</string>
     <string name="phone_input_via_whatsapp">واتساب</string>
     <string name="phone_input_label">رقم الهاتف</string>
+    <string name="phone_country_egypt">مصر</string>
+    <string name="phone_country_saudi_arabia">السعودية</string>
+    <string name="phone_country_uae">الإمارات</string>
     <string name="phone_input_carrier_charges">قد تُطبق رسوم من شركة الاتصالات على الرسائل النصية.</string>
+    <string name="phone_input_feature_instant_sms">رسائل SMS فورية</string>
+    <string name="phone_input_feature_verified_private">خصوصية موثوقة</string>
+    <string name="validation_phone_required">أدخل رقم هاتفك.</string>
+    <string name="login_validation_phone_length">أدخل %1$d أرقام بالضبط بعد %2$s.</string>
+    <string name="login_validation_egypt_phone_prefix">أدخل رقم موبايل مصري يبدأ بـ 10 أو 11 أو 12 أو 15 بعد +20.</string>
+    <string name="login_validation_saudi_phone_prefix">أدخل رقم جوال سعودي يبدأ بـ 5 بعد +966.</string>
+    <string name="login_validation_uae_phone_prefix">أدخل رقم هاتف إماراتي يبدأ بـ 50 أو 52 أو 54 أو 55 أو 56 أو 58 بعد +971.</string>
+    <string name="auth_error_invalid_phone">رقم الهاتف غير صالح. تحقق من البلد والرقم ثم حاول مرة أخرى.</string>
+    <string name="auth_error_otp_incomplete">أدخل رمز التحقق كاملًا والمكوّن من 6 أرقام.</string>
+    <string name="auth_error_invalid_otp">رمز التحقق غير صحيح. تحقق من الرمز وحاول مرة أخرى.</string>
+    <string name="auth_error_expired_otp">انتهت صلاحية رمز التحقق. اطلب رمزًا جديدًا.</string>
+    <string name="auth_error_network">لا يوجد اتصال بالإنترنت. تحقق من اتصالك وحاول مرة أخرى.</string>
+    <string name="auth_error_too_many_requests">محاولات كثيرة جدًا. انتظر قليلًا قبل المحاولة مرة أخرى.</string>
+    <string name="auth_error_service_unavailable">خدمة تسجيل الدخول غير متاحة مؤقتًا. حاول مرة أخرى بعد قليل.</string>
+    <string name="auth_error_send_code">تعذر إرسال رمز التحقق. حاول مرة أخرى.</string>
+    <string name="auth_error_resend_code">تعذرت إعادة إرسال رمز التحقق. حاول مرة أخرى.</string>
+    <string name="auth_error_verification">تعذر التحقق من الرمز. حاول مرة أخرى.</string>
+    <string name="auth_error_profile_load">تم التحقق من هاتفك، لكن تعذر تحميل حسابك. حاول مرة أخرى.</string>
 
     <!-- Request -->
     <string name="nurse_requests_edit_rate_title">تعديل السعر</string>

@@ -5,16 +5,18 @@ import com.carenest.provider.auth.data.remote.dto.AuthResponseDto
 import com.carenest.provider.auth.data.remote.dto.CurrentUserDto
 import com.carenest.provider.auth.data.remote.dto.DevLoginResponseDto
 import com.carenest.provider.auth.data.remote.dto.ErrorResponseDto
+import com.carenest.provider.auth.domain.model.AuthException
+import com.carenest.provider.auth.domain.model.AuthFailure
 import com.carenest.provider.auth.domain.repository.AuthRepository
 import com.carenest.provider.auth.domain.repository.AuthenticatedNurse
 import com.carenest.provider.auth.domain.repository.AuthenticatedUser
 import com.carenest.provider.auth.domain.repository.NurseVerificationStatus
 import com.carenest.provider.core.datastore.AuthenticationSessionStore
-import com.carenest.provider.core.util.Resource
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.isSuccess
+import java.io.IOException
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
@@ -28,35 +30,26 @@ class AuthRepositoryImpl @Inject constructor(
         return try {
             val response = dataSource.login(phoneNumber)
 
-            handleGenericResponse(response)
+            handleGenericResponse(response, AuthOperation.REQUEST_OTP)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(e.toAuthException(AuthOperation.REQUEST_OTP))
         }
     }
 
     override suspend fun devLogin(
         phoneNumber: String,
-    ): Resource<String> {
+    ): Result<String> {
         return try {
             val response = dataSource.devLogin(phoneNumber)
 
             if (response.status.isSuccess()) {
                 val devResponse = response.body<DevLoginResponseDto>()
-
-                Resource.Success(devResponse.otp)
+                Result.success(devResponse.otp)
             } else {
-                val errorBody = response.body<ErrorResponseDto>()
-
-                Resource.Error(
-                    errorBody.message
-                        ?: "Something went wrong",
-                )
+                handleErrorResponse(response, AuthOperation.REQUEST_OTP)
             }
         } catch (e: Exception) {
-            Resource.Error(
-                e.message
-                    ?: "An unexpected error occurred",
-            )
+            Result.failure(e.toAuthException(AuthOperation.REQUEST_OTP))
         }
     }
 
@@ -88,10 +81,11 @@ class AuthRepositoryImpl @Inject constructor(
 
                 Result.success(authResponse.user?.nurse?.toDomain())
             } else {
-                handleErrorResponse(response)
+                handleErrorResponse(response, AuthOperation.VERIFY_OTP)
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            authenticationSessionStore.clearSession()
+            Result.failure(e.toAuthException(AuthOperation.VERIFY_OTP))
         }
     }
 
@@ -109,73 +103,105 @@ class AuthRepositoryImpl @Inject constructor(
                     ),
                 )
             } else {
-                handleErrorResponse(response)
+                handleErrorResponse(response, AuthOperation.AUTHENTICATED_REQUEST)
             }
         } catch (error: Exception) {
-            Result.failure(error)
+            Result.failure(error.toAuthException(AuthOperation.AUTHENTICATED_REQUEST))
         }
     }
 
     private suspend fun handleGenericResponse(
         response: HttpResponse,
+        operation: AuthOperation,
     ): Result<Unit> {
         return if (response.status.isSuccess()) {
             Result.success(Unit)
         } else {
-            handleErrorResponse(response)
+            handleErrorResponse(response, operation)
         }
     }
 
     private suspend fun <T> handleErrorResponse(
         response: HttpResponse,
+        operation: AuthOperation,
     ): Result<T> {
         val statusCode = response.status.value
 
-        return try {
-            val errorBody = response.body<ErrorResponseDto>()
+        val errorBody = runCatching { response.body<ErrorResponseDto>() }.getOrNull()
+        val parsedMessage = errorBody?.message
+            ?: errorBody?.error
+            ?: errorBody?.details
+            ?: runCatching { response.bodyAsText() }.getOrNull()?.takeIf(String::isNotBlank)
+            ?: "HTTP $statusCode (${response.status.description})"
 
-            val parsedMessage =
-                errorBody.message
-                    ?: errorBody.error
-                    ?: errorBody.details
-
-            if (!parsedMessage.isNullOrBlank()) {
-                Result.failure(
-                    Exception(parsedMessage),
-                )
-            } else {
-                val rawBody = response.bodyAsText()
-
-                if (rawBody.isNotBlank()) {
-                    Result.failure(
-                        Exception("HTTP $statusCode: $rawBody"),
-                    )
-                } else {
-                    Result.failure(
-                        Exception(
-                            "HTTP $statusCode (${response.status.description})",
-                        ),
-                    )
-                }
-            }
-        } catch (e: Exception) {
-            val rawBody = runCatching {
-                response.bodyAsText()
-            }.getOrDefault("")
-
-            if (rawBody.isNotBlank()) {
-                Result.failure(
-                    Exception("HTTP $statusCode: $rawBody"),
-                )
-            } else {
-                Result.failure(
-                    Exception(
-                        "HTTP $statusCode (${response.status.description})",
-                    ),
-                )
-            }
-        }
+        return Result.failure(
+            authException(
+                operation = operation,
+                statusCode = statusCode,
+                backendCode = errorBody?.code,
+                message = parsedMessage,
+            )
+        )
     }
+}
+
+private enum class AuthOperation {
+    REQUEST_OTP,
+    VERIFY_OTP,
+    AUTHENTICATED_REQUEST,
+}
+
+private fun Throwable.toAuthException(operation: AuthOperation): AuthException {
+    if (this is AuthException) return this
+
+    return authException(
+        operation = operation,
+        message = message ?: "Authentication request failed",
+        cause = this,
+    )
+}
+
+private fun authException(
+    operation: AuthOperation,
+    message: String,
+    statusCode: Int? = null,
+    backendCode: String? = null,
+    cause: Throwable? = null,
+): AuthException {
+    val searchableMessage = listOfNotNull(backendCode, message)
+        .joinToString(" ")
+        .lowercase()
+
+    val failure = when {
+        cause is IOException ||
+            searchableMessage.contains("timeout") ||
+            searchableMessage.contains("unable to resolve host") ||
+            searchableMessage.contains("failed to connect") -> AuthFailure.Network
+        searchableMessage.contains("too many") ||
+            searchableMessage.contains("rate limit") -> AuthFailure.TooManyRequests
+        operation == AuthOperation.VERIFY_OTP && searchableMessage.contains("expired") ->
+            AuthFailure.ExpiredOtp
+        operation == AuthOperation.VERIFY_OTP &&
+            (searchableMessage.contains("invalid otp") ||
+                searchableMessage.contains("incorrect code") ||
+                searchableMessage.contains("invalid code")) -> AuthFailure.InvalidOtp
+        statusCode == 408 -> AuthFailure.Network
+        statusCode == 429 -> AuthFailure.TooManyRequests
+        statusCode != null && statusCode >= 500 -> AuthFailure.Server
+        operation == AuthOperation.VERIFY_OTP && statusCode in setOf(400, 401, 403, 404, 409, 422) ->
+            AuthFailure.InvalidOtp
+        operation == AuthOperation.REQUEST_OTP && statusCode in setOf(400, 404, 422) ->
+            AuthFailure.InvalidPhone
+        else -> AuthFailure.Unknown
+    }
+
+    return AuthException(
+        failure = failure,
+        message = message,
+        statusCode = statusCode,
+        backendCode = backendCode,
+        cause = cause,
+    )
 }
 
 private fun com.carenest.provider.auth.data.remote.dto.NurseAuthDto.toDomain() =

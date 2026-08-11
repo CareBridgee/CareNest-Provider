@@ -10,7 +10,6 @@ import com.carenest.provider.auth.domain.util.AuthenticationDestination
 import com.carenest.provider.auth.presentation.auth.otp.withSavedProgressFallback
 import com.carenest.provider.core.datastore.AuthenticationSession
 import com.carenest.provider.core.datastore.AuthenticationSessionDestination
-import com.carenest.provider.core.util.Resource
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -183,7 +182,7 @@ class AuthenticationDestinationResolverTest {
             private set
 
         override suspend fun login(phoneNumber: String): Result<Unit> = Result.success(Unit)
-        override suspend fun devLogin(phoneNumber: String): Resource<String> {
+        override suspend fun devLogin(phoneNumber: String): Result<String> {
             TODO("Not yet implemented")
         }
 
