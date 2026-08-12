@@ -19,4 +19,7 @@ sealed interface RequestRoutes : NavKey {
 
     @Serializable
     data class ScanQr(val requestId: String) : RequestRoutes
+
+    @Serializable
+    data class PatientSummary(val requestId: String) : RequestRoutes
 }

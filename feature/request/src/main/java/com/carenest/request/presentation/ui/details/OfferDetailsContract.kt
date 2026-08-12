@@ -28,6 +28,7 @@ sealed interface OfferDetailsEffect {
     data class OpenChat(val patientId: String) : OfferDetailsEffect
     data class CopyToClipboard(val text: String) : OfferDetailsEffect
     data class ShowSummary(val summary: String) : OfferDetailsEffect
+    data class NavigateToPatientSummary(val requestId: String) : OfferDetailsEffect
     data class OpenMaps(val address: String) : OfferDetailsEffect
     data class ShowError(val message: UiText) : OfferDetailsEffect
 }

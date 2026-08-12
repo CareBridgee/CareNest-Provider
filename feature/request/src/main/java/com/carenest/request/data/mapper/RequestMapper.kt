@@ -6,8 +6,12 @@ import com.carenest.request.data.remote.dto.PatientReportDto
 import com.carenest.request.data.remote.dto.ServiceRequestDetailsDto
 import com.carenest.request.data.remote.dto.ServiceRequestNursePreviewDto
 import com.carenest.request.data.remote.dto.ServiceRequestNurseProfileDto
+import com.carenest.request.data.remote.dto.PatientMedicalSummaryDto
+import com.carenest.request.domain.model.EmergencyContactItem
+import com.carenest.request.domain.model.MedicalHistoryItem
 import com.carenest.request.domain.model.Offer
 import com.carenest.request.domain.model.PatientInfo
+import com.carenest.request.domain.model.PatientMedicalSummary
 import com.carenest.request.domain.model.VisitSummary
 import java.util.Calendar
 import kotlinx.serialization.json.JsonElement
@@ -205,6 +209,38 @@ private fun String?.toAgeOrNull(): Int? {
 private fun String?.orPlaceholder(): String = this?.takeIf(String::isNotBlank) ?: PLACEHOLDER
 
 private fun Double.toMiles(): Float = (this * KILOMETERS_TO_MILES).toFloat()
+
+fun PatientMedicalSummaryDto.toDomain(): PatientMedicalSummary = PatientMedicalSummary(
+    profileId = profileId.orEmpty(),
+    firstName = firstName.orEmpty(),
+    lastName = lastName.orEmpty(),
+    profileImageUrl = profileImageUrl.orEmpty(),
+    dateOfBirth = dateOfBirth,
+    gender = gender,
+    bloodType = bloodType,
+    height = height,
+    weight = weight,
+    mobilityStatus = mobilityStatus,
+    mobilityNotes = mobilityNotes,
+    previousSurgeries = previousSurgeries,
+    previousHospitalizations = previousHospitalizations,
+    allergies = allergies,
+    medicalConditions = medicalConditions,
+    medications = medications,
+    medicalHistory = medicalHistory.map {
+        MedicalHistoryItem(
+            type = it.type.orEmpty(),
+            description = it.description.orEmpty(),
+        )
+    },
+    emergencyContacts = emergencyContacts.map {
+        EmergencyContactItem(
+            name = it.name.orEmpty(),
+            relationship = it.relationship.orEmpty(),
+            phoneNumber = it.phoneNumber.orEmpty(),
+        )
+    },
+)
 
 private const val PLACEHOLDER = "\u2014"
 private const val KILOMETERS_TO_MILES = 0.621371192237334

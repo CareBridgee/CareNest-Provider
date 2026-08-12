@@ -8,6 +8,7 @@ import com.carenest.provider.core.navigation.navigate
 import com.carenest.request.presentation.ui.details.OfferDetailsScreen
 import com.carenest.request.presentation.ui.list.RequestsListScreen
 import com.carenest.request.presentation.ui.offerconfirmed.OfferConfirmedScreen
+import com.carenest.request.presentation.ui.patientsummary.PatientSummaryScreen
 import com.carenest.request.presentation.ui.scan.ScanQrScreen
 import com.carenest.request.presentation.ui.visit_summary.VisitCompletedScreen
 import kotlinx.serialization.modules.SerializersModule
@@ -21,6 +22,7 @@ val requestSerializers = SerializersModule {
         subclass(RequestRoutes.RequestDetails::class, RequestRoutes.RequestDetails.serializer())
         subclass(RequestRoutes.VisitCompleted::class, RequestRoutes.VisitCompleted.serializer())
         subclass(RequestRoutes.ScanQr::class, RequestRoutes.ScanQr.serializer())
+        subclass(RequestRoutes.PatientSummary::class, RequestRoutes.PatientSummary.serializer())
     }
 }
 
@@ -78,6 +80,16 @@ fun EntryProviderScope<NavKey>.providerRequestEntries(
             onVisitCompleted = { requestId ->
                 backStack.navigate(RequestRoutes.VisitCompleted(requestId))
             },
+            onPatientSummary = { requestId ->
+                backStack.navigate(RequestRoutes.PatientSummary(requestId))
+            },
+        )
+    }
+
+    entry<RequestRoutes.PatientSummary> { route ->
+        PatientSummaryScreen(
+            requestId = route.requestId,
+            onBack = { backStack.goBack() },
         )
     }
 

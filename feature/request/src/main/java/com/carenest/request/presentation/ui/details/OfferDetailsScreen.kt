@@ -60,6 +60,7 @@ fun OfferDetailsScreen(
     onOpenChat: (String) -> Unit,
     onVisitCompleted: (String) -> Unit,
     modifier: Modifier = Modifier,
+    onPatientSummary: (String) -> Unit = {},
     viewModel: OfferDetailsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -75,6 +76,7 @@ fun OfferDetailsScreen(
         when (effect) {
             OfferDetailsEffect.NavigateBack -> onBack()
             is OfferDetailsEffect.NavigateToVisitCompleted -> onVisitCompleted(effect.requestId)
+            is OfferDetailsEffect.NavigateToPatientSummary -> onPatientSummary(effect.requestId)
             is OfferDetailsEffect.InitiateCall -> {
                 val intent = Intent(Intent.ACTION_DIAL).apply {
                     data = Uri.parse("tel:${effect.phone}")

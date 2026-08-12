@@ -61,15 +61,15 @@ class OfferDetailsViewModel @Inject constructor(
                 withAddress { sendEffect(OfferDetailsEffect.CopyToClipboard(it)) }
             }
             OfferDetailsIntent.ViewSummaryClicked -> {
-                val summary = currentState.offer?.patientInfo?.summery
-                if (summary.isNullOrBlank()) {
+                val targetRequestId = loadedRequestId ?: currentState.offer?.offerId
+                if (targetRequestId.isNullOrBlank()) {
                     sendEffect(
                         OfferDetailsEffect.ShowError(
-                            UiText.StringResource(R.string.patient_report_unavailable)
+                            UiText.StringResource(R.string.request_not_found)
                         )
                     )
                 } else {
-                    sendEffect(OfferDetailsEffect.ShowSummary(summary))
+                    sendEffect(OfferDetailsEffect.NavigateToPatientSummary(targetRequestId))
                 }
             }
             OfferDetailsIntent.OpenInMapsClicked -> {
