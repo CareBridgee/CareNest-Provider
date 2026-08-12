@@ -11,7 +11,6 @@ import com.carenest.provider.profile.domain.model.FailedStep
 import com.carenest.provider.profile.domain.model.NurseProfile
 import com.carenest.provider.profile.domain.model.NurseService
 import com.carenest.provider.profile.domain.model.NurseRegistration
-import com.carenest.provider.profile.domain.model.NurseService
 import com.carenest.provider.profile.domain.model.NurseServiceBatchResult
 import com.carenest.provider.profile.domain.model.NurseUpdate
 import com.carenest.provider.profile.domain.model.ServiceFailure
