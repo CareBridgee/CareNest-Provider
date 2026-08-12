@@ -46,4 +46,15 @@
     <string name="nav_profile">Profile</string>
     <string name="nurse_requests_no_requests_title">No requests nearby</string>
     <string name="nurse_requests_no_requests_description">Stay online. New patient care requests in your area will appear here automatically.</string>
+    <string name="location_permission_rationale_title">Location Permission Required</string>
+    <string name="location_permission_rationale_message">CareNest needs your location to update your availability so nearby patients can find and request your services.</string>
+    <string name="location_permission_required_title">Location Required</string>
+    <string name="location_permission_required_message">Location permission is required to turn online and receive nearby patient care requests. Please enable location access in settings.</string>
+    <string name="location_permission_allow">Allow</string>
+    <string name="location_permission_deny">Deny</string>
+    <string name="location_permission_open_settings">Open Settings</string>
+    <string name="notification_permission_rationale_title">Notification Permission Required</string>
+    <string name="notification_permission_rationale_message">This app needs notification access to alert you in real-time when new patient care requests arrive or reservation updates occur.</string>
+    <string name="notification_permission_allow">Allow</string>
+    <string name="notification_permission_deny">Deny</string>
 </resources>

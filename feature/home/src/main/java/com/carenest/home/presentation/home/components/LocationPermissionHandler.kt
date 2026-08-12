@@ -1,15 +1,24 @@
 package com.carenest.home.presentation.home.components
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.carenest.home.R
 import com.carenest.provider.designsystem.components.dialog.CareNestDialog
 
 @Composable
@@ -21,6 +30,8 @@ fun LocationPermissionHandler(
 ) {
     val context = LocalContext.current
     val activity = context as? ComponentActivity
+
+    var showSettingsDialog by remember { mutableStateOf(false) }
 
     val permissions = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
@@ -35,21 +46,44 @@ fun LocationPermissionHandler(
         if (granted) {
             onPermissionGranted()
         } else {
-            onPermissionDenied()
+            showSettingsDialog = true
         }
     }
 
-    if (showRationale) {
+    if (showSettingsDialog) {
         CareNestDialog(
-            title = "Location Permission Required",
-            message = "CareNest needs your location to update your availability so nearby patients can find and request your services.",
-            confirmText = "Allow",
-            dismissText = "Deny",
+            title = stringResource(R.string.location_permission_required_title),
+            message = stringResource(R.string.location_permission_required_message),
+            confirmText = stringResource(R.string.location_permission_open_settings),
+            dismissText = stringResource(R.string.cancel),
+            onConfirm = {
+                showSettingsDialog = false
+                val intent = Intent(
+                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.fromParts("package", context.packageName, null)
+                )
+                context.startActivity(intent)
+                onPermissionDenied()
+            },
+            onDismiss = {
+                showSettingsDialog = false
+                onPermissionDenied()
+            },
+        )
+    } else if (showRationale) {
+        CareNestDialog(
+            title = stringResource(R.string.location_permission_rationale_title),
+            message = stringResource(R.string.location_permission_rationale_message),
+            confirmText = stringResource(R.string.location_permission_allow),
+            dismissText = stringResource(R.string.location_permission_deny),
             onConfirm = {
                 launcher.launch(permissions)
                 onRationaleDismissed()
             },
-            onDismiss = onRationaleDismissed,
+            onDismiss = {
+                onRationaleDismissed()
+                showSettingsDialog = true
+            },
         )
     } else {
         LaunchedEffect(Unit) {
