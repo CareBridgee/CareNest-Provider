@@ -139,56 +139,98 @@ fun ProfessionalDocumentsContent(
             .background(Theme.colors.backGround),
     ) {
         ProviderAccountTopBar(onNavigateBack = { onIntent(ProfessionalDocumentsIntent.BackClicked) })
-        if (state.isLoading) {
-            ProfessionalDocumentsLoadingSkeleton()
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(Theme.spacing.medium),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-            item {
-                BasicText(
-                    text = stringResource(R.string.documents_title),
-                    style = Theme.typography.title.copy(color = Theme.colors.primaryFont),
-                )
-                Spacer(Modifier.height(Theme.spacing.small))
-                BasicText(
-                    text = stringResource(R.string.documents_subtitle),
-                    style = Theme.typography.body.small.copy(
-                        color = Theme.colors.secondaryFont,
-                        fontWeight = FontWeight.Normal,
-                    ),
-                )
-                Spacer(Modifier.height(Theme.spacing.medium))
-            }
-            items(state.documents, key = { it.id }) { document ->
-                ProfessionalDocumentCard(
-                    document = document,
-                    title = stringResource(document.titleRes),
-                    supportingText = stringResource(document.uploadedDateRes),
-                    viewLabel = stringResource(R.string.documents_view),
-                    replaceLabel = stringResource(R.string.documents_edit),
-                    verifiedLabel = stringResource(R.string.documents_verified),
-                    pendingLabel = stringResource(R.string.documents_pending),
-                    rejectedLabel = stringResource(R.string.documents_rejected),
-                    isUploading = false,
-                    onViewClick = {
-                        onIntent(ProfessionalDocumentsIntent.DocumentClicked(document.id))
-                    },
-                    onReplaceClick = {
-                        onIntent(ProfessionalDocumentsIntent.DocumentClicked(document.id))
-                    },
+        when {
+            state.isLoading -> ProfessionalDocumentsLoadingSkeleton()
+            state.documents.isEmpty() && state.errorMessage != null -> {
+                DocumentsErrorContent(
+                    message = resolveMessage(LocalContext.current, state.errorMessage),
+                    onRetry = { onIntent(ProfessionalDocumentsIntent.RetryClicked) },
                 )
             }
-            item {
-                UploadDocumentCard(
-                    onClick = { onIntent(ProfessionalDocumentsIntent.UploadDocumentClicked) },
-                )
-            }
-            item { PendingDocumentInfo() }
+            else -> {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(Theme.spacing.medium),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    item { DocumentsHeader() }
+                    items(state.documents, key = { it.id }) { document ->
+                        ProfessionalDocumentCard(
+                            document = document,
+                            title = stringResource(document.titleRes),
+                            supportingText = stringResource(document.supportingTextRes),
+                            viewLabel = stringResource(R.string.documents_view),
+                            replaceLabel = stringResource(R.string.documents_edit),
+                            verifiedLabel = stringResource(R.string.documents_verified),
+                            pendingLabel = stringResource(R.string.documents_pending),
+                            rejectedLabel = stringResource(R.string.documents_rejected),
+                            missingLabel = stringResource(R.string.documents_missing),
+                            onViewClick = { target ->
+                                onIntent(ProfessionalDocumentsIntent.ViewDocumentClicked(target))
+                            },
+                            onReplaceClick = { target ->
+                                onIntent(ProfessionalDocumentsIntent.ReplaceDocumentClicked(target))
+                            },
+                        )
+                    }
+                    state.documents.firstMissingTarget()?.let { target ->
+                        item {
+                            UploadDocumentCard(
+                                enabled = state.uploadingTarget == null,
+                                onClick = {
+                                    onIntent(ProfessionalDocumentsIntent.ReplaceDocumentClicked(target))
+                                },
+                            )
+                        }
+                    }
+                    item { PendingDocumentInfo() }
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun DocumentsHeader() {
+    BasicText(
+        text = stringResource(R.string.documents_title),
+        style = Theme.typography.title.copy(color = Theme.colors.primaryFont),
+    )
+    Spacer(Modifier.height(Theme.spacing.small))
+    BasicText(
+        text = stringResource(R.string.documents_subtitle),
+        style = Theme.typography.body.small.copy(
+            color = Theme.colors.secondaryFont,
+            fontWeight = FontWeight.Normal,
+        ),
+    )
+    Spacer(Modifier.height(Theme.spacing.medium))
+}
+
+@Composable
+private fun DocumentsErrorContent(
+    message: String,
+    onRetry: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(Theme.spacing.large),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        BasicText(
+            text = message,
+            style = Theme.typography.body.medium.copy(
+                color = Theme.colors.secondaryFont,
+                textAlign = TextAlign.Center,
+            ),
+        )
+        Spacer(Modifier.height(Theme.spacing.medium))
+        PrimaryButton(
+            caption = stringResource(R.string.documents_retry),
+            onClick = onRetry,
+        )
     }
 }
 

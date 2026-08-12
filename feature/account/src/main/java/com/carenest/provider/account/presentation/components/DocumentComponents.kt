@@ -98,9 +98,9 @@ fun ProfessionalDocumentCard(
     verifiedLabel: String,
     pendingLabel: String,
     rejectedLabel: String,
-    isUploading: Boolean,
-    onViewClick: () -> Unit,
-    onReplaceClick: () -> Unit,
+    missingLabel: String,
+    onViewClick: (DocumentUploadTarget) -> Unit,
+    onReplaceClick: (DocumentUploadTarget) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -143,33 +143,64 @@ fun ProfessionalDocumentCard(
                 pendingLabel = pendingLabel,
                 rejectedLabel = rejectedLabel,
             )
-            if (isUploading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(18.dp),
-                    color = Theme.colors.primary,
-                    strokeWidth = 2.dp,
-                )
-            } else {
-                Row(horizontalArrangement = Arrangement.spacedBy(Theme.spacing.small)) {
-                    if (document.primaryUrl != null) {
-                        BasicText(
-                            text = viewLabel,
-                            style = Theme.typography.body.small.copy(
-                                color = Theme.colors.tint,
-                                fontWeight = FontWeight.Medium,
-                            ),
-                            modifier = Modifier.clickable(onClick = onViewClick),
-                        )
-                    }
-                    if (document.replacementTargets.isNotEmpty()) {
-                        BasicText(
-                            text = replaceLabel,
-                            style = Theme.typography.body.small.copy(
-                                color = Theme.colors.tint,
-                                fontWeight = FontWeight.Medium,
-                            ),
-                            modifier = Modifier.clickable(onClick = onReplaceClick),
-                        )
+        }
+        Spacer(Modifier.height(Theme.spacing.medium))
+        Column(verticalArrangement = Arrangement.spacedBy(Theme.spacing.small)) {
+            document.files.forEach { file ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    BasicText(
+                        text = stringResource(file.labelRes),
+                        style = Theme.typography.body.small.copy(
+                            color = Theme.colors.primaryFont,
+                            fontWeight = FontWeight.Medium,
+                        ),
+                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(Theme.spacing.medium),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        if (file.isUploading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                color = Theme.colors.primary,
+                                strokeWidth = 2.dp,
+                            )
+                        } else {
+                            if (file.url.isNullOrBlank()) {
+                                BasicText(
+                                    text = missingLabel,
+                                    style = Theme.typography.hint.large.copy(
+                                        color = Theme.colors.hint,
+                                        fontWeight = FontWeight.Normal,
+                                    ),
+                                )
+                            } else {
+                                BasicText(
+                                    text = viewLabel,
+                                    style = Theme.typography.body.small.copy(
+                                        color = Theme.colors.tint,
+                                        fontWeight = FontWeight.Medium,
+                                    ),
+                                    modifier = Modifier.clickable {
+                                        onViewClick(file.target)
+                                    },
+                                )
+                            }
+                            BasicText(
+                                text = replaceLabel,
+                                style = Theme.typography.body.small.copy(
+                                    color = Theme.colors.tint,
+                                    fontWeight = FontWeight.Medium,
+                                ),
+                                modifier = Modifier.clickable {
+                                    onReplaceClick(file.target)
+                                },
+                            )
+                        }
                     }
                 }
             }

@@ -28,6 +28,12 @@ enum class DocumentStatus {
     Rejected,
 }
 
+enum class DocumentUploadTarget {
+    NationalIdFront,
+    NationalIdBack,
+    NursingLicense,
+    ProfessionalCertificate,
+}
 
 data class ProfessionalDocumentUiModel(
     val id: String,
@@ -35,14 +41,14 @@ data class ProfessionalDocumentUiModel(
     @StringRes val supportingTextRes: Int,
     @DrawableRes val iconRes: Int,
     val status: DocumentStatus,
-    val primaryUrl: String? = null,
-    val secondaryUrl: String? = null,
-    val replacementTargets: List<DocumentReplacementTarget> = emptyList(),
+    val files: List<ProfessionalDocumentFileUiModel>,
 )
 
-data class DocumentReplacementTarget(
-    val field: String,
+data class ProfessionalDocumentFileUiModel(
+    val target: DocumentUploadTarget,
     @StringRes val labelRes: Int,
+    val url: String?,
+    val isUploading: Boolean = false,
 )
 
 enum class ReviewFilter {
