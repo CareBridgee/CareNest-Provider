@@ -85,9 +85,9 @@ class ChatDataSourceImp @Inject constructor(
 
         val displayName = patientName ?: "Patient"
 
-        val currentNurseUserId = sessionStore.state.firstOrNull()?.session?.nurseId
+        val (currentNurseUserId, currentNursePhone) = getCurrentNurseInfo()
         val restMessages = try {
-            remoteDataSource.getMessages(requestId).map { it.toDomain(currentNurseUserId) }
+            remoteDataSource.getMessages(requestId).map { it.toDomain(currentNurseUserId, currentNursePhone) }
         } catch (_: Exception) {
             emptyList()
         }
@@ -117,14 +117,14 @@ class ChatDataSourceImp @Inject constructor(
     }
 
     override suspend fun fetchChatMessages(requestId: String, after: String?): List<ChatMessage> {
-        val currentNurseUserId = sessionStore.state.firstOrNull()?.session?.nurseId
+        val (currentNurseUserId, currentNursePhone) = getCurrentNurseInfo()
         val dtoList = remoteDataSource.getMessages(requestId, after)
-        return dtoList.map { it.toDomain(currentNurseUserId) }
+        return dtoList.map { it.toDomain(currentNurseUserId, currentNursePhone) }
     }
 
     override suspend fun sendMessage(requestId: String, text: String): ChatMessage {
         nurseSocketClient.connect()
-        val currentNurseUserId = sessionStore.state.firstOrNull()?.session?.nurseId
+        val (currentNurseUserId, currentNursePhone) = getCurrentNurseInfo()
 
         val dto = remoteDataSource.sendMessage(requestId, text)
 
@@ -132,17 +132,28 @@ class ChatDataSourceImp @Inject constructor(
             nurseSocketClient.sendChatMessage(requestId, text)
         }
 
-        return dto.toDomain(currentNurseUserId)
+        return dto.toDomain(currentNurseUserId, currentNursePhone)
     }
 
-    private fun MessageDto.toDomain(currentNurseUserId: String?): ChatMessage {
-        val isNurseSender = !currentNurseUserId.isNullOrBlank() &&
-                (senderUserId.equals(currentNurseUserId, ignoreCase = true) ||
-                        senderName?.contains("Nurse", ignoreCase = true) == true ||
-                        senderUserId.contains("nurse", ignoreCase = true))
+    private suspend fun getCurrentNurseInfo(): Pair<String?, String?> {
+        val session = sessionStore.session.firstOrNull() ?: sessionStore.state.firstOrNull()?.session
+        return Pair(session?.nurseId, session?.phoneNumber)
+    }
 
-        val senderType = if (isNurseSender) MessageSender.NURSE else MessageSender.PATIENT
-        val type = if (isNurseSender) ChatMessageType.OUTGOING else ChatMessageType.INCOMING
+    private fun MessageDto.toDomain(
+        currentNurseUserId: String?,
+        currentNursePhone: String?,
+    ): ChatMessage {
+        val isNurse = isNurseSender(
+            senderUserId = senderUserId,
+            senderName = senderName,
+            senderPhone = senderPhone,
+            currentNurseUserId = currentNurseUserId,
+            currentNursePhone = currentNursePhone,
+        )
+
+        val senderType = if (isNurse) MessageSender.NURSE else MessageSender.PATIENT
+        val type = if (isNurse) ChatMessageType.OUTGOING else ChatMessageType.INCOMING
 
         return ChatMessage(
             id = id,
@@ -164,3 +175,26 @@ class ChatDataSourceImp @Inject constructor(
         }
     }
 }
+
+internal fun isNurseSender(
+    senderUserId: String,
+    senderName: String?,
+    senderPhone: String?,
+    currentNurseUserId: String?,
+    currentNursePhone: String?,
+): Boolean {
+    val matchesUserId = !currentNurseUserId.isNullOrBlank() &&
+            senderUserId.equals(currentNurseUserId, ignoreCase = true)
+
+    val matchesPhone = !currentNursePhone.isNullOrBlank() &&
+            !senderPhone.isNullOrBlank() &&
+            phoneDigits(senderPhone) == phoneDigits(currentNursePhone)
+
+    val matchesName = senderName?.contains("Nurse", ignoreCase = true) == true
+    val matchesUserIdPrefix = senderUserId.contains("nurse", ignoreCase = true)
+
+    return matchesUserId || matchesPhone || matchesName || matchesUserIdPrefix
+}
+
+private fun phoneDigits(phone: String): String =
+    phone.replace(Regex("[^0-9]"), "")
