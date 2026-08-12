@@ -101,9 +101,9 @@ private fun NurseResponseDto.toDomain(): NurseProfile = NurseProfile(
     phoneNumber = phoneNumber,
     profileImageUrl = profileImageUrl,
     nationalId = nationalId,
+    licenseNumber = licenseNumber,
     nationalIdFrontUrl = nationalIdFrontUrl,
     nationalIdBackUrl = nationalIdBackUrl,
-    licenseNumber = licenseNumber,
     licenseImageUrl = licenseImageUrl,
     professionalCertificateUrl = professionalCertificateUrl,
     specialization = specialization,
@@ -118,18 +118,20 @@ private fun NurseResponseDto.toDomain(): NurseProfile = NurseProfile(
         FailedStep(step, item.reason.orEmpty())
     },
     services = services.mapNotNull { service ->
-        val name = service.serviceName?.takeIf(String::isNotBlank) ?: return@mapNotNull null
+        val serviceTypeId = service.serviceTypeId.takeIf(String::isNotBlank) ?: return@mapNotNull null
         NurseService(
-            id = service.id,
-            serviceTypeId = service.serviceTypeId,
-            serviceName = name,
+            id = service.id.orEmpty(),
+            serviceTypeId = serviceTypeId,
+            serviceName = service.serviceName ?: serviceTypeId,
             serviceDescription = service.serviceDescription,
             basePrice = service.basePrice,
-            isActive = service.isActive,
+            isActive = service.isActive ?: true,
         )
     },
 )
 
-private fun String.toVerificationStatus(): VerificationStatus =
-    runCatching { VerificationStatus.valueOf(this) }
-        .getOrDefault(VerificationStatus.UNDER_REVIEW)
+private fun String.toVerificationStatus(): VerificationStatus = when (uppercase()) {
+    "VERIFIED", "APPROVED" -> VerificationStatus.APPROVED
+    "REJECTED" -> VerificationStatus.REJECTED
+    else -> VerificationStatus.UNDER_REVIEW
+}
