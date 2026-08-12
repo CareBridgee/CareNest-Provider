@@ -57,10 +57,35 @@ data class FailedStep(
 
 data class NurseProfile(
     val id: String,
-    val profileImageUrl: String?,
-    val verificationStatus: VerificationStatus,
-    val rejectionReason: String?,
-    val failedSteps: List<FailedStep>,
+    val userId: String? = null,
+    val firstName: String? = null,
+    val lastName: String? = null,
+    val phoneNumber: String? = null,
+    val profileImageUrl: String? = null,
+    val nationalId: String? = null,
+    val nationalIdFrontUrl: String? = null,
+    val nationalIdBackUrl: String? = null,
+    val licenseNumber: String? = null,
+    val licenseImageUrl: String? = null,
+    val professionalCertificateUrl: String? = null,
+    val specialization: String? = null,
+    val yearsOfExperience: Int? = null,
+    val bio: String? = null,
+    val ratingAvg: Double? = null,
+    val totalReviews: Int? = null,
+    val verificationStatus: VerificationStatus = VerificationStatus.UNDER_REVIEW,
+    val rejectionReason: String? = null,
+    val failedSteps: List<FailedStep> = emptyList(),
+    val services: List<NurseService> = emptyList(),
+)
+
+data class NurseService(
+    val id: String?,
+    val serviceTypeId: String?,
+    val serviceName: String,
+    val serviceDescription: String?,
+    val basePrice: Double?,
+    val isActive: Boolean,
 )
 
 data class ServiceFailure(

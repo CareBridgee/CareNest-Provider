@@ -9,6 +9,7 @@ import com.carenest.provider.profile.data.remote.dto.ServiceTypeResponseDto
 import com.carenest.provider.profile.data.remote.dto.UserResponseDto
 import com.carenest.provider.profile.domain.model.FailedStep
 import com.carenest.provider.profile.domain.model.NurseProfile
+import com.carenest.provider.profile.domain.model.NurseService
 import com.carenest.provider.profile.domain.model.NurseRegistration
 import com.carenest.provider.profile.domain.model.NurseServiceBatchResult
 import com.carenest.provider.profile.domain.model.NurseUpdate
@@ -94,11 +95,41 @@ class ProfileRepositoryImpl @Inject constructor(
 
 private fun NurseResponseDto.toDomain(): NurseProfile = NurseProfile(
     id = id,
+    userId = userId,
+    firstName = firstName,
+    lastName = lastName,
+    phoneNumber = phoneNumber,
     profileImageUrl = profileImageUrl,
-    verificationStatus = VerificationStatus.valueOf(verificationStatus),
+    nationalId = nationalId,
+    nationalIdFrontUrl = nationalIdFrontUrl,
+    nationalIdBackUrl = nationalIdBackUrl,
+    licenseNumber = licenseNumber,
+    licenseImageUrl = licenseImageUrl,
+    professionalCertificateUrl = professionalCertificateUrl,
+    specialization = specialization,
+    yearsOfExperience = yearsOfExperience,
+    bio = bio,
+    ratingAvg = ratingAvg,
+    totalReviews = totalReviews,
+    verificationStatus = verificationStatus.toVerificationStatus(),
     rejectionReason = rejectionDetails?.overallReason ?: rejectionReason,
     failedSteps = rejectionDetails?.failedSteps.orEmpty().mapNotNull { item ->
         val step = item.step ?: return@mapNotNull null
         FailedStep(step, item.reason.orEmpty())
     },
+    services = services.mapNotNull { service ->
+        val name = service.serviceName?.takeIf(String::isNotBlank) ?: return@mapNotNull null
+        NurseService(
+            id = service.id,
+            serviceTypeId = service.serviceTypeId,
+            serviceName = name,
+            serviceDescription = service.serviceDescription,
+            basePrice = service.basePrice,
+            isActive = service.isActive,
+        )
+    },
 )
+
+private fun String.toVerificationStatus(): VerificationStatus =
+    runCatching { VerificationStatus.valueOf(this) }
+        .getOrDefault(VerificationStatus.UNDER_REVIEW)
