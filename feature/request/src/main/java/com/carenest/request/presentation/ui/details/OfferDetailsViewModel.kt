@@ -10,6 +10,8 @@ import com.carenest.provider.core.network.socket.client.NurseSocketClient
 import com.carenest.provider.core.network.socket.model.ReservationEventType
 import com.carenest.request.R
 import com.carenest.request.domain.usecase.GetRequestContractUseCase
+import com.carenest.request.domain.model.Offer
+import com.carenest.request.domain.repository.PatientGeocodingRepository
 import com.carenest.request.presentation.UiText
 import com.carenest.request.presentation.toUiText
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,12 +23,15 @@ import javax.inject.Inject
 class OfferDetailsViewModel @Inject constructor(
     private val getRequestContract: GetRequestContractUseCase,
     private val nurseSocketClient: NurseSocketClient,
+    private val patientGeocodingRepository: PatientGeocodingRepository,
 ) : ViewModel(),
     StateHolder<OfferDetailsUiState> by DefaultStateHolder(OfferDetailsUiState()),
     EffectPublisher<OfferDetailsEffect> by DefaultEffectPublisher() {
 
     private var loadedRequestId: String? = null
     private var socketJob: Job? = null
+    private var geocodingJob: Job? = null
+    private var copyAddressWhenResolved = false
 
     fun onIntent(intent: OfferDetailsIntent) {
         when (intent) {
@@ -58,7 +63,17 @@ class OfferDetailsViewModel @Inject constructor(
                 }
             }
             OfferDetailsIntent.CopyAddressClicked -> {
-                withAddress { sendEffect(OfferDetailsEffect.CopyToClipboard(it)) }
+                val offer = currentState.offer ?: return
+                val hasCoordinates = offer.patientInfo.latitude != null &&
+                    offer.patientInfo.longitude != null
+                if (hasCoordinates && currentState.patientLocation == null) {
+                    copyAddressWhenResolved = true
+                    if (!currentState.isAddressLoading) {
+                        reverseGeocodePatientLocation(offer)
+                    }
+                } else {
+                    withBestAddress { sendEffect(OfferDetailsEffect.CopyToClipboard(it)) }
+                }
             }
             OfferDetailsIntent.ViewSummaryClicked -> {
                 val summary = currentState.offer?.patientInfo?.summery
@@ -73,7 +88,26 @@ class OfferDetailsViewModel @Inject constructor(
                 }
             }
             OfferDetailsIntent.OpenInMapsClicked -> {
-                withAddress { sendEffect(OfferDetailsEffect.OpenMaps(it)) }
+                val patient = currentState.offer?.patientInfo ?: return
+                val address = currentState.patientLocation?.address
+                    ?.takeIf(String::isNotBlank)
+                    ?: patient.fullAddress()
+                val hasCoordinates = patient.latitude != null && patient.longitude != null
+                if (!hasCoordinates && address.isBlank()) {
+                    sendEffect(
+                        OfferDetailsEffect.ShowError(
+                            UiText.StringResource(R.string.patient_address_unavailable)
+                        )
+                    )
+                } else {
+                    sendEffect(
+                        OfferDetailsEffect.OpenMaps(
+                            latitude = patient.latitude,
+                            longitude = patient.longitude,
+                            address = address,
+                        )
+                    )
+                }
             }
             OfferDetailsIntent.MoreClicked -> {
                 // Handle more options if needed
@@ -90,12 +124,21 @@ class OfferDetailsViewModel @Inject constructor(
         loadedRequestId = requestId
 
         observeSocketEvents(requestId)
+        geocodingJob?.cancel()
+        copyAddressWhenResolved = false
 
         viewModelScope.launch {
-            updateState { copy(isLoading = true) }
+            updateState {
+                copy(
+                    isLoading = true,
+                    patientLocation = null,
+                    isAddressLoading = false,
+                )
+            }
             getRequestContract(requestId)
                 .onSuccess { contract ->
                     updateState { copy(isLoading = false, offer = contract) }
+                    reverseGeocodePatientLocation(contract)
                     if (contract.serviceRequestStatus.equals("COMPLETED", ignoreCase = true)) {
                         sendEffect(OfferDetailsEffect.NavigateToVisitCompleted(contract.offerId))
                     } else if (contract.serviceRequestStatus.equals("CANCELLED", ignoreCase = true) ||
@@ -148,11 +191,11 @@ class OfferDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun withAddress(block: (String) -> Unit) {
+    private fun withBestAddress(block: (String) -> Unit) {
         val patient = currentState.offer?.patientInfo ?: return
-        val address = listOf(patient.addressLine, patient.addressDetail)
-            .filter(String::isNotBlank)
-            .joinToString(", ")
+        val address = currentState.patientLocation?.address
+            ?.takeIf(String::isNotBlank)
+            ?: patient.fullAddress()
         if (address.isBlank()) {
             sendEffect(
                 OfferDetailsEffect.ShowError(
@@ -164,8 +207,60 @@ class OfferDetailsViewModel @Inject constructor(
         }
     }
 
+    private fun com.carenest.request.domain.model.PatientInfo.fullAddress(): String =
+        listOf(addressLine, addressDetail)
+            .filter(String::isNotBlank)
+            .joinToString(", ")
+
+    private fun reverseGeocodePatientLocation(offer: Offer) {
+        val latitude = offer.patientInfo.latitude ?: return
+        val longitude = offer.patientInfo.longitude ?: return
+
+        geocodingJob?.cancel()
+        geocodingJob = viewModelScope.launch {
+            updateState { copy(isAddressLoading = true) }
+            patientGeocodingRepository.reverseGeocode(latitude, longitude)
+                .onSuccess { location ->
+                    if (currentState.offer?.offerId == offer.offerId) {
+                        updateState {
+                            copy(
+                                patientLocation = location,
+                                isAddressLoading = false,
+                            )
+                        }
+                        if (copyAddressWhenResolved) {
+                            copyAddressWhenResolved = false
+                            val address = location.address.takeIf(String::isNotBlank)
+                                ?: offer.patientInfo.fullAddress()
+                            if (address.isNotBlank()) {
+                                sendEffect(OfferDetailsEffect.CopyToClipboard(address))
+                            } else {
+                                sendEffect(
+                                    OfferDetailsEffect.ShowError(
+                                        UiText.StringResource(R.string.patient_address_unavailable)
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+                .onFailure {
+                    if (currentState.offer?.offerId == offer.offerId) {
+                        updateState { copy(isAddressLoading = false) }
+                        if (copyAddressWhenResolved) {
+                            copyAddressWhenResolved = false
+                            withBestAddress {
+                                sendEffect(OfferDetailsEffect.CopyToClipboard(it))
+                            }
+                        }
+                    }
+                }
+        }
+    }
+
     override fun onCleared() {
         socketJob?.cancel()
+        geocodingJob?.cancel()
         loadedRequestId?.let { id ->
             viewModelScope.launch {
                 nurseSocketClient.unsubscribeFromReservation(id)

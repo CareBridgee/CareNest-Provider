@@ -11,4 +11,6 @@ data class PatientInfo(
     val addressDetail: String,
     val phone: String,
     val summery: String,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
 )

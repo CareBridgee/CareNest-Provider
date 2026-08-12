@@ -53,6 +53,8 @@ fun ServiceRequestDetailsDto.toDomainOffer(
             summery = patientReport?.report
                 ?: assignedProfile?.serviceDescription
                 ?: serviceDescription.orEmpty(),
+            latitude = latitude,
+            longitude = longitude,
         ),
         visitDate = (
             acceptedOffer?.proposedDate
