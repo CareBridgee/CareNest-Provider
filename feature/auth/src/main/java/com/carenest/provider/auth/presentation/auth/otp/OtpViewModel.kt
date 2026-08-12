@@ -4,9 +4,13 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.carenest.provider.auth.domain.usecase.VerifyOtpUseCase
+import com.carenest.provider.auth.domain.usecase.DevLoginUseCase
 import com.carenest.provider.auth.domain.usecase.ResolveAuthenticationDestinationUseCase
 import com.carenest.provider.auth.domain.repository.AuthenticatedNurse
 import com.carenest.provider.auth.domain.util.AuthenticationDestination
+import com.carenest.provider.auth.domain.validation.PhoneValidator
+import com.carenest.provider.auth.presentation.auth.AuthUiError
+import com.carenest.provider.auth.presentation.auth.toAuthUiError
 import com.carenest.provider.core.datastore.AuthenticationSession
 import com.carenest.provider.core.datastore.AuthenticationCredentials
 import com.carenest.provider.core.datastore.AuthenticationSessionDestination
@@ -16,6 +20,8 @@ import com.carenest.provider.core.mvi.DefaultStateHolder
 import com.carenest.provider.core.mvi.EffectPublisher
 import com.carenest.provider.core.mvi.StateHolder
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -23,6 +29,7 @@ import javax.inject.Inject
 @HiltViewModel
 class OtpViewModel @Inject constructor(
     private val verifyOtpUseCase: VerifyOtpUseCase,
+    private val devLoginUseCase: DevLoginUseCase,
     private val resolveDestination: ResolveAuthenticationDestinationUseCase,
     private val authenticationSessionStore: AuthenticationSessionStore,
 ) : ViewModel(),
@@ -31,35 +38,90 @@ class OtpViewModel @Inject constructor(
 
     private var verifiedNurse: AuthenticatedNurse? = null
     private var verifiedCredentials: AuthenticationCredentials? = null
+    private var countdownJob: Job? = null
 
+    init {
+        startCountdown()
+    }
 
     fun onEvent(event: OtpIntent) {
         when (event) {
-            is OtpIntent.PhoneNumberChanged -> updateState {
-                copy(
-                    phoneNumber = event.phone,
-                    otpCode = event.otp ?: otpCode
-                )
-            }
+            is OtpIntent.PhoneNumberChanged -> updateState { copy(phoneNumber = event.phone) }
             is OtpIntent.OtpCodeChanged -> updateState { copy(otpCode = event.otp, errorMessage = null) }
             OtpIntent.VerifyOtpClicked -> verifyOtp()
             OtpIntent.RetryDestinationResolution -> retryDestinationResolution()
             OtpIntent.BackClicked -> sendEffect(OtpEffect.NavigateBack)
-            OtpIntent.ResendClicked -> { /* TODO: Resend OTP */ }
+            OtpIntent.ResendClicked -> resendOtp()
+        }
+    }
+
+    private fun startCountdown() {
+        countdownJob?.cancel()
+        updateState {
+            copy(
+                remainingSeconds = RESEND_SECONDS,
+                countdownGeneration = countdownGeneration + 1,
+            )
+        }
+        countdownJob = viewModelScope.launch {
+            for (seconds in (RESEND_SECONDS - 1) downTo 0) {
+                delay(ONE_SECOND_MILLIS)
+                updateState { copy(remainingSeconds = seconds) }
+            }
+        }
+    }
+
+    private fun resendOtp() {
+        if (!currentState.canResend) return
+
+        val phoneNumber = PhoneValidator.normalizeInternationalNumber(currentState.phoneNumber)
+        if (phoneNumber == null) {
+            updateState { copy(errorMessage = AuthUiError.InvalidPhone) }
+            return
+        }
+
+        updateState { copy(isResending = true, errorMessage = null) }
+        viewModelScope.launch {
+            devLoginUseCase(phoneNumber).fold(
+                onSuccess = { otp ->
+                    updateState {
+                        copy(
+                            otpCode = otp,
+                            isResending = false,
+                            errorMessage = null,
+                        )
+                    }
+                    startCountdown()
+                },
+                onFailure = { error ->
+                    updateState {
+                        copy(
+                            isResending = false,
+                            remainingSeconds = 0,
+                            errorMessage = error.toAuthUiError(AuthUiError.ResendCodeFailed),
+                        )
+                    }
+                },
+            )
         }
     }
 
     private fun verifyOtp() {
+        if (currentState.isLoading) return
+
         if (currentState.otpCode.length != 6) {
-            updateState { copy(errorMessage = "Invalid OTP code") }
+            updateState { copy(errorMessage = AuthUiError.OtpIncomplete) }
             return
         }
 
         viewModelScope.launch {
             updateState { copy(isLoading = true, errorMessage = null) }
 
-            val digitsOnly = currentState.phoneNumber.replace(Regex("[^0-9]"), "")
-            val sanitizedPhone = "+$digitsOnly"
+            val sanitizedPhone = PhoneValidator.normalizeInternationalNumber(currentState.phoneNumber)
+            if (sanitizedPhone == null) {
+                updateState { copy(isLoading = false, errorMessage = AuthUiError.InvalidPhone) }
+                return@launch
+            }
             val result = verifyOtpUseCase(sanitizedPhone, currentState.otpCode)
 
             result.fold(
@@ -73,7 +135,7 @@ class OtpViewModel @Inject constructor(
                         copy(
                             isLoading = false,
                             canRetryDestination = false,
-                            errorMessage = error.message ?: "Verification failed",
+                            errorMessage = error.toAuthUiError(AuthUiError.VerificationFailed),
                         )
                     }
                 }
@@ -102,7 +164,7 @@ class OtpViewModel @Inject constructor(
                         copy(
                             isLoading = false,
                             canRetryDestination = false,
-                            errorMessage = "Unable to initialize the authenticated session",
+                            errorMessage = AuthUiError.ProfileLoadFailed,
                         )
                     }
                     return@fold
@@ -119,7 +181,7 @@ class OtpViewModel @Inject constructor(
                         copy(
                             isLoading = false,
                             canRetryDestination = false,
-                            errorMessage = "Unable to initialize the authenticated session",
+                            errorMessage = AuthUiError.ProfileLoadFailed,
                         )
                     }
                     return@fold
@@ -147,11 +209,16 @@ class OtpViewModel @Inject constructor(
                     copy(
                         isLoading = false,
                         canRetryDestination = true,
-                        errorMessage = error.message ?: "Unable to determine account destination",
+                        errorMessage = error.toAuthUiError(AuthUiError.ProfileLoadFailed),
                     )
                 }
             },
         )
+    }
+
+    private companion object {
+        const val RESEND_SECONDS = 30
+        const val ONE_SECOND_MILLIS = 1_000L
     }
 }
 

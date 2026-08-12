@@ -3,19 +3,19 @@ package com.carenest.provider.auth.presentation.auth.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.carenest.provider.auth.domain.usecase.DevLoginUseCase
-import com.carenest.provider.auth.domain.usecase.LoginWithPhoneUseCase
+import com.carenest.provider.auth.domain.validation.PhoneValidator
+import com.carenest.provider.auth.presentation.auth.AuthUiError
+import com.carenest.provider.auth.presentation.auth.toAuthUiError
 import com.carenest.provider.core.mvi.DefaultEffectPublisher
 import com.carenest.provider.core.mvi.DefaultStateHolder
 import com.carenest.provider.core.mvi.EffectPublisher
 import com.carenest.provider.core.mvi.StateHolder
-import com.carenest.provider.core.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val loginWithPhoneUseCase: LoginWithPhoneUseCase,
     private val devLoginUseCase: DevLoginUseCase
 ) : ViewModel(),
     StateHolder<LoginState> by DefaultStateHolder(LoginState()),
@@ -24,7 +24,19 @@ class LoginViewModel @Inject constructor(
     fun onEvent(event: LoginIntent) {
         when (event) {
             is LoginIntent.PhoneNumberChanged -> {
-                updateState { copy(phoneNumber = event.phone, errorMessage = null) }
+                val phone = PhoneValidator.sanitize(
+                    event.phone,
+                    currentState.selectedCountry.phoneConfig,
+                )
+                updateState {
+                    copy(
+                        phoneNumber = phone,
+                        phoneValidationError = phone.takeIf(String::isNotBlank)?.let {
+                            PhoneValidator.validate(it, selectedCountry.phoneConfig)
+                        },
+                        errorMessage = null,
+                    )
+                }
             }
 
             is LoginIntent.OtpMethodChanged -> {
@@ -32,7 +44,21 @@ class LoginViewModel @Inject constructor(
             }
 
             is LoginIntent.CountryCodeChanged -> {
-                updateState { copy(selectedCountry = event.country, isCountryDropdownExpanded = false) }
+                val phone = PhoneValidator.sanitize(
+                    currentState.phoneNumber,
+                    event.country.phoneConfig,
+                )
+                updateState {
+                    copy(
+                        phoneNumber = phone,
+                        selectedCountry = event.country,
+                        isCountryDropdownExpanded = false,
+                        phoneValidationError = phone.takeIf(String::isNotBlank)?.let {
+                            PhoneValidator.validate(it, event.country.phoneConfig)
+                        },
+                        errorMessage = null,
+                    )
+                }
             }
 
             LoginIntent.ToggleCountryDropdown -> {
@@ -53,7 +79,9 @@ class LoginViewModel @Inject constructor(
             LoginStep.PHONE_INPUT -> updateState {
                 copy(
                     currentStep = LoginStep.LANDING,
-                    phoneNumber = ""
+                    phoneNumber = "",
+                    phoneValidationError = null,
+                    errorMessage = null,
                 )
             }
 
@@ -64,46 +92,46 @@ class LoginViewModel @Inject constructor(
     }
 
     private fun requestOtp() {
-        if (currentState.phoneNumber.isBlank()) {
-            updateState { copy(errorMessage = "Phone number is required") }
+        if (currentState.isLoading) return
+
+        val validationError = PhoneValidator.validate(
+            currentState.phoneNumber,
+            currentState.selectedCountry.phoneConfig,
+        )
+        if (validationError != null) {
+            updateState { copy(phoneValidationError = validationError, errorMessage = null) }
             return
         }
 
         viewModelScope.launch {
-
-            val rawPhoneNumber = "${currentState.selectedCountry.code}${currentState.phoneNumber}"
-            val digitsOnly = rawPhoneNumber.replace(Regex("[^0-9]"), "")
-            val fullPhoneNumber = "+$digitsOnly"
+            val fullPhoneNumber = PhoneValidator.toInternationalNumber(
+                currentState.phoneNumber,
+                currentState.selectedCountry.phoneConfig,
+            )
             updateState { copy(isLoading = true, errorMessage = null) }
 
-            // Using DevLoginUseCase for development purposes as requested
             val result = devLoginUseCase(fullPhoneNumber)
 
             updateState { copy(isLoading = false) }
 
-            when (result) {
-                is Resource.Success -> {
+            result.fold(
+                onSuccess = { otp ->
                     sendEffect(
                         LoginEffect.NavigateToOtp(
                             fullPhoneNumber,
                             currentState.selectedOtpMethod,
-                            result.data
+                            otp,
                         )
                     )
-                }
-
-                is Resource.Error -> {
+                },
+                onFailure = { error ->
                     updateState {
                         copy(
-                            errorMessage = result.message ?: "Something went wrong. Please try again."
+                            errorMessage = error.toAuthUiError(AuthUiError.SendCodeFailed),
                         )
                     }
-                }
-
-                is Resource.Loading -> {
-                    // Handled by isLoading flag above
-                }
-            }
+                },
+            )
         }
     }
 }

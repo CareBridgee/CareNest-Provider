@@ -1,5 +1,9 @@
 package com.carenest.provider.auth.presentation.auth.login
 
+import com.carenest.provider.auth.domain.validation.PhoneNumberValidationError
+import com.carenest.provider.auth.domain.validation.SupportedPhoneCountry
+import com.carenest.provider.auth.presentation.auth.AuthUiError
+
 sealed interface LoginIntent {
     data class PhoneNumberChanged(val phone: String) : LoginIntent
     data class OtpMethodChanged(val method: OtpDeliveryMethod) : LoginIntent
@@ -21,27 +25,16 @@ enum class OtpDeliveryMethod {
 }
 
 data class Country(
-    val name: String,
-    val code: String,
-    val flag: String
-)
+    val flag: String,
+    val phoneConfig: SupportedPhoneCountry,
+) {
+    val code: String get() = phoneConfig.dialCode
+}
 
 val countries = listOf(
-    Country(
-        "Egypt",
-        "+20",
-        "\uD83C\uDDEA\uD83C\uDDEC"
-    ),
-    Country(
-        "Saudi Arabia",
-        "+966",
-        "\uD83C\uDDF8\uD83C\uDDE6"
-    ),
-    Country(
-        "UAE",
-        "+971",
-        "\uD83C\uDDE6\uD83C\uDDEA"
-    )
+    Country("\uD83C\uDDEA\uD83C\uDDEC", SupportedPhoneCountry.EGYPT),
+    Country("\uD83C\uDDF8\uD83C\uDDE6", SupportedPhoneCountry.SAUDI_ARABIA),
+    Country("\uD83C\uDDE6\uD83C\uDDEA", SupportedPhoneCountry.UAE),
 )
 
 data class LoginState(
@@ -51,8 +44,13 @@ data class LoginState(
     val isCountryDropdownExpanded: Boolean = false,
     val selectedOtpMethod: OtpDeliveryMethod = OtpDeliveryMethod.SMS,
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
-)
+    val phoneValidationError: PhoneNumberValidationError? = null,
+    val errorMessage: AuthUiError? = null,
+) {
+    val isPhoneValid: Boolean
+        get() = phoneNumber.isNotBlank() &&
+            selectedCountry.phoneConfig.validate(phoneNumber) == null
+}
 
 sealed interface LoginEffect {
     data class NavigateToOtp(

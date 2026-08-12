@@ -25,14 +25,30 @@ enum class MenuItemId {
 enum class DocumentStatus {
     Verified,
     Pending,
+    Rejected,
+}
+
+enum class DocumentUploadTarget {
+    NationalIdFront,
+    NationalIdBack,
+    NursingLicense,
+    ProfessionalCertificate,
 }
 
 data class ProfessionalDocumentUiModel(
     val id: String,
     @StringRes val titleRes: Int,
-    @StringRes val uploadedDateRes: Int,
+    @StringRes val supportingTextRes: Int,
     @DrawableRes val iconRes: Int,
     val status: DocumentStatus,
+    val files: List<ProfessionalDocumentFileUiModel>,
+)
+
+data class ProfessionalDocumentFileUiModel(
+    val target: DocumentUploadTarget,
+    @StringRes val labelRes: Int,
+    val url: String?,
+    val isUploading: Boolean = false,
 )
 
 enum class ReviewFilter {
