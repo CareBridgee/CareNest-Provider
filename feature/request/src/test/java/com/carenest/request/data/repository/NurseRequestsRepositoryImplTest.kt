@@ -112,6 +112,72 @@ class NurseRequestsRepositoryImplTest {
         assertEquals("\u2014", result.estimatedDuration)
     }
 
+    @Test
+    fun `fetches patient summary from service request preview`() = runBlocking {
+        val remote = FakeRequestRemoteDataSource().apply {
+            preview = {
+                ServiceRequestNursePreviewDto(
+                    serviceRequestId = "service-request-id",
+                    patient = PatientMedicalSummaryDto(
+                        profileId = "profile-id",
+                        firstName = "Mona",
+                        lastName = "Ali",
+                        profileImageUrl = "https://example.com/patient.jpg",
+                        dateOfBirth = "1988-04-12",
+                        gender = "FEMALE",
+                        bloodType = "O+",
+                        height = 168.0,
+                        weight = 64.0,
+                        mobilityStatus = "Independent",
+                        mobilityNotes = "Needs help on stairs",
+                        previousSurgeries = "Appendectomy",
+                        previousHospitalizations = "None",
+                        allergies = listOf("Penicillin"),
+                        medicalConditions = listOf("Hypertension"),
+                        medications = listOf("Lisinopril"),
+                        medicalHistory = listOf(
+                            com.carenest.request.data.remote.dto.MedicalHistoryItemDto(
+                                type = "Surgery",
+                                description = "Appendectomy",
+                            ),
+                        ),
+                        emergencyContacts = listOf(
+                            com.carenest.request.data.remote.dto.EmergencyContactItemDto(
+                                name = "Sara Ali",
+                                relationship = "Sister",
+                                phoneNumber = "+201000000000",
+                            ),
+                        ),
+                    ),
+                )
+            }
+        }
+
+        val result = repository(remote).fetchPatientSummary("service-request-id")
+
+        assertEquals(listOf("service-request-id"), remote.previewRequestIds)
+        assertEquals("profile-id", result.profileId)
+        assertEquals("Mona Ali", result.fullName)
+        assertEquals("https://example.com/patient.jpg", result.profileImageUrl)
+        assertEquals("1988-04-12", result.dateOfBirth)
+        assertEquals("FEMALE", result.gender)
+        assertEquals("O+", result.bloodType)
+        assertEquals(168.0, result.height ?: 0.0, 0.0)
+        assertEquals(64.0, result.weight ?: 0.0, 0.0)
+        assertEquals("Independent", result.mobilityStatus)
+        assertEquals("Needs help on stairs", result.mobilityNotes)
+        assertEquals("Appendectomy", result.previousSurgeries)
+        assertEquals("None", result.previousHospitalizations)
+        assertEquals(listOf("Penicillin"), result.allergies)
+        assertEquals(listOf("Hypertension"), result.medicalConditions)
+        assertEquals(listOf("Lisinopril"), result.medications)
+        assertEquals("Surgery", result.medicalHistory.single().type)
+        assertEquals("Appendectomy", result.medicalHistory.single().description)
+        assertEquals("Sara Ali", result.emergencyContacts.single().name)
+        assertEquals("Sister", result.emergencyContacts.single().relationship)
+        assertEquals("+201000000000", result.emergencyContacts.single().phoneNumber)
+    }
+
     private fun repository(remote: RequestRemoteDataSource) = NurseRequestsRepositoryImpl(
         dataSource = NoOpNurseRequestsDataSource,
         remoteDataSource = remote,
@@ -134,6 +200,7 @@ private class FakeRequestRemoteDataSource : RequestRemoteDataSource {
     var profile: suspend () -> ServiceRequestNurseProfileDto = { error("Not configured") }
     var report: suspend (String) -> PatientReportDto = { error("Not configured") }
     var previewCalls = 0
+    val previewRequestIds = mutableListOf<String>()
 
     override suspend fun getServiceRequestDetails(serviceRequestId: String) = details()
 
@@ -141,6 +208,7 @@ private class FakeRequestRemoteDataSource : RequestRemoteDataSource {
         serviceRequestId: String,
     ): ServiceRequestNursePreviewDto {
         previewCalls++
+        previewRequestIds += serviceRequestId
         return preview()
     }
 

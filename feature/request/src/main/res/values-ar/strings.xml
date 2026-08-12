@@ -131,4 +131,29 @@
     <string name="scan_qr_instruction">قم بمحاذاة رمز QR داخل الإطار للمسح</string>
     <string name="scan_qr_scanning">جارٍ المسح…</string>
     <string name="scan_qr_retry">حاول مرة أخرى</string>
+
+    <!-- Patient Summary -->
+    <string name="patient_summary_title">CareConnect</string>
+    <string name="patient_summary_personal_info">المعلومات الشخصية</string>
+    <string name="patient_summary_age">العمر</string>
+    <string name="patient_summary_gender">النوع</string>
+    <string name="patient_summary_blood_type">فصيلة الدم</string>
+    <string name="patient_summary_height">الطول</string>
+    <string name="patient_summary_weight">الوزن</string>
+    <string name="patient_summary_mobility">الحركة</string>
+    <string name="patient_summary_medical_conditions">الحالات الطبية</string>
+    <string name="patient_summary_allergies">الحساسية</string>
+    <string name="patient_summary_current_medications">الأدوية الحالية</string>
+    <string name="patient_summary_mobility_care_notes">ملاحظات الحركة والرعاية</string>
+    <string name="patient_summary_medical_history">التاريخ الطبي</string>
+    <string name="patient_summary_emergency_contacts">جهات اتصال الطوارئ</string>
+    <string name="patient_summary_height_unit">%1$s سم</string>
+    <string name="patient_summary_weight_unit">%1$s كجم</string>
+    <string name="patient_summary_no_allergies">لا توجد حساسيات مسجلة</string>
+    <string name="patient_summary_no_conditions">لا توجد حالات طبية مسجلة</string>
+    <string name="patient_summary_no_medications">لا توجد أدوية حالية</string>
+    <string name="patient_summary_no_history">لا يوجد تاريخ طبي مسجل</string>
+    <string name="patient_summary_no_contacts">لا توجد جهات اتصال طوارئ</string>
+    <string name="patient_summary_mobility_status_label">حالة الحركة: %1$s</string>
+    <string name="patient_summary_notes_label">ملاحظات: %1$s</string>
 </resources>
