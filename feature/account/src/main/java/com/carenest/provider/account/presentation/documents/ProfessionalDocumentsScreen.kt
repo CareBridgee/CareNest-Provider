@@ -1,5 +1,11 @@
 package com.carenest.provider.account.presentation.documents
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.provider.OpenableColumns
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,14 +28,18 @@ import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -39,11 +49,15 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carenest.provider.account.R
-import com.carenest.provider.account.presentation.components.ProfessionalDocumentsLoadingSkeleton
 import com.carenest.provider.account.presentation.components.ProfessionalDocumentCard
+import com.carenest.provider.account.presentation.components.ProfessionalDocumentsLoadingSkeleton
 import com.carenest.provider.account.presentation.components.ProviderAccountTopBar
-import com.carenest.provider.account.presentation.model.DocumentStatus
+import com.carenest.provider.account.presentation.model.DocumentUploadTarget
 import com.carenest.provider.core.mvi.ObserveEffect
+import com.carenest.provider.designsystem.components.button.PrimaryButton
+import com.carenest.provider.designsystem.components.toast.ToastHost
+import com.carenest.provider.designsystem.components.toast.ToastType
+import com.carenest.provider.designsystem.components.toast.rememberToastState
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.designsystem.R as DesignSystemR
@@ -52,19 +66,65 @@ import com.carenest.provider.designsystem.R as DesignSystemR
 fun ProfessionalDocumentsRoute(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
-    onOpenDocument: (String) -> Unit = {},
-    onUploadDocument: () -> Unit = {},
     viewModel: ProfessionalDocumentsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val toastState = rememberToastState()
+    var pendingPickerTarget by remember { mutableStateOf<DocumentUploadTarget?>(null) }
+    val documentPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        val target = pendingPickerTarget
+        pendingPickerTarget = null
+        if (uri != null && target != null) {
+            persistReadPermission(context, uri)
+            viewModel.onIntent(
+                ProfessionalDocumentsIntent.DocumentFilePicked(
+                    PickedDocumentFile(
+                        target = target,
+                        uri = uri,
+                        fileName = getFileName(context, uri),
+                        mimeType = context.contentResolver.getType(uri) ?: "application/octet-stream",
+                    ),
+                ),
+            )
+        }
+    }
+
     ObserveEffect(viewModel.effect) { effect ->
         when (effect) {
             ProfessionalDocumentsEffect.NavigateBack -> onNavigateBack()
-            is ProfessionalDocumentsEffect.OpenDocument -> onOpenDocument(effect.id)
-            ProfessionalDocumentsEffect.UploadDocument -> onUploadDocument()
+            is ProfessionalDocumentsEffect.OpenDocument -> {
+                val opened = openDocumentUrl(context, effect.url)
+                if (!opened) {
+                    toastState.show(
+                        message = resolveMessage(context, "documents_error_no_viewer"),
+                        type = ToastType.Error,
+                    )
+                }
+            }
+            is ProfessionalDocumentsEffect.OpenDocumentPicker -> {
+                pendingPickerTarget = effect.target
+                documentPicker.launch(arrayOf("*/*"))
+            }
+            is ProfessionalDocumentsEffect.ShowMessage -> {
+                toastState.show(
+                    message = resolveMessage(context, effect.message),
+                    type = effect.type,
+                )
+            }
         }
     }
-    ProfessionalDocumentsContent(state, viewModel::onIntent, modifier)
+
+    Box(modifier = modifier.fillMaxSize()) {
+        ProfessionalDocumentsContent(
+            state = state,
+            onIntent = viewModel::onIntent,
+            modifier = Modifier.fillMaxSize(),
+        )
+        ToastHost(state = toastState)
+    }
 }
 
 @Composable
@@ -133,7 +193,10 @@ fun ProfessionalDocumentsContent(
 }
 
 @Composable
-private fun UploadDocumentCard(onClick: () -> Unit) {
+private fun UploadDocumentCard(
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
     val borderColor = Theme.colors.onDisable
     Column(
         modifier = Modifier
@@ -149,7 +212,7 @@ private fun UploadDocumentCard(onClick: () -> Unit) {
                     cornerRadius = CornerRadius(24.dp.toPx()),
                 )
             }
-            .clickable(onClick = onClick)
+            .clickable(enabled = enabled, onClick = onClick)
             .padding(Theme.spacing.large),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -223,6 +286,54 @@ private fun PendingDocumentInfo() {
             )
         }
     }
+}
+
+private fun List<com.carenest.provider.account.presentation.model.ProfessionalDocumentUiModel>.firstMissingTarget(): DocumentUploadTarget? = asSequence()
+    .flatMap { it.files.asSequence() }
+    .firstOrNull { it.url.isNullOrBlank() }
+    ?.target
+
+private fun openDocumentUrl(context: Context, url: String): Boolean =
+    runCatching {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
+    }.isSuccess
+
+private fun getFileName(context: Context, uri: Uri): String {
+    var result: String? = null
+    if (uri.scheme == "content") {
+        val cursor = context.contentResolver.query(uri, null, null, null, null)
+        cursor.use { current ->
+            if (current != null && current.moveToFirst()) {
+                val index = current.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (index != -1) result = current.getString(index)
+            }
+        }
+    }
+    if (result == null) {
+        result = uri.path
+        val lastSlash = result?.lastIndexOf('/')
+        if (lastSlash != null && lastSlash != -1) {
+            result = result.substring(lastSlash + 1)
+        }
+    }
+    return result ?: "upload"
+}
+
+private fun persistReadPermission(context: Context, uri: Uri) {
+    runCatching {
+        context.contentResolver.takePersistableUriPermission(
+            uri,
+            Intent.FLAG_GRANT_READ_URI_PERMISSION,
+        )
+    }
+}
+
+private fun resolveMessage(context: Context, message: String): String {
+    val resId = context.resources.getIdentifier(message, "string", context.packageName)
+    return if (resId != 0) context.getString(resId) else message
 }
 
 @Preview(showBackground = true, heightDp = 1000)

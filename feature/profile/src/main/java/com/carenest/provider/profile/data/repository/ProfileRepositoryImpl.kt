@@ -9,6 +9,7 @@ import com.carenest.provider.profile.data.remote.dto.ServiceTypeResponseDto
 import com.carenest.provider.profile.data.remote.dto.UserResponseDto
 import com.carenest.provider.profile.domain.model.FailedStep
 import com.carenest.provider.profile.domain.model.NurseProfile
+import com.carenest.provider.profile.domain.model.NurseService
 import com.carenest.provider.profile.domain.model.NurseRegistration
 import com.carenest.provider.profile.domain.model.NurseService
 import com.carenest.provider.profile.domain.model.NurseServiceBatchResult

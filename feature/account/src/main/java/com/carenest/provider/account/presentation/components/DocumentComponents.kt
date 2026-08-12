@@ -27,9 +27,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.carenest.provider.account.presentation.model.DocumentUploadTarget
 import com.carenest.provider.account.presentation.model.DocumentStatus
 import com.carenest.provider.account.presentation.model.ProfessionalDocumentUiModel
 import com.carenest.provider.designsystem.theme.Theme
@@ -101,7 +103,7 @@ fun ProfessionalDocumentCard(
     onReplaceClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .shadow(1.dp, Theme.shapes.extraLarge)
@@ -109,61 +111,32 @@ fun ProfessionalDocumentCard(
             .background(Theme.colors.surface)
             .border(1.dp, Theme.colors.divider, Theme.shapes.extraLarge)
             .padding(Theme.spacing.medium),
-        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .clip(Theme.shapes.medium)
-                .background(Theme.colors.primaryContainer),
-            contentAlignment = Alignment.Center,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
-                painter = painterResource(document.iconRes),
-                contentDescription = null,
-                tint = if (
-                    document.iconRes == DesignSystemR.drawable.ic_account_acls_certificate
-                ) {
-                    Color.Unspecified
-                } else {
-                    Theme.colors.tint
-                },
-                modifier = if (
-                    document.iconRes == DesignSystemR.drawable.ic_account_acls_certificate
-                ) {
-                    Modifier
-                        .width(19.dp)
-                        .height(25.dp)
-                } else {
-                    Modifier.size(25.dp)
-                },
-            )
-        }
-        Spacer(Modifier.width(Theme.spacing.medium))
-        Column(Modifier.weight(1f)) {
-            BasicText(
-                text = title,
-            style = Theme.typography.body.medium.copy(
-                color = Theme.colors.primaryFont,
-                fontWeight = FontWeight.SemiBold,
-                lineHeight = Theme.typography.body.medium.lineHeight,
-            ),
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            )
-            BasicText(
-                text = supportingText,
-            style = Theme.typography.hint.large.copy(
-                color = Theme.colors.secondaryFont,
-                    fontWeight = FontWeight.Normal,
-                ),
-            )
-        }
-        Spacer(Modifier.width(Theme.spacing.small))
-        Column(
-            horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.spacedBy(Theme.spacing.small),
-        ) {
+            DocumentIcon(document)
+            Spacer(Modifier.width(Theme.spacing.medium))
+            Column(Modifier.weight(1f)) {
+                BasicText(
+                    text = title,
+                    style = Theme.typography.body.medium.copy(
+                        color = Theme.colors.primaryFont,
+                        fontWeight = FontWeight.SemiBold,
+                        lineHeight = Theme.typography.body.medium.lineHeight,
+                    ),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                BasicText(
+                    text = supportingText,
+                    style = Theme.typography.hint.large.copy(
+                        color = Theme.colors.secondaryFont,
+                        fontWeight = FontWeight.Normal,
+                    ),
+                )
+            }
+            Spacer(Modifier.width(Theme.spacing.small))
             DocumentStatusBadge(
                 status = document.status,
                 verifiedLabel = verifiedLabel,
@@ -201,5 +174,37 @@ fun ProfessionalDocumentCard(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun DocumentIcon(document: ProfessionalDocumentUiModel) {
+    Box(
+        modifier = Modifier
+            .size(48.dp)
+            .clip(Theme.shapes.medium)
+            .background(Theme.colors.primaryContainer),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            painter = painterResource(document.iconRes),
+            contentDescription = null,
+            tint = if (
+                document.iconRes == DesignSystemR.drawable.ic_account_acls_certificate
+            ) {
+                Color.Unspecified
+            } else {
+                Theme.colors.tint
+            },
+            modifier = if (
+                document.iconRes == DesignSystemR.drawable.ic_account_acls_certificate
+            ) {
+                Modifier
+                    .width(19.dp)
+                    .height(25.dp)
+            } else {
+                Modifier.size(25.dp)
+            },
+        )
     }
 }

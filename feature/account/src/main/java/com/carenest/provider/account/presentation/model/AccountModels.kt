@@ -28,10 +28,11 @@ enum class DocumentStatus {
     Rejected,
 }
 
+
 data class ProfessionalDocumentUiModel(
     val id: String,
     @StringRes val titleRes: Int,
-    @StringRes val uploadedDateRes: Int,
+    @StringRes val supportingTextRes: Int,
     @DrawableRes val iconRes: Int,
     val status: DocumentStatus,
     val primaryUrl: String? = null,
