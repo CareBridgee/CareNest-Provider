@@ -48,14 +48,14 @@ internal fun NurseProfile.toProfessionalDocuments(
 ): List<ProfessionalDocumentUiModel> {
     val status = verificationStatus.toDocumentStatus()
     return listOf(
-    ProfessionalDocumentUiModel(
-        id = "national-id",
-        titleRes = R.string.documents_national_id,
+        ProfessionalDocumentUiModel(
+            id = "national-id",
+            titleRes = R.string.documents_national_id,
             supportingTextRes = documentSupportingText(
                 nationalIdFrontUrl,
                 nationalIdBackUrl,
             ),
-        iconRes = DesignSystemR.drawable.ic_id_card,
+            iconRes = DesignSystemR.drawable.ic_id_card,
             status = status,
             files = listOf(
                 ProfessionalDocumentFileUiModel(
@@ -71,8 +71,38 @@ internal fun NurseProfile.toProfessionalDocuments(
                     isUploading = uploadingTarget == DocumentUploadTarget.NationalIdBack,
                 ),
             ),
+        ),
+        ProfessionalDocumentUiModel(
+            id = "nursing-license",
+            titleRes = R.string.documents_nursing_license,
+            supportingTextRes = documentSupportingText(licenseImageUrl),
+            iconRes = DesignSystemR.drawable.ic_document_text,
+            status = status,
+            files = listOf(
+                ProfessionalDocumentFileUiModel(
+                    target = DocumentUploadTarget.NursingLicense,
+                    labelRes = R.string.documents_nursing_license,
+                    url = licenseImageUrl,
+                    isUploading = uploadingTarget == DocumentUploadTarget.NursingLicense,
+                ),
+            ),
+        ),
+        ProfessionalDocumentUiModel(
+            id = "professional-certificate",
+            titleRes = R.string.documents_professional_certificate,
+            supportingTextRes = documentSupportingText(professionalCertificateUrl),
+            iconRes = DesignSystemR.drawable.ic_account_acls_certificate,
+            status = status,
+            files = listOf(
+                ProfessionalDocumentFileUiModel(
+                    target = DocumentUploadTarget.ProfessionalCertificate,
+                    labelRes = R.string.documents_professional_certificate,
+                    url = professionalCertificateUrl,
+                    isUploading = uploadingTarget == DocumentUploadTarget.ProfessionalCertificate,
+                ),
+            ),
+        ),
     )
-)
 }
 
 private fun VerificationStatus.toDocumentStatus(): DocumentStatus = when (this) {
