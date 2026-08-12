@@ -1,5 +1,7 @@
 package com.carenest.home.presentation.home
 
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -56,7 +58,7 @@ fun HomeScreen(
     onNavigateToRequests: () -> Unit,
     onOfferConfirmed: (String) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = hiltViewModel(),
+    viewModel: HomeViewModel = hiltViewModel(checkNotNull(LocalActivity.current) as ComponentActivity),
 ) {
     val context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
