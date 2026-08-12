@@ -2,8 +2,6 @@ package com.carenest.request.presentation.ui.details.composable
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +18,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.carenest.provider.designsystem.R as RD
 import com.carenest.provider.designsystem.theme.Theme
@@ -32,24 +32,52 @@ fun ServiceSection(
     onViewSummaryClicked: () -> Unit,
     modifier: Modifier = Modifier
 ){
-    BasicText(
-        text = stringResource(R.string.request_details_service_section),
-        style = Theme.typography.body.small.copy(color = Theme.colors.primary, fontWeight = FontWeight.Bold),
-    )
+    val durationColumnWidth = 144.dp
+
+    Row(modifier = Modifier.fillMaxWidth()) {
+        BasicText(
+            text = stringResource(R.string.request_details_service_section),
+            style = Theme.typography.body.small.copy(
+                color = Theme.colors.primary,
+                fontWeight = FontWeight.Bold,
+            ),
+            modifier = Modifier.weight(1f),
+        )
+        Spacer(Modifier.width(Theme.spacing.small))
+        BasicText(
+            text = stringResource(RD.string.request_details_estimated_duration),
+            style = Theme.typography.body.small.copy(
+                color = Theme.colors.secondaryFont,
+                fontWeight = FontWeight.Normal,
+                textAlign = TextAlign.End,
+            ),
+            modifier = Modifier.width(durationColumnWidth),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+
+    Spacer(Modifier.height(Theme.spacing.extraSmall))
+
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             BasicText(
                 text = offer.serviceType,
                 style = Theme.typography.title.copy(
                     color = Theme.colors.primaryFont,
                     fontWeight = FontWeight.Bold,
                 ),
+                modifier = Modifier.weight(1f, fill = false),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
             )
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(4.dp))
             Icon(
                 painter = painterResource(RD.drawable.ic_bag_success),
                 contentDescription = null,
@@ -57,16 +85,18 @@ fun ServiceSection(
                 modifier = Modifier.size(20.dp),
             )
         }
-        Column(horizontalAlignment = Alignment.End) {
-            BasicText(
-                text = stringResource(RD.string.request_details_estimated_duration),
-                style = Theme.typography.body.small.copy(color = Theme.colors.secondaryFont, fontWeight = FontWeight.Normal),
-            )
-            BasicText(
-                text = offer.estimatedDuration,
-                style = Theme.typography.body.medium.copy(color = Theme.colors.primaryFont, fontWeight = FontWeight.Bold),
-            )
-        }
+        Spacer(Modifier.width(Theme.spacing.small))
+        BasicText(
+            text = offer.estimatedDuration,
+            style = Theme.typography.body.medium.copy(
+                color = Theme.colors.primaryFont,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.End,
+            ),
+            modifier = Modifier.width(durationColumnWidth),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 
     Spacer(Modifier.height(Theme.spacing.small))

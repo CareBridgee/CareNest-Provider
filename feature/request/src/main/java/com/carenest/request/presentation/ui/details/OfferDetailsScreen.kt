@@ -284,7 +284,7 @@ private fun OfferDetailsPreview() {
                         distanceMiles = 2.4f
                     ),
                     totalAmount = 95f,
-                    serviceType = "Wound Care",
+                    serviceType = "E2E Nursing Service 662736",
                     serviceImage = ""
                 ),
             ),
