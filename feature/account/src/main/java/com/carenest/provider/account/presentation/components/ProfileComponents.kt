@@ -34,10 +34,13 @@ import androidx.compose.ui.unit.dp
 import com.carenest.provider.account.R
 import com.carenest.provider.designsystem.R as DesignSystemR
 import com.carenest.provider.designsystem.theme.Theme
+import coil3.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
 
 @Composable
 fun ProfileMenuHero(
     name: String,
+    avatarUrl: String?,
     specialty: String,
     rating: String,
     onClick: () -> Unit,
@@ -54,15 +57,19 @@ fun ProfileMenuHero(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(contentAlignment = Alignment.BottomEnd) {
-            Image(
-                painter = painterResource(DesignSystemR.drawable.nurse_image),
+            AsyncImage(
+                model = avatarUrl?.takeIf(String::isNotBlank),
                 contentDescription = stringResource(R.string.account_profile_photo),
+                placeholder = painterResource(DesignSystemR.drawable.nurse_image),
+                error = painterResource(DesignSystemR.drawable.nurse_image),
+                fallback = painterResource(DesignSystemR.drawable.nurse_image),
                 modifier = Modifier
                     .size(100.dp)
                     .clip(CircleShape)
                     .background(Theme.colors.primaryContainer)
                     .padding(5.dp)
                     .clip(CircleShape),
+                contentScale = ContentScale.Crop,
             )
             Row(
                 modifier = Modifier

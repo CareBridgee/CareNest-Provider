@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.carenest.home.R
 import com.carenest.home.presentation.home.components.AvailableRequestsHeader
 import com.carenest.home.presentation.home.components.EarningsSection
@@ -60,6 +61,11 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onIntent(HomeIntent.RefreshProfile)
+        onPauseOrDispose { }
+    }
 
     ObserveEffect(viewModel.effect) { effect ->
         when (effect) {
@@ -127,7 +133,7 @@ fun HomeContent(
         topBar = {
             HomeGreetingBar(
                 name = state.nurseName,
-                avatarUrl = "https://picsum.photos/200/300",
+                avatarUrl = state.nurseAvatar,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = Theme.spacing.medium),

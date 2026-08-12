@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.carenest.provider.account.R
 import com.carenest.provider.account.presentation.components.ProfileMenuLoadingSkeleton
 import com.carenest.provider.account.presentation.components.ProfileMenuCard
@@ -56,6 +57,10 @@ fun ProfileMenuRoute(
     viewModel: ProfileMenuViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onIntent(ProfileMenuIntent.RefreshProfile)
+        onPauseOrDispose { }
+    }
     ObserveEffect(viewModel.effect) { effect ->
         when (effect) {
             ProfileMenuEffect.OpenPublicProfile -> onOpenPublicProfile()
@@ -85,7 +90,8 @@ fun ProfileMenuContent(
             .background(Theme.colors.backGround),
     ) {
         ProviderAccountTopBar(
-            title = stringResource(R.string.account_provider_short_name),
+            title = state.fullName.ifBlank { stringResource(R.string.account_provider_short_name) },
+            avatarUrl = state.avatarUrl,
             showSettings = true,
             onSettingsClick = { onIntent(ProfileMenuIntent.SettingsClicked) },
         )
@@ -104,9 +110,10 @@ fun ProfileMenuContent(
             ) {
             item {
                 ProfileMenuHero(
-                    name = stringResource(R.string.account_provider_name),
-                    specialty = stringResource(R.string.account_specialty),
-                    rating = stringResource(R.string.account_rating_value),
+                    name = state.fullName.ifBlank { stringResource(R.string.account_provider_name) },
+                    avatarUrl = state.avatarUrl,
+                    specialty = state.specialty.ifBlank { stringResource(R.string.account_specialty) },
+                    rating = state.rating,
                     onClick = { onIntent(ProfileMenuIntent.ProfileCardClicked) },
                 )
             }

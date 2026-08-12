@@ -30,11 +30,14 @@ import androidx.compose.ui.unit.dp
 import com.carenest.provider.account.R
 import com.carenest.provider.designsystem.R as DesignSystemR
 import com.carenest.provider.designsystem.theme.Theme
+import coil3.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
 
 @Composable
 fun ProviderAccountTopBar(
     modifier: Modifier = Modifier,
     title: String = stringResource(R.string.account_brand),
+    avatarUrl: String? = null,
     showSettings: Boolean = false,
     onSettingsClick: () -> Unit = {},
     onNavigateBack: (() -> Unit)? = null,
@@ -58,12 +61,16 @@ fun ProviderAccountTopBar(
             )
             Spacer(Modifier.width(Theme.spacing.medium))
         }
-        Image(
-            painter = painterResource(DesignSystemR.drawable.nurse_image),
+        AsyncImage(
+            model = avatarUrl?.takeIf(String::isNotBlank),
             contentDescription = stringResource(R.string.account_profile_photo),
+            placeholder = painterResource(DesignSystemR.drawable.nurse_image),
+            error = painterResource(DesignSystemR.drawable.nurse_image),
+            fallback = painterResource(DesignSystemR.drawable.nurse_image),
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape),
+            contentScale = ContentScale.Crop,
         )
         Spacer(Modifier.width(Theme.spacing.medium))
         BasicText(
