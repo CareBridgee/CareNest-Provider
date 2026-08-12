@@ -149,7 +149,7 @@ class HomeViewModel @Inject constructor(
             nurseSocketClient.connect()
             viewModelScope.launch {
                 // Testing coordinates provided by user
-                nurseSocketClient.updateAvailability(true, 30.03154, 31.22768)
+                nurseSocketClient.updateAvailability(true, 30.2361926, 31.4790023)
             }
 
             // Stream real-time socket requests

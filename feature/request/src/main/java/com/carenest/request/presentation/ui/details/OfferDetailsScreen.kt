@@ -59,6 +59,7 @@ fun OfferDetailsScreen(
     onBack: () -> Unit,
     onOpenChat: (String) -> Unit,
     onVisitCompleted: (String) -> Unit,
+    onOpenPatientLocation: (Double, Double, String, String) -> Unit,
     modifier: Modifier = Modifier,
     onPatientSummary: (String) -> Unit = {},
     viewModel: OfferDetailsViewModel = hiltViewModel(),
@@ -90,6 +91,11 @@ fun OfferDetailsScreen(
 
             is OfferDetailsEffect.CopyToClipboard -> {
                 clipboardManager.setText(AnnotatedString(effect.text))
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.request_details_address_copied),
+                    Toast.LENGTH_SHORT,
+                ).show()
             }
 
             is OfferDetailsEffect.ShowSummary -> {
@@ -97,13 +103,32 @@ fun OfferDetailsScreen(
             }
 
             is OfferDetailsEffect.OpenMaps -> {
-                val gmmIntentUri = Uri.parse("geo:0,0?q=${Uri.encode(effect.address)}")
+                val hasCoordinates = effect.latitude != null && effect.longitude != null
+                val query = if (hasCoordinates) {
+                    val label = effect.address.takeIf(String::isNotBlank)
+                    if (label == null) {
+                        "${effect.latitude},${effect.longitude}"
+                    } else {
+                        "${effect.latitude},${effect.longitude}(${Uri.encode(label)})"
+                    }
+                } else {
+                    Uri.encode(effect.address)
+                }
+                val gmmIntentUri = Uri.parse("geo:0,0?q=$query")
                 val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
                 mapIntent.setPackage("com.google.android.apps.maps")
                 if (mapIntent.resolveActivity(context.packageManager) != null) {
                     context.startActivity(mapIntent)
                 } else {
-                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/maps/search/?api=1&query=${Uri.encode(effect.address)}"))
+                    val browserQuery = if (hasCoordinates) {
+                        "${effect.latitude},${effect.longitude}"
+                    } else {
+                        effect.address
+                    }
+                    val browserIntent = Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("https://www.google.com/maps/search/?api=1&query=${Uri.encode(browserQuery)}")
+                    )
                     context.startActivity(browserIntent)
                 }
             }
@@ -117,6 +142,7 @@ fun OfferDetailsScreen(
     OfferDetailsContent(
         state = state,
         onIntent = viewModel::onIntent,
+        onOpenPatientLocation = onOpenPatientLocation,
         modifier = modifier,
     )
 }
@@ -125,6 +151,7 @@ fun OfferDetailsScreen(
 private fun OfferDetailsContent(
     state: OfferDetailsUiState,
     onIntent: (OfferDetailsIntent) -> Unit,
+    onOpenPatientLocation: (Double, Double, String, String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -150,7 +177,10 @@ private fun OfferDetailsContent(
 
                 state.offer != null -> RequestDetailsBody(
                     offer = state.offer,
+                    patientLocation = state.patientLocation,
+                    isAddressLoading = state.isAddressLoading,
                     onIntent = onIntent,
+                    onOpenPatientLocation = onOpenPatientLocation,
                 )
 
                 else -> BasicText(
@@ -194,7 +224,10 @@ private fun SectionContainer(
 @Composable
 private fun RequestDetailsBody(
     offer: Offer,
+    patientLocation: com.carenest.request.domain.model.PatientLocationDetails?,
+    isAddressLoading: Boolean,
     onIntent: (OfferDetailsIntent) -> Unit,
+    onOpenPatientLocation: (Double, Double, String, String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -252,8 +285,26 @@ private fun RequestDetailsBody(
         SectionContainer {
             LocationSection(
                 offer = offer,
+                location = patientLocation,
+                isAddressLoading = isAddressLoading,
                 onCopyAddressClicked = { onIntent(OfferDetailsIntent.CopyAddressClicked) },
-                onMapClicked = { onIntent(OfferDetailsIntent.OpenInMapsClicked) })
+                onMapClicked = {
+                    val latitude = offer.patientInfo.latitude
+                    val longitude = offer.patientInfo.longitude
+                    if (latitude != null && longitude != null) {
+                        onOpenPatientLocation(
+                            latitude,
+                            longitude,
+                            patientLocation?.address
+                                ?.takeIf(String::isNotBlank)
+                                ?: offer.patientInfo.addressLine,
+                            if (patientLocation == null) offer.patientInfo.addressDetail else "",
+                        )
+                    } else {
+                        onIntent(OfferDetailsIntent.OpenInMapsClicked)
+                    }
+                },
+            )
         }
 
         SectionContainer { PaymentSection(offer = offer) }
@@ -291,6 +342,7 @@ private fun OfferDetailsPreview() {
                 ),
             ),
             onIntent = {},
+            onOpenPatientLocation = { _, _, _, _ -> },
         )
     }
 }

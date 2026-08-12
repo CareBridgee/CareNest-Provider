@@ -15,6 +15,14 @@ sealed interface RequestRoutes : NavKey {
     data class RequestDetails(val requestId: String) : RequestRoutes
 
     @Serializable
+    data class PatientLocation(
+        val latitude: Double,
+        val longitude: Double,
+        val addressLine: String,
+        val addressDetail: String,
+    ) : RequestRoutes
+
+    @Serializable
     data class VisitCompleted(val requestId: String) : RequestRoutes
 
     @Serializable
