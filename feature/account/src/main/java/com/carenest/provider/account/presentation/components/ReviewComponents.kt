@@ -49,6 +49,26 @@ fun RatingStars(
 }
 
 @Composable
+fun StarRatingRow(
+    rating: Double,
+    modifier: Modifier = Modifier,
+    iconSize: Int = 24,
+) {
+    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        repeat(5) { index ->
+            val starLevel = index + 1
+            val isFilled = rating >= (starLevel - 0.25)
+            Icon(
+                imageVector = if (isFilled) Icons.Rounded.Star else Icons.Rounded.StarBorder,
+                contentDescription = null,
+                tint = if (isFilled) Theme.colors.warning else Theme.colors.track,
+                modifier = Modifier.size(iconSize.dp),
+            )
+        }
+    }
+}
+
+@Composable
 fun RatingDistributionRow(
     star: Int,
     progress: Float,
@@ -128,7 +148,7 @@ fun ReviewCard(
             Spacer(Modifier.width(Theme.spacing.medium))
             Column(Modifier.weight(1f)) {
                 BasicText(
-                    text = stringResource(review.authorRes),
+                    text = review.authorName,
                     style = Theme.typography.body.small.copy(
                         color = Theme.colors.primaryFont,
                         fontWeight = FontWeight.Medium,
@@ -137,35 +157,39 @@ fun ReviewCard(
                 RatingStars(rating = review.rating, iconSize = 18)
             }
             BasicText(
-                text = stringResource(review.dateRes),
-                    style = Theme.typography.hint.large.copy(
+                text = review.dateText,
+                style = Theme.typography.hint.large.copy(
                     color = Theme.colors.hint,
                     fontWeight = FontWeight.Normal,
                 ),
             )
         }
-        BasicText(
-            text = stringResource(review.bodyRes),
-            style = Theme.typography.body.small.copy(
-                color = Theme.colors.primaryFont,
-                fontWeight = FontWeight.Normal,
-            ),
-        )
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Rounded.MedicalServices,
-                contentDescription = null,
-                tint = Theme.colors.tint,
-                modifier = Modifier.size(18.dp),
-            )
-            Spacer(Modifier.width(Theme.spacing.small))
+        if (review.bodyText.isNotBlank()) {
             BasicText(
-                text = stringResource(review.serviceRes),
+                text = review.bodyText,
                 style = Theme.typography.body.small.copy(
-                    color = Theme.colors.tint,
-                    fontWeight = FontWeight.Medium,
+                    color = Theme.colors.primaryFont,
+                    fontWeight = FontWeight.Normal,
                 ),
             )
+        }
+        if (!review.serviceName.isNullOrBlank()) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Rounded.MedicalServices,
+                    contentDescription = null,
+                    tint = Theme.colors.tint,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(Modifier.width(Theme.spacing.small))
+                BasicText(
+                    text = review.serviceName,
+                    style = Theme.typography.body.small.copy(
+                        color = Theme.colors.tint,
+                        fontWeight = FontWeight.Medium,
+                    ),
+                )
+            }
         }
     }
 }
