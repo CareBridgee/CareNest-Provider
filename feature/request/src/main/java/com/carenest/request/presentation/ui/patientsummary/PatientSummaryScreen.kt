@@ -2,18 +2,21 @@ package com.carenest.request.presentation.ui.patientsummary
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.foundation.background
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -25,6 +28,7 @@ import com.carenest.provider.designsystem.components.topbar.TopBarLeading
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.request.R
 import com.carenest.request.domain.model.PatientMedicalSummary
+import com.carenest.request.presentation.asString
 import com.carenest.request.presentation.ui.patientsummary.components.AllergiesCard
 import com.carenest.request.presentation.ui.patientsummary.components.EmergencyContactsCard
 import com.carenest.request.presentation.ui.patientsummary.components.MedicalConditionsCard
@@ -57,6 +61,9 @@ fun PatientSummaryScreen(
                 }
                 context.startActivity(intent)
             }
+            is PatientSummaryEffect.ShowError -> {
+                Toast.makeText(context, effect.message.asString(context), Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -73,7 +80,7 @@ private fun PatientSummaryContent(
     onIntent: (PatientSummaryIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val patient = state.patient ?: PatientMedicalSummary()
+    val context = LocalContext.current
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -90,42 +97,68 @@ private fun PatientSummaryContent(
                 .fillMaxSize()
                 .padding(innerPadding),
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(Theme.spacing.medium),
-                verticalArrangement = Arrangement.spacedBy(Theme.spacing.medium),
-            ) {
-                PatientHeaderCard(patient = patient)
-
-                PersonalInformationCard(patient = patient)
-
-                MedicalConditionsCard(conditions = patient.medicalConditions)
-
-                AllergiesCard(allergies = patient.allergies)
-
-                MedicationsCard(medications = patient.medications)
-
-                MobilityCareNotesCard(
-                    mobilityStatus = patient.mobilityStatus,
-                    mobilityNotes = patient.mobilityNotes,
+            when {
+                state.isLoading -> CircularProgressIndicator(
+                    color = Theme.colors.primary,
+                    modifier = Modifier.align(Alignment.Center),
                 )
 
-                MedicalHistoryCard(
-                    medicalHistory = patient.medicalHistory,
-                    previousSurgeries = patient.previousSurgeries,
-                    previousHospitalizations = patient.previousHospitalizations,
+                state.patient != null -> PatientSummaryBody(
+                    patient = state.patient,
+                    onIntent = onIntent,
                 )
 
-                EmergencyContactsCard(
-                    contacts = patient.emergencyContacts,
-                    onCallClick = { phone ->
-                        onIntent(PatientSummaryIntent.CallEmergencyContact(phone))
-                    },
+                else -> BasicText(
+                    text = state.errorMessage?.asString(context)
+                        ?: stringResource(R.string.request_not_found),
+                    style = Theme.typography.body.medium.copy(color = Theme.colors.secondaryFont),
+                    modifier = Modifier.align(Alignment.Center),
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun PatientSummaryBody(
+    patient: PatientMedicalSummary,
+    onIntent: (PatientSummaryIntent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(Theme.spacing.medium),
+        verticalArrangement = Arrangement.spacedBy(Theme.spacing.medium),
+    ) {
+        PatientHeaderCard(patient = patient)
+
+        PersonalInformationCard(patient = patient)
+
+        MedicalConditionsCard(conditions = patient.medicalConditions)
+
+        AllergiesCard(allergies = patient.allergies)
+
+        MedicationsCard(medications = patient.medications)
+
+        MobilityCareNotesCard(
+            mobilityStatus = patient.mobilityStatus,
+            mobilityNotes = patient.mobilityNotes,
+        )
+
+        MedicalHistoryCard(
+            medicalHistory = patient.medicalHistory,
+            previousSurgeries = patient.previousSurgeries,
+            previousHospitalizations = patient.previousHospitalizations,
+        )
+
+        EmergencyContactsCard(
+            contacts = patient.emergencyContacts,
+            onCallClick = { phone ->
+                onIntent(PatientSummaryIntent.CallEmergencyContact(phone))
+            },
+        )
     }
 }
 

@@ -27,6 +27,8 @@ import com.carenest.provider.designsystem.R as RD
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.request.R
 import com.carenest.request.domain.model.PatientMedicalSummary
+import java.time.LocalDate
+import java.time.Period
 
 @Composable
 fun PersonalInformationCard(
@@ -177,17 +179,10 @@ private fun formatDecimal(value: Double): String {
 }
 
 private fun parseAgeString(dob: String): String {
-    val parts = dob.split('-')
-    if (parts.size < 3) return dob
-    val birthYear = parts[0].toIntOrNull() ?: return dob
-    val birthMonth = parts[1].toIntOrNull() ?: return dob
-    val birthDay = parts[2].take(2).toIntOrNull() ?: return dob
-    val now = java.util.Calendar.getInstance()
-    var age = now.get(java.util.Calendar.YEAR) - birthYear
-    val currentMonth = now.get(java.util.Calendar.MONTH) + 1
-    val currentDay = now.get(java.util.Calendar.DAY_OF_MONTH)
-    if (currentMonth < birthMonth || currentMonth == birthMonth && currentDay < birthDay) age--
-    return age.coerceAtLeast(0).toString()
+    return runCatching {
+        val birthDate = LocalDate.parse(dob.substringBefore('T'))
+        Period.between(birthDate, LocalDate.now()).years.coerceAtLeast(0).toString()
+    }.getOrDefault(dob)
 }
 
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
