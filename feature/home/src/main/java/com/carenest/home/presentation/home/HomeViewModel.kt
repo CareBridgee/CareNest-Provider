@@ -14,6 +14,8 @@ import com.carenest.provider.core.mvi.EffectPublisher
 import com.carenest.provider.core.mvi.StateHolder
 import com.carenest.home.domain.model.NurseRequest
 import com.carenest.home.domain.usecase.ListenReservationEventsUseCase
+import com.carenest.home.domain.usecase.GetAvailabilityUseCase
+import com.carenest.home.domain.usecase.UpdateAvailabilityUseCase
 import com.carenest.provider.core.network.socket.client.NurseSocketClient
 import com.carenest.provider.core.network.socket.model.ReservationEventType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,6 +24,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -32,6 +36,8 @@ class HomeViewModel @Inject constructor(
     private val listenReservationEvents: ListenReservationEventsUseCase,
     private val getNurseProfile: GetNurseProfileUseCase,
     private val nurseSocketClient: NurseSocketClient,
+    private val getAvailability: GetAvailabilityUseCase,
+    private val updateAvailability: UpdateAvailabilityUseCase,
 ) : ViewModel(),
     StateHolder<HomeUiState> by DefaultStateHolder(HomeUiState()),
     EffectPublisher<HomeEffect> by DefaultEffectPublisher() {
@@ -41,10 +47,26 @@ class HomeViewModel @Inject constructor(
     private var offerEventListenerJob: Job? = null
     private var offerTimerJob: Job? = null
 
+    val isOnline = getAvailability()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
+
     init {
         getNurseData()
         observeSocketErrors()
         observeNotifications()
+        observeAvailability()
+    }
+
+    private fun observeAvailability() {
+        viewModelScope.launch {
+            isOnline.collect { online ->
+                applyAvailabilityChange(online)
+            }
+        }
     }
 
     private fun observeSocketErrors() {
@@ -100,6 +122,12 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun handleOnlineToggle(isOnline: Boolean) {
+        viewModelScope.launch {
+            updateAvailability(isOnline)
+        }
+    }
+
+    private fun applyAvailabilityChange(isOnline: Boolean) {
         fetchJob?.cancel()
         socketJob?.cancel()
         offerEventListenerJob?.cancel()

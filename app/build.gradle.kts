@@ -54,6 +54,8 @@ dependencies {
     implementation(project(":feature:chat"))
 
     implementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    debugImplementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.navigation3)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
