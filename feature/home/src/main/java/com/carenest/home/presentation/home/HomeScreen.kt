@@ -58,7 +58,7 @@ fun HomeScreen(
     onNavigateToRequests: () -> Unit,
     onOfferConfirmed: (String) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = hiltViewModel(checkNotNull(LocalActivity.current) as ComponentActivity),
+    viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
