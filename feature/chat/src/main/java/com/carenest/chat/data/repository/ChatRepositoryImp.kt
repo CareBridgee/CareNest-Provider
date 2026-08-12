@@ -19,7 +19,7 @@ class ChatRepositoryImpl @Inject constructor(
         val session = dataSource.fetchChatSession(requestId)
         val existing = messagesCache.getOrPut(requestId) { mutableListOf() }
 
-        val merged = (existing + session.messages)
+        val merged = (session.messages + existing)
             .distinctBy { it.id }
             .sortedBy { it.sentAtEpochMillis }
             .toMutableList()
@@ -32,7 +32,7 @@ class ChatRepositoryImpl @Inject constructor(
         val newMessages = dataSource.fetchChatMessages(requestId, after)
         val existing = messagesCache.getOrPut(requestId) { mutableListOf() }
 
-        val merged = (existing + newMessages)
+        val merged = (newMessages + existing)
             .distinctBy { it.id }
             .sortedBy { it.sentAtEpochMillis }
             .toMutableList()
