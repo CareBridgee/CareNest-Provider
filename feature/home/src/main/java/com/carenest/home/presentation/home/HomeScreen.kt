@@ -34,6 +34,7 @@ import com.carenest.home.presentation.home.components.AvailableRequestsHeader
 import com.carenest.home.presentation.home.components.EarningsSection
 import com.carenest.home.presentation.home.components.HomeGreetingBar
 import com.carenest.home.presentation.home.components.NoRequestsEmptyState
+import com.carenest.home.presentation.home.components.LocationPermissionHandler
 import com.carenest.home.presentation.home.components.NotificationPermissionHandler
 import com.carenest.home.presentation.home.components.NurseRequestCard
 import com.carenest.home.presentation.home.components.OfflineEmptyState
@@ -88,14 +89,19 @@ fun HomeContent(
     modifier: Modifier = Modifier,
 ) {
     var requestNotificationPermission by remember { mutableStateOf(false) }
-    var showPermissionRationale by remember { mutableStateOf(false) }
+    var showNotificationRationale by remember { mutableStateOf(false) }
+
+    var requestLocationPermission by remember { mutableStateOf(false) }
+    var showLocationRationale by remember { mutableStateOf(false) }
 
     val handleToggleOnline: (Boolean) -> Unit = { isOnline ->
         if (isOnline) {
             requestNotificationPermission = true
         } else {
             requestNotificationPermission = false
-            showPermissionRationale = false
+            showNotificationRationale = false
+            requestLocationPermission = false
+            showLocationRationale = false
             onIntent(HomeIntent.OnlineToggled(false))
         }
     }
@@ -104,16 +110,35 @@ fun HomeContent(
         NotificationPermissionHandler(
             onPermissionGranted = {
                 requestNotificationPermission = false
-                showPermissionRationale = false
+                showNotificationRationale = false
+                requestLocationPermission = true
+            },
+            onPermissionDenied = {
+                showNotificationRationale = true
+            },
+            showRationale = showNotificationRationale,
+            onRationaleDismissed = {
+                showNotificationRationale = false
+                requestNotificationPermission = false
+                requestLocationPermission = true
+            }
+        )
+    }
+
+    if (requestLocationPermission) {
+        LocationPermissionHandler(
+            onPermissionGranted = {
+                requestLocationPermission = false
+                showLocationRationale = false
                 onIntent(HomeIntent.OnlineToggled(true))
             },
             onPermissionDenied = {
-                showPermissionRationale = true
+                showLocationRationale = true
             },
-            showRationale = showPermissionRationale,
+            showRationale = showLocationRationale,
             onRationaleDismissed = {
-                showPermissionRationale = false
-                requestNotificationPermission = false
+                showLocationRationale = false
+                requestLocationPermission = false
                 onIntent(HomeIntent.OnlineToggled(true))
             }
         )
