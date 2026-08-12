@@ -27,8 +27,8 @@ class NurseRequestsDataSourceImpl @Inject constructor(
             response.map { item ->
                 NurseRequest(
                     id = item.serviceRequestId,
-                    patientName = item.patientName ?: item.serviceName ?: "Patient Request",
-                    patientImage = item.patientAvatar ?: "",
+                    patientName = "${item.patientFirstName ?: ""} ${item.patientLastName ?: ""}".trim().ifBlank { item.serviceName ?: "Patient Request" },
+                    patientImage = item.patientProfileImageUrl ?: "",
                     serviceType = item.serviceName ?: "Nursing Visit",
                     serviceImage = "",
                     baseRate = (item.estimatedPrice ?: 50.0).toFloat(),

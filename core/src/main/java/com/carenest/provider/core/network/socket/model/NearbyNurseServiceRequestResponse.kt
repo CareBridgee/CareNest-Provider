@@ -6,6 +6,9 @@ import kotlinx.serialization.Serializable
 data class NearbyNurseServiceRequestResponse(
     val serviceRequestId: String,
     val profileId: String,
+    val patientFirstName: String? = null,
+    val patientLastName: String? = null,
+    val patientProfileImageUrl: String? = null,
     val serviceTypeId: String? = null,
     val serviceName: String? = null,
     val serviceDescription: String? = null,
@@ -16,7 +19,6 @@ data class NearbyNurseServiceRequestResponse(
     val longitude: Double,
     val distanceKm: Double? = null,
     val estimatedPrice: Double? = null,
-    val patientName: String? = null,
-    val patientAvatar: String? = null,
+    val estimatedDurationMinutes: Int? = null,
     val createdAt: String? = null
 )

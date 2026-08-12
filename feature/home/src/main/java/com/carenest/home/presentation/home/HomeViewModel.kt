@@ -116,6 +116,7 @@ class HomeViewModel @Inject constructor(
     private fun getNurseData(){
         viewModelScope.launch {
             getNurseProfile().onSuccess { profile ->
+                Log.e("profile",profile.toString())
                 updateState { copy(nurseName = profile.name, nurseAvatar = profile.avatarUrl) }
             }
         }
@@ -155,10 +156,11 @@ class HomeViewModel @Inject constructor(
             // Stream real-time socket requests
             socketJob = viewModelScope.launch {
                 nurseSocketClient.nearbyRequests.collect { socketReq ->
+                    val patientName = "${socketReq.patientFirstName ?: ""} ${socketReq.patientLastName ?: ""}".trim().ifBlank { socketReq.serviceName ?: "Patient Request" }
                     val newRequest = NurseRequest(
                         id = socketReq.serviceRequestId,
-                        patientName = socketReq.patientName ?: socketReq.serviceName ?: "Patient Request",
-                        patientImage = socketReq.patientAvatar ?: "",
+                        patientName = patientName,
+                        patientImage = socketReq.patientProfileImageUrl ?: "",
                         serviceType = socketReq.serviceName ?: "Nursing Visit",
                         serviceImage = "",
                         baseRate = (socketReq.estimatedPrice ?: 50.0).toFloat(),
