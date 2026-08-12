@@ -1,6 +1,7 @@
 package com.carenest.provider.auth.presentation.auth.otp
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -32,6 +33,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.carenest.provider.auth.domain.util.AuthenticationDestination
+import com.carenest.provider.auth.domain.validation.PhoneValidator
+import com.carenest.provider.auth.presentation.auth.localizedMessage
 import com.carenest.provider.auth.presentation.auth.otp.components.OtpTextField
 import com.carenest.provider.core.mvi.ObserveEffect
 import com.carenest.provider.designsystem.R
@@ -52,7 +55,10 @@ fun OtpScreen(
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(phone, otp) {
-        viewModel.onEvent(OtpIntent.PhoneNumberChanged(phone, otp))
+        viewModel.onEvent(OtpIntent.PhoneNumberChanged(phone))
+        otp?.let {
+            viewModel.onEvent(OtpIntent.OtpCodeChanged(it))
+        }
     }
 
     ObserveEffect(viewModel.effect) { effect ->
@@ -80,7 +86,7 @@ internal fun OtpScreenContent(
     ) {
 
         CareNestTopBar(
-            title = "CareConnect",
+            title = stringResource(R.string.otp_app_name),
             leading = TopBarLeading.Back {
                 onEvent(OtpIntent.BackClicked)
             }
@@ -128,11 +134,19 @@ internal fun OtpScreenContent(
             Spacer(modifier = Modifier.height(12.dp))
 
             BasicText(
-                text = stringResource(
-                    R.string.otp_subtitle,
-                    state.phoneNumber
-                ),
-                modifier = Modifier.padding(horizontal = 16.dp),
+                text = stringResource(R.string.otp_subtitle),
+                modifier = Modifier.fillMaxWidth(),
+                style = Theme.typography.body.large.copy(
+                    color = Theme.colors.secondaryFont,
+                    textAlign = TextAlign.Center
+                )
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            BasicText(
+                text = PhoneValidator.formatInternationalNumber(state.phoneNumber),
+                modifier = Modifier.fillMaxWidth(),
                 style = Theme.typography.body.large.copy(
                     color = Theme.colors.secondaryFont,
                     textAlign = TextAlign.Center
@@ -164,12 +178,12 @@ internal fun OtpScreenContent(
                         }
                     )
 
-                    if (state.errorMessage != null) {
+                    state.errorMessage.localizedMessage()?.let { errorMessage ->
 
                         Spacer(modifier = Modifier.height(16.dp))
 
                         BasicText(
-                            text = state.errorMessage,
+                            text = errorMessage,
                             style = Theme.typography.body.medium.copy(
                                 color = Theme.colors.error,
                                 textAlign = TextAlign.Center
@@ -204,17 +218,43 @@ internal fun OtpScreenContent(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            BasicText(
-                text = stringResource(R.string.otp_resend_timer),
-                style = Theme.typography.body.large.copy(
-                    color = Theme.colors.primary,
-                    textAlign = TextAlign.Center
-                )
+            OtpResendCountdown(
+                remainingSeconds = state.remainingSeconds,
+                isResending = state.isResending,
+                onResend = { onEvent(OtpIntent.ResendClicked) },
             )
 
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
+}
+
+@Composable
+private fun OtpResendCountdown(
+    remainingSeconds: Int,
+    isResending: Boolean,
+    onResend: () -> Unit,
+) {
+    val displayedSeconds = remainingSeconds.coerceAtLeast(0)
+    val canResend = displayedSeconds == 0 && !isResending
+
+    BasicText(
+        text = if (displayedSeconds > 0) {
+            val minutes = displayedSeconds / 60
+            val seconds = displayedSeconds % 60
+            stringResource(
+                R.string.auth_otp_resend_timer,
+                "%02d:%02d".format(minutes, seconds),
+            )
+        } else {
+            stringResource(R.string.auth_otp_resend_code)
+        },
+        modifier = Modifier.clickable(enabled = canResend, onClick = onResend),
+        style = Theme.typography.body.large.copy(
+            color = if (canResend) Theme.colors.primary else Theme.colors.secondaryFont,
+            textAlign = TextAlign.Center,
+        ),
+    )
 }
 
 @Preview(showBackground = true)
