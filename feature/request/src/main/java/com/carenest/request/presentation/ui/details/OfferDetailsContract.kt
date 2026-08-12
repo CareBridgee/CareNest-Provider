@@ -1,11 +1,14 @@
 package com.carenest.request.presentation.ui.details
 
 import com.carenest.request.domain.model.Offer
+import com.carenest.request.domain.model.PatientLocationDetails
 import com.carenest.request.presentation.UiText
 
 data class OfferDetailsUiState(
     val isLoading: Boolean = true,
     val offer: Offer? = null,
+    val patientLocation: PatientLocationDetails? = null,
+    val isAddressLoading: Boolean = false,
     val isRequestCancelledByPatient: Boolean = false,
 )
 
@@ -28,6 +31,10 @@ sealed interface OfferDetailsEffect {
     data class OpenChat(val patientId: String) : OfferDetailsEffect
     data class CopyToClipboard(val text: String) : OfferDetailsEffect
     data class ShowSummary(val summary: String) : OfferDetailsEffect
-    data class OpenMaps(val address: String) : OfferDetailsEffect
+    data class OpenMaps(
+        val latitude: Double?,
+        val longitude: Double?,
+        val address: String,
+    ) : OfferDetailsEffect
     data class ShowError(val message: UiText) : OfferDetailsEffect
 }

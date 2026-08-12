@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.compose)
@@ -18,6 +20,16 @@ android {
         minSdk = 24
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField(
+            type = "String",
+            name = "MAPBOX_ACCESS_TOKEN",
+            value = "\"${gradleLocalProperties(rootDir, providers).getProperty("MAPBOX_ACCESS_TOKEN")}\"",
+        )
+        buildConfigField(
+            type = "String",
+            name = "LOCATION_IQ_TOKEN",
+            value = "\"${gradleLocalProperties(rootDir, providers).getProperty("location_iq_token", "")}\"",
+        )
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -26,6 +38,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
 }
@@ -59,6 +72,9 @@ dependencies {
     // Networking
     implementation(libs.bundles.ktor)
     implementation(libs.kotlinx.serialization)
+
+    // Mapbox
+    implementation(libs.bundles.mapbox)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)

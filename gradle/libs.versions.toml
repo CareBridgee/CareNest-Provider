@@ -24,6 +24,7 @@ kover = "0.9.8"
 ktor = "3.1.0"
 camerax = "1.4.1"
 barcode-scanning = "17.3.0"
+mapbox = "11.10.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -97,6 +98,10 @@ androidx-camera-view = { group = "androidx.camera", name = "camera-view", versio
 # ML Kit
 barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "barcode-scanning" }
 
+# Mapbox
+mapbox-maps-android = { group = "com.mapbox.maps", name = "android", version.ref = "mapbox" }
+mapbox-maps-compose = { group = "com.mapbox.extension", name = "maps-compose", version.ref = "mapbox" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
@@ -161,4 +166,9 @@ camera = [
     "androidx-camera-camera2",
     "androidx-camera-lifecycle",
     "androidx-camera-view",
+]
+
+mapbox = [
+    "mapbox-maps-android",
+    "mapbox-maps-compose",
 ]
