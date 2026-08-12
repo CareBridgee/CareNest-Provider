@@ -2,6 +2,7 @@ package com.carenest.provider.core.datastore
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -27,6 +28,7 @@ enum class AppThemeMode {
 data class AppPreferencesState(
     val themeMode: AppThemeMode = AppThemeMode.System,
     val languageCode: String = defaultLanguageCode(),
+    val isOnline: Boolean = false,
 )
 
 interface AppPreferences {
@@ -35,6 +37,8 @@ interface AppPreferences {
     suspend fun setThemeMode(mode: AppThemeMode)
 
     suspend fun setLanguageCode(languageCode: String)
+
+    suspend fun setOnline(isOnline: Boolean)
 }
 
 class DataStoreAppPreferences @Inject constructor(
@@ -53,6 +57,7 @@ class DataStoreAppPreferences @Inject constructor(
                 languageCode = preferences[Keys.LANGUAGE_CODE]
                     ?.takeIf { it in SUPPORTED_LANGUAGE_CODES }
                     ?: defaultLanguageCode(),
+                isOnline = preferences[Keys.IS_ONLINE] ?: false,
             )
         }
         .distinctUntilChanged()
@@ -70,9 +75,16 @@ class DataStoreAppPreferences @Inject constructor(
         }
     }
 
+    override suspend fun setOnline(isOnline: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[Keys.IS_ONLINE] = isOnline
+        }
+    }
+
     private object Keys {
         val THEME_MODE = stringPreferencesKey("app_theme_mode")
         val LANGUAGE_CODE = stringPreferencesKey("app_language_code")
+        val IS_ONLINE = booleanPreferencesKey("is_online")
     }
 }
 
