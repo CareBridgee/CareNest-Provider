@@ -22,6 +22,8 @@ import java.time.Instant
 import java.util.UUID
 import javax.inject.Inject
 
+import com.carenest.chat.data.datasource.isNurseSender
+
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     private val getChatSessionUseCase: GetChatSessionUseCase,
@@ -81,7 +83,9 @@ class ChatViewModel @Inject constructor(
     private fun observeSocketMessages(requestId: String) {
         socketMessagesJob?.cancel()
         socketMessagesJob = viewModelScope.launch {
-            val currentNurseId = sessionStore.state.firstOrNull()?.session?.nurseId
+            val session = sessionStore.session.firstOrNull() ?: sessionStore.state.firstOrNull()?.session
+            val currentNurseId = session?.nurseId
+            val currentNursePhone = session?.phoneNumber
             nurseSocketClient.chatMessages.collect { socketMsg ->
                 if (socketMsg.serviceRequestId == requestId || socketMsg.serviceRequestId.isEmpty()) {
                     val trimmedContent = socketMsg.content.trim()
@@ -90,13 +94,16 @@ class ChatViewModel @Inject constructor(
                         it.senderType == MessageSender.NURSE && it.text.trim() == trimmedContent
                     }
 
-                    val isNurseSender = matchesExistingNurseMessage ||
-                            (!currentNurseId.isNullOrBlank() && socketMsg.senderUserId.equals(currentNurseId, ignoreCase = true)) ||
-                            (socketMsg.senderName?.contains("Nurse", ignoreCase = true) == true) ||
-                            (socketMsg.senderUserId.contains("nurse", ignoreCase = true))
+                    val isNurse = matchesExistingNurseMessage || isNurseSender(
+                        senderUserId = socketMsg.senderUserId,
+                        senderName = socketMsg.senderName,
+                        senderPhone = socketMsg.senderPhone,
+                        currentNurseUserId = currentNurseId,
+                        currentNursePhone = currentNursePhone,
+                    )
 
-                    val senderType = if (isNurseSender) MessageSender.NURSE else MessageSender.PATIENT
-                    val messageType = if (isNurseSender) ChatMessageType.OUTGOING else ChatMessageType.INCOMING
+                    val senderType = if (isNurse) MessageSender.NURSE else MessageSender.PATIENT
+                    val messageType = if (isNurse) ChatMessageType.OUTGOING else ChatMessageType.INCOMING
 
                     val socketEpochMillis = parseIsoToEpochMillis(socketMsg.createdAt)
 

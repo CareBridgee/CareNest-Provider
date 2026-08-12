@@ -84,4 +84,43 @@ class ChatRepositoryTest {
         val cached = historyResult.getOrNull().orEmpty()
         assertTrue(cached.any { it.id == "server_uuid_100" })
     }
+
+    @Test
+    fun `isNurseSender correctly identifies nurse vs patient messages`() {
+        val isNurseByUserId = com.carenest.chat.data.datasource.isNurseSender(
+            senderUserId = "nurse_123",
+            senderName = "John Doe",
+            senderPhone = "12345",
+            currentNurseUserId = "nurse_123",
+            currentNursePhone = null,
+        )
+        assertTrue(isNurseByUserId)
+
+        val isNurseByPhone = com.carenest.chat.data.datasource.isNurseSender(
+            senderUserId = "usr_abc",
+            senderName = "John Doe",
+            senderPhone = "+1234567890",
+            currentNurseUserId = null,
+            currentNursePhone = "+1 (234) 567-890",
+        )
+        assertTrue(isNurseByPhone)
+
+        val isNurseByName = com.carenest.chat.data.datasource.isNurseSender(
+            senderUserId = "usr_xyz",
+            senderName = "Nurse Elena",
+            senderPhone = null,
+            currentNurseUserId = null,
+            currentNursePhone = null,
+        )
+        assertTrue(isNurseByName)
+
+        val isPatient = com.carenest.chat.data.datasource.isNurseSender(
+            senderUserId = "patient_001",
+            senderName = "Elena Patient",
+            senderPhone = "+999999999",
+            currentNurseUserId = "nurse_123",
+            currentNursePhone = "+1234567890",
+        )
+        org.junit.Assert.assertFalse(isPatient)
+    }
 }

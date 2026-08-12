@@ -6,6 +6,7 @@ import androidx.navigation3.runtime.NavKey
 import com.carenest.provider.core.navigation.goBack
 import com.carenest.provider.core.navigation.navigate
 import com.carenest.request.presentation.ui.details.OfferDetailsScreen
+import com.carenest.request.presentation.ui.details.PatientLocationMapScreen
 import com.carenest.request.presentation.ui.list.RequestsListScreen
 import com.carenest.request.presentation.ui.offerconfirmed.OfferConfirmedScreen
 import com.carenest.request.presentation.ui.scan.ScanQrScreen
@@ -19,6 +20,7 @@ val requestSerializers = SerializersModule {
         subclass(RequestRoutes.RequestList::class, RequestRoutes.RequestList.serializer())
         subclass(RequestRoutes.OfferConfirmed::class, RequestRoutes.OfferConfirmed.serializer())
         subclass(RequestRoutes.RequestDetails::class, RequestRoutes.RequestDetails.serializer())
+        subclass(RequestRoutes.PatientLocation::class, RequestRoutes.PatientLocation.serializer())
         subclass(RequestRoutes.VisitCompleted::class, RequestRoutes.VisitCompleted.serializer())
         subclass(RequestRoutes.ScanQr::class, RequestRoutes.ScanQr.serializer())
     }
@@ -62,6 +64,16 @@ fun EntryProviderScope<NavKey>.providerRequestEntries(
         )
     }
 
+    entry<RequestRoutes.PatientLocation> { route ->
+        PatientLocationMapScreen(
+            latitude = route.latitude,
+            longitude = route.longitude,
+            addressLine = route.addressLine,
+            addressDetail = route.addressDetail,
+            onBack = { backStack.goBack() },
+        )
+    }
+
     entry<RequestRoutes.ScanQr> { route ->
         ScanQrScreen(
             requestId = route.requestId,
@@ -77,6 +89,16 @@ fun EntryProviderScope<NavKey>.providerRequestEntries(
             onOpenChat = onOpenChat,
             onVisitCompleted = { requestId ->
                 backStack.navigate(RequestRoutes.VisitCompleted(requestId))
+            },
+            onOpenPatientLocation = { latitude, longitude, addressLine, addressDetail ->
+                backStack.navigate(
+                    RequestRoutes.PatientLocation(
+                        latitude = latitude,
+                        longitude = longitude,
+                        addressLine = addressLine,
+                        addressDetail = addressDetail,
+                    )
+                )
             },
         )
     }

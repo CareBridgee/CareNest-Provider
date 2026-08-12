@@ -65,6 +65,9 @@
     <string name="request_details_service_section">SERVICE TYPE</string>
     <string name="request_details_location_section">LOCATION</string>
     <string name="request_details_copy_address">Copy Address</string>
+    <string name="request_details_finding_address">Finding patient address…</string>
+    <string name="request_details_address_copied">Address copied</string>
+    <string name="request_details_patient_location">Patient location</string>
     <string name="request_details_payment_section">PAYMENT SUMMARY</string>
     <string name="request_details_open_maps">Open in Maps</string>
     <string name="request_details_payment_info">Payment will be processed after completion</string>
