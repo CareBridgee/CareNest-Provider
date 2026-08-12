@@ -16,5 +16,7 @@ data class NearbyNurseServiceRequestResponse(
     val longitude: Double,
     val distanceKm: Double? = null,
     val estimatedPrice: Double? = null,
+    val patientName: String? = null,
+    val patientAvatar: String? = null,
     val createdAt: String? = null
 )

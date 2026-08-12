@@ -27,8 +27,8 @@ class NurseRequestsRemoteDataSource @Inject constructor(
             response.map { item ->
                 NurseRequest(
                     id = item.serviceRequestId,
-                    patientName = item.serviceName ?: "Patient Request",
-                    patientImage = "",
+                    patientName = item.patientName ?: item.serviceName ?: "Patient Request",
+                    patientImage = item.patientAvatar ?: "",
                     serviceType = item.serviceName ?: "Nursing Visit",
                     serviceImage = "",
                     baseRate = (item.estimatedPrice ?: 50.0).toFloat(),

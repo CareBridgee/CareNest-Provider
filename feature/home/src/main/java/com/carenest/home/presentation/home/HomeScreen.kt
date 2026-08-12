@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carenest.home.R
+import com.carenest.home.domain.model.RequestStatus
 import com.carenest.home.presentation.home.components.AvailableRequestsHeader
 import com.carenest.home.presentation.home.components.EarningsSection
 import com.carenest.home.presentation.home.components.HomeGreetingBar
@@ -120,6 +121,9 @@ fun HomeContent(
     }
 
     val bottomNavigationContentPadding = LocalBottomNavigationContentPadding.current
+    val filteredRequests = remember(state.requests) {
+        state.requests.filter { it.status != RequestStatus.ACCEPTED }
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -127,7 +131,7 @@ fun HomeContent(
         topBar = {
             HomeGreetingBar(
                 name = state.nurseName,
-                avatarUrl = "https://picsum.photos/200/300",
+                avatarUrl = state.nurseAvatar,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = Theme.spacing.medium),
@@ -223,9 +227,9 @@ fun HomeContent(
                     }
                 }
 
-                if (state.isOnline && !state.isLoading && state.requests.isNotEmpty()) {
+                if (state.isOnline && !state.isLoading && filteredRequests.isNotEmpty()) {
                     items(
-                        items = state.requests,
+                        items = filteredRequests,
                         key = { it.id },
                     ) { request ->
                         NurseRequestCard(

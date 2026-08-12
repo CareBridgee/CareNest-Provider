@@ -1,5 +1,6 @@
 package com.carenest.home.presentation.home.components
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
@@ -110,15 +111,17 @@ fun NurseRequestCard(
                 Row(
                     modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically
                 ) {
-                    //will use async image
-                    Image(
-                        painter = painterResource(com.carenest.provider.designsystem.R.drawable.patient_imgae),
+                    Log.e("image",request.patientImage)
+                    AsyncImage(
+                        model = request.patientImage.ifBlank { null },
                         contentDescription = null,
                         modifier = Modifier
                             .size(48.dp)
                             .clip(RoundedCornerShape(12.dp))
                             .background(Theme.colors.tint),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Crop,
+                        error = painterResource(com.carenest.provider.designsystem.R.drawable.patient_imgae),
+                        placeholder = painterResource(com.carenest.provider.designsystem.R.drawable.patient_imgae)
                     )
 
                     Spacer(modifier = Modifier.width(Theme.spacing.small))
@@ -139,12 +142,6 @@ fun NurseRequestCard(
                         Row(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Image(
-                                painter = painterResource(com.carenest.provider.designsystem.R.drawable.ic_location),
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = stringResource(
                                     R.string.nurse_requests_distance_miles, request.distanceMiles
@@ -194,8 +191,6 @@ fun NurseRequestCard(
             {
                 AsyncImage(
                     model = request.serviceImage.ifBlank { null },
-                    placeholder = painterResource(com.carenest.provider.designsystem.R.drawable.ic_service_placeholder),
-                    error = painterResource(com.carenest.provider.designsystem.R.drawable.ic_service_placeholder),
                     contentDescription = request.serviceType,
                     modifier = Modifier.size(20.dp)
                 )
@@ -208,12 +203,6 @@ fun NurseRequestCard(
                     ),
                     modifier = Modifier.weight(1f),
                     maxLines = 1,
-                )
-
-                Image(
-                    painter = painterResource(com.carenest.provider.designsystem.R.drawable.ic_file),
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
                 )
 
             }

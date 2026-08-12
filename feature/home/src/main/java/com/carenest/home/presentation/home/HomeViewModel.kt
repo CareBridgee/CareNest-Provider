@@ -149,7 +149,7 @@ class HomeViewModel @Inject constructor(
             nurseSocketClient.connect()
             viewModelScope.launch {
                 // Testing coordinates provided by user
-                nurseSocketClient.updateAvailability(true, 30.2361926, 31.4790023)
+                nurseSocketClient.updateAvailability(true, 30.03155, 31.22697)
             }
 
             // Stream real-time socket requests
@@ -157,8 +157,8 @@ class HomeViewModel @Inject constructor(
                 nurseSocketClient.nearbyRequests.collect { socketReq ->
                     val newRequest = NurseRequest(
                         id = socketReq.serviceRequestId,
-                        patientName = socketReq.serviceName ?: "Patient Request",
-                        patientImage = "",
+                        patientName = socketReq.patientName ?: socketReq.serviceName ?: "Patient Request",
+                        patientImage = socketReq.patientAvatar ?: "",
                         serviceType = socketReq.serviceName ?: "Nursing Visit",
                         serviceImage = "",
                         baseRate = (socketReq.estimatedPrice ?: 50.0).toFloat(),
