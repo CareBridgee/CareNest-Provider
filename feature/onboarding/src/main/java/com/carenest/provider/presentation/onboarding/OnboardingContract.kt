@@ -5,10 +5,10 @@ import androidx.annotation.StringRes
 
 data class OnboardingPage(
     val id: Int,
-    @DrawableRes val illustrationRes: Int,
-    @StringRes val titleRes: Int,
-    @StringRes val descriptionRes: Int,
-    @StringRes val illustrationContentDescriptionRes: Int,
+    @param:DrawableRes val illustrationRes: Int,
+    @param:StringRes val titleRes: Int,
+    @param:StringRes val descriptionRes: Int,
+    @param:StringRes val illustrationContentDescriptionRes: Int,
     val style: OnboardingPageStyle,
 )
 

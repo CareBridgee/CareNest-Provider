@@ -5,9 +5,9 @@ import androidx.annotation.StringRes
 
 data class MenuItemUiModel(
     val id: MenuItemId,
-    @StringRes val titleRes: Int,
-    @StringRes val subtitleRes: Int,
-    @DrawableRes val iconRes: Int,
+    @param:StringRes val titleRes: Int,
+    @param:StringRes val subtitleRes: Int,
+    @param:DrawableRes val iconRes: Int,
     val showVerifiedDot: Boolean = false,
 )
 
@@ -37,16 +37,16 @@ enum class DocumentUploadTarget {
 
 data class ProfessionalDocumentUiModel(
     val id: String,
-    @StringRes val titleRes: Int,
-    @StringRes val supportingTextRes: Int,
-    @DrawableRes val iconRes: Int,
+    @param:StringRes val titleRes: Int,
+    @param:StringRes val supportingTextRes: Int,
+    @param:DrawableRes val iconRes: Int,
     val status: DocumentStatus,
     val files: List<ProfessionalDocumentFileUiModel>,
 )
 
 data class ProfessionalDocumentFileUiModel(
     val target: DocumentUploadTarget,
-    @StringRes val labelRes: Int,
+    @param:StringRes val labelRes: Int,
     val url: String?,
     val isUploading: Boolean = false,
 )

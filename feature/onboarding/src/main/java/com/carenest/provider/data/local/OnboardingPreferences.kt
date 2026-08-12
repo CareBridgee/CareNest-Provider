@@ -19,7 +19,7 @@ interface OnboardingPreferences {
 }
 
 class DataStoreOnboardingPreferences @Inject constructor(
-    @OnboardingDataStore private val dataStore: DataStore<Preferences>,
+    @param:OnboardingDataStore private val dataStore: DataStore<Preferences>,
 ) : OnboardingPreferences {
 
     override val isCompleted: Flow<Boolean> = dataStore.data

@@ -8,7 +8,6 @@ import com.carenest.provider.auth.domain.repository.AuthRepository
 import com.carenest.provider.auth.domain.repository.AuthenticatedNurse
 import com.carenest.provider.auth.domain.repository.AuthenticatedUser
 import com.carenest.provider.auth.domain.repository.NurseVerificationStatus
-import com.carenest.provider.core.util.Resource
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -20,7 +19,7 @@ class GetNurseReviewsUseCaseTest {
         private val userResult: Result<AuthenticatedUser>,
     ) : AuthRepository {
         override suspend fun login(phoneNumber: String): Result<Unit> = Result.success(Unit)
-        override suspend fun devLogin(phoneNumber: String): Resource<String> = Resource.Success("123456")
+        override suspend fun devLogin(phoneNumber: String): Result<String> = Result.success("123456")
         override suspend fun verifyOtp(phoneNumber: String, otp: String): Result<AuthenticatedNurse?> =
             Result.success(userResult.getOrNull()?.nurse)
         override suspend fun getCurrentUser(): Result<AuthenticatedUser> = userResult

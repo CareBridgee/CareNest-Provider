@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class RatingsAndReviewsViewModel @Inject constructor(
     private val getNurseReviewsUseCase: GetNurseReviewsUseCase,
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) : ViewModel(),
     StateHolder<RatingsAndReviewsUiState> by DefaultStateHolder(RatingsAndReviewsUiState()),
     EffectPublisher<RatingsAndReviewsEffect> by DefaultEffectPublisher() {
