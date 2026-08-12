@@ -15,6 +15,7 @@ import com.carenest.provider.core.mvi.StateHolder
 import com.carenest.home.domain.model.NurseRequest
 import com.carenest.home.domain.usecase.ListenReservationEventsUseCase
 import com.carenest.home.domain.usecase.GetAvailabilityUseCase
+import com.carenest.home.domain.usecase.GetCurrentLocationUseCase
 import com.carenest.home.domain.usecase.UpdateAvailabilityUseCase
 import com.carenest.provider.core.network.socket.client.NurseSocketClient
 import com.carenest.provider.core.network.socket.model.ReservationEventType
@@ -38,6 +39,7 @@ class HomeViewModel @Inject constructor(
     private val nurseSocketClient: NurseSocketClient,
     private val getAvailability: GetAvailabilityUseCase,
     private val updateAvailability: UpdateAvailabilityUseCase,
+    private val getCurrentLocation: GetCurrentLocationUseCase,
 ) : ViewModel(),
     StateHolder<HomeUiState> by DefaultStateHolder(HomeUiState()),
     EffectPublisher<HomeEffect> by DefaultEffectPublisher() {
@@ -148,8 +150,12 @@ class HomeViewModel @Inject constructor(
         if (isOnline) {
             nurseSocketClient.connect()
             viewModelScope.launch {
-                // Testing coordinates provided by user
-                nurseSocketClient.updateAvailability(true, 30.03155, 31.22697)
+                val location = getCurrentLocation()
+                nurseSocketClient.updateAvailability(
+                    available = true,
+                    lat = location?.latitude,
+                    lng = location?.longitude
+                )
             }
 
             // Stream real-time socket requests

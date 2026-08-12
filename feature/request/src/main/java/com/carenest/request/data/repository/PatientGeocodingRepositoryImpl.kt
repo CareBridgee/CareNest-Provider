@@ -1,6 +1,6 @@
 package com.carenest.request.data.repository
 
-import com.carenest.request.data.remote.PatientGeocodingApi
+import com.carenest.request.data.remote.ProviderGeocodingApi
 import com.carenest.request.domain.model.PatientLocationDetails
 import com.carenest.request.domain.repository.PatientGeocodingRepository
 import kotlinx.coroutines.Dispatchers
@@ -8,7 +8,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class PatientGeocodingRepositoryImpl @Inject constructor(
-    private val api: PatientGeocodingApi,
+    private val api: ProviderGeocodingApi,
 ) : PatientGeocodingRepository {
 
     override suspend fun reverseGeocode(

@@ -9,8 +9,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.carenest.home.R
 import com.carenest.provider.designsystem.components.dialog.CareNestDialog
 
 @Composable
@@ -42,10 +44,10 @@ fun NotificationPermissionHandler(
 
     if (showRationale) {
         CareNestDialog(
-            title = "Notification Permission Required",
-            message = "This app needs notification access to alert you in real-time when new patient care requests arrive or reservation updates occur.",
-            confirmText = "Allow",
-            dismissText = "Deny",
+            title = stringResource(R.string.notification_permission_rationale_title),
+            message = stringResource(R.string.notification_permission_rationale_message),
+            confirmText = stringResource(R.string.notification_permission_allow),
+            dismissText = stringResource(R.string.notification_permission_deny),
             onConfirm = {
                 launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 onRationaleDismissed()
