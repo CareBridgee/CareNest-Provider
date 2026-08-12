@@ -1,6 +1,5 @@
 package com.carenest.home.presentation.home.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -20,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.carenest.home.R
 import com.carenest.provider.designsystem.theme.Theme
 
@@ -42,9 +42,12 @@ fun HomeGreetingBar(
                 .border(2.dp, Theme.colors.primaryVariant, CircleShape)
                 .background(Theme.colors.surfaceVariant), contentAlignment = Alignment.Center
         ) {
-            Image( //this will convert to async image
-                painter = painterResource(com.carenest.provider.designsystem.R.drawable.nurse_image),
+            AsyncImage(
+                model = avatarUrl?.takeIf(String::isNotBlank),
                 contentDescription = "User Avatar",
+                placeholder = painterResource(com.carenest.provider.designsystem.R.drawable.nurse_image),
+                error = painterResource(com.carenest.provider.designsystem.R.drawable.nurse_image),
+                fallback = painterResource(com.carenest.provider.designsystem.R.drawable.nurse_image),
                 modifier = Modifier
                     .size(42.dp)
                     .clip(CircleShape),

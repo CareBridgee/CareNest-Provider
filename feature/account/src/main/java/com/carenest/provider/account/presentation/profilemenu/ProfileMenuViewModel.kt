@@ -10,14 +10,24 @@ import com.carenest.provider.core.mvi.EffectPublisher
 import com.carenest.provider.core.mvi.StateHolder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import com.carenest.provider.profile.domain.usecase.GetNurseUseCase
 
 @HiltViewModel
 class ProfileMenuViewModel @Inject constructor(
     private val authenticationSessionStore: AuthenticationSessionStore,
+    private val getNurse: GetNurseUseCase,
 ) : ViewModel(),
     StateHolder<ProfileMenuUiState> by DefaultStateHolder(ProfileMenuUiState()),
     EffectPublisher<ProfileMenuEffect> by DefaultEffectPublisher() {
+
+    private var profileJob: Job? = null
+
+    init {
+        loadProfile()
+    }
 
     fun onIntent(intent: ProfileMenuIntent) {
         when (intent) {
@@ -33,6 +43,7 @@ class ProfileMenuViewModel @Inject constructor(
                 authenticationSessionStore.clearSession()
                 sendEffect(ProfileMenuEffect.Logout)
             }
+            ProfileMenuIntent.RefreshProfile -> loadProfile()
             is ProfileMenuIntent.MenuItemClicked -> when (intent.id) {
                 MenuItemId.ProfessionalInfo -> sendEffect(ProfileMenuEffect.OpenPublicProfile)
                 MenuItemId.Documents -> sendEffect(ProfileMenuEffect.OpenDocuments)
@@ -43,6 +54,36 @@ class ProfileMenuViewModel @Inject constructor(
                 MenuItemId.Wallet -> sendEffect(ProfileMenuEffect.OpenWallet)
                 MenuItemId.Support -> sendEffect(ProfileMenuEffect.OpenSupport)
             }
+        }
+    }
+
+    private fun loadProfile() {
+        profileJob?.cancel()
+        profileJob = viewModelScope.launch {
+            updateState { copy(isLoading = true) }
+            val nurseId = authenticationSessionStore.session.first()?.nurseId
+            if (nurseId.isNullOrBlank()) {
+                updateState { copy(isLoading = false) }
+                return@launch
+            }
+            getNurse(nurseId).fold(
+                onSuccess = { profile ->
+                    val fullName = listOfNotNull(
+                        profile.firstName?.takeIf(String::isNotBlank),
+                        profile.lastName?.takeIf(String::isNotBlank),
+                    ).joinToString(" ")
+                    updateState {
+                        copy(
+                            isLoading = false,
+                            fullName = fullName,
+                            avatarUrl = profile.profileImageUrl,
+                            specialty = profile.specialization.orEmpty(),
+                            rating = profile.ratingAvg?.let { "%.1f".format(it) } ?: "0",
+                        )
+                    }
+                },
+                onFailure = { updateState { copy(isLoading = false) } },
+            )
         }
     }
 }

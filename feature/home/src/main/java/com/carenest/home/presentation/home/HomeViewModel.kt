@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.carenest.home.domain.model.RequestStatus
 import com.carenest.home.domain.usecase.GetEarningsSummaryUseCase
 import com.carenest.home.domain.usecase.GetIncomingRequestsUseCase
-import com.carenest.home.domain.usecase.GetNurseProfileUseCase
 import com.carenest.home.domain.usecase.SendOfferToPatientUseCase
 import com.carenest.provider.core.mvi.DefaultEffectPublisher
 import com.carenest.provider.core.mvi.DefaultStateHolder
@@ -19,6 +18,8 @@ import com.carenest.home.domain.usecase.GetCurrentLocationUseCase
 import com.carenest.home.domain.usecase.UpdateAvailabilityUseCase
 import com.carenest.provider.core.network.socket.client.NurseSocketClient
 import com.carenest.provider.core.network.socket.model.ReservationEventType
+import com.carenest.provider.core.datastore.AuthenticationSessionStore
+import com.carenest.provider.profile.domain.usecase.GetNurseUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
@@ -26,6 +27,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -35,7 +37,8 @@ class HomeViewModel @Inject constructor(
     private val getEarningsSummary: GetEarningsSummaryUseCase,
     private val sendOfferToPatient: SendOfferToPatientUseCase,
     private val listenReservationEvents: ListenReservationEventsUseCase,
-    private val getNurseProfile: GetNurseProfileUseCase,
+    private val authenticationSessionStore: AuthenticationSessionStore,
+    private val getNurse: GetNurseUseCase,
     private val nurseSocketClient: NurseSocketClient,
     private val getAvailability: GetAvailabilityUseCase,
     private val updateAvailability: UpdateAvailabilityUseCase,
@@ -48,6 +51,7 @@ class HomeViewModel @Inject constructor(
     private var socketJob: Job? = null
     private var offerEventListenerJob: Job? = null
     private var offerTimerJob: Job? = null
+    private var profileJob: Job? = null
 
     val isOnline = getAvailability()
         .stateIn(
@@ -112,13 +116,25 @@ class HomeViewModel @Inject constructor(
             HomeIntent.SaveRateClicked -> saveEditedRate()
             HomeIntent.DismissModal -> dismissModal()
             HomeIntent.ViewAllRequestsClicked -> sendEffect(HomeEffect.NavigateToRequestList)
+            HomeIntent.RefreshProfile -> getNurseData()
         }
     }
 
     private fun getNurseData(){
-        viewModelScope.launch {
-            getNurseProfile().onSuccess { profile ->
-                updateState { copy(nurseName = profile.name, nurseAvatar = profile.avatarUrl) }
+        profileJob?.cancel()
+        profileJob = viewModelScope.launch {
+            val nurseId = authenticationSessionStore.session.first()?.nurseId ?: return@launch
+            getNurse(nurseId).onSuccess { profile ->
+                val fullName = listOfNotNull(
+                    profile.firstName?.takeIf(String::isNotBlank),
+                    profile.lastName?.takeIf(String::isNotBlank),
+                ).joinToString(" ")
+                updateState {
+                    copy(
+                        nurseName = fullName,
+                        nurseAvatar = profile.profileImageUrl,
+                    )
+                }
             }
         }
     }

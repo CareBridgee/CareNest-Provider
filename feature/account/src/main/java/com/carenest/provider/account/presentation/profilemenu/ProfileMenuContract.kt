@@ -7,6 +7,10 @@ import com.carenest.provider.designsystem.R as DesignSystemR
 
 data class ProfileMenuUiState(
     val isLoading: Boolean = false,
+    val fullName: String = "",
+    val avatarUrl: String? = null,
+    val specialty: String = "",
+    val rating: String = "0",
     val menuItems: List<MenuItemUiModel> = sampleProfileMenuItems,
 )
 
@@ -19,6 +23,7 @@ sealed interface ProfileMenuIntent {
     data object PayoutsClicked : ProfileMenuIntent
     data object WalletClicked : ProfileMenuIntent
     data object LogoutClicked : ProfileMenuIntent
+    data object RefreshProfile : ProfileMenuIntent
 }
 
 sealed interface ProfileMenuEffect {
