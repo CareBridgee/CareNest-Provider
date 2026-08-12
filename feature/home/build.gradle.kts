@@ -32,6 +32,7 @@ android {
 dependencies {
     implementation(project(":designsystem"))
     implementation(project(":core"))
+    implementation(project(":feature:profile"))
 
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)

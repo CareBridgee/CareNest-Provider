@@ -2,11 +2,14 @@ package com.carenest.request.data.repository
 
 import com.carenest.provider.core.network.socket.model.ReservationEvent
 import com.carenest.request.data.datasource.NurseRequestsDataSource
+import com.carenest.request.data.mapper.toDomain
 import com.carenest.request.data.mapper.toDomainOffer
 import com.carenest.request.data.remote.RequestRemoteDataSource
 import com.carenest.request.data.remote.dto.ServiceRequestDetailsDto
 import com.carenest.request.domain.model.CancellationReason
+import com.carenest.request.domain.model.EmergencyContactItem
 import com.carenest.request.domain.model.Offer
+import com.carenest.request.domain.model.PatientMedicalSummary
 import com.carenest.request.domain.model.Request
 import com.carenest.request.domain.repository.NurseRequestsRepository
 import kotlinx.coroutines.flow.Flow
@@ -77,6 +80,61 @@ class NurseRequestsRepositoryImpl @Inject constructor(
 
         throw profileResult.exceptionOrNull()
             ?: IllegalStateException("Could not load request contract for $requestId")
+    }
+
+    override suspend fun fetchPatientSummary(requestId: String): PatientMedicalSummary {
+        val profilePatient = runCatching {
+            remoteDataSource.getServiceRequestProfile(requestId).patient?.toDomain()
+        }.getOrNull()
+        if (profilePatient != null) return profilePatient
+
+        val previewPatient = runCatching {
+            remoteDataSource.getServiceRequestPreview(requestId).patient?.toDomain()
+        }.getOrNull()
+        if (previewPatient != null) return previewPatient
+
+        val contract = runCatching { fetchRequestContract(requestId) }.getOrNull()
+        if (contract != null) {
+            val contractServiceRequestId = contract.offerId
+            if (contractServiceRequestId != requestId) {
+                val contractProfilePatient = runCatching {
+                    remoteDataSource.getServiceRequestProfile(contractServiceRequestId).patient?.toDomain()
+                }.getOrNull()
+                if (contractProfilePatient != null) return contractProfilePatient
+
+                val contractPreviewPatient = runCatching {
+                    remoteDataSource.getServiceRequestPreview(contractServiceRequestId).patient?.toDomain()
+                }.getOrNull()
+                if (contractPreviewPatient != null) return contractPreviewPatient
+            }
+
+            val info = contract.patientInfo
+            return PatientMedicalSummary(
+                profileId = info.id,
+                firstName = info.name.substringBefore(" "),
+                lastName = info.name.substringAfter(" ", ""),
+                profileImageUrl = info.image,
+                dateOfBirth = info.age?.let { age ->
+                    val year = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR) - age
+                    "$year-01-01"
+                },
+                gender = null,
+                bloodType = null,
+                height = null,
+                weight = null,
+                mobilityStatus = null,
+                mobilityNotes = info.summery.takeIf { it.isNotBlank() },
+                allergies = emptyList(),
+                medicalConditions = emptyList(),
+                medications = emptyList(),
+                medicalHistory = emptyList(),
+                emergencyContacts = if (info.phone.isNotBlank()) {
+                    listOf(EmergencyContactItem(name = info.name, phoneNumber = info.phone))
+                } else emptyList(),
+            )
+        }
+
+        throw IllegalStateException("Service request patient summary not found for: $requestId")
     }
 
     override suspend fun cancelRequest(

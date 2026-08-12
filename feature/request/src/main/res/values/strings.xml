@@ -141,4 +141,29 @@
     <string name="cancellation_dialog_title">Service Request Cancelled</string>
     <string name="cancellation_dialog_message">This service request has been cancelled by the patient.</string>
     <string name="cancellation_dialog_ok">OK</string>
+
+    <!-- Patient Summary -->
+    <string name="patient_summary_title">CareConnect</string>
+    <string name="patient_summary_personal_info">PERSONAL INFORMATION</string>
+    <string name="patient_summary_age">Age</string>
+    <string name="patient_summary_gender">Gender</string>
+    <string name="patient_summary_blood_type">Blood Type</string>
+    <string name="patient_summary_height">Height</string>
+    <string name="patient_summary_weight">Weight</string>
+    <string name="patient_summary_mobility">Mobility</string>
+    <string name="patient_summary_medical_conditions">MEDICAL CONDITIONS</string>
+    <string name="patient_summary_allergies">ALLERGIES</string>
+    <string name="patient_summary_current_medications">CURRENT MEDICATIONS</string>
+    <string name="patient_summary_mobility_care_notes">MOBILITY &amp; CARE NOTES</string>
+    <string name="patient_summary_medical_history">MEDICAL HISTORY</string>
+    <string name="patient_summary_emergency_contacts">EMERGENCY CONTACTS</string>
+    <string name="patient_summary_height_unit">%1$s cm</string>
+    <string name="patient_summary_weight_unit">%1$s kg</string>
+    <string name="patient_summary_no_allergies">No known allergies</string>
+    <string name="patient_summary_no_conditions">No medical conditions reported</string>
+    <string name="patient_summary_no_medications">No current medications listed</string>
+    <string name="patient_summary_no_history">No medical history recorded</string>
+    <string name="patient_summary_no_contacts">No emergency contacts listed</string>
+    <string name="patient_summary_mobility_status_label">Mobility Status: %1$s</string>
+    <string name="patient_summary_notes_label">Notes: %1$s</string>
 </resources>

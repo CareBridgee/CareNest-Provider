@@ -141,6 +141,7 @@ fun PublicProfileContent(
     ) {
         ProviderAccountTopBar(
             showSettings = true,
+            avatarUrl = state.profileImageUrl,
             onSettingsClick = { onIntent(PublicProfileIntent.SettingsClicked) },
             onNavigateBack = { onIntent(PublicProfileIntent.BackClicked) },
         )
@@ -208,7 +209,6 @@ private fun PublicProfileHero(
         Box(
             modifier = Modifier
                 .size(116.dp)
-                .clip(CircleShape)
                 .clickable(onClick = onProfileImageClick),
             contentAlignment = Alignment.Center,
         ) {

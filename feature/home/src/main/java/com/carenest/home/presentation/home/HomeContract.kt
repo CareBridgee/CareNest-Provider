@@ -40,6 +40,7 @@ sealed interface HomeIntent {
     data class EditRateChanged(val rate: Float) : HomeIntent
     data class TabSelected(val index: Int) : HomeIntent
     data object ViewAllRequestsClicked : HomeIntent
+    data object RefreshProfile : HomeIntent
     data object SaveRateClicked : HomeIntent
     data object DismissModal : HomeIntent
 }
