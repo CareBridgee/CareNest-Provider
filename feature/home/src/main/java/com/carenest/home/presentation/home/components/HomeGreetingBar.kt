@@ -44,7 +44,7 @@ fun HomeGreetingBar(
         ) {
             AsyncImage(
                 model = avatarUrl?.takeIf(String::isNotBlank),
-                contentDescription = "User Avatar",
+                contentDescription = stringResource(R.string.home_user_avatar_content_description),
                 placeholder = painterResource(com.carenest.provider.designsystem.R.drawable.nurse_image),
                 error = painterResource(com.carenest.provider.designsystem.R.drawable.nurse_image),
                 fallback = painterResource(com.carenest.provider.designsystem.R.drawable.nurse_image),

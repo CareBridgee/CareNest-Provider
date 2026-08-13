@@ -26,12 +26,16 @@ fun formatMessageTime(epochMillis: Long): String =
     Instant.ofEpochMilli(epochMillis).atZone(zone).format(timeFormatter)
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun formatDateSeparator(epochMillis: Long): String {
+fun formatDateSeparator(
+    epochMillis: Long,
+    todayLabel: String,
+    yesterdayLabel: String,
+): String {
     val messageDate = Instant.ofEpochMilli(epochMillis).atZone(zone).toLocalDate()
     val today = LocalDate.now(zone)
     return when (messageDate) {
-        today -> "Today"
-        today.minusDays(1) -> "Yesterday"
+        today -> todayLabel
+        today.minusDays(1) -> yesterdayLabel
         else -> messageDate.format(dateFormatter)
     }
 }

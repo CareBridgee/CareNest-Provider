@@ -23,6 +23,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -31,6 +32,7 @@ import com.carenest.chat.presentation.ui.chat.components.ChatInputBar
 import com.carenest.chat.presentation.ui.chat.components.ChatTopBar
 import com.carenest.chat.presentation.ui.chat.components.DateSeparatorPill
 import com.carenest.chat.presentation.ui.chat.components.MessageBubble
+import com.carenest.chat.R
 import com.carenest.chat.domain.model.ChatMessage
 import com.carenest.chat.presentation.util.dayKey
 import com.carenest.chat.presentation.util.dialPhoneNumber
@@ -151,7 +153,9 @@ private fun ChatScreenContent(
                     item(key = "date_${firstMessage.id}") {
                         DateSeparatorPill(
                             label = formatDateSeparator(
-                                firstMessage.sentAtEpochMillis
+                                epochMillis = firstMessage.sentAtEpochMillis,
+                                todayLabel = stringResource(R.string.chat_today),
+                                yesterdayLabel = stringResource(R.string.chat_yesterday),
                             )
                         )
                     }
