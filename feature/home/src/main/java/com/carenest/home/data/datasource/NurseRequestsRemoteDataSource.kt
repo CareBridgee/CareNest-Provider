@@ -8,7 +8,6 @@ import com.carenest.home.domain.model.RequestStatus
 import com.carenest.provider.core.network.socket.client.NurseSocketClient
 import com.carenest.provider.core.network.socket.model.NearbyNurseServiceRequestResponse
 import com.carenest.provider.core.network.socket.model.ReservationEvent
-import com.carenest.provider.core.network.socket.model.patientDisplayName
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -30,7 +29,8 @@ class NurseRequestsRemoteDataSource @Inject constructor(
             response.map { item ->
                 NurseRequest(
                     id = item.serviceRequestId,
-                    patientName = item.patientDisplayName(),
+                    patientName = "${item.patientFirstName ?: ""} ${item.patientLastName ?: ""}".trim()
+                        .ifBlank { item.serviceName ?: "Patient Request" },
                     patientImage = item.patientProfileImageUrl ?: "",
                     serviceType = item.serviceName ?: "Nursing Visit",
                     serviceImage = "",
