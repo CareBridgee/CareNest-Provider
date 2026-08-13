@@ -46,7 +46,7 @@ data class VerificationDocumentsUiState(
 )
 
 data class ServiceUi(
-    @DrawableRes val icon: Int,
+    @param:DrawableRes val icon: Int,
     val title: String,
     val id: String = "",
     val description: String? = null,

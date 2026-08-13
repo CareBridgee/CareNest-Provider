@@ -35,141 +35,158 @@ import com.carenest.provider.auth.presentation.auth.login.LoginIntent
 import com.carenest.provider.designsystem.R
 import com.carenest.provider.designsystem.R as DR
 
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import com.carenest.provider.auth.presentation.auth.login.google.GoogleSignInHelper
+
 @Composable
 fun AuthLandingScreen(onEvent: (LoginIntent) -> Unit) {
-    var showGoogleUnavailableDialog by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
+    val googleSignInHelper = remember(context) { GoogleSignInHelper(context) }
 
-    if (showGoogleUnavailableDialog) {
-        AlertDialog(
-            onDismissRequest = { showGoogleUnavailableDialog = false },
-            shape = RoundedCornerShape(24.dp),
-            containerColor = Theme.colors.surface,
-            tonalElevation = 0.dp,
-            title = {
-                Text(
-                    text = stringResource(R.string.auth_google_unavailable_title),
-                    style = Theme.typography.title.copy(fontWeight = FontWeight.Bold),
-                    color = Theme.colors.primaryFont,
-                )
-            },
-            text = {
-                Text(
-                    text = stringResource(R.string.auth_google_unavailable_message),
-                    style = Theme.typography.body.medium,
-                    color = Theme.colors.secondaryFont,
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = { showGoogleUnavailableDialog = false }) {
-                    Text(
-                        text = stringResource(R.string.auth_google_unavailable_action),
-                        style = Theme.typography.body.medium.copy(fontWeight = FontWeight.SemiBold),
-                        color = Theme.colors.primary,
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        println("GoogleAuthUI: Activity launcher result code=${result.resultCode}, intentData=${result.data}")
+        Log.i("GoogleAuthUI", "Google Sign-In activity launcher returned with resultCode=${result.resultCode}")
+        googleSignInHelper.parseGoogleAccount(result.data).fold(
+            onSuccess = { payload ->
+                println("GoogleAuthUI: Google account payload retrieved. Sending GoogleSignInClicked event...")
+                onEvent(
+                    LoginIntent.GoogleSignInClicked(
+                        idToken = payload.idToken,
+                        firstName = payload.firstName,
+                        lastName = payload.lastName,
+                        email = payload.email,
+                        profileImageUrl = payload.profileImageUrl,
                     )
-                }
+                )
+            },
+            onFailure = { error ->
+                println("GoogleAuthUI: Google Sign-In failed with error=${error.message}")
+                onEvent(LoginIntent.GoogleSignInFailed(error.message))
             },
         )
     }
 
-    Box(
+    fun launchGoogleSignIn() {
+        println("GoogleAuthUI: Google Sign-In button clicked")
+        Log.i("GoogleAuthUI", "Google Sign-In button clicked. Launching GMS Sign-In intent...")
+        try {
+            val intent = googleSignInHelper.client.signInIntent
+            println("GoogleAuthUI: Launching Google Sign-In intent=$intent")
+            googleSignInLauncher.launch(intent)
+        } catch (e: Throwable) {
+            println("GoogleAuthUI: Error launching Google Sign-In intent: ${e.message}")
+            Log.e("GoogleAuthUI", "Failed to launch Google Sign-In intent: ${e.message}", e)
+        }
+    }
+
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .background(Theme.colors.backGround)
     ) {
+        val minHeight = maxHeight
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(0.5f),
-                contentAlignment = Alignment.Center
+                    .defaultMinSize(minHeight = minHeight)
+                    .padding(horizontal = 24.dp, vertical = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Row(
-                    modifier = Modifier.wrapContentSize(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                // Top Content: Logo, Title, and Description
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-
                     Image(
                         painter = painterResource(DR.drawable.logo),
                         contentDescription = null,
                         modifier = Modifier.size(200.dp),
                         contentScale = ContentScale.Fit
                     )
+
+                    Spacer(modifier = Modifier.height(28.dp))
+
+                    BasicText(
+                        text = stringResource(R.string.app_name_careconnect),
+                        style = Theme.typography.display.copy(
+                            color = Theme.colors.primary,
+                            fontWeight = FontWeight.Normal,
+                            textAlign = TextAlign.Center
+                        )
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    BasicText(
+                        text = stringResource(R.string.app_auth_description),
+                        style = Theme.typography.title.copy(
+                            fontSize = 16.sp,
+                            color = Theme.colors.primary,
+                            fontWeight = FontWeight.Normal,
+                            textAlign = TextAlign.Center
+                        )
+                    )
+                }
+
+                // Bottom Content: Action Buttons & Terms Agreement
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    SecondaryButton(
+                        caption = stringResource(R.string.auth_continue_google),
+                        iconPainter = painterResource(id = DR.drawable.ic_google),
+                        changeIconColor = false,
+                        onClick = { launchGoogleSignIn() },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    SecondaryButton(
+                        caption = stringResource(R.string.auth_continue_phone),
+                        iconPainter = painterResource(id = DR.drawable.ic_call),
+                        onClick = { onEvent(LoginIntent.ContinueWithPhoneClicked) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(28.dp))
+
+                    BasicText(
+                        text = buildAnnotatedString {
+                            val fullText = stringResource(R.string.auth_terms_agreement)
+                            withStyle(style = SpanStyle(color = Theme.colors.hint)) {
+                                append(fullText)
+                            }
+                        },
+                        style = Theme.typography.body.medium.copy(
+                            textAlign = TextAlign.Center
+                        )
+                    )
                 }
             }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Theme.spacing.medium)
-                    .weight(0.3f)
-                ,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                BasicText(
-                    text = stringResource(R.string.app_name_careconnect),
-                    style = Theme.typography.display.copy(
-                        color = Theme.colors.primary,
-                        fontWeight = FontWeight.Normal,
-                        textAlign = TextAlign.Start
-                    )
-                )
-
-                BasicText(
-                    text = stringResource(R.string.app_auth_description),
-                    style = Theme.typography.title.copy(
-                        fontSize = 16.sp,
-                        color = Theme.colors.primary,
-                        fontWeight = FontWeight.Normal,
-                        textAlign = TextAlign.Center
-                    )
-                )
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                SecondaryButton(
-                    caption = stringResource(R.string.auth_continue_google),
-                    iconPainter = painterResource(id = DR.drawable.ic_google),
-                    changeIconColor = false,
-                    onClick = { showGoogleUnavailableDialog = true },
-                    modifier = Modifier.fillMaxWidth().height(56.dp)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                SecondaryButton(
-                    caption = stringResource(R.string.auth_continue_phone),
-                    iconPainter = painterResource(id = DR.drawable.ic_call),
-                    onClick = { onEvent(LoginIntent.ContinueWithPhoneClicked) },
-                    modifier = Modifier.fillMaxWidth().height(56.dp)
-                )
-
-                Spacer(modifier = Modifier.height(48.dp))
-
-                BasicText(
-                    text = buildAnnotatedString {
-                        val fullText = stringResource(R.string.auth_terms_agreement)
-                        withStyle(style = SpanStyle(color = Theme.colors.hint)) {
-                            append(fullText)
-                        }
-                    },
-                    style = Theme.typography.body.medium.copy(
-                        textAlign = TextAlign.Center
-                    )
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }

@@ -71,6 +71,7 @@ fun OfferDetailsScreen(
     }
 
     val context = LocalContext.current
+    @Suppress("DEPRECATION")
     val clipboardManager = LocalClipboardManager.current
 
     ObserveEffect(viewModel.effect) { effect ->

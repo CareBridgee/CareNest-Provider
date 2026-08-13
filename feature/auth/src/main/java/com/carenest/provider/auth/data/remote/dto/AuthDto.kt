@@ -8,9 +8,15 @@ data class LoginRequestDto(
 )
 
 @Serializable
+data class GoogleLoginRequestDto(
+    val idToken: String,
+)
+
+@Serializable
 data class VerifyOtpRequestDto(
     val phoneNumber: String,
-    val otp: String
+    val otp: String,
+    val pendingToken: String? = null
 )
 
 @Serializable
@@ -18,7 +24,14 @@ data class AuthResponseDto(
     val accessToken: String? = null,
     val refreshToken: String? = null,
     val expiresIn: Long? = null,
+    val status: String? = null,
+    val pendingToken: String? = null,
+    val email: String? = null,
+    val firstName: String? = null,
+    val lastName: String? = null,
+    val profileImageUrl: String? = null,
     val user: UserDto? = null,
+    val nurseUser: UserDto? = null,
     val message: String? = null
 )
 

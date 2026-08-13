@@ -308,10 +308,12 @@ class NurseSocketClientImpl @Inject constructor(
             runCatching { stompClient.subscribe("$DEST_TOPIC_CHAT_PREFIX/$reservationId") }
         }
 
-        if (isAvailableState) {
+        if (isAvailableState && lastKnownLat != null && lastKnownLng != null) {
             Log.d("NurseSocketClient", "Restoring availability state: $isAvailableState")
             val payload = json.encodeToString(AvailabilityRequest(true, lastKnownLat, lastKnownLng))
             runCatching { stompClient.send(DEST_APP_AVAILABILITY, payload) }
+        } else if (isAvailableState) {
+            Log.w("NurseSocketClient", "Skipping availability restore: coordinates missing (lat=$lastKnownLat, lng=$lastKnownLng)")
         }
 
         // Start heartbeat ticker (~30s)
@@ -398,6 +400,10 @@ class NurseSocketClientImpl @Inject constructor(
     }
 
     override suspend fun updateAvailability(available: Boolean, lat: Double?, lng: Double?) {
+        if (available && (lat == null || lng == null)) {
+            Log.w("NurseSocketClient", "Cannot set availability to true without location coordinates (lat=$lat, lng=$lng)")
+            return
+        }
         isAvailableState = available
         lastKnownLat = lat
         lastKnownLng = lng

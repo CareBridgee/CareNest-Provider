@@ -205,6 +205,8 @@ private val PUBLIC_AUTH_PATHS = setOf(
     "/api/v1/auth/nurse/verify-otp",
     "/api/v1/auth/dev/request-otp",
     "/api/v1/auth/refresh",
+    "/api/v1/auth/nurse/google",
+    "/api/v1/auth/verify-otp",
 )
 
 private val SafeNetworkLogging = createClientPlugin("SafeNetworkLogging") {

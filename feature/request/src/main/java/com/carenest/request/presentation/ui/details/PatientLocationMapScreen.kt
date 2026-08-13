@@ -1,3 +1,5 @@
+@file:Suppress("ComposableNaming", "COMPOSE_APPLIES_TO_RIGHT", "ComposableTarget", "ComposableTargetMismatch", "RestrictedApi", "UncheckedCast")
+
 package com.carenest.request.presentation.ui.details
 
 import androidx.compose.foundation.background
@@ -50,6 +52,7 @@ import com.mapbox.maps.viewannotation.viewAnnotationOptions
 
 @OptIn(MapboxExperimental::class)
 @Composable
+@Suppress("COMPOSE_APPLIES_TO_RIGHT")
 fun PatientLocationMapScreen(
     latitude: Double,
     longitude: Double,

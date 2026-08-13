@@ -9,5 +9,6 @@ internal data object LoginRoute : NavKey
 @Serializable
 internal data class OtpRoute(
     val phone: String,
-    val otp: String? = null
+    val otp: String? = null,
+    val pendingToken: String? = null,
 ) : NavKey

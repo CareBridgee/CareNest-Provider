@@ -1,7 +1,11 @@
 package com.carenest.provider.auth.di
 
-import com.carenest.provider.auth.data.remote.AuthRemoteDataSource
-import com.carenest.provider.auth.data.remote.KtorAuthRemoteDataSource
+import com.carenest.provider.auth.data.remote.auth.AuthRemoteDataSource
+import com.carenest.provider.auth.data.remote.auth.google.GoogleAuthApi
+import com.carenest.provider.auth.data.remote.auth.google.GoogleAuthApiImpl
+import com.carenest.provider.auth.data.remote.auth.phone.DefaultAuthApi
+import com.carenest.provider.auth.data.remote.auth.phone.DefaultAuthApiImpl
+import com.carenest.provider.auth.data.remote.auth.phone.DefaultAuthRemoteDataSource
 import com.carenest.provider.auth.data.repository.AuthRepositoryImpl
 import com.carenest.provider.auth.domain.repository.AuthRepository
 import dagger.Binds
@@ -22,6 +26,18 @@ abstract class AuthBindingsModule {
     @Binds
     @Singleton
     abstract fun bindAuthRemoteDataSource(
-        implementation: KtorAuthRemoteDataSource
+        implementation: DefaultAuthRemoteDataSource
     ): AuthRemoteDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindDefaultAuthApi(
+        implementation: DefaultAuthApiImpl
+    ): DefaultAuthApi
+
+    @Binds
+    @Singleton
+    abstract fun bindGoogleAuthApi(
+        implementation: GoogleAuthApiImpl
+    ): GoogleAuthApi
 }

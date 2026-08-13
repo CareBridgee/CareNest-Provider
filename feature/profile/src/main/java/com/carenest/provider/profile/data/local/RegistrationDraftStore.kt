@@ -59,7 +59,7 @@ interface RegistrationDraftStore {
 }
 
 class DataStoreRegistrationDraftStore @Inject constructor(
-    @RegistrationDraftDataStore private val dataStore: DataStore<Preferences>,
+    @param:RegistrationDraftDataStore private val dataStore: DataStore<Preferences>,
     private val json: Json,
 ) : RegistrationDraftStore {
 

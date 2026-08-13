@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.carenest.provider.auth.domain.usecase.VerifyOtpUseCase
 import com.carenest.provider.auth.domain.usecase.DevLoginUseCase
 import com.carenest.provider.auth.domain.usecase.ResolveAuthenticationDestinationUseCase
-import com.carenest.provider.auth.domain.repository.AuthenticatedNurse
+import com.carenest.provider.auth.domain.model.AuthenticatedNurse
 import com.carenest.provider.auth.domain.util.AuthenticationDestination
 import com.carenest.provider.auth.domain.validation.PhoneValidator
 import com.carenest.provider.auth.presentation.auth.AuthUiError
@@ -47,11 +47,13 @@ class OtpViewModel @Inject constructor(
     fun onEvent(event: OtpIntent) {
         when (event) {
             is OtpIntent.PhoneNumberChanged -> updateState { copy(phoneNumber = event.phone) }
+            is OtpIntent.PendingTokenChanged -> updateState { copy(pendingToken = event.pendingToken) }
             is OtpIntent.OtpCodeChanged -> updateState { copy(otpCode = event.otp, errorMessage = null) }
             OtpIntent.VerifyOtpClicked -> verifyOtp()
             OtpIntent.RetryDestinationResolution -> retryDestinationResolution()
             OtpIntent.BackClicked -> sendEffect(OtpEffect.NavigateBack)
             OtpIntent.ResendClicked -> resendOtp()
+            OtpIntent.DismissErrorDialog -> updateState { copy(errorMessage = null) }
         }
     }
 
@@ -122,7 +124,7 @@ class OtpViewModel @Inject constructor(
                 updateState { copy(isLoading = false, errorMessage = AuthUiError.InvalidPhone) }
                 return@launch
             }
-            val result = verifyOtpUseCase(sanitizedPhone, currentState.otpCode)
+            val result = verifyOtpUseCase(sanitizedPhone, currentState.otpCode, currentState.pendingToken)
 
             result.fold(
                 onSuccess = { nurse ->

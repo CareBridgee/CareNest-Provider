@@ -48,14 +48,16 @@ import com.carenest.provider.designsystem.theme.Theme
 fun OtpScreen(
     phone: String,
     otp: String? = null,
+    pendingToken: String? = null,
     viewModel: OtpViewModel = hiltViewModel(),
     onAuthenticationSuccess: (AuthenticationDestination) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
 
-    LaunchedEffect(phone, otp) {
+    LaunchedEffect(phone, otp, pendingToken) {
         viewModel.onEvent(OtpIntent.PhoneNumberChanged(phone))
+        viewModel.onEvent(OtpIntent.PendingTokenChanged(pendingToken))
         otp?.let {
             viewModel.onEvent(OtpIntent.OtpCodeChanged(it))
         }
@@ -226,6 +228,18 @@ internal fun OtpScreenContent(
 
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+
+    state.errorMessage?.localizedMessage()?.let { message ->
+        com.carenest.provider.designsystem.components.dialog.CareNestDialog(
+            title = stringResource(R.string.auth_error_dialog_title),
+            message = message,
+            confirmText = stringResource(R.string.auth_error_dialog_confirm),
+            onConfirm = { onEvent(OtpIntent.DismissErrorDialog) },
+            onDismiss = { onEvent(OtpIntent.DismissErrorDialog) },
+            dismissText = null,
+            confirmColor = Theme.colors.primary,
+        )
     }
 }
 
