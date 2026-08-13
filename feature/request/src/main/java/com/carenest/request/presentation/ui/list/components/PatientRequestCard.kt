@@ -98,15 +98,16 @@ fun PatientRequestCard(
                 Row(
                     modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically
                 ) {
-                    //will use async image
-                    Image(
-                        painter = painterResource(RD.drawable.patient_imgae),
+                    AsyncImage(
+                        model = request.patientImage.ifBlank { null },
                         contentDescription = null,
                         modifier = Modifier
                             .size(48.dp)
                             .clip(RoundedCornerShape(12.dp))
                             .background(Theme.colors.tint),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Crop,
+                        placeholder = painterResource(RD.drawable.patient_imgae),
+                        error = painterResource(RD.drawable.patient_imgae),
                     )
 
                     Spacer(modifier = Modifier.width(Theme.spacing.small))

@@ -3,6 +3,7 @@ package com.carenest.home.domain.repository
 import com.carenest.home.domain.model.EarningsSummary
 import com.carenest.home.domain.model.NurseProfile
 import com.carenest.home.domain.model.NurseRequest
+import com.carenest.home.domain.model.ServiceRequestPreview
 import com.carenest.provider.core.network.socket.model.ReservationEvent
 import kotlinx.coroutines.flow.Flow
 
@@ -18,4 +19,5 @@ interface NurseRequestsRepository {
     fun listenReservationEvents(reservationId: String): Flow<ReservationEvent>
     suspend fun fetchEarningsSummary(): EarningsSummary
     suspend fun getNurseProfile(): NurseProfile
+    suspend fun getServiceRequestPreview(serviceRequestId: String): ServiceRequestPreview
 }

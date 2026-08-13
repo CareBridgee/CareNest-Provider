@@ -1,5 +1,6 @@
 package com.carenest.home.data.datasource
 
+import com.carenest.home.data.dto.ServiceRequestPreviewDto
 import com.carenest.home.domain.model.EarningsSummary
 import com.carenest.home.domain.model.NurseProfile
 import com.carenest.home.domain.model.NurseRequest
@@ -23,12 +24,14 @@ class NurseRequestsRemoteDataSource @Inject constructor(
 
     override suspend fun getIncomingRequests(): List<NurseRequest> {
         return try {
-            val response = httpClient.get("api/v1/service-requests/nearby").body<List<NearbyNurseServiceRequestResponse>>()
+            val response = httpClient.get("api/v1/service-requests/nearby")
+                .body<List<NearbyNurseServiceRequestResponse>>()
             response.map { item ->
                 NurseRequest(
                     id = item.serviceRequestId,
-                    patientName = item.serviceName ?: "Patient Request",
-                    patientImage = "",
+                    patientName = "${item.patientFirstName ?: ""} ${item.patientLastName ?: ""}".trim()
+                        .ifBlank { item.serviceName ?: "Patient Request" },
+                    patientImage = item.patientProfileImageUrl ?: "",
                     serviceType = item.serviceName ?: "Nursing Visit",
                     serviceImage = "",
                     baseRate = (item.estimatedPrice ?: 50.0).toFloat(),
@@ -84,6 +87,14 @@ class NurseRequestsRemoteDataSource @Inject constructor(
                 name = "Care Provider",
                 avatarUrl = ""
             )
+        }
+    }
+    override suspend fun getServiceRequestPreview(serviceRequestId: String) : ServiceRequestPreviewDto {
+        return try {
+            httpClient.get("api/v1/service-requests/${serviceRequestId}/preview")
+                .body<ServiceRequestPreviewDto>()
+        } catch (e: Exception) {
+            throw e
         }
     }
 }

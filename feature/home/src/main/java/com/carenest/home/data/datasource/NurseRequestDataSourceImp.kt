@@ -1,5 +1,6 @@
 package com.carenest.home.data.datasource
 
+import com.carenest.home.data.dto.ServiceRequestPreviewDto
 import com.carenest.home.domain.model.EarningsSummary
 import com.carenest.home.domain.model.NurseProfile
 import com.carenest.home.domain.model.NurseRequest
@@ -7,6 +8,7 @@ import com.carenest.home.domain.model.RequestStatus
 import com.carenest.provider.core.network.socket.client.NurseSocketClient
 import com.carenest.provider.core.network.socket.model.NearbyNurseServiceRequestResponse
 import com.carenest.provider.core.network.socket.model.ReservationEvent
+import com.carenest.provider.core.network.socket.model.patientDisplayName
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -23,12 +25,13 @@ class NurseRequestsDataSourceImpl @Inject constructor(
 
     override suspend fun getIncomingRequests(): List<NurseRequest> {
         return try {
-            val response = httpClient.get("api/v1/service-requests/nearby").body<List<NearbyNurseServiceRequestResponse>>()
+            val response = httpClient.get("api/v1/service-requests/nearby")
+                .body<List<NearbyNurseServiceRequestResponse>>()
             response.map { item ->
                 NurseRequest(
                     id = item.serviceRequestId,
-                    patientName = item.serviceName ?: "Patient Request",
-                    patientImage = "",
+                    patientName = item.patientDisplayName(),
+                    patientImage = item.patientProfileImageUrl ?: "",
                     serviceType = item.serviceName ?: "Nursing Visit",
                     serviceImage = "",
                     baseRate = (item.estimatedPrice ?: 50.0).toFloat(),
@@ -86,4 +89,8 @@ class NurseRequestsDataSourceImpl @Inject constructor(
             )
         }
     }
+
+   override suspend fun getServiceRequestPreview(serviceRequestId: String): ServiceRequestPreviewDto =
+        httpClient.get("/api/v1/service-requests/$serviceRequestId/preview")
+            .body<ServiceRequestPreviewDto>()
 }

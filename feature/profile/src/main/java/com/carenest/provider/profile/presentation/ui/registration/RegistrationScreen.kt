@@ -8,9 +8,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
@@ -30,27 +28,17 @@ import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.designsystem.components.stepper.HorizontalStepper
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
-import com.carenest.provider.designsystem.components.topbar.TopBarLeading
+import com.carenest.provider.designsystem.components.calendar.SPDatePickerDialog
 import com.carenest.provider.profile.presentation.ui.registration.component.ApplicationReviewComponent
 import com.carenest.provider.profile.presentation.ui.registration.component.PersonalInfoComponent
 import com.carenest.provider.profile.presentation.ui.registration.component.ServicesSelectionComponent
 import com.carenest.provider.profile.presentation.ui.registration.component.VerificationDocumentsComponent
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDefaults
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.BasicText
@@ -73,6 +61,7 @@ import com.carenest.provider.designsystem.components.button.SecondaryButton
 import com.carenest.provider.designsystem.components.button.ButtonIconPosition
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import com.carenest.provider.designsystem.components.topbar.TopBarLeading
 import com.carenest.provider.profile.R as ProfileR
 import com.carenest.provider.designsystem.R as DesignR
 import com.carenest.provider.profile.domain.model.VerificationStatus
@@ -151,14 +140,14 @@ fun RegistrationScreen(
     }
 
     if (showDatePicker) {
-        RegistrationDatePickerDialog(
+        SPDatePickerDialog(
             state = datePickerState,
             onDismissRequest = { showDatePicker = false },
-            onConfirm = { selectedDateMillis ->
-                selectedDateMillis?.let { millis ->
-                    val sdf = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
-                    sdf.timeZone = TimeZone.getTimeZone("UTC")
-                    val date = sdf.format(Date(millis))
+            onConfirm = {
+                datePickerState.selectedDateMillis?.let { millis ->
+                    val sdf = SimpleDateFormat("MM/dd/yyyy", java.util.Locale.getDefault())
+                    sdf.timeZone = java.util.TimeZone.getTimeZone("UTC")
+                    val date = sdf.format(java.util.Date(millis))
                     registrationViewmodel.onIntent(RegistrationIntent.OnDateOfBirthChanged(date))
                 }
                 showDatePicker = false
@@ -399,76 +388,6 @@ private fun RegistrationScreenContent(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun RegistrationDatePickerDialog(
-    state: DatePickerState,
-    onDismissRequest: () -> Unit,
-    onConfirm: (Long?) -> Unit,
-) {
-    val colors = DatePickerDefaults.colors(
-        containerColor = Theme.colors.surface,
-        titleContentColor = Theme.colors.secondaryFont,
-        headlineContentColor = Theme.colors.primary,
-        weekdayContentColor = Theme.colors.secondaryFont,
-        subheadContentColor = Theme.colors.primaryFont,
-        navigationContentColor = Theme.colors.primary,
-        yearContentColor = Theme.colors.primaryFont,
-        disabledYearContentColor = Theme.colors.onDisable,
-        currentYearContentColor = Theme.colors.primary,
-        selectedYearContentColor = Theme.colors.onPrimary,
-        disabledSelectedYearContentColor = Theme.colors.onDisable,
-        selectedYearContainerColor = Theme.colors.primary,
-        disabledSelectedYearContainerColor = Theme.colors.disable,
-        dayContentColor = Theme.colors.primaryFont,
-        disabledDayContentColor = Theme.colors.onDisable,
-        selectedDayContentColor = Theme.colors.onPrimary,
-        disabledSelectedDayContentColor = Theme.colors.onDisable,
-        selectedDayContainerColor = Theme.colors.primary,
-        disabledSelectedDayContainerColor = Theme.colors.disable,
-        todayContentColor = Theme.colors.primary,
-        todayDateBorderColor = Theme.colors.primary,
-        dayInSelectionRangeContentColor = Theme.colors.onPrimaryContainer,
-        dayInSelectionRangeContainerColor = Theme.colors.primaryContainer,
-        dividerColor = Theme.colors.divider,
-    )
-    val actionButtonColors = ButtonDefaults.textButtonColors(
-        contentColor = Theme.colors.primary,
-    )
-
-    DatePickerDialog(
-        onDismissRequest = onDismissRequest,
-        confirmButton = {
-            TextButton(
-                onClick = { onConfirm(state.selectedDateMillis) },
-                colors = actionButtonColors,
-            ) {
-                Text(
-                    text = stringResource(id = android.R.string.ok),
-                    style = Theme.typography.body.small,
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismissRequest,
-                colors = actionButtonColors,
-            ) {
-                Text(
-                    text = stringResource(id = android.R.string.cancel),
-                    style = Theme.typography.body.small,
-                )
-            }
-        },
-        shape = Theme.shapes.extraLarge,
-        colors = colors,
-    ) {
-        DatePicker(
-            state = state,
-            colors = colors,
-        )
-    }
-}
 
 @Composable
 fun RegistrationContent(

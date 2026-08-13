@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.serialization)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
 }

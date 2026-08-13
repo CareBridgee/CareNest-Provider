@@ -15,9 +15,11 @@ import com.carenest.home.domain.model.NurseRequest
 import com.carenest.home.domain.usecase.ListenReservationEventsUseCase
 import com.carenest.home.domain.usecase.GetAvailabilityUseCase
 import com.carenest.home.domain.usecase.GetCurrentLocationUseCase
+import com.carenest.home.domain.usecase.GetServiceRequestPreviewUseCase
 import com.carenest.home.domain.usecase.UpdateAvailabilityUseCase
 import com.carenest.provider.core.network.socket.client.NurseSocketClient
 import com.carenest.provider.core.network.socket.model.ReservationEventType
+import com.carenest.provider.core.network.socket.model.patientDisplayName
 import com.carenest.provider.core.datastore.AuthenticationSessionStore
 import com.carenest.provider.profile.domain.usecase.GetNurseUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,6 +32,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlin.text.isNotBlank
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -39,6 +42,7 @@ class HomeViewModel @Inject constructor(
     private val listenReservationEvents: ListenReservationEventsUseCase,
     private val authenticationSessionStore: AuthenticationSessionStore,
     private val getNurse: GetNurseUseCase,
+    private val getServiceRequestPreviewUseCase: GetServiceRequestPreviewUseCase,
     private val nurseSocketClient: NurseSocketClient,
     private val getAvailability: GetAvailabilityUseCase,
     private val updateAvailability: UpdateAvailabilityUseCase,
@@ -179,8 +183,8 @@ class HomeViewModel @Inject constructor(
                 nurseSocketClient.nearbyRequests.collect { socketReq ->
                     val newRequest = NurseRequest(
                         id = socketReq.serviceRequestId,
-                        patientName = socketReq.serviceName ?: "Patient Request",
-                        patientImage = "",
+                        patientName = socketReq.patientDisplayName(),
+                        patientImage = socketReq.patientProfileImageUrl.orEmpty(),
                         serviceType = socketReq.serviceName ?: "Nursing Visit",
                         serviceImage = "",
                         baseRate = (socketReq.estimatedPrice ?: 50.0).toFloat(),
@@ -197,6 +201,7 @@ class HomeViewModel @Inject constructor(
                         }
                         copy(requests = updatedList)
                     }
+                    enrichPatientPreview(newRequest.id)
                 }
             }
 
@@ -222,6 +227,7 @@ class HomeViewModel @Inject constructor(
                             rating = earningsSummary?.rating ?: rating,
                         )
                     }
+                    fetchedRequests.forEach { enrichPatientPreview(it.id) }
                 }
             }
         } else {
@@ -408,6 +414,32 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    private fun enrichPatientPreview(requestId: String) {
+        viewModelScope.launch {
+            try {
+                val preview = getServiceRequestPreviewUseCase(requestId)
+                val patient = preview.patient ?: return@launch
+                val patientName = patient.fullName
+                val imageUrl = patient.profileImageUrl
+
+                updateState {
+                    copy(
+                        requests = requests.map { request ->
+                            if (request.id != requestId) return@map request
+                            request.copy(
+                                patientName = patientName.takeIf(String::isNotBlank)
+                                    ?: request.patientName,
+                                patientImage = imageUrl?.takeIf(String::isNotBlank)
+                                    ?: request.patientImage,
+                            )
+                        }
+                    )
+                }
+            } catch (_: Exception) {
+
+            }
+        }
+    }
     override fun onCleared() {
         fetchJob?.cancel()
         socketJob?.cancel()
