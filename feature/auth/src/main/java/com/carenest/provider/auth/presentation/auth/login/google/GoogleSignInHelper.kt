@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.carenest.provider.auth.presentation.auth.login.google
 
 import android.content.Context

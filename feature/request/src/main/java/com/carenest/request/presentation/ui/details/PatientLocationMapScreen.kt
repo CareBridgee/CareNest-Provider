@@ -99,6 +99,7 @@ fun PatientLocationMapScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
         ) {
+            @Suppress("COMPOSE_APPLIES_TO_RIGHT")
             MapboxMap(
                 modifier = Modifier.fillMaxSize(),
                 mapState = rememberMapState(),
