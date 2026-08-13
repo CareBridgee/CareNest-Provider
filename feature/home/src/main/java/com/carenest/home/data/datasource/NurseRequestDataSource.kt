@@ -1,6 +1,6 @@
 package com.carenest.home.data.datasource
 
-import com.carenest.home.data.ServiceRequestPreviewDto
+import com.carenest.home.data.dto.ServiceRequestPreviewDto
 import com.carenest.home.domain.model.EarningsSummary
 import com.carenest.home.domain.model.NurseProfile
 import com.carenest.home.domain.model.NurseRequest

@@ -1,4 +1,4 @@
-package com.carenest.home.data
+package com.carenest.home.data.dto
 
 
 import kotlinx.serialization.Serializable

@@ -1,7 +1,7 @@
 package com.carenest.home.data.repository
 
 import com.carenest.home.data.datasource.NurseRequestsDataSource
-import com.carenest.home.data.toDomain
+import com.carenest.home.data.mapper.toDomain
 import com.carenest.home.domain.model.EarningsSummary
 import com.carenest.home.domain.model.NurseProfile
 import com.carenest.home.domain.model.NurseRequest
