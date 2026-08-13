@@ -31,12 +31,7 @@ class GoogleAuthApiImpl @Inject constructor(
         otp: String,
         pendingToken: String?,
     ): HttpResponse {
-        val endpoint = if (pendingToken != null) {
-            "/api/v1/auth/verify-otp"
-        } else {
-            "/api/v1/auth/nurse/verify-otp"
-        }
-        return httpClient.post(endpoint) {
+        return httpClient.post("/api/v1/auth/nurse/verify-otp") {
             contentType(ContentType.Application.Json)
             setBody(VerifyOtpRequestDto(phoneNumber, otp, pendingToken))
         }
