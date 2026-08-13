@@ -171,6 +171,17 @@ coordination of services.</string>
     <string name="nurse_requests_status_accepted">Accepted</string>
     <string name="nurse_requests_action_edit">Edit</string>
     <string name="nurse_requests_action_make_offer">Make Offer</string>
+    <string name="profile_avatar_content_description">Profile avatar</string>
+    <string name="connection_alert_title">Connection Alert</string>
+    <string name="connection_error_code">Error Code: %1$s</string>
+    <string name="common_ok">OK</string>
+    <string name="profile_content_description">Profile</string>
+    <string name="notifications_content_description">Notifications</string>
+    <string name="rating_content_description">Rating</string>
+    <string name="ai_chat_content_description">AI Chat</string>
+    <string name="search_content_description">Search</string>
+    <string name="cart_content_description">Cart</string>
+    <string name="call_content_description">Call</string>
 </resources>
 
 

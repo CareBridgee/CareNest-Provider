@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="active_reservation_title">الحجز النشط</string>
+    <string name="active_reservation_monitoring">متابعة تحديثات الحجز لحظيًا</string>
+    <string name="reservation_confirmed_title">تم تأكيد الحجز</string>
+    <string name="reservation_confirmed_message">تم قبول العرض، والزيارة نشطة الآن.</string>
+    <string name="offer_countered_title">عرض مضاد</string>
+    <string name="offer_countered_message">اقترح المريض شروطًا بديلة.</string>
+    <string name="offer_updated_title">تم تحديث العرض</string>
+    <string name="offer_updated_message">تم تحديث شروط الحجز.</string>
+    <string name="reservation_cancelled_title">تم إلغاء الحجز</string>
+    <string name="reservation_cancelled_message">تم إلغاء هذا الطلب.</string>
+    <string name="visit_completed_title">اكتملت الزيارة</string>
+    <string name="visit_completed_message">اكتملت الزيارة بنجاح.</string>
+    <string name="reservation_update_received">تم استلام تحديث جديد للحجز.</string>
+    <string name="reservation_channel_name">تحديثات الحجوزات النشطة</string>
+    <string name="reservation_channel_description">يعرض تحديثات الحالة لحظيًا للحجوزات التمريضية الجارية</string>
+</resources>

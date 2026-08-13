@@ -1,5 +1,5 @@
 <resources>
-    <string name="account_brand">NurseConnect</string>
+    <string name="account_brand">CareConnect</string>
     <string name="account_provider_short_name">Nurse Sarah</string>
     <string name="account_provider_name">Nurse Sarah Mitchell, RN</string>
     <string name="account_specialty">Specialized Geriatric Care</string>
@@ -13,8 +13,8 @@
     <string name="profile_menu_professional_info_subtitle">Specialties, bio, and education</string>
     <string name="profile_menu_documents">Documents</string>
     <string name="profile_menu_documents_subtitle">Verified on 12 Jan 2024</string>
-    <string name="profile_menu_availability">Availability Settings</string>
-    <string name="profile_menu_availability_subtitle">Working hours &amp; block dates</string>
+    <string name="profile_menu_app_settings">App Settings</string>
+    <string name="profile_menu_app_settings_subtitle">Language, appearance, and privacy</string>
     <string name="profile_menu_reviews">Reviews</string>
     <string name="profile_menu_reviews_subtitle">128 patient testimonials</string>
     <string name="profile_menu_earnings">Earnings</string>

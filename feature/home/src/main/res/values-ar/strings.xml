@@ -41,4 +41,25 @@
         <string name="Max">الحد الأقصى</string>
         <string name="estimated_price">السعر التقديري</string>
         <string name="nurse_requests_rate_per_hour">%1$.0f$</string>
+    <!-- Navigation -->
+    <string name="nav_home">الرئيسية</string>
+    <string name="nav_services">الخدمات</string>
+    <string name="nav_booking">الحجوزات</string>
+    <string name="nav_profile">الملف الشخصي</string>
+
+    <!-- Empty states and permissions -->
+    <string name="nurse_requests_no_requests_title">لا توجد طلبات قريبة</string>
+    <string name="nurse_requests_no_requests_description">ابقَ متصلاً. ستظهر هنا تلقائيًا طلبات رعاية المرضى الجديدة في منطقتك.</string>
+    <string name="location_permission_rationale_title">يلزم إذن الموقع</string>
+    <string name="location_permission_rationale_message">يحتاج CareNest إلى موقعك لتحديث حالة توافرك حتى يتمكن المرضى القريبون من العثور عليك وطلب خدماتك.</string>
+    <string name="location_permission_required_title">الموقع مطلوب</string>
+    <string name="location_permission_required_message">يلزم السماح بالوصول إلى الموقع لتفعيل حالة الاتصال واستقبال طلبات رعاية المرضى القريبة. يرجى تفعيل إذن الموقع من الإعدادات.</string>
+    <string name="location_permission_allow">سماح</string>
+    <string name="location_permission_deny">رفض</string>
+    <string name="location_permission_open_settings">فتح الإعدادات</string>
+    <string name="notification_permission_rationale_title">يلزم إذن الإشعارات</string>
+    <string name="notification_permission_rationale_message">يحتاج التطبيق إلى إذن الإشعارات لتنبيهك فور وصول طلبات رعاية جديدة أو حدوث تحديثات على الحجوزات.</string>
+    <string name="notification_permission_allow">سماح</string>
+    <string name="notification_permission_deny">رفض</string>
+    <string name="home_user_avatar_content_description">الصورة الشخصية للمستخدم</string>
 </resources>
