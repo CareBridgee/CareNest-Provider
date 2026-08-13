@@ -25,6 +25,7 @@ ktor = "3.1.0"
 camerax = "1.4.1"
 barcode-scanning = "17.3.0"
 mapbox = "11.10.3"
+gms-auth = "21.6.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -102,6 +103,11 @@ barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", vers
 mapbox-maps-android = { group = "com.mapbox.maps", name = "android", version.ref = "mapbox" }
 mapbox-maps-compose = { group = "com.mapbox.extension", name = "maps-compose", version.ref = "mapbox" }
 
+# gms-auth
+gms-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "gms-auth" }
+
+
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
@@ -110,6 +116,10 @@ hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinxSerializationPlugin" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+
+
+
+
 
 [bundles]
 

@@ -42,6 +42,8 @@ dependencies {
     implementation(libs.bundles.compose)
     implementation(libs.bundles.coil)
     implementation(libs.androidx.navigation3.runtime)
+    //noinspection LoginCredentials
+    implementation(libs.gms.auth)
 
 
     // Lifecycle and ViewModel
