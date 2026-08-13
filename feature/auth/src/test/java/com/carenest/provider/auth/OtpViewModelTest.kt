@@ -1,8 +1,9 @@
 package com.carenest.provider.auth
 
+import com.carenest.provider.auth.domain.model.AuthenticatedNurse
+import com.carenest.provider.auth.domain.model.AuthenticatedUser
+import com.carenest.provider.auth.domain.model.GoogleLoginResult
 import com.carenest.provider.auth.domain.repository.AuthRepository
-import com.carenest.provider.auth.domain.repository.AuthenticatedNurse
-import com.carenest.provider.auth.domain.repository.AuthenticatedUser
 import com.carenest.provider.auth.domain.usecase.AuthenticationDestinationResolver
 import com.carenest.provider.auth.domain.usecase.DevLoginUseCase
 import com.carenest.provider.auth.domain.usecase.ResolveAuthenticationDestinationUseCase
@@ -149,9 +150,19 @@ private class FakeOtpAuthRepository : AuthRepository {
         return otpResult
     }
 
+    override suspend fun googleLogin(
+        idToken: String,
+        firstName: String?,
+        lastName: String?,
+        email: String?,
+        profileImageUrl: String?,
+    ): Result<GoogleLoginResult> =
+        Result.failure(UnsupportedOperationException())
+
     override suspend fun verifyOtp(
         phoneNumber: String,
         otp: String,
+        pendingToken: String?,
     ): Result<AuthenticatedNurse?> = Result.failure(UnsupportedOperationException())
 
     override suspend fun getCurrentUser(): Result<AuthenticatedUser> =
