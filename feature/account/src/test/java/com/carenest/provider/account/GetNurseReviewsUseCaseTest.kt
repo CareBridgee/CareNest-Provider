@@ -4,10 +4,11 @@ import com.carenest.provider.account.domain.model.NurseReview
 import com.carenest.provider.account.domain.model.NurseReviewsPage
 import com.carenest.provider.account.domain.repository.ReviewsRepository
 import com.carenest.provider.account.domain.usecase.GetNurseReviewsUseCase
+import com.carenest.provider.auth.domain.model.AuthenticatedNurse
+import com.carenest.provider.auth.domain.model.AuthenticatedUser
+import com.carenest.provider.auth.domain.model.GoogleLoginResult
+import com.carenest.provider.auth.domain.model.NurseVerificationStatus
 import com.carenest.provider.auth.domain.repository.AuthRepository
-import com.carenest.provider.auth.domain.repository.AuthenticatedNurse
-import com.carenest.provider.auth.domain.repository.AuthenticatedUser
-import com.carenest.provider.auth.domain.repository.NurseVerificationStatus
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -20,7 +21,18 @@ class GetNurseReviewsUseCaseTest {
     ) : AuthRepository {
         override suspend fun login(phoneNumber: String): Result<Unit> = Result.success(Unit)
         override suspend fun devLogin(phoneNumber: String): Result<String> = Result.success("123456")
-        override suspend fun verifyOtp(phoneNumber: String, otp: String): Result<AuthenticatedNurse?> =
+        override suspend fun googleLogin(
+            idToken: String,
+            firstName: String?,
+            lastName: String?,
+            email: String?,
+            profileImageUrl: String?,
+        ): Result<GoogleLoginResult> = Result.failure(UnsupportedOperationException())
+        override suspend fun verifyOtp(
+            phoneNumber: String,
+            otp: String,
+            pendingToken: String?,
+        ): Result<AuthenticatedNurse?> =
             Result.success(userResult.getOrNull()?.nurse)
         override suspend fun getCurrentUser(): Result<AuthenticatedUser> = userResult
     }
