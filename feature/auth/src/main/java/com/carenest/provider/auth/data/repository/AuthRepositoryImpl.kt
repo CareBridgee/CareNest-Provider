@@ -1,23 +1,26 @@
 package com.carenest.provider.auth.data.repository
 
-import com.carenest.provider.auth.data.remote.AuthRemoteDataSource
+import com.carenest.provider.auth.data.remote.auth.AuthRemoteDataSource
 import com.carenest.provider.auth.data.remote.dto.AuthResponseDto
 import com.carenest.provider.auth.data.remote.dto.CurrentUserDto
 import com.carenest.provider.auth.data.remote.dto.DevLoginResponseDto
 import com.carenest.provider.auth.data.remote.dto.ErrorResponseDto
 import com.carenest.provider.auth.domain.model.AuthException
 import com.carenest.provider.auth.domain.model.AuthFailure
+import com.carenest.provider.auth.domain.model.AuthenticatedNurse
+import com.carenest.provider.auth.domain.model.AuthenticatedUser
+import com.carenest.provider.auth.domain.model.GoogleLoginResult
+import com.carenest.provider.auth.domain.model.NurseVerificationStatus
 import com.carenest.provider.auth.domain.repository.AuthRepository
-import com.carenest.provider.auth.domain.repository.AuthenticatedNurse
-import com.carenest.provider.auth.domain.repository.AuthenticatedUser
-import com.carenest.provider.auth.domain.repository.NurseVerificationStatus
 import com.carenest.provider.core.datastore.AuthenticationSessionStore
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.isSuccess
+import android.util.Log
 import java.io.IOException
 import javax.inject.Inject
+
 
 class AuthRepositoryImpl @Inject constructor(
     private val dataSource: AuthRemoteDataSource,
@@ -53,14 +56,87 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun googleLogin(
+        idToken: String,
+        firstName: String?,
+        lastName: String?,
+        email: String?,
+        profileImageUrl: String?,
+    ): Result<GoogleLoginResult> {
+        return try {
+            Log.i("AuthRepo", "Executing POST /api/v1/auth/nurse/google with Google ID token")
+            val response = dataSource.googleLogin(
+                idToken = idToken,
+                firstName = firstName,
+                lastName = lastName,
+                email = email,
+                profileImageUrl = profileImageUrl,
+            )
+
+            if (response.status.isSuccess()) {
+                val authResponse = response.body<AuthResponseDto>()
+                Log.i("AuthRepo", "Google login HTTP ${response.status.value} received. Payload status=${authResponse.status}")
+
+                when (authResponse.status) {
+                    "AUTHENTICATED" -> {
+                        val accessToken = requireNotNull(authResponse.accessToken) {
+                            "Google auth response did not contain an access token"
+                        }
+                        val refreshToken = requireNotNull(authResponse.refreshToken) {
+                            "Google auth response did not contain a refresh token"
+                        }
+
+                        authenticationSessionStore.beginAuthentication(
+                            accessToken = accessToken,
+                            refreshToken = refreshToken,
+                        )
+
+                        val nurse = authResponse.nurseUser?.nurse?.toDomain()
+                            ?: authResponse.user?.nurse?.toDomain()
+                        Log.i("AuthRepo", "Google login AUTHENTICATED successfully. Tokens saved.")
+                        Result.success(GoogleLoginResult.Authenticated(nurse))
+                    }
+                    "PHONE_REQUIRED" -> {
+                        val pendingToken = requireNotNull(authResponse.pendingToken) {
+                            "Google auth response did not contain pendingToken for PHONE_REQUIRED"
+                        }
+                        Log.i("AuthRepo", "Google login PHONE_REQUIRED. Email=${authResponse.email}")
+                        Result.success(
+                            GoogleLoginResult.PhoneRequired(
+                                pendingToken = pendingToken,
+                                email = authResponse.email,
+                                firstName = authResponse.firstName,
+                                lastName = authResponse.lastName,
+                                profileImageUrl = authResponse.profileImageUrl,
+                            )
+                        )
+                    }
+                    else -> {
+                        Log.e("AuthRepo", "Unexpected status in Google login response: ${authResponse.status}")
+                        handleErrorResponse(response, AuthOperation.GOOGLE_LOGIN)
+                    }
+                }
+            } else {
+                Log.e("AuthRepo", "Google login HTTP response failed with status code ${response.status.value}")
+                handleErrorResponse(response, AuthOperation.GOOGLE_LOGIN)
+            }
+        } catch (e: Exception) {
+            Log.e("AuthRepo", "Google login exception: ${e.message}", e)
+            authenticationSessionStore.clearSession()
+            Result.failure(e.toAuthException(AuthOperation.GOOGLE_LOGIN))
+        }
+    }
+
     override suspend fun verifyOtp(
         phoneNumber: String,
         otp: String,
+        pendingToken: String?,
     ): Result<AuthenticatedNurse?> {
         return try {
             val response = dataSource.verifyOtp(
                 phoneNumber = phoneNumber,
                 otp = otp,
+                pendingToken = pendingToken,
             )
 
             if (response.status.isSuccess()) {
@@ -79,7 +155,9 @@ class AuthRepositoryImpl @Inject constructor(
                     refreshToken = refreshToken,
                 )
 
-                Result.success(authResponse.user?.nurse?.toDomain())
+                val nurse = authResponse.nurseUser?.nurse?.toDomain()
+                    ?: authResponse.user?.nurse?.toDomain()
+                Result.success(nurse)
             } else {
                 handleErrorResponse(response, AuthOperation.VERIFY_OTP)
             }
@@ -136,11 +214,14 @@ class AuthRepositoryImpl @Inject constructor(
     ): Result<T> {
         val statusCode = response.status.value
 
+        val rawBody = runCatching { response.bodyAsText() }.getOrNull()
+        Log.e("AuthRepo", "HTTP Error $statusCode response raw body: $rawBody")
+
         val errorBody = runCatching { response.body<ErrorResponseDto>() }.getOrNull()
         val parsedMessage = errorBody?.message
             ?: errorBody?.error
             ?: errorBody?.details
-            ?: runCatching { response.bodyAsText() }.getOrNull()?.takeIf(String::isNotBlank)
+            ?: rawBody?.takeIf(String::isNotBlank)
             ?: "HTTP $statusCode (${response.status.description})"
 
         return Result.failure(
@@ -157,6 +238,7 @@ class AuthRepositoryImpl @Inject constructor(
 private enum class AuthOperation {
     REQUEST_OTP,
     VERIFY_OTP,
+    GOOGLE_LOGIN,
     AUTHENTICATED_REQUEST,
 }
 
@@ -204,9 +286,16 @@ private fun authException(
         else -> AuthFailure.Unknown
     }
 
+    val userFriendlyMessage = if (operation == AuthOperation.GOOGLE_LOGIN &&
+        (searchableMessage.contains("check constraint") || searchableMessage.contains("not-null"))) {
+        "Google Sign-In is temporarily unavailable because the server could not create the account. Please continue with phone or try again later."
+    } else {
+        message
+    }
+
     return AuthException(
         failure = failure,
-        message = message,
+        message = userFriendlyMessage,
         statusCode = statusCode,
         backendCode = backendCode,
         cause = cause,

@@ -1,9 +1,10 @@
 package com.carenest.provider.auth
 
+import com.carenest.provider.auth.domain.model.AuthenticatedNurse
+import com.carenest.provider.auth.domain.model.AuthenticatedUser
+import com.carenest.provider.auth.domain.model.GoogleLoginResult
+import com.carenest.provider.auth.domain.model.NurseVerificationStatus
 import com.carenest.provider.auth.domain.repository.AuthRepository
-import com.carenest.provider.auth.domain.repository.AuthenticatedNurse
-import com.carenest.provider.auth.domain.repository.AuthenticatedUser
-import com.carenest.provider.auth.domain.repository.NurseVerificationStatus
 import com.carenest.provider.auth.domain.usecase.AuthenticationDestinationResolver
 import com.carenest.provider.auth.domain.usecase.ResolveAuthenticationDestinationUseCase
 import com.carenest.provider.auth.domain.util.AuthenticationDestination
@@ -186,9 +187,19 @@ class AuthenticationDestinationResolverTest {
             TODO("Not yet implemented")
         }
 
+        override suspend fun googleLogin(
+            idToken: String,
+            firstName: String?,
+            lastName: String?,
+            email: String?,
+            profileImageUrl: String?,
+        ): Result<GoogleLoginResult> =
+            Result.failure(UnsupportedOperationException())
+
         override suspend fun verifyOtp(
             phoneNumber: String,
             otp: String,
+            pendingToken: String?,
         ): Result<AuthenticatedNurse?> {
             verifyOtpCalls += 1
             return Result.failure(UnsupportedOperationException())

@@ -8,22 +8,31 @@ import com.carenest.provider.auth.domain.model.AuthFailure
 import com.carenest.provider.designsystem.R
 import java.io.IOException
 
-enum class AuthUiError(@get:StringRes val messageRes: Int) {
-    InvalidPhone(R.string.auth_error_invalid_phone),
-    OtpIncomplete(R.string.auth_error_otp_incomplete),
-    InvalidOtp(R.string.auth_error_invalid_otp),
-    ExpiredOtp(R.string.auth_error_expired_otp),
-    NetworkUnavailable(R.string.auth_error_network),
-    TooManyRequests(R.string.auth_error_too_many_requests),
-    ServiceUnavailable(R.string.auth_error_service_unavailable),
-    SendCodeFailed(R.string.auth_error_send_code),
-    ResendCodeFailed(R.string.auth_error_resend_code),
-    VerificationFailed(R.string.auth_error_verification),
-    ProfileLoadFailed(R.string.auth_error_profile_load),
+sealed interface AuthUiError {
+    data class Resource(@get:StringRes val messageRes: Int) : AuthUiError
+    data class Custom(val message: String) : AuthUiError
+
+    companion object {
+        val InvalidPhone = Resource(R.string.auth_error_invalid_phone)
+        val OtpIncomplete = Resource(R.string.auth_error_otp_incomplete)
+        val InvalidOtp = Resource(R.string.auth_error_invalid_otp)
+        val ExpiredOtp = Resource(R.string.auth_error_expired_otp)
+        val NetworkUnavailable = Resource(R.string.auth_error_network)
+        val TooManyRequests = Resource(R.string.auth_error_too_many_requests)
+        val ServiceUnavailable = Resource(R.string.auth_error_service_unavailable)
+        val SendCodeFailed = Resource(R.string.auth_error_send_code)
+        val ResendCodeFailed = Resource(R.string.auth_error_resend_code)
+        val VerificationFailed = Resource(R.string.auth_error_verification)
+        val ProfileLoadFailed = Resource(R.string.auth_error_profile_load)
+    }
 }
 
 @Composable
-fun AuthUiError?.localizedMessage(): String? = this?.let { stringResource(it.messageRes) }
+fun AuthUiError?.localizedMessage(): String? = when (this) {
+    null -> null
+    is AuthUiError.Resource -> stringResource(messageRes)
+    is AuthUiError.Custom -> message
+}
 
 fun Throwable.toAuthUiError(default: AuthUiError): AuthUiError = when (this) {
     is AuthException -> when (failure) {
@@ -33,9 +42,16 @@ fun Throwable.toAuthUiError(default: AuthUiError): AuthUiError = when (this) {
         AuthFailure.ExpiredOtp -> AuthUiError.ExpiredOtp
         AuthFailure.TooManyRequests -> AuthUiError.TooManyRequests
         AuthFailure.Server -> AuthUiError.ServiceUnavailable
-        AuthFailure.Unknown -> default
+        AuthFailure.Unknown -> {
+            val msg = message
+            if (!msg.isNullOrBlank() && msg != "technical backend message" && msg != "Authentication request failed") {
+                AuthUiError.Custom(msg)
+            } else {
+                default
+            }
+        }
     }
 
     is IOException -> AuthUiError.NetworkUnavailable
-    else -> default
+    else -> this.message?.takeIf { it.isNotBlank() }?.let { AuthUiError.Custom(it) } ?: default
 }
