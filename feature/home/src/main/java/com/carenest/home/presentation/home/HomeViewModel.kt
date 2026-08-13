@@ -15,6 +15,7 @@ import com.carenest.home.domain.model.NurseRequest
 import com.carenest.home.domain.usecase.ListenReservationEventsUseCase
 import com.carenest.home.domain.usecase.GetAvailabilityUseCase
 import com.carenest.home.domain.usecase.GetCurrentLocationUseCase
+import com.carenest.home.domain.usecase.GetServiceRequestPreviewUseCase
 import com.carenest.home.domain.usecase.UpdateAvailabilityUseCase
 import com.carenest.provider.core.network.socket.client.NurseSocketClient
 import com.carenest.provider.core.network.socket.model.ReservationEventType
@@ -30,6 +31,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlin.text.isNotBlank
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -39,6 +41,7 @@ class HomeViewModel @Inject constructor(
     private val listenReservationEvents: ListenReservationEventsUseCase,
     private val authenticationSessionStore: AuthenticationSessionStore,
     private val getNurse: GetNurseUseCase,
+    private val getServiceRequestPreviewUseCase: GetServiceRequestPreviewUseCase,
     private val nurseSocketClient: NurseSocketClient,
     private val getAvailability: GetAvailabilityUseCase,
     private val updateAvailability: UpdateAvailabilityUseCase,
@@ -197,6 +200,7 @@ class HomeViewModel @Inject constructor(
                         }
                         copy(requests = updatedList)
                     }
+                    enrichPatientImage(newRequest.id)
                 }
             }
 
@@ -222,6 +226,7 @@ class HomeViewModel @Inject constructor(
                             rating = earningsSummary?.rating ?: rating,
                         )
                     }
+                    fetchedRequests.forEach { enrichPatientImage(it.id) }
                 }
             }
         } else {
@@ -408,6 +413,26 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    private fun enrichPatientImage(requestId: String) {
+        viewModelScope.launch {
+            try {
+                val preview = getServiceRequestPreviewUseCase(requestId)
+                val imageUrl = preview.patient.profileImageUrl
+                if (imageUrl.isNullOrBlank()) return@launch
+
+                updateState {
+                    copy(
+                        requests = requests.map { request ->
+                            if (request.id == requestId) request.copy(patientImage = imageUrl)
+                            else request
+                        }
+                    )
+                }
+            } catch (_: Exception) {
+
+            }
+        }
+    }
     override fun onCleared() {
         fetchJob?.cancel()
         socketJob?.cancel()

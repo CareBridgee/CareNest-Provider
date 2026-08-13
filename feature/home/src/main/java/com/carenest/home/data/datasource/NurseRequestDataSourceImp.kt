@@ -1,5 +1,6 @@
 package com.carenest.home.data.datasource
 
+import com.carenest.home.data.ServiceRequestPreviewDto
 import com.carenest.home.domain.model.EarningsSummary
 import com.carenest.home.domain.model.NurseProfile
 import com.carenest.home.domain.model.NurseRequest
@@ -10,6 +11,7 @@ import com.carenest.provider.core.network.socket.model.ReservationEvent
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.statement.HttpResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import javax.inject.Inject
@@ -23,11 +25,13 @@ class NurseRequestsDataSourceImpl @Inject constructor(
 
     override suspend fun getIncomingRequests(): List<NurseRequest> {
         return try {
-            val response = httpClient.get("api/v1/service-requests/nearby").body<List<NearbyNurseServiceRequestResponse>>()
+            val response = httpClient.get("api/v1/service-requests/nearby")
+                .body<List<NearbyNurseServiceRequestResponse>>()
             response.map { item ->
                 NurseRequest(
                     id = item.serviceRequestId,
-                    patientName = "${item.patientFirstName ?: ""} ${item.patientLastName ?: ""}".trim().ifBlank { item.serviceName ?: "Patient Request" },
+                    patientName = "${item.patientFirstName ?: ""} ${item.patientLastName ?: ""}".trim()
+                        .ifBlank { item.serviceName ?: "Patient Request" },
                     patientImage = item.patientProfileImageUrl ?: "",
                     serviceType = item.serviceName ?: "Nursing Visit",
                     serviceImage = "",
@@ -86,4 +90,7 @@ class NurseRequestsDataSourceImpl @Inject constructor(
             )
         }
     }
+
+   override suspend fun getServiceRequestPreview(serviceRequestId: String): ServiceRequestPreviewDto =
+        httpClient.get("/api/v1/service-requests/$serviceRequestId").body<ServiceRequestPreviewDto>()
 }

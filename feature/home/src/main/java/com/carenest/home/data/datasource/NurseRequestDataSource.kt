@@ -1,5 +1,6 @@
 package com.carenest.home.data.datasource
 
+import com.carenest.home.data.ServiceRequestPreviewDto
 import com.carenest.home.domain.model.EarningsSummary
 import com.carenest.home.domain.model.NurseProfile
 import com.carenest.home.domain.model.NurseRequest
@@ -18,4 +19,5 @@ interface NurseRequestsDataSource {
     fun listenReservationEvents(reservationId: String): Flow<ReservationEvent>
     suspend fun getEarningsSummary(): EarningsSummary
     suspend fun getNurseProfile(): NurseProfile
+    suspend fun getServiceRequestPreview(serviceRequestId: String): ServiceRequestPreviewDto
 }
