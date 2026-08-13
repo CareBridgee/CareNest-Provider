@@ -1,6 +1,5 @@
 package com.carenest.home.presentation.home.components
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
@@ -111,7 +110,6 @@ fun NurseRequestCard(
                 Row(
                     modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Log.e("image",request.patientImage)
                     AsyncImage(
                         model = request.patientImage.ifBlank { null },
                         contentDescription = null,

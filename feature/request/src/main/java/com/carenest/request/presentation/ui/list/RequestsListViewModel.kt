@@ -8,10 +8,12 @@ import com.carenest.provider.core.mvi.EffectPublisher
 import com.carenest.provider.core.mvi.StateHolder
 import com.carenest.provider.core.network.socket.client.NurseSocketClient
 import com.carenest.provider.core.network.socket.model.ReservationEventType
+import com.carenest.provider.core.network.socket.model.patientDisplayName
 import com.carenest.request.domain.model.Request
 import com.carenest.request.domain.model.RequestStatus
 import com.carenest.request.domain.usecase.CreateOfferUseCase
 import com.carenest.request.domain.usecase.GetIncomingRequestsUseCase
+import com.carenest.request.domain.usecase.GetPatientSummaryUseCase
 import com.carenest.request.domain.usecase.ListenReservationEventsUseCase
 import com.carenest.request.domain.usecase.WithdrawOfferUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class RequestsListViewModel @Inject constructor(
     private val getIncomingRequests: GetIncomingRequestsUseCase,
+    private val getPatientSummary: GetPatientSummaryUseCase,
     private val withdrawOffer: WithdrawOfferUseCase,
     private val createOffer: CreateOfferUseCase,
     private val listenReservationEvents: ListenReservationEventsUseCase,
@@ -88,7 +91,8 @@ class RequestsListViewModel @Inject constructor(
             nurseSocketClient.nearbyRequests.collect { socketReq ->
                 val newRequest = Request(
                     id = socketReq.serviceRequestId,
-                    patientName = socketReq.serviceName ?: "Patient Request",
+                    patientName = socketReq.patientDisplayName(),
+                    patientImage = socketReq.patientProfileImageUrl.orEmpty(),
                     serviceName = socketReq.serviceName ?: "Nursing Visit",
                     basePrice = (socketReq.estimatedPrice ?: 50.0).toFloat(),
                     patientAddress = socketReq.distanceKm?.let { "$it km" } ?: "Nearby",
@@ -105,6 +109,7 @@ class RequestsListViewModel @Inject constructor(
                     }
                     copy(isLoading = false, requests = updatedList)
                 }
+                enrichPatientPreview(newRequest.id)
             }
         }
 
@@ -114,6 +119,7 @@ class RequestsListViewModel @Inject constructor(
                     val combined = (initialRequests + requests).distinctBy { it.id }
                     copy(isLoading = false, requests = combined)
                 }
+                initialRequests.forEach { enrichPatientPreview(it.id) }
             }.onFailure {
                 updateState { copy(isLoading = false) }
             }
@@ -255,6 +261,26 @@ class RequestsListViewModel @Inject constructor(
                     if (request.id == requestId) request.copy(status = status) else request
                 }
             )
+        }
+    }
+
+    private fun enrichPatientPreview(requestId: String) {
+        viewModelScope.launch {
+            getPatientSummary(requestId).onSuccess { patient ->
+                updateState {
+                    copy(
+                        requests = requests.map { request ->
+                            if (request.id != requestId) return@map request
+                            request.copy(
+                                patientName = patient.fullName.takeIf(String::isNotBlank)
+                                    ?: request.patientName,
+                                patientImage = patient.profileImageUrl.takeIf(String::isNotBlank)
+                                    ?: request.patientImage,
+                            )
+                        },
+                    )
+                }
+            }
         }
     }
 

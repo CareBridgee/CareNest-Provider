@@ -22,3 +22,10 @@ data class NearbyNurseServiceRequestResponse(
     val estimatedDurationMinutes: Int? = null,
     val createdAt: String? = null
 )
+
+fun NearbyNurseServiceRequestResponse.patientDisplayName(
+    fallback: String = "Patient Request",
+): String = listOf(patientFirstName, patientLastName)
+    .mapNotNull { it?.trim()?.takeIf(String::isNotEmpty) }
+    .joinToString(" ")
+    .ifBlank { fallback }

@@ -3,6 +3,7 @@ package com.carenest.request.data.datasource
 import com.carenest.provider.core.network.socket.client.NurseSocketClient
 import com.carenest.provider.core.network.socket.model.NearbyNurseServiceRequestResponse
 import com.carenest.provider.core.network.socket.model.ReservationEvent
+import com.carenest.provider.core.network.socket.model.patientDisplayName
 import com.carenest.request.domain.model.CancellationReason
 import com.carenest.request.domain.model.Offer
 import com.carenest.request.domain.model.PatientInfo
@@ -29,7 +30,8 @@ class NurseRequestsDataSourceImpl @Inject constructor(
             response.map { item ->
                 Request(
                     id = item.serviceRequestId,
-                    patientName = item.serviceName ?: "Patient Request",
+                    patientName = item.patientDisplayName(),
+                    patientImage = item.patientProfileImageUrl.orEmpty(),
                     serviceName = item.serviceName ?: "Nursing Visit",
                     basePrice = (item.estimatedPrice ?: 50.0).toFloat(),
                     patientAddress = item.distanceKm?.let { "$it km" } ?: "Nearby",

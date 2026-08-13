@@ -69,6 +69,9 @@ data class NurseDto(
 data class NearbyNurseServiceRequestResponseDto(
     val serviceRequestId: String,
     val profileId: String,
+    val patientFirstName: String? = null,
+    val patientLastName: String? = null,
+    val patientProfileImageUrl: String? = null,
     val serviceTypeId: String,
     val serviceName: String,
     val serviceDescription: String? = null,

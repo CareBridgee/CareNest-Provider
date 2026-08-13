@@ -178,6 +178,40 @@ class NurseRequestsRepositoryImplTest {
         assertEquals("+201000000000", result.emergencyContacts.single().phoneNumber)
     }
 
+    @Test
+    fun `patient identity prefers preview over assigned profile`() = runBlocking {
+        val remote = FakeRequestRemoteDataSource().apply {
+            preview = {
+                ServiceRequestNursePreviewDto(
+                    serviceRequestId = "service-request-id",
+                    patient = PatientMedicalSummaryDto(
+                        profileId = "preview-profile-id",
+                        firstName = "Preview",
+                        lastName = "Patient",
+                        profileImageUrl = "https://example.com/preview-patient.jpg",
+                    ),
+                )
+            }
+            profile = {
+                ServiceRequestNurseProfileDto(
+                    serviceRequestId = "service-request-id",
+                    patient = PatientMedicalSummaryDto(
+                        profileId = "assigned-profile-id",
+                        firstName = "Assigned",
+                        lastName = "Patient",
+                        profileImageUrl = "https://example.com/assigned-patient.jpg",
+                    ),
+                )
+            }
+        }
+
+        val result = repository(remote).fetchPatientSummary("service-request-id")
+
+        assertEquals("Preview Patient", result.fullName)
+        assertEquals("https://example.com/preview-patient.jpg", result.profileImageUrl)
+        assertEquals(1, remote.previewCalls)
+    }
+
     private fun repository(remote: RequestRemoteDataSource) = NurseRequestsRepositoryImpl(
         dataSource = NoOpNurseRequestsDataSource,
         remoteDataSource = remote,

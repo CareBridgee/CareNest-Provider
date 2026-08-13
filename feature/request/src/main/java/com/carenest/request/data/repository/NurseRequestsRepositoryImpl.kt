@@ -83,15 +83,15 @@ class NurseRequestsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun fetchPatientSummary(requestId: String): PatientMedicalSummary {
-        val profilePatient = runCatching {
-            remoteDataSource.getServiceRequestProfile(requestId).patient?.toDomain()
-        }.getOrNull()
-        if (profilePatient != null) return profilePatient
-
         val previewPatient = runCatching {
             remoteDataSource.getServiceRequestPreview(requestId).patient?.toDomain()
         }.getOrNull()
         if (previewPatient != null) return previewPatient
+
+        val profilePatient = runCatching {
+            remoteDataSource.getServiceRequestProfile(requestId).patient?.toDomain()
+        }.getOrNull()
+        if (profilePatient != null) return profilePatient
 
         val contract = runCatching { fetchRequestContract(requestId) }.getOrNull()
         if (contract != null) {

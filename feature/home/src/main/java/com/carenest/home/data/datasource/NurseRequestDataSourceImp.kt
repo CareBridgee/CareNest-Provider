@@ -8,6 +8,7 @@ import com.carenest.home.domain.model.RequestStatus
 import com.carenest.provider.core.network.socket.client.NurseSocketClient
 import com.carenest.provider.core.network.socket.model.NearbyNurseServiceRequestResponse
 import com.carenest.provider.core.network.socket.model.ReservationEvent
+import com.carenest.provider.core.network.socket.model.patientDisplayName
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -29,8 +30,7 @@ class NurseRequestsDataSourceImpl @Inject constructor(
             response.map { item ->
                 NurseRequest(
                     id = item.serviceRequestId,
-                    patientName = "${item.patientFirstName ?: ""} ${item.patientLastName ?: ""}".trim()
-                        .ifBlank { item.serviceName ?: "Patient Request" },
+                    patientName = item.patientDisplayName(),
                     patientImage = item.patientProfileImageUrl ?: "",
                     serviceType = item.serviceName ?: "Nursing Visit",
                     serviceImage = "",
@@ -91,5 +91,6 @@ class NurseRequestsDataSourceImpl @Inject constructor(
     }
 
    override suspend fun getServiceRequestPreview(serviceRequestId: String): ServiceRequestPreviewDto =
-        httpClient.get("/api/v1/service-requests/$serviceRequestId").body<ServiceRequestPreviewDto>()
+        httpClient.get("/api/v1/service-requests/$serviceRequestId/preview")
+            .body<ServiceRequestPreviewDto>()
 }
