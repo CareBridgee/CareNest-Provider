@@ -641,7 +641,7 @@ fun AvailabilityTopBar(
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_profile),
-                contentDescription = "Profile",
+                contentDescription = stringResource(R.string.profile_content_description),
                 tint = Theme.colors.onPrimaryContainer,
                 modifier = Modifier.size(22.dp),
             )
@@ -669,7 +669,7 @@ fun AvailabilityTopBar(
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_notification),
-                contentDescription = "Notifications",
+                contentDescription = stringResource(R.string.notifications_content_description),
                 tint = Theme.colors.primaryFont,
                 modifier = Modifier.size(24.dp),
             )

@@ -9,6 +9,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import com.carenest.provider.core.R
 import com.carenest.provider.core.network.socket.client.NurseSocketClient
 import com.carenest.provider.core.network.socket.model.ReservationEventType
 import dagger.hilt.android.AndroidEntryPoint
@@ -53,8 +54,8 @@ class ActiveReservationService : Service() {
             currentServiceRequestId = requestId
             setActiveReservationId(this, requestId)
             val notification = buildNotification(
-                title = "Active Reservation",
-                content = "Monitoring real-time reservation updates",
+                title = getString(R.string.active_reservation_title),
+                content = getString(R.string.active_reservation_monitoring),
                 requestId = requestId
             )
             startForeground(NOTIFICATION_ID, notification)
@@ -87,30 +88,54 @@ class ActiveReservationService : Service() {
     private fun handleReservationEvent(eventType: ReservationEventType, requestId: String) {
         when (eventType) {
             ReservationEventType.OFFER_ACCEPTED -> {
-                updateNotification("Reservation Confirmed", "Offer accepted! Visit active.", requestId)
+                updateNotification(
+                    getString(R.string.reservation_confirmed_title),
+                    getString(R.string.reservation_confirmed_message),
+                    requestId,
+                )
             }
             ReservationEventType.OFFER_COUNTERED -> {
-                updateNotification("Offer Countered", "Patient proposed counter terms.", requestId)
+                updateNotification(
+                    getString(R.string.offer_countered_title),
+                    getString(R.string.offer_countered_message),
+                    requestId,
+                )
             }
             ReservationEventType.OFFER_UPDATED -> {
-                updateNotification("Offer Updated", "Reservation terms updated.", requestId)
+                updateNotification(
+                    getString(R.string.offer_updated_title),
+                    getString(R.string.offer_updated_message),
+                    requestId,
+                )
             }
             ReservationEventType.REQUEST_CANCELLED -> {
-                updateNotification("Reservation Cancelled", "This request was cancelled.", requestId)
+                updateNotification(
+                    getString(R.string.reservation_cancelled_title),
+                    getString(R.string.reservation_cancelled_message),
+                    requestId,
+                )
                 serviceScope.launch {
                     delay(5000.milliseconds)
                     stopForegroundService()
                 }
             }
             ReservationEventType.COMPLETED -> {
-                updateNotification("Visit Completed", "Visit successfully completed.", requestId)
+                updateNotification(
+                    getString(R.string.visit_completed_title),
+                    getString(R.string.visit_completed_message),
+                    requestId,
+                )
                 serviceScope.launch {
                     delay(5000.milliseconds)
                     stopForegroundService()
                 }
             }
             else -> {
-                updateNotification("Active Reservation", "Real-time reservation update received.", requestId)
+                updateNotification(
+                    getString(R.string.active_reservation_title),
+                    getString(R.string.reservation_update_received),
+                    requestId,
+                )
             }
         }
     }
@@ -154,10 +179,10 @@ class ActiveReservationService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Active Reservation Updates",
+                getString(R.string.reservation_channel_name),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Shows real-time status updates for ongoing nurse reservations"
+                description = getString(R.string.reservation_channel_description)
             }
             notificationManager.createNotificationChannel(channel)
         }

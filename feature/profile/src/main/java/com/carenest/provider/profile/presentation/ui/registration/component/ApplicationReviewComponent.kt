@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -86,7 +87,11 @@ fun ApplicationReviewComponent(
         ) {
             InfoRow(label = stringResource(com.carenest.provider.profile.R.string.full_name_label), value = "${state.personalInfoState.firstName} ${state.personalInfoState.lastName}")
             if (state.personalInfoState.phoneNumber.isNotBlank()) {
-                InfoRow(label = stringResource(com.carenest.provider.profile.R.string.phone_number_label), value = state.personalInfoState.phoneNumber)
+                InfoRow(
+                    label = stringResource(com.carenest.provider.profile.R.string.phone_number_label),
+                    value = state.personalInfoState.phoneNumber,
+                    forceLeftToRight = true,
+                )
             }
         }
 
@@ -228,15 +233,27 @@ fun ApplicationReviewComponent(
 }
 
 @Composable
-private fun InfoRow(label: String, value: String) {
+private fun InfoRow(
+    label: String,
+    value: String,
+    forceLeftToRight: Boolean = false,
+) {
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
         BasicText(
             text = label,
             style = Theme.typography.body.small.copy(color = Theme.colors.secondaryFont)
         )
+        val valueStyle = Theme.typography.body.medium.copy(
+            color = Theme.colors.primaryFont,
+            fontWeight = FontWeight.SemiBold,
+        )
         BasicText(
             text = value,
-            style = Theme.typography.body.medium.copy(color = Theme.colors.primaryFont, fontWeight = FontWeight.SemiBold)
+            style = if (forceLeftToRight) {
+                valueStyle.copy(textDirection = TextDirection.Ltr)
+            } else {
+                valueStyle
+            },
         )
     }
 }

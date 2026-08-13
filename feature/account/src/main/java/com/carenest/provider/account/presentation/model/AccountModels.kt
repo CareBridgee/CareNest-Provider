@@ -14,7 +14,7 @@ data class MenuItemUiModel(
 enum class MenuItemId {
     ProfessionalInfo,
     Documents,
-    Availability,
+    Settings,
     Reviews,
     Earnings,
     Payouts,
