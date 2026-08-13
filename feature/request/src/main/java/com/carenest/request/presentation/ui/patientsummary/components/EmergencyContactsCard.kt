@@ -22,6 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import com.carenest.provider.designsystem.R as RD
 import com.carenest.provider.designsystem.theme.Theme
@@ -118,6 +119,7 @@ private fun EmergencyContactRow(
                         text = contact.phoneNumber,
                         style = Theme.typography.body.small.copy(
                             color = Theme.colors.secondaryFont,
+                            textDirection = TextDirection.Ltr,
                         ),
                     )
                 }
@@ -135,7 +137,10 @@ private fun EmergencyContactRow(
                 ) {
                     Icon(
                         painter = painterResource(RD.drawable.ic_call),
-                        contentDescription = "Call ${contact.name}",
+                        contentDescription = stringResource(
+                            R.string.call_contact_content_description,
+                            contact.name,
+                        ),
                         tint = Theme.colors.onPrimary,
                         modifier = Modifier.size(20.dp),
                     )

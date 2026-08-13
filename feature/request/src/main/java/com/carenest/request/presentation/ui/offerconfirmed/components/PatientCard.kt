@@ -90,13 +90,13 @@ fun PatientCard(
             Row {
                 ActionIconButton(
                     icon = painterResource(RD.drawable.ic_phone),
-                    contentDescription = "ic phone",
+                    contentDescription = stringResource(R.string.request_call_patient),
                     onClick = onCallClick,
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 ActionIconButton(
                     icon = painterResource(RD.drawable.ic_message),
-                    contentDescription = "ic message",
+                    contentDescription = stringResource(R.string.request_message_patient),
                     onClick = onMessageClick,
                 )
             }

@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -138,7 +139,7 @@ internal fun OtpScreenContent(
                 modifier = Modifier.fillMaxWidth(),
                 style = Theme.typography.body.large.copy(
                     color = Theme.colors.secondaryFont,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
                 )
             )
 
@@ -149,7 +150,8 @@ internal fun OtpScreenContent(
                 modifier = Modifier.fillMaxWidth(),
                 style = Theme.typography.body.large.copy(
                     color = Theme.colors.secondaryFont,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    textDirection = TextDirection.Ltr,
                 )
             )
 

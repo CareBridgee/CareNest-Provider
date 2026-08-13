@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -129,8 +131,7 @@ fun ProfileMenuContent(
                                 MenuItemId.Earnings -> ProfileMenuIntent.EarningsClicked
                                 MenuItemId.Payouts -> ProfileMenuIntent.PayoutsClicked
                                 MenuItemId.Wallet -> ProfileMenuIntent.WalletClicked
-                                MenuItemId.Availability ->
-                                    ProfileMenuIntent.AvailabilitySettingsClicked
+                                MenuItemId.Settings -> ProfileMenuIntent.SettingsClicked
                                 else -> ProfileMenuIntent.MenuItemClicked(item.id)
                             },
                         )
@@ -149,8 +150,12 @@ fun ProfileMenuContent(
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Theme.colors.error),
                     border = null,
                 ) {
-                    Icon(Icons.AutoMirrored.Rounded.Logout, contentDescription = null)
-                    androidx.compose.foundation.layout.Spacer(Modifier.padding(Theme.spacing.extraSmall))
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Rounded.Logout,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Spacer(Modifier.width(Theme.spacing.small))
                     BasicText(
                         text = stringResource(R.string.profile_menu_logout),
                         style = Theme.typography.body.small.copy(

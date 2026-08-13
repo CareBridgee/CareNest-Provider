@@ -34,8 +34,6 @@ class ProfileMenuViewModel @Inject constructor(
             ProfileMenuIntent.ProfileCardClicked ->
                 sendEffect(ProfileMenuEffect.OpenPublicProfile)
             ProfileMenuIntent.SettingsClicked -> sendEffect(ProfileMenuEffect.OpenSettings)
-            ProfileMenuIntent.AvailabilitySettingsClicked ->
-                sendEffect(ProfileMenuEffect.OpenSettings)
             ProfileMenuIntent.EarningsClicked -> sendEffect(ProfileMenuEffect.OpenEarnings)
             ProfileMenuIntent.PayoutsClicked -> sendEffect(ProfileMenuEffect.OpenPayouts)
             ProfileMenuIntent.WalletClicked -> sendEffect(ProfileMenuEffect.OpenWallet)
@@ -47,7 +45,7 @@ class ProfileMenuViewModel @Inject constructor(
             is ProfileMenuIntent.MenuItemClicked -> when (intent.id) {
                 MenuItemId.ProfessionalInfo -> sendEffect(ProfileMenuEffect.OpenPublicProfile)
                 MenuItemId.Documents -> sendEffect(ProfileMenuEffect.OpenDocuments)
-                MenuItemId.Availability -> sendEffect(ProfileMenuEffect.OpenSettings)
+                MenuItemId.Settings -> sendEffect(ProfileMenuEffect.OpenSettings)
                 MenuItemId.Reviews -> sendEffect(ProfileMenuEffect.OpenRatingsAndReviews)
                 MenuItemId.Earnings -> sendEffect(ProfileMenuEffect.OpenEarnings)
                 MenuItemId.Payouts -> sendEffect(ProfileMenuEffect.OpenPayouts)

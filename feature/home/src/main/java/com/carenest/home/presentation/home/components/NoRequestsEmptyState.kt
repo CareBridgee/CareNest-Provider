@@ -30,7 +30,7 @@ fun NoRequestsEmptyState(modifier: Modifier = Modifier) {
     ) {
         Image(
             painter = painterResource(R.drawable.offline_state),
-            contentDescription = "No requests",
+            contentDescription = null,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(180.dp),
