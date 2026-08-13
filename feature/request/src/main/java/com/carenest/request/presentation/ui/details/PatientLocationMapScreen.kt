@@ -99,15 +99,16 @@ fun PatientLocationMapScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
         ) {
-            @Suppress("COMPOSE_APPLIES_TO_RIGHT")
             MapboxMap(
                 modifier = Modifier.fillMaxSize(),
                 mapState = rememberMapState(),
             ) {
+                @Suppress("COMPOSE_APPLIES_TO_RIGHT")
                 MapEffect(cameraOptions) { mapView ->
                     mapView.mapboxMap.setCamera(cameraOptions)
                 }
 
+                @Suppress("COMPOSE_APPLIES_TO_RIGHT")
                 ViewAnnotation(
                     options = viewAnnotationOptions {
                         geometry(patientPoint)
