@@ -82,7 +82,7 @@ class EarningsRepositoryImpl @Inject constructor(
         if (dto.estimatedPrice != null && dto.estimatedPrice > 0.0) {
             return dto.estimatedPrice
         }
-        val requestId = dto.serviceRequestId ?: return 50.0
+        val requestId = dto.serviceRequestId ?: return 0.0
         return try {
             val details = httpClient.get("/api/v1/service-requests/$requestId")
                 .body<ServiceRequestDetailsResponse>()
@@ -91,10 +91,10 @@ class EarningsRepositoryImpl @Inject constructor(
             acceptedOfferPrice
                 ?: details.serviceType?.basePrice
                 ?: details.estimatedPrice
-                ?: 50.0
+                ?: 0.0
         } catch (e: Exception) {
             Log.w("EarningsRepository", "Failed to fetch details for request $requestId to resolve price", e)
-            50.0
+            0.0
         }
     }
 
@@ -105,16 +105,20 @@ class EarningsRepositoryImpl @Inject constructor(
             .joinToString(" ")
             .ifEmpty { "Patient" }
 
-        val formattedDuration = when {
-            dto.estimatedDurationMinutes != null && dto.estimatedDurationMinutes > 0 -> {
-                val hours = dto.estimatedDurationMinutes / 60.0
+        val formattedDuration = if (dto.estimatedDurationMinutes != null && dto.estimatedDurationMinutes > 0) {
+            val mins = dto.estimatedDurationMinutes
+            if (mins < 60) {
+                "$mins mins"
+            } else {
+                val hours = mins / 60.0
                 if (hours % 1.0 == 0.0) {
                     "${hours.toInt()} ${if (hours.toInt() == 1) "hour" else "hours"}"
                 } else {
                     "${String.format(Locale.US, "%.1f", hours)} hours"
                 }
             }
-            else -> "1.0 hour"
+        } else {
+            "N/A"
         }
 
         val mappedStatus = when (dto.status?.uppercase(Locale.US)) {

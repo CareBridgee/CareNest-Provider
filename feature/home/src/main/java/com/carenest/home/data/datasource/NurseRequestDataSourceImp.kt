@@ -34,7 +34,7 @@ class NurseRequestsDataSourceImpl @Inject constructor(
                     patientImage = item.patientProfileImageUrl ?: "",
                     serviceType = item.serviceName ?: "Nursing Visit",
                     serviceImage = "",
-                    baseRate = (item.estimatedPrice ?: 50.0).toFloat(),
+                    baseRate = (item.estimatedPrice ?: 0.0).toFloat(),
                     distanceMiles = (item.distanceKm ?: 0.0).toFloat(),
                     status = RequestStatus.ESTIMATED
                 )
