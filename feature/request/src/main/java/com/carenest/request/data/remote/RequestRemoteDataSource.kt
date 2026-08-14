@@ -50,7 +50,6 @@ class KtorRequestRemoteDataSource @Inject constructor(
 
     override suspend fun getPatientReport(profileId: String): PatientReportDto =
         api.getPatientReport(profileId).bodyOrThrow()
-
 }
 
 private suspend inline fun <reified T> HttpResponse.bodyOrThrow(): T {

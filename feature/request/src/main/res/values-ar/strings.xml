@@ -71,6 +71,14 @@
     <string name="request_details_total_amount">المبلغ الإجمالي</string>
     <string name="request_details_cancel_visit">إلغاء الزيارة</string>
     <string name="request_not_found">هذا الطلب لم يعد متاحًا.</string>
+    <string name="request_history_error_title">تعذر تحميل سجل الطلبات</string>
+    <string name="request_history_empty_title">لا يوجد سجل طلبات بعد</string>
+    <string name="request_history_empty_description">ستظهر طلبات الخدمة المجدولة والمكتملة هنا.</string>
+    <string name="request_history_filter_empty_title">لا توجد طلبات بهذه الحالة</string>
+    <string name="request_history_filter_empty_description">جرّب تبويب حالة آخر لعرض المزيد من سجل الطلبات.</string>
+    <string name="request_history_retry">إعادة المحاولة</string>
+    <string name="request_history_unknown_service">خدمة رعاية</string>
+    <string name="request_history_unknown_patient">المريض</string>
     <string name="request_call_patient">اتصال بالمريض</string>
     <string name="request_message_patient">مراسلة المريض</string>
     <string name="cancel_request_title">إلغاء الزيارة؟</string>

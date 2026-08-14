@@ -32,6 +32,9 @@ class RequestApi @Inject constructor(
     suspend fun getServiceRequestProfile(serviceRequestId: String): HttpResponse =
         httpClient.get("/api/v1/service-requests/$serviceRequestId/profile")
 
+    suspend fun getNurseRequestHistory(): HttpResponse =
+        httpClient.get("/api/v1/service-requests/nurse/history")
+
     suspend fun getPatientReport(profileId: String): HttpResponse =
         httpClient.get("/api/v1/profiles/report/$profileId/report")
 
