@@ -28,17 +28,14 @@ import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.designsystem.components.stepper.HorizontalStepper
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
-import com.carenest.provider.designsystem.components.calendar.SPDatePickerDialog
 import com.carenest.provider.profile.presentation.ui.registration.component.ApplicationReviewComponent
 import com.carenest.provider.profile.presentation.ui.registration.component.PersonalInfoComponent
 import com.carenest.provider.profile.presentation.ui.registration.component.ServicesSelectionComponent
 import com.carenest.provider.profile.presentation.ui.registration.component.VerificationDocumentsComponent
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import java.text.SimpleDateFormat
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.BasicText
@@ -79,9 +76,7 @@ fun RegistrationScreen(
     val context = LocalContext.current
 
     val snackbarHostState = remember { SnackbarHostState() }
-    var showDatePicker by remember { mutableStateOf(false) }
     var showGenderSheet by remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState()
 
     LaunchedEffect(state.currentPage) {
         if (pagerState.currentPage != state.currentPage) {
@@ -137,22 +132,6 @@ fun RegistrationScreen(
                 }
             }
         }
-    }
-
-    if (showDatePicker) {
-        SPDatePickerDialog(
-            state = datePickerState,
-            onDismissRequest = { showDatePicker = false },
-            onConfirm = {
-                datePickerState.selectedDateMillis?.let { millis ->
-                    val sdf = SimpleDateFormat("MM/dd/yyyy", java.util.Locale.getDefault())
-                    sdf.timeZone = java.util.TimeZone.getTimeZone("UTC")
-                    val date = sdf.format(java.util.Date(millis))
-                    registrationViewmodel.onIntent(RegistrationIntent.OnDateOfBirthChanged(date))
-                }
-                showDatePicker = false
-            },
-        )
     }
 
     val photoPicker = rememberLauncherForActivityResult(
@@ -283,10 +262,6 @@ fun RegistrationScreen(
 
             RegistrationEffect.OpenGenderSelection -> {
                 showGenderSheet = true
-            }
-
-            RegistrationEffect.ShowCalendar -> {
-                showDatePicker = true
             }
 
             is RegistrationEffect.ShowMessage -> {
@@ -425,8 +400,6 @@ fun RegistrationContent(
                         state = state.personalInfoState,
                         onFirstNameChanged = { onIntent(RegistrationIntent.OnFirstNameChanged(it)) },
                         onLastNameChanged = { onIntent(RegistrationIntent.OnLastNameChanged(it)) },
-                        onDateOfBirthChanged = { onIntent(RegistrationIntent.OnDateOfBirthChanged(it)) },
-                        onDateOfBirthClick = { onIntent(RegistrationIntent.OnDateOfBirthClick) },
                         onNationalIdChanged = { onIntent(RegistrationIntent.OnNationalIdChanged(it)) },
                         onGenderClick = { onIntent(RegistrationIntent.OnGenderClick) },
                         onProfilePhotoClick = {

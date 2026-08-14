@@ -13,12 +13,13 @@
     <string name="location_label">الموقع</string>
     <string name="location_hint">مثال: القاهرة، مصر</string>
     <string name="dob_label">تاريخ الميلاد</string>
-    <string name="dob_hint">شهر/يوم/سنة</string>
+    <string name="dob_hint">DD/MM/YYYY</string>
     <string name="national_id_label">الرقم القومي</string>
     <string name="national_id_hint">00000000000000</string>
     <string name="gender_label">الجنس</string>
     <string name="gender_hint">اختر الجنس</string>
     <string name="next">التالي</string>
+    <string name="registration_title">التسجيل</string>
     <string name="step_indicator">الخطوة %1$d من %2$d: %3$s</string>
 
     <!-- Verification Documents -->
@@ -44,7 +45,7 @@
     <string name="replace_action">استبدال</string>
     <string name="remove_action">حذف</string>
     <!-- Top Bar -->
-    <string name="app_name">CareConnect</string>
+    <string name="app_name">CareNest</string>
 
     <!-- Screen -->
     <string name="application_under_review">الطلب قيد المراجعة</string>
@@ -90,6 +91,8 @@
 
     <!-- Validation Messages -->
     <string name="error_fill_all_fields">يرجى ملء جميع الحقول المطلوبة</string>
+    <string name="error_name_invalid">يجب أن يتكون الاسم من حرفين إلى 50 حرفًا، ويُسمح فقط بالمسافات والشرطة والفاصلة العليا</string>
+    <string name="error_invalid_national_id">أدخل رقمًا قوميًّا صحيحًا من 14 رقمًا يتضمن تاريخ ميلاد صالحًا</string>
     <string name="error_nid_dob_mismatch">الرقم القومي لا يتطابق مع تاريخ الميلاد</string>
     <string name="error_upload_all_docs">يرجى تحميل جميع الوثائق وملء تفاصيل الخبرة</string>
     <string name="error_select_service">يرجى اختيار خدمة واحدة على الأقل</string>
@@ -111,4 +114,81 @@
     <string name="step_services">الخدمات</string>
     <string name="step_review">المراجعة</string>
 
+    <!-- Authentication -->
+    <string name="app_name_careconnect">CareConnect لمقدمي الرعاية</string>
+    <string name="app_auth_description">مرحبًا بعودتك! يُرجى تسجيل الدخول أو إنشاء حساب.</string>
+    <string name="auth_continue_google">المتابعة باستخدام Google</string>
+    <string name="auth_continue_phone">المتابعة باستخدام رقم الهاتف</string>
+    <string name="auth_terms_agreement">بالمتابعة، فإنك توافق على الشروط وسياسة الخصوصية الخاصة بنا.</string>
+    <string name="phone_input_topbar_title">انضم إلينا باستخدام رقم الهاتف</string>
+    <string name="phone_input_subtitle">سنرسل إليك رمز تحقق عبر رسالة نصية للتحقق من رقم هاتفك.</string>
+    <string name="phone_input_next_btn">التالي</string>
+    <string name="otp_title">التحقق من رمز OTP</string>
+    <string name="otp_subtitle">أدخل الرمز المُرسل إلى </string>
+    <string name="otp_verify_btn">تحقق</string>
+    <string name="otp_resend_timer">إعادة إرسال الرمز خلال 00:30</string>
+    <string name="phone_header_brand">منصة آمنة</string>
+    <string name="phone_input_secure_care_desc">يُستخدم رقم هاتفك فقط للتحقق من هويتك والتنسيق الآمن للخدمات.</string>
+    <string name="phone_input_via_sms">رسالة نصية (SMS)</string>
+    <string name="phone_input_via_whatsapp">واتساب</string>
+    <string name="phone_input_label">رقم الهاتف</string>
+    <string name="phone_input_carrier_charges">قد تُطبق رسوم من شركة الاتصالات على الرسائل النصية.</string>
+
+    <!-- Application status -->
+    <string name="application_received">تم استلام الطلب</string>
+    <string name="background_check">التحقق من الخلفية</string>
+    <string name="in_progress">قيد التنفيذ</string>
+    <string name="final_approval">الموافقة النهائية</string>
+    <string name="pending">قيد الانتظار</string>
+    <string name="go_to_home_view_only">الانتقال إلى الرئيسية</string>
+    <string name="contact_support">التواصل مع الدعم</string>
+    <string name="back_to_login">العودة إلى تسجيل الدخول</string>
+    <string name="notify_email">سنبلغك عبر البريد الإلكتروني</string>
+    <string name="account_activated">بمجرد تفعيل حسابك.</string>
+    <string name="user_message">نتحقق حاليًا من بيانات اعتمادك لضمان تقديم أعلى مستوى من الرعاية. يستغرق ذلك عادةً</string>
+    <string name="verified">تم التحقق</string>
+    <string name="approved">تمت الموافقة</string>
+    <string name="congratulations">تهانينا!</string>
+    <string name="account_verified">تم التحقق من حسابك.</string>
+    <string name="network_welcome_message">أصبحت الآن جزءًا من شبكة CareConnect. ابدأ بقبول المهام لتنمية مسيرتك المهنية وتقديم الرعاية لمن يحتاجون إليها.</string>
+    <string name="go_to_home">الانتقال إلى الرئيسية</string>
+    <string name="start_your_journey">ابدأ رحلتك</string>
+    <string name="review_community_guidelines">راجع إرشادات المجتمع</string>
+    <string name="available_jobs">المهام المتاحة</string>
+    <string name="jobs_near_you">24 بالقرب منك</string>
+    <string name="network_perks">مزايا الشبكة</string>
+    <string name="network_rewards">12 مكافأة</string>
+
+    <!-- Rejected document and re-upload -->
+    <string name="action_required">إجراء مطلوب</string>
+    <string name="rejected_license_reason">تم رفض <b>ترخيص مزاولة التمريض</b> لأن الصورة غير واضحة.</string>
+    <string name="ensure_good_lighting">تأكد من الإضاءة الجيدة</string>
+    <string name="good_lighting_desc">صوّر مستندك في مكان جيد الإضاءة دون وهج أو ظلال.</string>
+    <string name="stay_in_focus">حافظ على وضوح الصورة</string>
+    <string name="in_focus_desc">ثبّت هاتفك وتأكد من أن جميع النصوص واضحة ومقروءة.</string>
+    <string name="visible_edges">أظهر جميع الحواف</string>
+    <string name="visible_edges_desc">ضع المستند على سطح مستوٍ وأظهر أركانه الأربعة كاملة.</string>
+    <string name="upload_again">إعادة الرفع</string>
+    <string name="help_center_tip">هل تحتاج إلى مساعدة؟ تفضل بزيارة <b>مركز المساعدة</b> للاطلاع على دليل التحقق من المستندات خطوة بخطوة.</string>
+    <string name="reupload_title_default">إعادة رفع المستند</string>
+    <string name="reupload_title">إعادة رفع المستند</string>
+    <string name="default_rejection_reason">المستند غير واضح بدرجة كافية. يرجى التأكد من وضوح جميع النصوص والحواف.</string>
+    <string name="document_verification_title">التحقق من المستند</string>
+    <string name="document_verification_step">الخطوة %1$d من %2$d</string>
+    <string name="upload_new_photo">رفع صورة جديدة</string>
+    <string name="upload_file_types">JPG أو PNG أو PDF (بحد أقصى 10 ميجابايت)</string>
+    <string name="previous_upload_rejected">تم رفض الملف المرفوع سابقًا</string>
+    <string name="update_document">تحديث المستند</string>
+    <string name="cancel">إلغاء</string>
+    <string name="capture_tips">نصائح التصوير</string>
+    <string name="good_lighting">إضاءة جيدة</string>
+    <string name="good_lighting_tip">تأكد من إضاءة المستند جيدًا وتجنب الأماكن المظلمة.</string>
+    <string name="show_edges">أظهر جميع الحواف</string>
+    <string name="show_edges_tip">تأكد من ظهور أركان المستند الأربعة بوضوح.</string>
+    <string name="stay_focused">حافظ على وضوح الصورة</string>
+    <string name="stay_focused_tip">ثبّت جهازك حتى يظهر النص واضحًا ومقروءًا.</string>
+    <string name="flat_surface">استخدم سطحًا مستويًا</string>
+    <string name="flat_surface_tip">ضع المستند على سطح مستوٍ داكن لتحسين جودة الصورة.</string>
+    <string name="submit">إرسال</string>
+    <string name="edit_content_description">تعديل</string>
 </resources>

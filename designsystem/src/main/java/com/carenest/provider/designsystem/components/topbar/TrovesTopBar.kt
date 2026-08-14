@@ -29,17 +29,17 @@ fun TrovesTopBar(
         actions = listOf(
             TopBarAction(
                 icon = painterResource(com.carenest.provider.designsystem.R.drawable.ic_ai_sparkles),
-                contentDescription = "AI Chat",
+                contentDescription = stringResource(com.carenest.provider.designsystem.R.string.ai_chat_content_description),
                 onClick = onAiClick,
             ),
             TopBarAction(
                 icon = painterResource(com.carenest.provider.designsystem.R.drawable.ic_search),
-                contentDescription = "Search",
+                contentDescription = stringResource(com.carenest.provider.designsystem.R.string.search_content_description),
                 onClick = onSearchClick,
             ),
             TopBarAction(
                 icon = painterResource(com.carenest.provider.designsystem.R.drawable.ic_cart),
-                contentDescription = "Cart",
+                contentDescription = stringResource(com.carenest.provider.designsystem.R.string.cart_content_description),
                 badgeCount = cartBadgeCount,
                 onClick = onCartClick,
             ),

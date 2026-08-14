@@ -18,7 +18,6 @@ sealed interface ProfileMenuIntent {
     data object ProfileCardClicked : ProfileMenuIntent
     data class MenuItemClicked(val id: MenuItemId) : ProfileMenuIntent
     data object SettingsClicked : ProfileMenuIntent
-    data object AvailabilitySettingsClicked : ProfileMenuIntent
     data object EarningsClicked : ProfileMenuIntent
     data object PayoutsClicked : ProfileMenuIntent
     data object WalletClicked : ProfileMenuIntent
@@ -53,10 +52,10 @@ private val sampleProfileMenuItems = listOf(
         showVerifiedDot = true,
     ),
     MenuItemUiModel(
-        MenuItemId.Availability,
-        R.string.profile_menu_availability,
-        R.string.profile_menu_availability_subtitle,
-        DesignSystemR.drawable.ic_account_availability,
+        MenuItemId.Settings,
+        R.string.profile_menu_app_settings,
+        R.string.profile_menu_app_settings_subtitle,
+        DesignSystemR.drawable.ic_account_settings,
     ),
     MenuItemUiModel(
         MenuItemId.Reviews,

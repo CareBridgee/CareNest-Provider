@@ -12,12 +12,16 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.LayoutDirection
 import coil3.compose.AsyncImage
 import com.carenest.provider.designsystem.R
 import com.carenest.provider.designsystem.theme.Theme
@@ -33,24 +37,25 @@ fun CareNestTopBar(
     leading: TopBarLeading? = null,
     trailingAvatarUrl: String? = null
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .shadow(
-                elevation = Theme.spacing.extraSmall,
-                clip = false
-            )
-            .background(Theme.colors.surface)
-            .padding(
-                horizontal = Theme.spacing.large,
-                vertical = Theme.spacing.small + Theme.spacing.extraSmall
-            ),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .shadow(
+                    elevation = Theme.spacing.extraSmall,
+                    clip = false
+                )
+                .background(Theme.colors.surface)
+                .padding(
+                    horizontal = Theme.spacing.large,
+                    vertical = Theme.spacing.small + Theme.spacing.extraSmall
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
         if (leading is TopBarLeading.Back) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_arrow_back),
-                contentDescription = "Back",
+                contentDescription = stringResource(R.string.back),
                 tint = Theme.colors.primary,
                 modifier = Modifier
                     .size(Theme.size.iconMedium)
@@ -70,13 +75,14 @@ fun CareNestTopBar(
         if (trailingAvatarUrl != null) {
             AsyncImage(
                 model = trailingAvatarUrl,
-                contentDescription = "Profile Avatar",
+                contentDescription = stringResource(R.string.profile_avatar_content_description),
                 modifier = Modifier
                     .size(Theme.size.medium)
                     .clip(CircleShape)
                     .border(Theme.spacing.extraSmall / 4, Theme.colors.onDisable, CircleShape),
                 contentScale = ContentScale.Crop
             )
+        }
         }
     }
 }

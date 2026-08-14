@@ -26,7 +26,7 @@ fun OfflineEmptyState(modifier: Modifier = Modifier) {
     ) {
         Image(
             painter = painterResource(R.drawable.offline_state),
-            contentDescription = "state",
+            contentDescription = null,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(220.dp),

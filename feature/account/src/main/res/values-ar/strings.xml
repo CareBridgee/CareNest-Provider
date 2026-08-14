@@ -1,5 +1,5 @@
 <resources>
-    <string name="account_brand">نيرس كونيكت</string>
+    <string name="account_brand">CareConnect</string>
     <string name="account_provider_short_name">الممرضة سارة</string>
     <string name="account_provider_name">الممرضة سارة ميتشل</string>
     <string name="account_specialty">رعاية متخصصة لكبار السن</string>
@@ -13,8 +13,8 @@
     <string name="profile_menu_professional_info_subtitle">التخصصات والنبذة والتعليم</string>
     <string name="profile_menu_documents">المستندات</string>
     <string name="profile_menu_documents_subtitle">تم التحقق في ١٢ يناير ٢٠٢٤</string>
-    <string name="profile_menu_availability">إعدادات التوفر</string>
-    <string name="profile_menu_availability_subtitle">ساعات العمل والتواريخ المحظورة</string>
+    <string name="profile_menu_app_settings">إعدادات التطبيق</string>
+    <string name="profile_menu_app_settings_subtitle">اللغة، المظهر والخصوصية</string>
     <string name="profile_menu_reviews">التقييمات</string>
     <string name="profile_menu_reviews_subtitle">١٢٨ شهادة من المرضى</string>
     <string name="profile_menu_earnings">الأرباح</string>
@@ -172,6 +172,6 @@
     <string name="bottom_nav_home">الرئيسية</string>
     <string name="bottom_nav_support">الدعم</string>
     <string name="bottom_nav_profile">الملف</string>
-    <string name="bottom_nav_active_jobs">الوظائف النشطة</string>
+    <string name="bottom_nav_active_jobs">الوظائف</string>
     <string name="bottom_nav_earnings">الأرباح</string>
 </resources>

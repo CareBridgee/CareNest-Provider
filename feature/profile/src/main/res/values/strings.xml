@@ -13,7 +13,7 @@
     <string name="location_label">Location</string>
     <string name="location_hint">e.g. Chicago, IL</string>
     <string name="dob_label">Date of Birth</string>
-    <string name="dob_hint">mm/dd/yyyy</string>
+    <string name="dob_hint">DD/MM/YYYY</string>
     <string name="national_id_label">National ID</string>
     <string name="national_id_hint">00000000000000</string>
     <string name="gender_label">Gender Identity</string>
@@ -45,7 +45,7 @@
     <string name="replace_action">Replace</string>
     <string name="remove_action">Remove</string>
     <!-- Top Bar -->
-    <string name="app_name">CareConnect</string>
+    <string name="app_name">CareNest</string>
 
     <!-- Screen -->
     <string name="app_name_careconnect">CareConnect Provider</string>
@@ -53,19 +53,21 @@
     <string name="auth_continue_google">Continue with Google</string>
     <string name="auth_continue_phone">Continue with Phone</string>
     <string name="auth_terms_agreement">By continuing, you agree to our Terms and Privacy Policy</string>
-    <string name="phone_input_topbar_title">Enter Phone Number</string>
-    <string name="phone_input_subtitle">We will send you a code to verify your number</string>
-    <string name="phone_input_next_btn">Continue</string>
+    <string name="phone_input_topbar_title">Join us via phone number</string>
+    <string name="phone_input_subtitle">We\'ll text a code to verify your \n phone.</string>
+    <string name="phone_input_next_btn">Next</string>
     <string name="otp_title">Verify OTP</string>
-    <string name="otp_subtitle">Enter the code sent to %1$s</string>
+    <string name="otp_subtitle">Enter the code sent to </string>
     <string name="otp_verify_btn">Verify</string>
     <string name="otp_resend_timer">Resend code in 00:30</string>
     <string name="phone_header_brand">Secure Platform</string>
-    <string name="phone_input_secure_care_desc">Your information is protected and encrypted</string>
+    <string name="phone_input_secure_care_desc">Your number is used only for
+verification and secure
+coordination of services.</string>
     <string name="phone_input_via_sms">SMS</string>
     <string name="phone_input_via_whatsapp">WhatsApp</string>
     <string name="phone_input_label">Phone Number</string>
-    <string name="phone_input_carrier_charges">Standard carrier charges may apply</string>
+    <string name="phone_input_carrier_charges">Carrier charges may apply for SMS.</string>
     <string name="application_under_review">Application Under Review</string>
     <string name="verification_message">
         We are currently verifying your credentials to ensure the highest standard of care. This usually takes %1$s.
@@ -112,7 +114,7 @@
     <string name="approved">Approved</string>
     <string name="congratulations">Congratulations!</string>
     <string name="account_verified">Your account has been verified.</string>
-    <string name="network_welcome_message">You are now part of the Serene Care network. Start accepting jobs to grow your career and provide care to those who need it most.</string>
+    <string name="network_welcome_message">You are now part of the CareConnect network. Start accepting jobs to grow your career and provide care to those who need it most.</string>
     <string name="go_to_home">Go to Home</string>
     <string name="start_your_journey">Start your journey</string>
     <string name="review_community_guidelines">Review Community Guidelines</string>
@@ -175,6 +177,8 @@
 
     <!-- Validation Messages -->
     <string name="error_fill_all_fields">Please fill all required fields</string>
+    <string name="error_name_invalid">Names must contain 2–50 letters and may only include spaces, hyphens, or apostrophes</string>
+    <string name="error_invalid_national_id">Enter a valid 14-digit National ID containing a valid date of birth</string>
     <string name="error_nid_dob_mismatch">National ID does not match Date of Birth</string>
     <string name="error_upload_all_docs">Please upload all documents and fill experience details</string>
     <string name="error_select_service">Please select at least one service</string>
@@ -196,4 +200,5 @@
     <string name="step_services">Services</string>
     <string name="step_review">Review</string>
 
+    <string name="edit_content_description">Edit</string>
 </resources>

@@ -15,17 +15,19 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.carenest.provider.account.R
 import com.carenest.provider.designsystem.R as DesignSystemR
@@ -42,17 +44,18 @@ fun ProviderAccountTopBar(
     onSettingsClick: () -> Unit = {},
     onNavigateBack: (() -> Unit)? = null,
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .shadow(1.dp)
-            .background(Theme.colors.surface)
-            .padding(horizontal = Theme.spacing.large, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .shadow(1.dp)
+                .background(Theme.colors.surface)
+                .padding(horizontal = Theme.spacing.large, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
         if (onNavigateBack != null) {
             Icon(
-                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                painter = painterResource(DesignSystemR.drawable.ic_arrow_back),
                 contentDescription = stringResource(R.string.account_back),
                 tint = Theme.colors.tint,
                 modifier = Modifier
@@ -90,6 +93,7 @@ fun ProviderAccountTopBar(
                     .size(26.dp)
                     .clickable(onClick = onSettingsClick),
             )
+        }
         }
     }
 }

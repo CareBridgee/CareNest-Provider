@@ -156,4 +156,14 @@
     <string name="patient_summary_no_contacts">لا توجد جهات اتصال طوارئ</string>
     <string name="patient_summary_mobility_status_label">حالة الحركة: %1$s</string>
     <string name="patient_summary_notes_label">ملاحظات: %1$s</string>
+    <!-- Request details and cancellation -->
+    <string name="request_details_finding_address">جارٍ تحديد عنوان المريض…</string>
+    <string name="request_details_address_copied">تم نسخ العنوان</string>
+    <string name="request_details_patient_location">موقع المريض</string>
+    <string name="cancellation_dialog_title">تم إلغاء طلب الخدمة</string>
+    <string name="cancellation_dialog_message">ألغى المريض طلب الخدمة هذا.</string>
+    <string name="cancellation_dialog_ok">حسنًا</string>
+    <string name="requests_empty_title">لا توجد طلبات متاحة</string>
+    <string name="requests_empty_description">ستظهر هنا فورًا الطلبات الواردة من المرضى القريبين.</string>
+    <string name="call_contact_content_description">الاتصال بـ %1$s</string>
 </resources>

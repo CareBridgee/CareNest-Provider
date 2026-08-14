@@ -35,6 +35,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -171,10 +173,13 @@ private fun SPBottomNavigationItem(
         Spacer(modifier = Modifier.height(2.dp))
         BasicText(
             text = item.label,
+            modifier = Modifier.fillMaxWidth(),
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             style = Theme.typography.hint.large.copy(
                 color = textColor,
                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                textAlign = TextAlign.Center,
             ),
         )
     }

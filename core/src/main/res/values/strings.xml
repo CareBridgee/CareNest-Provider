@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="active_reservation_title">Active Reservation</string>
+    <string name="active_reservation_monitoring">Monitoring real-time reservation updates</string>
+    <string name="reservation_confirmed_title">Reservation Confirmed</string>
+    <string name="reservation_confirmed_message">Offer accepted! Visit active.</string>
+    <string name="offer_countered_title">Offer Countered</string>
+    <string name="offer_countered_message">Patient proposed counter terms.</string>
+    <string name="offer_updated_title">Offer Updated</string>
+    <string name="offer_updated_message">Reservation terms updated.</string>
+    <string name="reservation_cancelled_title">Reservation Cancelled</string>
+    <string name="reservation_cancelled_message">This request was cancelled.</string>
+    <string name="visit_completed_title">Visit Completed</string>
+    <string name="visit_completed_message">Visit successfully completed.</string>
+    <string name="reservation_update_received">Real-time reservation update received.</string>
+    <string name="reservation_channel_name">Active Reservation Updates</string>
+    <string name="reservation_channel_description">Shows real-time status updates for ongoing nurse reservations</string>
+</resources>

@@ -230,7 +230,7 @@ fun PatientInfoCard(
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_call),
-                    contentDescription = "Call",
+                    contentDescription = stringResource(R.string.call_content_description),
                     tint = Theme.colors.onPrimaryContainer,
                     modifier = Modifier.size(20.dp)
                 )

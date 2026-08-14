@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.ColorPainter
@@ -56,7 +57,7 @@ fun BaseTopAppBar(
         if (leadingIcon != null) {
             IconBox(
                 icon = leadingIcon,
-                contentDescription = "Navigate up",
+                contentDescription = stringResource(com.carenest.provider.designsystem.R.string.back),
                 onClick = onLeadingClick,
                 border = border,
                 autoMirror = autoMirrorLeadingIcon,

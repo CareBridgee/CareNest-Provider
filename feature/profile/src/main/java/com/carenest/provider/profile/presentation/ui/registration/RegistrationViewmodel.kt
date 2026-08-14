@@ -23,8 +23,6 @@ import com.carenest.provider.profile.domain.model.VerificationStatus
 import com.carenest.provider.profile.domain.usecase.LoadServiceTypesUseCase
 import com.carenest.provider.profile.domain.usecase.SubmitRegistrationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.text.SimpleDateFormat
-import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
@@ -57,16 +55,24 @@ class RegistrationViewmodel @Inject constructor(
 
     fun onIntent(intent: RegistrationIntent) {
         when (intent) {
-            is RegistrationIntent.OnFirstNameChanged -> updatePersonal { copy(firstName = intent.firstName) }
-            is RegistrationIntent.OnLastNameChanged -> updatePersonal { copy(lastName = intent.lastName) }
-            is RegistrationIntent.OnDateOfBirthChanged -> updatePersonal { copy(dateOfBirth = intent.dateOfBirth) }
-            is RegistrationIntent.OnNationalIdChanged -> updatePersonal { copy(nationalId = intent.nationalId) }
+            is RegistrationIntent.OnFirstNameChanged -> updatePersonal {
+                copy(firstName = PersonalInfoValidation.sanitizeName(intent.firstName))
+            }
+            is RegistrationIntent.OnLastNameChanged -> updatePersonal {
+                copy(lastName = PersonalInfoValidation.sanitizeName(intent.lastName))
+            }
+            is RegistrationIntent.OnNationalIdChanged -> updatePersonal {
+                val normalizedId = PersonalInfoValidation.normalizeNationalId(intent.nationalId)
+                copy(
+                    nationalId = normalizedId,
+                    dateOfBirth = PersonalInfoValidation.extractDateOfBirth(normalizedId).orEmpty(),
+                )
+            }
             is RegistrationIntent.OnGenderChanged -> updatePersonal { copy(gender = intent.gender) }
             is RegistrationIntent.OnProfilePhotoPicked -> updatePersonal {
                 copy(profilePhoto = intent.attachment)
             }
             RegistrationIntent.OnGenderClick -> sendEffect(RegistrationEffect.OpenGenderSelection)
-            RegistrationIntent.OnDateOfBirthClick -> sendEffect(RegistrationEffect.ShowCalendar)
             RegistrationIntent.OnProfilePhotoClick -> sendEffect(RegistrationEffect.OpenProfilePhotoPicker)
             RegistrationIntent.OnNationalIdFrontClick -> sendEffect(RegistrationEffect.OpenNationalIdFrontPicker)
             RegistrationIntent.OnNationalIdBackClick -> sendEffect(RegistrationEffect.OpenNationalIdBackPicker)
@@ -226,7 +232,7 @@ class RegistrationViewmodel @Inject constructor(
             user = UserUpdate(
                 firstName = personal.firstName.trim(),
                 lastName = personal.lastName.trim(),
-                dateOfBirth = personal.dateOfBirth.toBackendDate(),
+                dateOfBirth = PersonalInfoValidation.toBackendDate(personal.dateOfBirth),
                 gender = personal.gender.name,
                 profileImage = fileReader.readAttachment(requireNotNull(personal.profilePhoto)),
             ),
@@ -254,11 +260,14 @@ class RegistrationViewmodel @Inject constructor(
                 val personal = state.personalInfoState
                 when {
                     personal.firstName.isBlank() || personal.lastName.isBlank() ||
-                        personal.dateOfBirth.isBlank() || personal.nationalId.isBlank() ||
+                        personal.nationalId.isBlank() ||
                         personal.gender == Gender.UNKNOWN || personal.profilePhotoUri == null ->
                         "error_fill_all_fields"
-                    !validateNidWithDob(personal.nationalId, personal.dateOfBirth) ->
-                        "error_nid_dob_mismatch"
+                    !PersonalInfoValidation.isValidName(personal.firstName) ||
+                        !PersonalInfoValidation.isValidName(personal.lastName) ->
+                        "error_name_invalid"
+                    PersonalInfoValidation.extractDateOfBirth(personal.nationalId) == null ->
+                        "error_invalid_national_id"
                     else -> null
                 }
             }
@@ -299,25 +308,17 @@ class RegistrationViewmodel @Inject constructor(
         updateState { copy(stepperState = stepperState.copy(currentStepTitle = title)) }
     }
 
-    private fun validateNidWithDob(nid: String, dob: String): Boolean {
-        if (!nid.matches(Regex("\\d{14}"))) return false
-        val parts = dob.split("/")
-        if (parts.size != 3) return false
-        val century = when (nid.first()) { '2' -> "19"; '3' -> "20"; else -> return false }
-        return century + nid.substring(1, 3) == parts[2] &&
-            nid.substring(3, 5) == parts[0] && nid.substring(5, 7) == parts[1]
-    }
-
     private fun restoreDraft(draft: RegistrationDraft) {
         val page = draft.currentPage.coerceIn(0, 3)
+        val nationalId = PersonalInfoValidation.normalizeNationalId(draft.nationalId)
         updateState {
             copy(
                 currentPage = page,
                 personalInfoState = PersonalInfoState(
-                    firstName = draft.firstName,
-                    lastName = draft.lastName,
-                    dateOfBirth = draft.dateOfBirth,
-                    nationalId = draft.nationalId,
+                    firstName = PersonalInfoValidation.sanitizeName(draft.firstName),
+                    lastName = PersonalInfoValidation.sanitizeName(draft.lastName),
+                    dateOfBirth = PersonalInfoValidation.extractDateOfBirth(nationalId).orEmpty(),
+                    nationalId = nationalId,
                     gender = runCatching { Gender.valueOf(draft.gender) }.getOrDefault(Gender.UNKNOWN),
                     profilePhoto = draft.profilePhoto?.toAttachment(),
                 ),
@@ -379,11 +380,5 @@ private fun com.carenest.provider.profile.domain.model.NurseProfile.toSavedSessi
         nurseId = id,
         phoneNumber = phoneNumber,
     )
-
-private fun String.toBackendDate(): String {
-    val source = SimpleDateFormat("MM/dd/yyyy", Locale.US).apply { isLenient = false }
-    val target = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-    return target.format(requireNotNull(source.parse(this)) { "Invalid date of birth" })
-}
 
 private fun Throwable.userMessage(): String = message?.takeIf(String::isNotBlank) ?: "error_unknown"

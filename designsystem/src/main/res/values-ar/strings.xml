@@ -95,7 +95,7 @@
     <string name="availability_distance_max_label">٥٠ ميل</string>
     <string name="back">رجوع</string>
     <!-- Auth strings -->
-    <string name="app_name_careconnect">كير كونيكت لمقدمي الرعاية</string>
+    <string name="app_name_careconnect">CareConnect لمقدمي الرعاية</string>
     <string name="app_auth_description">مرحبًا بعودتك! يُرجى تسجيل الدخول أو إنشاء حساب.</string>
     <string name="auth_continue_google">المتابعة باستخدام Google</string>
     <string name="auth_google_unavailable_title">تسجيل الدخول عبر Google قريبًا</string>
@@ -173,4 +173,15 @@
     <string name="nurse_requests_status_accepted">تم القبول</string>
     <string name="nurse_requests_action_edit">تعديل</string>
     <string name="nurse_requests_action_make_offer">تقديم عرض</string>
+    <string name="profile_avatar_content_description">الصورة الشخصية</string>
+    <string name="connection_alert_title">تنبيه الاتصال</string>
+    <string name="connection_error_code">رمز الخطأ: %1$s</string>
+    <string name="common_ok">حسنًا</string>
+    <string name="profile_content_description">الملف الشخصي</string>
+    <string name="notifications_content_description">الإشعارات</string>
+    <string name="rating_content_description">التقييم</string>
+    <string name="ai_chat_content_description">محادثة الذكاء الاصطناعي</string>
+    <string name="search_content_description">بحث</string>
+    <string name="cart_content_description">سلة التسوق</string>
+    <string name="call_content_description">اتصال</string>
 </resources>

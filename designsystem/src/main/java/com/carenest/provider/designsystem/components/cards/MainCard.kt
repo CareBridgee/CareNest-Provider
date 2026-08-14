@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -110,7 +111,9 @@ fun MainCard(
             ) {
                 Icon(
                     painter = ratingIconPainter,
-                    contentDescription = "Rating",
+                    contentDescription = stringResource(
+                        com.carenest.provider.designsystem.R.string.rating_content_description
+                    ),
                     tint = Theme.colors.amber,
                     modifier = Modifier.size(14.dp)
                 )

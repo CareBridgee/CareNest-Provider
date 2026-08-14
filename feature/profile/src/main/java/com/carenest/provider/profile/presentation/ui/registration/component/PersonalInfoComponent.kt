@@ -50,8 +50,6 @@ fun PersonalInfoComponent(
     state: PersonalInfoState,
     onFirstNameChanged: (String) -> Unit,
     onLastNameChanged: (String) -> Unit,
-    onDateOfBirthChanged: (String) -> Unit,
-    onDateOfBirthClick: () -> Unit,
     onNationalIdChanged: (String) -> Unit,
     onGenderClick: () -> Unit,
     onProfilePhotoClick: () -> Unit,
@@ -120,33 +118,27 @@ fun PersonalInfoComponent(
         Spacer(modifier = Modifier.height(Theme.spacing.medium))
 
         CustomTextField(
-            text = state.dateOfBirth,
-            onTextChange = onDateOfBirthChanged,
-            title = stringResource(R.string.dob_label),
-            hint = stringResource(R.string.dob_hint),
-            leadingIcon = painterResource(id = com.carenest.provider.designsystem.R.drawable.ic_calendar),
-            modifier = Modifier
-                .fillMaxWidth()
-                .noRippleClickable { onDateOfBirthClick() },
-            readOnly = true,
-            enabled = false,
-            singleLine = true
-        )
-
-        Spacer(modifier = Modifier.height(Theme.spacing.medium))
-
-        CustomTextField(
             text = state.nationalId,
-            onTextChange = {
-                if (it.length <= 14 && it.all { char -> char.isDigit() }) {
-                    onNationalIdChanged(it)
-                }
-            },
+            onTextChange = onNationalIdChanged,
             title = stringResource(R.string.national_id_label),
             hint = stringResource(R.string.national_id_hint),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
+
+        Spacer(modifier = Modifier.height(Theme.spacing.medium))
+
+        CustomTextField(
+            text = state.dateOfBirth,
+            onTextChange = {},
+            title = stringResource(R.string.dob_label),
+            hint = stringResource(R.string.dob_hint),
+            leadingIcon = painterResource(id = com.carenest.provider.designsystem.R.drawable.ic_calendar),
+            modifier = Modifier.fillMaxWidth(),
+            readOnly = true,
+            enabled = false,
+            singleLine = true
         )
 
         Spacer(modifier = Modifier.height(Theme.spacing.medium))
@@ -270,8 +262,6 @@ fun PersonalInfoComponentPreview() {
             state = PersonalInfoState(),
             onFirstNameChanged = {},
             onLastNameChanged = {},
-            onDateOfBirthChanged = {},
-            onDateOfBirthClick = {},
             onNationalIdChanged = {},
             onGenderClick = {},
             onProfilePhotoClick = {}
@@ -286,8 +276,6 @@ fun PersonalInfoComponentDarkPreview() {
             state = PersonalInfoState(),
             onFirstNameChanged = {},
             onLastNameChanged = {},
-            onDateOfBirthChanged = {},
-            onDateOfBirthClick = {},
             onNationalIdChanged = {},
             onGenderClick = {},
             onProfilePhotoClick = {}
