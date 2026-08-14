@@ -48,6 +48,7 @@ dependencies {
 
     implementation(libs.bundles.lifecycle)
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.bundles.ktor)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)

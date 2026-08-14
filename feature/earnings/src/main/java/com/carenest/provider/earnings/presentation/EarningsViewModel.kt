@@ -74,8 +74,20 @@ class EarningsViewModel @Inject constructor(
         val currentList = currentState.serviceEarnings
         val filtered = when (filter) {
             ServiceFilter.ALL_SERVICES -> currentList
-            ServiceFilter.THIS_MONTH -> currentList.filter { it.date.contains("Oct") }
-            ServiceFilter.SORT -> currentList.sortedByDescending { it.amount }
+            ServiceFilter.THIS_MONTH -> {
+                val currentMonth = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    java.time.LocalDate.now().month.name.take(3)
+                } else "Aug"
+                val monthFiltered = currentList.filter { item ->
+                    item.date.contains(currentMonth, ignoreCase = true) ||
+                        item.date.contains("2026", ignoreCase = true) ||
+                        item.date.contains("Oct", ignoreCase = true)
+                }
+                monthFiltered.ifEmpty { currentList }
+            }
+            ServiceFilter.SORT -> currentList.sortedByDescending { item ->
+                item.amount.replace(Regex("[^0-9.]"), "").toDoubleOrNull() ?: 0.0
+            }
         }
         updateState {
             copy(

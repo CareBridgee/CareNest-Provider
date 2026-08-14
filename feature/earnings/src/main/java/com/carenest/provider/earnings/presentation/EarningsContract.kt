@@ -14,7 +14,7 @@ data class EarningsUiState(
     val serviceEarnings: List<ServiceEarningItem> = emptyList(),
     val filteredEarnings: List<ServiceEarningItem> = emptyList(),
     val selectedFilter: ServiceFilter = ServiceFilter.ALL_SERVICES,
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val isError: Boolean = false,
     val errorMessage: String? = null,
     val isEmpty: Boolean = false,

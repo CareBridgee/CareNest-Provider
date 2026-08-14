@@ -48,6 +48,7 @@ import com.carenest.provider.designsystem.components.bottomnav.LocalBottomNaviga
 import com.carenest.provider.designsystem.components.bottomnav.SPBottomNavigation
 import com.carenest.provider.designsystem.components.emptystate.EmptyState
 import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
+import com.carenest.provider.designsystem.components.topbar.TopBarLeading
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.earnings.domain.model.EarningStatus
@@ -57,6 +58,7 @@ import com.carenest.provider.earnings.domain.model.ServiceEarningItem
 @Composable
 fun EarningsScreen(
     onNavigateToPayouts: () -> Unit,
+    onNavigateBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     viewModel: EarningsViewModel = hiltViewModel()
 ) {
@@ -71,6 +73,7 @@ fun EarningsScreen(
     EarningsScreenContent(
         state = state,
         onIntent = viewModel::onIntent,
+        onNavigateBack = onNavigateBack,
         modifier = modifier
     )
 }
@@ -79,6 +82,7 @@ fun EarningsScreen(
 fun EarningsScreenContent(
     state: EarningsUiState,
     onIntent: (EarningsIntent) -> Unit,
+    onNavigateBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val bottomNavigationContentPadding = LocalBottomNavigationContentPadding.current
@@ -89,6 +93,7 @@ fun EarningsScreenContent(
     ) {
         CareNestTopBar(
             title = stringResource(com.carenest.provider.earnings.R.string.top_bar_title),
+            leading = onNavigateBack?.let { TopBarLeading.Back(it) },
             trailingAvatarUrl = "https://picsum.photos/200/300",
         )
         when {
@@ -166,7 +171,7 @@ fun EarningsScreenContent(
                             )
                         }
 
-                        if (state.isEmpty) {
+                        if (state.isEmpty || state.filteredEarnings.isEmpty()) {
                             item {
                                 EmptyState(
                                     title = stringResource(com.carenest.provider.earnings.R.string.no_service_earnings),

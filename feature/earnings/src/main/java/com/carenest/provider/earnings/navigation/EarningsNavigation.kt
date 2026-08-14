@@ -17,11 +17,13 @@ fun providerEarningsStartRoute(): NavKey = EarningsRoutes.ServiceEarnings
 
 fun EntryProviderScope<NavKey>.providerEarningsEntries(
     backStack: SnapshotStateList<NavKey>,
-    onNavigateToPayouts: () -> Unit
+    onNavigateToPayouts: () -> Unit,
+    onNavigateBack: (() -> Unit)? = null
 ) {
     entry<EarningsRoutes.ServiceEarnings> {
         EarningsScreen(
-            onNavigateToPayouts = onNavigateToPayouts
+            onNavigateToPayouts = onNavigateToPayouts,
+            onNavigateBack = onNavigateBack
         )
     }
 }
