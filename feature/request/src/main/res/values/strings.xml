@@ -78,6 +78,14 @@
     <string name="request_details_total_amount">Total Amount</string>
     <string name="request_details_cancel_visit">Cancel Visit</string>
     <string name="request_not_found">This request is no longer available.</string>
+    <string name="request_history_error_title">Couldn\'t load request history</string>
+    <string name="request_history_empty_title">No request history yet</string>
+    <string name="request_history_empty_description">Completed and scheduled service requests will appear here.</string>
+    <string name="request_history_filter_empty_title">No requests in this status</string>
+    <string name="request_history_filter_empty_description">Try another status tab to view more request history.</string>
+    <string name="request_history_retry">Retry</string>
+    <string name="request_history_unknown_service">Care service</string>
+    <string name="request_history_unknown_patient">Patient</string>
     <string name="request_call_patient">Call patient</string>
     <string name="request_message_patient">Message patient</string>
     <string name="cancel_request_title">Cancel Visit?</string>

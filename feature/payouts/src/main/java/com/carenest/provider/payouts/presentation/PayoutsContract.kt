@@ -6,7 +6,7 @@ import com.carenest.provider.payouts.domain.model.PayoutSummary
 data class PayoutsUiState(
     val summary: PayoutSummary = PayoutSummary("$0.00", "$0.00", "$0.00"),
     val historyList: List<PayoutItem> = emptyList(),
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val isError: Boolean = false,
     val errorMessage: String? = null,
     val isEmpty: Boolean = false,

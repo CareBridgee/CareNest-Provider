@@ -42,7 +42,6 @@ fun ServiceRequestDetailsDto.toDomainOffer(
     return Offer(
         offerId = serviceRequestId ?: requestedServiceRequestId,
         nurseOfferId = acceptedOffer?.id,
-        // The latest service-request contracts do not expose a reservation ID.
         reservationId = null,
         serviceRequestStatus = status ?: assignedProfile?.status,
         patientInfo = PatientInfo(

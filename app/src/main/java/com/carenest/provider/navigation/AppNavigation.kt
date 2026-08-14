@@ -264,6 +264,9 @@ fun AppNavigation(
             backStack = backStack,
             onNavigateToPayouts = {
                 backStack.navigate(providerPayoutsStartRoute())
+            },
+            onNavigateBack = {
+                backStack.goBack()
             }
         )
 

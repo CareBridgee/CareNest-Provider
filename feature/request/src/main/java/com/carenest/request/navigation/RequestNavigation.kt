@@ -15,7 +15,6 @@ import com.carenest.request.presentation.ui.visit_summary.VisitCompletedScreen
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 
-
 val requestSerializers = SerializersModule {
     polymorphic(NavKey::class) {
         subclass(RequestRoutes.RequestList::class, RequestRoutes.RequestList.serializer())
@@ -34,7 +33,7 @@ fun EntryProviderScope<NavKey>.providerRequestEntries(
     backStack: SnapshotStateList<NavKey>,
     onNavigateHome: () -> Unit,
     onOpenChat: (String) -> Unit,
-){
+) {
     entry<RequestRoutes.RequestList> {
         RequestsListScreen(
             onBack = { backStack.goBack() },
@@ -115,7 +114,7 @@ fun EntryProviderScope<NavKey>.providerRequestEntries(
         )
     }
 
-    entry<RequestRoutes.VisitCompleted> { route->
+    entry<RequestRoutes.VisitCompleted> { route ->
         VisitCompletedScreen(
             requestId = route.requestId,
             onNavigateHome = onNavigateHome,

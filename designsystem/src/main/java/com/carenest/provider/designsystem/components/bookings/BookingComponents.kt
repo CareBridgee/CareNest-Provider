@@ -450,7 +450,7 @@ fun BookingTabRow(
         stringResource(R.string.bookings_tab_cancelled),
     )
 
-/*    ScrollableTabRow(
+    ScrollableTabRow(
         selectedTabIndex = selectedIndex,
         containerColor = Theme.colors.backGround,
         contentColor = Theme.colors.primaryFont,
@@ -490,7 +490,7 @@ fun BookingTabRow(
                 )
             }
         }
-    }*/
+    }
 }
 
 /**

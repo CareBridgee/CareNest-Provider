@@ -25,7 +25,7 @@ class NurseRequestsDataSourceImpl @Inject constructor(
 
     override suspend fun getIncomingRequests(): List<NurseRequest> {
         return try {
-            val response = httpClient.get("api/v1/service-requests/nearby")
+            val response = httpClient.get("/api/v1/service-requests/nearby")
                 .body<List<NearbyNurseServiceRequestResponse>>()
             response.map { item ->
                 NurseRequest(
@@ -34,7 +34,7 @@ class NurseRequestsDataSourceImpl @Inject constructor(
                     patientImage = item.patientProfileImageUrl ?: "",
                     serviceType = item.serviceName ?: "Nursing Visit",
                     serviceImage = "",
-                    baseRate = (item.estimatedPrice ?: 50.0).toFloat(),
+                    baseRate = (item.estimatedPrice ?: 0.0).toFloat(),
                     distanceMiles = (item.distanceKm ?: 0.0).toFloat(),
                     status = RequestStatus.ESTIMATED
                 )
@@ -68,7 +68,7 @@ class NurseRequestsDataSourceImpl @Inject constructor(
 
     override suspend fun getEarningsSummary(): EarningsSummary {
         return try {
-            httpClient.get("api/v1/nurse/earnings").body<EarningsSummary>()
+            httpClient.get("/api/v1/nurse/earnings").body<EarningsSummary>()
         } catch (e: Exception) {
             EarningsSummary(
                 todayEarnings = 0.0,
@@ -81,7 +81,7 @@ class NurseRequestsDataSourceImpl @Inject constructor(
 
     override suspend fun getNurseProfile(): NurseProfile {
         return try {
-            httpClient.get("api/v1/profile").body<NurseProfile>()
+            httpClient.get("/api/v1/profile").body<NurseProfile>()
         } catch (e: Exception) {
             NurseProfile(
                 name = "Care Provider",
