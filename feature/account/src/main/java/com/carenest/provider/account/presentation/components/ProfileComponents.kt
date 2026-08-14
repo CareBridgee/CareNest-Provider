@@ -202,7 +202,7 @@ fun ProfileMenuCard(
 
 private fun Int.isOriginalColorAccountIcon(): Boolean = this in setOf(
     DesignSystemR.drawable.ic_account_professional_info,
-    DesignSystemR.drawable.ic_account_availability,
+    DesignSystemR.drawable.ic_account_settings,
     DesignSystemR.drawable.ic_account_reviews,
     DesignSystemR.drawable.ic_account_wallet,
     DesignSystemR.drawable.ic_account_support_chat,
@@ -213,9 +213,7 @@ private fun Int.accountMenuIconModifier(): Modifier = when (this) {
     DesignSystemR.drawable.ic_account_reviews,
     -> Modifier.size(20.dp)
 
-    DesignSystemR.drawable.ic_account_availability -> Modifier
-        .width(18.dp)
-        .height(20.dp)
+    DesignSystemR.drawable.ic_account_settings -> Modifier.size(22.dp)
 
     DesignSystemR.drawable.ic_account_wallet -> Modifier
         .width(19.dp)

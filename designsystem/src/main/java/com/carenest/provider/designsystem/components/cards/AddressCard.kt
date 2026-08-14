@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.carenest.provider.designsystem.theme.Theme
@@ -132,7 +133,10 @@ fun AddressCard(
             }
             BasicText(
                 text = phone,
-                style = Theme.typography.body.medium.copy(color = Theme.colors.secondaryFont),
+                style = Theme.typography.body.medium.copy(
+                    color = Theme.colors.secondaryFont,
+                    textDirection = TextDirection.Ltr,
+                ),
             )
         }
     }

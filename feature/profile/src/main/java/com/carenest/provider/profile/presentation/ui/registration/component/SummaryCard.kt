@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.carenest.provider.designsystem.theme.Theme
@@ -58,7 +59,7 @@ fun SummaryCard(
             )
             Icon(
                 painter = painterResource(id = com.carenest.provider.designsystem.R.drawable.ic_edit),
-                contentDescription = "Edit",
+                contentDescription = stringResource(com.carenest.provider.profile.R.string.edit_content_description),
                 tint = Theme.colors.tint,
                 modifier = Modifier
                     .size(Theme.size.iconSmall)

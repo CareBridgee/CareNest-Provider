@@ -87,7 +87,6 @@ sealed interface RegistrationEffect {
     data object OpenCertificatePicker : RegistrationEffect
     data object OpenLicensePicker : RegistrationEffect
     data object OpenGenderSelection : RegistrationEffect
-    data object ShowCalendar : RegistrationEffect
     data class SubmissionSucceeded(
         val nurseId: String,
         val verificationStatus: VerificationStatus,
@@ -101,7 +100,6 @@ sealed interface RegistrationEffect {
 sealed interface RegistrationIntent {
     data object OnProfilePhotoClick : RegistrationIntent
     data object OnGenderClick : RegistrationIntent
-    data object OnDateOfBirthClick : RegistrationIntent
     data object OnNationalIdFrontClick : RegistrationIntent
     data object OnNationalIdBackClick : RegistrationIntent
     data object OnNursingLicenseClick : RegistrationIntent
@@ -114,7 +112,6 @@ sealed interface RegistrationIntent {
     data class OnProfilePhotoPicked(val attachment: Attachment) : RegistrationIntent
     data class OnFirstNameChanged(val firstName: String) : RegistrationIntent
     data class OnLastNameChanged(val lastName: String) : RegistrationIntent
-    data class OnDateOfBirthChanged(val dateOfBirth: String) : RegistrationIntent
     data class OnNationalIdChanged(val nationalId: String) : RegistrationIntent
     data class OnGenderChanged(val gender: Gender) : RegistrationIntent
     data class OnNationalIdFrontPicked(val attachment: Attachment) : RegistrationIntent

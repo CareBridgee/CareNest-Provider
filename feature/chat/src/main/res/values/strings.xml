@@ -8,4 +8,12 @@
     <string name="chat_input_placeholder">Type a message…</string>
     <string name="chat_quick_tip_title">Quick Tip</string>
     <string name="chat_message_seen">Seen</string>
+    <string name="chat_message_sent">Sent</string>
+    <string name="chat_message_delivered">Delivered</string>
+    <string name="chat_message_failed">Failed</string>
+    <string name="chat_retry">Retry</string>
+    <string name="chat_today">Today</string>
+    <string name="chat_yesterday">Yesterday</string>
+    <string name="chat_patient_fallback">Patient</string>
+    <string name="chat_security_tip">You are communicating with %1$s. You can share visit updates or coordinates securely through this chat.</string>
 </resources>

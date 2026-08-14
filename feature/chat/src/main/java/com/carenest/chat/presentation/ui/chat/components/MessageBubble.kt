@@ -121,7 +121,7 @@ private fun ChatBubble(
                         MessageStatus.SENT -> {
                             Icon(
                                 imageVector = Icons.Filled.Done,
-                                contentDescription = "Sent",
+                                contentDescription = stringResource(R.string.chat_message_sent),
                                 tint = Theme.colors.hint,
                                 modifier = Modifier.size(14.dp),
                             )
@@ -129,7 +129,7 @@ private fun ChatBubble(
                         MessageStatus.DELIVERED -> {
                             Icon(
                                 imageVector = Icons.Filled.DoneAll,
-                                contentDescription = "Delivered",
+                                contentDescription = stringResource(R.string.chat_message_delivered),
                                 tint = Theme.colors.hint,
                                 modifier = Modifier.size(14.dp),
                             )
@@ -149,13 +149,13 @@ private fun ChatBubble(
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.ErrorOutline,
-                                    contentDescription = "Failed",
+                                    contentDescription = stringResource(R.string.chat_message_failed),
                                     tint = Theme.colors.error,
                                     modifier = Modifier.size(14.dp),
                                 )
                                 Spacer(modifier = Modifier.padding(start = 2.dp))
                                 Text(
-                                    text = "Retry",
+                                    text = stringResource(R.string.chat_retry),
                                     style = Theme.typography.hint.small,
                                     color = Theme.colors.error,
                                 )

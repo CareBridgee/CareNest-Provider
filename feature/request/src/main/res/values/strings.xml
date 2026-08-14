@@ -149,6 +149,8 @@
     <string name="cancellation_dialog_title">Service Request Cancelled</string>
     <string name="cancellation_dialog_message">This service request has been cancelled by the patient.</string>
     <string name="cancellation_dialog_ok">OK</string>
+    <string name="requests_empty_title">No Requests Available</string>
+    <string name="requests_empty_description">Incoming requests from nearby patients will appear here in real-time.</string>
 
     <!-- Patient Summary -->
     <string name="patient_summary_title">CareConnect</string>
@@ -174,4 +176,5 @@
     <string name="patient_summary_no_contacts">No emergency contacts listed</string>
     <string name="patient_summary_mobility_status_label">Mobility Status: %1$s</string>
     <string name="patient_summary_notes_label">Notes: %1$s</string>
+    <string name="call_contact_content_description">Call %1$s</string>
 </resources>

@@ -117,7 +117,7 @@ fun RequestsListContent(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    text = "No Requests Available",
+                                    text = stringResource(R.string.requests_empty_title),
                                     style = Theme.typography.body.large.copy(
                                         color = Theme.colors.secondaryFont,
                                         fontWeight = FontWeight.Bold
@@ -125,7 +125,7 @@ fun RequestsListContent(
                                 )
                                 Spacer(modifier = Modifier.height(Theme.spacing.extraSmall))
                                 Text(
-                                    text = "Incoming requests from nearby patients will appear here in real-time.",
+                                    text = stringResource(R.string.requests_empty_description),
                                     style = Theme.typography.body.medium.copy(color = Theme.colors.hint),
                                     textAlign = TextAlign.Center
                                 )

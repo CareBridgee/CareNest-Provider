@@ -19,6 +19,10 @@ class PhoneValidatorTest {
         assertEquals("102 764 2749", country.format("1027642749"))
         assertEquals("+201027642749", PhoneValidator.toInternationalNumber("1027642749", country))
         assertEquals(
+            "+20 102 764 2749",
+            PhoneValidator.formatInternationalNumber("+201027642749"),
+        )
+        assertEquals(
             PhoneNumberValidationError.InvalidFormat,
             PhoneValidator.validate("1327642749", country),
         )

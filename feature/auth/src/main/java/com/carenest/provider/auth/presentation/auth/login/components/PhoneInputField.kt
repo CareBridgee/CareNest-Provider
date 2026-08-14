@@ -24,6 +24,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,13 +32,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.carenest.provider.auth.domain.validation.SupportedPhoneCountry
 import com.carenest.provider.auth.presentation.auth.login.Country
@@ -65,10 +70,11 @@ fun PhoneInputField(
         "0".repeat(selectedCountry.phoneConfig.nationalDigitLength)
     )
 
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
         // Country Code Block
         Box(
             modifier = Modifier
@@ -79,12 +85,15 @@ fun PhoneInputField(
                 .padding(horizontal = 16.dp),
             contentAlignment = Alignment.Center
         ) {
-            BasicText(
-                text = "${selectedCountry.flag} ${selectedCountry.code}",
-                style = Theme.typography.body.large.copy(
-                    color = Theme.colors.primaryFont
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                BasicText(
+                    text = "${selectedCountry.flag} ${selectedCountry.code}",
+                    style = Theme.typography.body.large.copy(
+                        color = Theme.colors.primaryFont,
+                        textDirection = TextDirection.Ltr,
+                    )
                 )
-            )
+            }
 
             DropdownMenu(
                 expanded = isDropdownExpanded,
@@ -143,53 +152,60 @@ fun PhoneInputField(
         Spacer(modifier = Modifier.width(12.dp))
         
         // Phone Number Input
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .height(fieldHeight)
-                .clip(RoundedCornerShape(12.dp))
-                .background(containerColor)
-                .then(
-                    if (isError) {
-                        Modifier.border(1.dp, Theme.colors.error, RoundedCornerShape(12.dp))
-                    } else {
-                        Modifier
-                    }
-                )
-                .clickable(
-                    enabled = enabled,
-                    interactionSource = phoneInteractionSource,
-                    indication = null,
-                    onClick = phoneFocusRequester::requestFocus,
-                )
-                .padding(horizontal = 16.dp),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            if (phone.isEmpty()) {
-                BasicText(
-                    text = placeholder,
-                    style = Theme.typography.body.large.copy(
-                        color = Theme.colors.hint
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(fieldHeight)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(containerColor)
+                    .then(
+                        if (isError) {
+                            Modifier.border(1.dp, Theme.colors.error, RoundedCornerShape(12.dp))
+                        } else {
+                            Modifier
+                        }
                     )
+                    .clickable(
+                        enabled = enabled,
+                        interactionSource = phoneInteractionSource,
+                        indication = null,
+                        onClick = phoneFocusRequester::requestFocus,
+                    )
+                    .padding(horizontal = 16.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                if (phone.isEmpty()) {
+                    BasicText(
+                        text = placeholder,
+                        style = Theme.typography.body.large.copy(
+                            color = Theme.colors.hint,
+                            textAlign = TextAlign.Start,
+                            textDirection = TextDirection.Ltr,
+                        )
+                    )
+                }
+
+                BasicTextField(
+                    value = phone,
+                    onValueChange = onPhoneChange,
+                    enabled = enabled,
+                    textStyle = Theme.typography.body.large.copy(
+                        color = Theme.colors.primaryFont,
+                        textAlign = TextAlign.Start,
+                        textDirection = TextDirection.Ltr,
+                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    visualTransformation = PhoneNumberVisualTransformation(
+                        selectedCountry.phoneConfig.groupSizes
+                    ),
+                    singleLine = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(phoneFocusRequester),
                 )
             }
-            
-            BasicTextField(
-                value = phone,
-                onValueChange = onPhoneChange,
-                enabled = enabled,
-                textStyle = Theme.typography.body.large.copy(
-                    color = Theme.colors.primaryFont
-                ),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                visualTransformation = PhoneNumberVisualTransformation(
-                    selectedCountry.phoneConfig.groupSizes
-                ),
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(phoneFocusRequester),
-            )
+        }
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.carenest.chat.data.datasource
 
 import android.os.Build
+import android.content.Context
 import androidx.annotation.RequiresApi
 import com.carenest.chat.data.remote.ChatRemoteDataSource
 import com.carenest.chat.data.remote.dto.MessageDto
@@ -21,6 +22,7 @@ import kotlinx.serialization.Serializable
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
+import dagger.hilt.android.qualifiers.ApplicationContext
 
 @Serializable
 private data class ChatPatientProfileDto(
@@ -51,6 +53,7 @@ private data class ChatProfileSummaryDto(
 @Singleton
 @RequiresApi(Build.VERSION_CODES.O)
 class ChatDataSourceImp @Inject constructor(
+    @param:ApplicationContext private val context: Context,
     private val remoteDataSource: ChatRemoteDataSource,
     private val nurseSocketClient: NurseSocketClient,
     private val httpClient: HttpClient,
@@ -83,7 +86,7 @@ class ChatDataSourceImp @Inject constructor(
             Triple(null, null, null)
         }
 
-        val displayName = patientName ?: "Patient"
+        val displayName = patientName ?: context.getString(com.carenest.chat.R.string.chat_patient_fallback)
 
         val (currentNurseUserId, currentNursePhone) = getCurrentNurseInfo()
         val restMessages = try {
@@ -95,7 +98,7 @@ class ChatDataSourceImp @Inject constructor(
         val systemTip = ChatMessage(
             id = "sys_$requestId",
             type = ChatMessageType.SYSTEM_TIP,
-            text = "You are communicating with $displayName. You can share visit updates or coordinates securely through this chat.",
+            text = context.getString(com.carenest.chat.R.string.chat_security_tip, displayName),
             senderType = MessageSender.NURSE,
             sentAtEpochMillis = System.currentTimeMillis() - 86400000L,
         )
