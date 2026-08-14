@@ -7,10 +7,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -19,6 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.progressSemantics
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -28,6 +31,8 @@ import com.carenest.provider.designsystem.components.topbar.TopBarLeading
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.designsystem.components.button.PrimaryButton
+import com.carenest.provider.designsystem.components.shimmer.ShimmerLine
+import com.carenest.provider.designsystem.components.shimmer.ShimmerPlaceholder
 import com.carenest.provider.profile.R
 import com.carenest.provider.profile.presentation.ui.under_review_screen.composable.ActionRequiredScreenContent
 import com.carenest.provider.profile.presentation.ui.under_review_screen.composable.ActionSection
@@ -123,12 +128,7 @@ private fun UnderReviewScreenContent(
                 .verticalScroll(rememberScrollState())
         ) {
             if (state.isLoading) {
-                Column(
-                    modifier = Modifier.fillMaxWidth().padding(Theme.spacing.extraLarge),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    CircularProgressIndicator(color = Theme.colors.primary)
-                }
+                UnderReviewLoadingSkeleton()
             } else if (state.error != null) {
                 Column(
                     modifier = Modifier.fillMaxWidth().padding(Theme.spacing.extraLarge),
@@ -187,6 +187,37 @@ private fun UnderReviewScreenContent(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun UnderReviewLoadingSkeleton() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .progressSemantics()
+            .padding(horizontal = Theme.spacing.large, vertical = Theme.spacing.extraLarge),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Theme.spacing.large),
+    ) {
+        ShimmerPlaceholder(Modifier.size(150.dp), Theme.shapes.extraLarge)
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            ShimmerLine(Modifier.fillMaxWidth(.62f), height = 24.dp)
+            ShimmerLine(Modifier.fillMaxWidth(.86f), height = 14.dp)
+            ShimmerLine(Modifier.fillMaxWidth(.72f), height = 14.dp)
+        }
+        ShimmerPlaceholder(
+            modifier = Modifier.fillMaxWidth().height(128.dp),
+            shape = Theme.shapes.large,
+        )
+        ShimmerPlaceholder(
+            modifier = Modifier.fillMaxWidth().height(52.dp),
+            shape = Theme.shapes.large,
+        )
+        ShimmerLine(Modifier.width(156.dp), height = 16.dp)
     }
 }
 

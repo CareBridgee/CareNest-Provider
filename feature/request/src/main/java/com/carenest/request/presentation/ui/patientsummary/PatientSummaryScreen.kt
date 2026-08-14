@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,6 +36,7 @@ import com.carenest.request.presentation.ui.patientsummary.components.Medication
 import com.carenest.request.presentation.ui.patientsummary.components.MobilityCareNotesCard
 import com.carenest.request.presentation.ui.patientsummary.components.PatientHeaderCard
 import com.carenest.request.presentation.ui.patientsummary.components.PersonalInformationCard
+import com.carenest.request.presentation.ui.components.PatientSummaryLoadingSkeleton
 
 @Composable
 fun PatientSummaryScreen(
@@ -98,10 +98,7 @@ private fun PatientSummaryContent(
                 .padding(innerPadding),
         ) {
             when {
-                state.isLoading -> CircularProgressIndicator(
-                    color = Theme.colors.primary,
-                    modifier = Modifier.align(Alignment.Center),
-                )
+                state.isLoading -> PatientSummaryLoadingSkeleton()
 
                 state.patient != null -> PatientSummaryBody(
                     patient = state.patient,

@@ -15,7 +15,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,6 +40,7 @@ import com.carenest.request.presentation.asString
 import com.carenest.request.presentation.ui.visit_summary.components.TotalAmountCard
 import com.carenest.request.presentation.ui.visit_summary.components.VisitRatingDialogContent
 import com.carenest.request.presentation.ui.visit_summary.components.VisitSummaryCard
+import com.carenest.request.presentation.ui.components.VisitCompletedLoadingSkeleton
 import com.carenest.provider.designsystem.R as RD
 import android.widget.Toast
 
@@ -80,7 +80,7 @@ fun VisitCompletedScreen(
         contentAlignment = Alignment.Center,
     ) {
         when {
-            state.isLoading -> CircularProgressIndicator(color = Theme.colors.primary)
+            state.isLoading -> VisitCompletedLoadingSkeleton()
             state.summary != null -> VisitCompletedContent(
                 summary = state.summary!!,
                 onIntent = viewModel::handleIntent,

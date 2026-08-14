@@ -36,6 +36,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carenest.provider.designsystem.components.topbar.CareNestTopBar
 import com.carenest.provider.designsystem.components.topbar.TopBarLeading
+import com.carenest.provider.designsystem.components.shimmer.ShimmerLine
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.request.BuildConfig
 import com.carenest.request.R
@@ -152,37 +153,37 @@ fun PatientLocationMapScreen(
                     )
                 }
                 Spacer(Modifier.width(2.dp))
-                Column(modifier = Modifier.weight(1f)) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
                     val displayedAddress = state.address.ifBlank { addressLine }
                     val displayedDetail = state.addressDetail.ifBlank { addressDetail }
-                    BasicText(
-                        text = if (displayedAddress.isNotBlank()) {
-                            displayedAddress
-                        } else {
-                            stringResource(
-                                if (state.isLoading) {
-                                    R.string.request_details_finding_address
-                                } else {
-                                    R.string.request_details_patient_location
-                                }
-                            )
-                        },
-                        style = Theme.typography.body.medium.copy(
-                            color = Theme.colors.primaryFont,
-                            fontWeight = FontWeight.Bold,
-                        ),
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    if (displayedDetail.isNotBlank() && displayedDetail != displayedAddress) {
+                    if (state.isLoading && displayedAddress.isBlank()) {
+                        ShimmerLine(Modifier.fillMaxWidth(.86f), height = 16.dp)
+                        ShimmerLine(Modifier.fillMaxWidth(.64f), height = 12.dp)
+                    } else {
                         BasicText(
-                            text = displayedDetail,
-                            style = Theme.typography.body.small.copy(
-                                color = Theme.colors.secondaryFont,
+                            text = displayedAddress.ifBlank {
+                                stringResource(R.string.request_details_patient_location)
+                            },
+                            style = Theme.typography.body.medium.copy(
+                                color = Theme.colors.primaryFont,
+                                fontWeight = FontWeight.Bold,
                             ),
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                         )
+                        if (displayedDetail.isNotBlank() && displayedDetail != displayedAddress) {
+                            BasicText(
+                                text = displayedDetail,
+                                style = Theme.typography.body.small.copy(
+                                    color = Theme.colors.secondaryFont,
+                                ),
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
                     }
                 }
             }

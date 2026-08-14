@@ -30,6 +30,7 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.carenest.provider.designsystem.R as RD
 import com.carenest.provider.designsystem.components.button.SecondaryButton
+import com.carenest.provider.designsystem.components.shimmer.ShimmerLine
 import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.designsystem.util.noRippleClickable
 import com.carenest.request.BuildConfig
@@ -106,30 +107,34 @@ fun LocationSection(
             tint = Theme.colors.primary,
             modifier = Modifier.size(22.dp),
         )
-        Column(modifier = Modifier.weight(1f)) {
-            BasicText(
-                text = when {
-                    address.isNotBlank() -> address
-                    isAddressLoading -> stringResource(R.string.request_details_finding_address)
-                    else -> stringResource(R.string.patient_address_unavailable)
-                },
-                style = Theme.typography.body.medium.copy(
-                    color = Theme.colors.primaryFont,
-                    fontWeight = FontWeight.Bold,
-                ),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-            if (addressDetail.isNotBlank() && addressDetail != address) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            if (isAddressLoading && address.isBlank()) {
+                ShimmerLine(Modifier.fillMaxWidth(.84f), height = 16.dp)
+                ShimmerLine(Modifier.fillMaxWidth(.62f), height = 12.dp)
+            } else {
                 BasicText(
-                    text = addressDetail,
-                    style = Theme.typography.body.small.copy(
-                        color = Theme.colors.secondaryFont,
-                        fontWeight = FontWeight.Normal,
+                    text = address.ifBlank { stringResource(R.string.patient_address_unavailable) },
+                    style = Theme.typography.body.medium.copy(
+                        color = Theme.colors.primaryFont,
+                        fontWeight = FontWeight.Bold,
                     ),
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
+                if (addressDetail.isNotBlank() && addressDetail != address) {
+                    BasicText(
+                        text = addressDetail,
+                        style = Theme.typography.body.small.copy(
+                            color = Theme.colors.secondaryFont,
+                            fontWeight = FontWeight.Normal,
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
         }
     }

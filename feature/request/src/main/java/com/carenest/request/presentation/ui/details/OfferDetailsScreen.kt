@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -51,6 +50,7 @@ import com.carenest.request.presentation.ui.details.composable.LocationSection
 import com.carenest.request.presentation.ui.details.composable.PatientSection
 import com.carenest.request.presentation.ui.details.composable.PaymentSection
 import com.carenest.request.presentation.ui.details.composable.ServiceSection
+import com.carenest.request.presentation.ui.components.OfferDetailsLoadingSkeleton
 import com.carenest.provider.designsystem.R as RD
 
 @Composable
@@ -171,10 +171,7 @@ private fun OfferDetailsContent(
                 .padding(innerPadding),
         ) {
             when {
-                state.isLoading -> CircularProgressIndicator(
-                    color = Theme.colors.primary,
-                    modifier = Modifier.align(Alignment.Center),
-                )
+                state.isLoading -> OfferDetailsLoadingSkeleton()
 
                 state.offer != null -> RequestDetailsBody(
                     offer = state.offer,
