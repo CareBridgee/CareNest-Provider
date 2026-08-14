@@ -173,8 +173,8 @@ class HomeViewModel @Inject constructor(
                 val location = getCurrentLocation()
                 nurseSocketClient.updateAvailability(
                     available = true,
-                    lat = location?.latitude,
-                    lng = location?.longitude
+                    lat = 30.03155,
+                    lng = 31.22697
                 )
             }
 
