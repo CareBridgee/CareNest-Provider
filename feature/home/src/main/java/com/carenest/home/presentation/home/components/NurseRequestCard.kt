@@ -190,7 +190,13 @@ fun NurseRequestCard(
                 AsyncImage(
                     model = request.serviceImage.ifBlank { null },
                     contentDescription = request.serviceType,
-                    modifier = Modifier.size(20.dp)
+                    placeholder = painterResource(com.carenest.provider.designsystem.R.drawable.ic_service_placeholder),
+                    error = painterResource(com.carenest.provider.designsystem.R.drawable.ic_service_placeholder),
+                    fallback = painterResource(com.carenest.provider.designsystem.R.drawable.ic_service_placeholder),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(RoundedCornerShape(6.dp)),
                 )
 
                 Text(

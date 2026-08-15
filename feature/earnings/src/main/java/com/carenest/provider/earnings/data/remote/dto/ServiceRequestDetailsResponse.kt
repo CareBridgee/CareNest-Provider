@@ -7,6 +7,7 @@ data class ServiceTypeDetailsDto(
     val id: String? = null,
     val name: String? = null,
     val basePrice: Double? = null,
+    val imageUrl: String? = null,
 )
 
 @Serializable

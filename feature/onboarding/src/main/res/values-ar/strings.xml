@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="splash_brand_name">CareNest</string>
-    <string name="splash_provider_label">Provider</string>
+    <string name="splash_brand_name">إطمئن</string>
+    <string name="splash_provider_label">مقدم الرعاية</string>
     <string name="splash_tagline">نُمكّن مقدمي الرعاية\nبأدوات احترافية.</string>
     <string name="splash_initializing">جارٍ تهيئة الجلسة الآمنة…</string>
-    <string name="splash_logo_content_description">شعار CareNest Provider</string>
+    <string name="splash_logo_content_description">شعار إطمئن لمقدم الرعاية</string>
     <string name="splash_image_content_description">مقدم رعاية صحية يستخدم أدوات رقمية احترافية</string>
 
     <string name="onboarding_skip">تخطي</string>
@@ -12,7 +12,7 @@
     <string name="onboarding_next_step">الخطوة التالية</string>
     <string name="onboarding_get_started">ابدأ الآن</string>
     <string name="onboarding_back_to_start">العودة إلى البداية</string>
-    <string name="onboarding_provider_brand">CareNest Provider</string>
+    <string name="onboarding_provider_brand">إطمئن - مقدم الرعاية</string>
     <string name="onboarding_step_count">الخطوة %1$d من %2$d</string>
     <string name="onboarding_watch_how_it_works">شاهد كيف يعمل</string>
     <string name="onboarding_completion_error">تعذّر حفظ تقدّمك. يُرجى المحاولة مرة أخرى.</string>

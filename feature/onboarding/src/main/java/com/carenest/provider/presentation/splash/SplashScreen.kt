@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -343,14 +344,17 @@ private fun PremiumLogoAnimation(
     Box(
         modifier = modifier
             .background(
-                shape = Theme.shapes.veryExtraLarge, color = Theme.colors.onPrimary
+                shape = Theme.shapes.veryExtraLarge,
+                color = Color(0xFF006168),
             )
-            .size(128.dp),
+            .size(128.dp)
+            .padding(16.dp),
     ) {
         Image(
             painter = logoPainter,
             contentDescription = stringResource(R.string.splash_logo_content_description),
-            modifier = Modifier.matchParentSize()
+            modifier = Modifier.matchParentSize(),
+            contentScale = ContentScale.Fit,
         )
         if (lightSweepAlpha > 0f) {
             Image(
@@ -359,6 +363,7 @@ private fun PremiumLogoAnimation(
                 modifier = Modifier
                     .matchParentSize()
                     .lightSweep(lightSweepProgress),
+                contentScale = ContentScale.Fit,
             )
         }
     }

@@ -17,6 +17,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -116,7 +117,13 @@ fun AuthLandingScreen(onEvent: (LoginIntent) -> Unit) {
                     Image(
                         painter = painterResource(DR.drawable.logo),
                         contentDescription = null,
-                        modifier = Modifier.size(200.dp),
+                        modifier = Modifier
+                            .size(200.dp)
+                            .background(
+                                color = Color(0xFF006168),
+                                shape = RoundedCornerShape(40.dp),
+                            )
+                            .padding(24.dp),
                         contentScale = ContentScale.Fit
                     )
 

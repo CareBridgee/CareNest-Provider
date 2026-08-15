@@ -14,6 +14,11 @@ class ServiceRequestPreviewMapperTest {
             {
               "serviceRequestId": "request-id",
               "serviceName": "Home care",
+              "serviceType": {
+                "id": "service-id",
+                "name": "Home care",
+                "imageUrl": "https://example.com/service.jpg"
+              },
               "patient": {
                 "firstName": "  Mona ",
                 "lastName": " Ali  ",
@@ -23,9 +28,13 @@ class ServiceRequestPreviewMapperTest {
             """.trimIndent(),
         )
 
-        val patient = dto.toDomain().patient
+        val preview = dto.toDomain()
+        val patient = preview.patient
 
         assertEquals("Mona Ali", patient?.fullName)
         assertEquals("https://example.com/patient.jpg", patient?.profileImageUrl)
+        assertEquals("service-id", preview.serviceTypeId)
+        assertEquals("Home care", preview.serviceName)
+        assertEquals("https://example.com/service.jpg", preview.serviceImageUrl)
     }
 }

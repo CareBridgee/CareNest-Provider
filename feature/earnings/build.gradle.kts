@@ -32,6 +32,7 @@ android {
 dependencies {
     implementation(project(":designsystem"))
     implementation(project(":core"))
+    implementation(project(":feature:profile"))
 
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
@@ -41,6 +42,7 @@ dependencies {
     implementation(libs.bundles.compose)
 
     implementation(libs.bundles.navigation3)
+    implementation(libs.bundles.coil)
 
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)

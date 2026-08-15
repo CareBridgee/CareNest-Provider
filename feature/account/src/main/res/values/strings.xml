@@ -1,5 +1,5 @@
 <resources>
-    <string name="account_brand">CareConnect</string>
+    <string name="account_brand">Etmaen</string>
     <string name="account_provider_short_name">Nurse Sarah</string>
     <string name="account_provider_name">Nurse Sarah Mitchell, RN</string>
     <string name="account_specialty">Specialized Geriatric Care</string>

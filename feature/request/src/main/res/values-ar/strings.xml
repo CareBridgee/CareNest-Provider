@@ -141,7 +141,7 @@
     <string name="scan_qr_retry">حاول مرة أخرى</string>
 
     <!-- Patient Summary -->
-    <string name="patient_summary_title">CareConnect</string>
+    <string name="patient_summary_title">إطمئن</string>
     <string name="patient_summary_personal_info">المعلومات الشخصية</string>
     <string name="patient_summary_age">العمر</string>
     <string name="patient_summary_gender">النوع</string>

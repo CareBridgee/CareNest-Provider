@@ -51,7 +51,7 @@
     <string name="nurse_requests_no_requests_title">لا توجد طلبات قريبة</string>
     <string name="nurse_requests_no_requests_description">ابقَ متصلاً. ستظهر هنا تلقائيًا طلبات رعاية المرضى الجديدة في منطقتك.</string>
     <string name="location_permission_rationale_title">يلزم إذن الموقع</string>
-    <string name="location_permission_rationale_message">يحتاج CareNest إلى موقعك لتحديث حالة توافرك حتى يتمكن المرضى القريبون من العثور عليك وطلب خدماتك.</string>
+    <string name="location_permission_rationale_message">يحتاج إطمئن إلى موقعك لتحديث حالة توافرك حتى يتمكن المرضى القريبون من العثور عليك وطلب خدماتك.</string>
     <string name="location_permission_required_title">الموقع مطلوب</string>
     <string name="location_permission_required_message">يلزم السماح بالوصول إلى الموقع لتفعيل حالة الاتصال واستقبال طلبات رعاية المرضى القريبة. يرجى تفعيل إذن الموقع من الإعدادات.</string>
     <string name="location_permission_allow">سماح</string>

@@ -11,6 +11,8 @@ data class NearbyNurseServiceRequestResponse(
     val patientProfileImageUrl: String? = null,
     val serviceTypeId: String? = null,
     val serviceName: String? = null,
+    val serviceImageUrl: String? = null,
+    val serviceTypeImageUrl: String? = null,
     val serviceDescription: String? = null,
     val preferredDate: String? = null,
     val preferredTime: String? = null,

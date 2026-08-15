@@ -32,8 +32,12 @@ class NurseRequestsDataSourceImpl @Inject constructor(
                     id = item.serviceRequestId,
                     patientName = item.patientDisplayName(),
                     patientImage = item.patientProfileImageUrl ?: "",
+                    serviceTypeId = item.serviceTypeId,
                     serviceType = item.serviceName ?: "Nursing Visit",
-                    serviceImage = "",
+                    serviceImage = listOf(
+                        item.serviceImageUrl,
+                        item.serviceTypeImageUrl,
+                    ).firstOrNull { !it.isNullOrBlank() }.orEmpty(),
                     baseRate = (item.estimatedPrice ?: 0.0).toFloat(),
                     distanceMiles = (item.distanceKm ?: 0.0).toFloat(),
                     status = RequestStatus.ESTIMATED

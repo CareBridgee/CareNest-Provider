@@ -22,6 +22,7 @@ import com.carenest.provider.core.network.socket.model.ReservationEventType
 import com.carenest.provider.core.network.socket.model.patientDisplayName
 import com.carenest.provider.core.datastore.AuthenticationSessionStore
 import com.carenest.provider.profile.domain.usecase.GetNurseUseCase
+import com.carenest.provider.profile.domain.usecase.LoadServiceTypesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
@@ -42,6 +43,7 @@ class HomeViewModel @Inject constructor(
     private val listenReservationEvents: ListenReservationEventsUseCase,
     private val authenticationSessionStore: AuthenticationSessionStore,
     private val getNurse: GetNurseUseCase,
+    private val loadServiceTypes: LoadServiceTypesUseCase,
     private val getServiceRequestPreviewUseCase: GetServiceRequestPreviewUseCase,
     private val nurseSocketClient: NurseSocketClient,
     private val getAvailability: GetAvailabilityUseCase,
@@ -56,6 +58,7 @@ class HomeViewModel @Inject constructor(
     private var offerEventListenerJob: Job? = null
     private var offerTimerJob: Job? = null
     private var profileJob: Job? = null
+    private var serviceImagesById: Map<String, String> = emptyMap()
 
     val isOnline = getAvailability()
         .stateIn(
@@ -66,6 +69,7 @@ class HomeViewModel @Inject constructor(
 
     init {
         getNurseData()
+        loadServiceImages()
         observeSocketErrors()
         observeNotifications()
         observeAvailability()
@@ -143,6 +147,27 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    private fun loadServiceImages() {
+        viewModelScope.launch {
+            loadServiceTypes().onSuccess { serviceTypes ->
+                serviceImagesById = serviceTypes.mapNotNull { serviceType ->
+                    val imageUrl = serviceType.imageUrl?.takeIf(String::isNotBlank)
+                        ?: return@mapNotNull null
+                    serviceType.id to imageUrl
+                }.toMap()
+                updateState {
+                    copy(
+                        requests = requests.map { request ->
+                            val resolvedImage = request.serviceImage.takeIf(String::isNotBlank)
+                                ?: request.serviceTypeId?.let(serviceImagesById::get)
+                            request.copy(serviceImage = resolvedImage.orEmpty())
+                        }
+                    )
+                }
+            }
+        }
+    }
+
     private fun handleOnlineToggle(isOnline: Boolean) {
         viewModelScope.launch {
             updateAvailability(isOnline)
@@ -185,8 +210,13 @@ class HomeViewModel @Inject constructor(
                         id = socketReq.serviceRequestId,
                         patientName = socketReq.patientDisplayName(),
                         patientImage = socketReq.patientProfileImageUrl.orEmpty(),
+                        serviceTypeId = socketReq.serviceTypeId,
                         serviceType = socketReq.serviceName ?: "Nursing Visit",
-                        serviceImage = "",
+                        serviceImage = listOf(
+                            socketReq.serviceImageUrl,
+                            socketReq.serviceTypeImageUrl,
+                            socketReq.serviceTypeId?.let(serviceImagesById::get),
+                        ).firstOrNull { !it.isNullOrBlank() }.orEmpty(),
                         baseRate = (socketReq.estimatedPrice ?: 50.0).toFloat(),
                         distanceMiles = (socketReq.distanceKm ?: 0.0).toFloat(),
                         status = RequestStatus.ESTIMATED
@@ -214,7 +244,11 @@ class HomeViewModel @Inject constructor(
                     val requestsResult = requestsDeferred.await()
                     val earningsSummary = earningsDeferred.await().getOrNull()
 
-                    val fetchedRequests = requestsResult.getOrDefault(emptyList())
+                    val fetchedRequests = requestsResult.getOrDefault(emptyList()).map { request ->
+                        val resolvedImage = request.serviceImage.takeIf(String::isNotBlank)
+                            ?: request.serviceTypeId?.let(serviceImagesById::get)
+                        request.copy(serviceImage = resolvedImage.orEmpty())
+                    }
                     Log.d("HomeViewModel", "REST fetch completed. Found ${fetchedRequests.size} requests.")
 
                     updateState {
@@ -418,19 +452,25 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val preview = getServiceRequestPreviewUseCase(requestId)
-                val patient = preview.patient ?: return@launch
-                val patientName = patient.fullName
-                val imageUrl = patient.profileImageUrl
+                val patient = preview.patient
+                val patientName = patient?.fullName
+                val patientImageUrl = patient?.profileImageUrl
 
                 updateState {
                     copy(
                         requests = requests.map { request ->
                             if (request.id != requestId) return@map request
                             request.copy(
-                                patientName = patientName.takeIf(String::isNotBlank)
+                                patientName = patientName?.takeIf(String::isNotBlank)
                                     ?: request.patientName,
-                                patientImage = imageUrl?.takeIf(String::isNotBlank)
+                                patientImage = patientImageUrl?.takeIf(String::isNotBlank)
                                     ?: request.patientImage,
+                                serviceTypeId = preview.serviceTypeId ?: request.serviceTypeId,
+                                serviceType = preview.serviceName ?: request.serviceType,
+                                serviceImage = preview.serviceImageUrl?.takeIf(String::isNotBlank)
+                                    ?: preview.serviceTypeId?.let(serviceImagesById::get)
+                                    ?: request.serviceTypeId?.let(serviceImagesById::get)
+                                    ?: request.serviceImage,
                             )
                         }
                     )

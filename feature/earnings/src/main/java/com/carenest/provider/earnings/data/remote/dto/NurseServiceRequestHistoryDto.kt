@@ -8,6 +8,8 @@ data class NurseServiceRequestHistoryDto(
     val serviceRequestId: String? = null,
     val serviceTypeId: String? = null,
     val serviceName: String? = null,
+    val serviceImageUrl: String? = null,
+    val serviceTypeImageUrl: String? = null,
     val estimatedDurationMinutes: Int? = null,
     val patientProfileId: String? = null,
     val patientFirstName: String? = null,

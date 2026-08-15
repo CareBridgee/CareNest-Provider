@@ -4,6 +4,7 @@ import com.carenest.provider.payouts.domain.model.PayoutItem
 import com.carenest.provider.payouts.domain.model.PayoutSummary
 
 data class PayoutsUiState(
+    val providerAvatarUrl: String? = null,
     val summary: PayoutSummary = PayoutSummary("$0.00", "$0.00", "$0.00"),
     val historyList: List<PayoutItem> = emptyList(),
     val isLoading: Boolean = true,

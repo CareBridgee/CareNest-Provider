@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="splash_brand_name">CareNest</string>
+    <string name="splash_brand_name">Etmaen</string>
     <string name="splash_provider_label">Provider</string>
     <string name="splash_tagline">Empowering caregivers\nwith professional tools.</string>
     <string name="splash_initializing">Initializing secure session…</string>
-    <string name="splash_logo_content_description">CareNest Provider logo</string>
+    <string name="splash_logo_content_description">Etmaen Provider logo</string>
     <string name="splash_image_content_description">Healthcare provider using professional digital tools</string>
 
     <string name="onboarding_skip">Skip</string>
@@ -12,7 +12,7 @@
     <string name="onboarding_next_step">Next Step</string>
     <string name="onboarding_get_started">Get Started</string>
     <string name="onboarding_back_to_start">Back to Start</string>
-    <string name="onboarding_provider_brand">CareNest Provider</string>
+    <string name="onboarding_provider_brand">Etmaen - Provider</string>
     <string name="onboarding_step_count">Step %1$d of %2$d</string>
     <string name="onboarding_watch_how_it_works">Watch how it works</string>
     <string name="onboarding_completion_error">We could not save your progress. Please try again.</string>

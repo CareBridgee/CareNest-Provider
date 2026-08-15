@@ -54,14 +54,24 @@ class EarningsRepositoryImpl @Inject constructor(
     private data class ResolvedEarningItem(
         val dto: NurseServiceRequestHistoryDto,
         val price: Double,
+        val serviceImageUrl: String?,
+    )
+
+    private data class ResolvedRequestValues(
+        val price: Double,
+        val serviceImageUrl: String?,
     )
 
     private suspend fun fetchResolvedEarningsItems(): List<ResolvedEarningItem> = coroutineScope {
         val history = fetchHistoryFromNetwork()
         history.map { dto ->
             async {
-                val price = resolvePriceForHistoryItem(dto)
-                ResolvedEarningItem(dto = dto, price = price)
+                val resolved = resolveValuesForHistoryItem(dto)
+                ResolvedEarningItem(
+                    dto = dto,
+                    price = resolved.price,
+                    serviceImageUrl = resolved.serviceImageUrl,
+                )
             }
         }.awaitAll()
     }
@@ -78,23 +88,35 @@ class EarningsRepositoryImpl @Inject constructor(
         }
     }
 
-    private suspend fun resolvePriceForHistoryItem(dto: NurseServiceRequestHistoryDto): Double {
+    private suspend fun resolveValuesForHistoryItem(
+        dto: NurseServiceRequestHistoryDto,
+    ): ResolvedRequestValues {
+        val directImageUrl = listOf(
+            dto.serviceImageUrl,
+            dto.serviceTypeImageUrl,
+        ).firstOrNull { !it.isNullOrBlank() }
         if (dto.estimatedPrice != null && dto.estimatedPrice > 0.0) {
-            return dto.estimatedPrice
+            return ResolvedRequestValues(dto.estimatedPrice, directImageUrl)
         }
-        val requestId = dto.serviceRequestId ?: return 0.0
+        val requestId = dto.serviceRequestId
+            ?: return ResolvedRequestValues(0.0, directImageUrl)
         return try {
             val details = httpClient.get("/api/v1/service-requests/$requestId")
                 .body<ServiceRequestDetailsResponse>()
             val acceptedOfferPrice = details.offers.firstOrNull { it.status.equals("ACCEPTED", ignoreCase = true) }?.proposedPrice
                 ?: details.offers.firstOrNull()?.proposedPrice
-            acceptedOfferPrice
+            val price = acceptedOfferPrice
                 ?: details.serviceType?.basePrice
                 ?: details.estimatedPrice
                 ?: 0.0
+            ResolvedRequestValues(
+                price = price,
+                serviceImageUrl = directImageUrl
+                    ?: details.serviceType?.imageUrl?.takeIf(String::isNotBlank),
+            )
         } catch (e: Exception) {
             Log.w("EarningsRepository", "Failed to fetch details for request $requestId to resolve price", e)
-            0.0
+            ResolvedRequestValues(0.0, directImageUrl)
         }
     }
 
@@ -162,7 +184,9 @@ class EarningsRepositoryImpl @Inject constructor(
             duration = formattedDuration,
             amount = formattedAmount,
             status = mappedStatus,
-            iconRes = mappedIconRes
+            iconRes = mappedIconRes,
+            serviceTypeId = dto.serviceTypeId,
+            serviceImageUrl = serviceImageUrl,
         )
     }
 }

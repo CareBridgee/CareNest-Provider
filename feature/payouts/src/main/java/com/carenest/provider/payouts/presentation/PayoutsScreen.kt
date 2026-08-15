@@ -96,7 +96,7 @@ fun PayoutsScreenContent(
                 leading = TopBarLeading.Back(
                     onBackClick = { onIntent(PayoutsIntent.BackToServiceEarningsClicked) }
                 ),
-                trailingAvatarUrl = "https://picsum.photos/200/300"
+                trailingAvatarUrl = state.providerAvatarUrl.orEmpty()
             )
         },
     ) { innerPadding ->
