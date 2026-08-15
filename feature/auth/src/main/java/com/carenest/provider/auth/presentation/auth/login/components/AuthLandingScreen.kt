@@ -17,7 +17,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -114,20 +114,17 @@ fun AuthLandingScreen(onEvent: (LoginIntent) -> Unit) {
                         .padding(top = 32.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+
+                    Spacer(modifier = Modifier.height(18.dp))
                     Image(
                         painter = painterResource(DR.drawable.logo),
                         contentDescription = null,
-                        modifier = Modifier
-                            .size(200.dp)
-                            .background(
-                                color = Color(0xFF006168),
-                                shape = RoundedCornerShape(40.dp),
-                            )
-                            .padding(24.dp),
-                        contentScale = ContentScale.Fit
+                        modifier = Modifier.size(150.dp),
+                        contentScale = ContentScale.Fit,
+                        colorFilter = ColorFilter.tint(Theme.colors.primary),
                     )
 
-                    Spacer(modifier = Modifier.height(28.dp))
+                    Spacer(modifier = Modifier.height(58.dp))
 
                     BasicText(
                         text = stringResource(R.string.app_name_careconnect),
