@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -40,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.AsyncImage
 import com.carenest.provider.core.mvi.ObserveEffect
 import com.carenest.provider.designsystem.R
 import com.carenest.provider.designsystem.components.bottomnav.BottomNavItem
@@ -93,7 +95,7 @@ fun EarningsScreenContent(
         CareNestTopBar(
             title = stringResource(com.carenest.provider.earnings.R.string.top_bar_title),
             leading = onNavigateBack?.let { TopBarLeading.Back(it) },
-            trailingAvatarUrl = "https://picsum.photos/200/300",
+            trailingAvatarUrl = state.providerAvatarUrl.orEmpty(),
         )
         when {
             state.isLoading -> {
@@ -392,6 +394,16 @@ fun ServiceEarningCard(
                 tint = Theme.colors.primaryVariant,
                 modifier = Modifier.size(24.dp)
             )
+            item.serviceImageUrl?.takeIf(String::isNotBlank)?.let { imageUrl ->
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = item.serviceTitle,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop,
+                )
+            }
         }
 
         Spacer(modifier = Modifier.width(Theme.spacing.medium))

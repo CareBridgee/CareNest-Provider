@@ -195,7 +195,7 @@ private fun Preview(){
 @Composable
 private fun PreviewSwitch(){
     SpTheme {
-       OnlineToggleCard(isOnline = true,{})
+       OnlineToggleCard(isOnline = true, onToggle = {})
     }
 }
 

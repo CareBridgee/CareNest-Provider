@@ -6,24 +6,39 @@ import com.carenest.provider.core.mvi.DefaultEffectPublisher
 import com.carenest.provider.core.mvi.DefaultStateHolder
 import com.carenest.provider.core.mvi.EffectPublisher
 import com.carenest.provider.core.mvi.StateHolder
+import com.carenest.provider.core.datastore.AuthenticationSessionStore
 import com.carenest.provider.payouts.domain.usecase.GetPayoutSummaryUseCase
 import com.carenest.provider.payouts.domain.usecase.GetWithdrawHistoryUseCase
 import com.carenest.provider.payouts.domain.usecase.RequestWithdrawalUseCase
+import com.carenest.provider.profile.domain.usecase.GetNurseUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 @HiltViewModel
 class PayoutsViewModel @Inject constructor(
     private val getPayoutSummaryUseCase: GetPayoutSummaryUseCase,
     private val getWithdrawHistoryUseCase: GetWithdrawHistoryUseCase,
-    private val requestWithdrawalUseCase: RequestWithdrawalUseCase
+    private val requestWithdrawalUseCase: RequestWithdrawalUseCase,
+    private val authenticationSessionStore: AuthenticationSessionStore,
+    private val getNurse: GetNurseUseCase,
 ) : ViewModel(),
     StateHolder<PayoutsUiState> by DefaultStateHolder(PayoutsUiState()),
     EffectPublisher<PayoutsEffect> by DefaultEffectPublisher() {
 
     init {
+        loadProviderAvatar()
         loadData()
+    }
+
+    private fun loadProviderAvatar() {
+        viewModelScope.launch {
+            val nurseId = authenticationSessionStore.session.first()?.nurseId ?: return@launch
+            getNurse(nurseId).onSuccess { profile ->
+                updateState { copy(providerAvatarUrl = profile.profileImageUrl) }
+            }
+        }
     }
 
     fun onIntent(intent: PayoutsIntent) {

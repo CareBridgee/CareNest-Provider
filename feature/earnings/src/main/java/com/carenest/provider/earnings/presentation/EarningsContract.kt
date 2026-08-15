@@ -10,6 +10,7 @@ enum class ServiceFilter {
 }
 
 data class EarningsUiState(
+    val providerAvatarUrl: String? = null,
     val summary: EarningsSummary = EarningsSummary(totalEarnings = "$0.00", jobsCount = 0),
     val serviceEarnings: List<ServiceEarningItem> = emptyList(),
     val filteredEarnings: List<ServiceEarningItem> = emptyList(),

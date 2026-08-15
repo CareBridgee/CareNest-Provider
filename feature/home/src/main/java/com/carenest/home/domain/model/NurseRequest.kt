@@ -10,6 +10,7 @@ data class NurseRequest(
     val id: String,
     val patientName: String,
     val patientImage: String,
+    val serviceTypeId: String? = null,
     val serviceType: String,
     val serviceImage : String,
     val baseRate: Float,

@@ -6,23 +6,69 @@ import com.carenest.provider.core.mvi.DefaultEffectPublisher
 import com.carenest.provider.core.mvi.DefaultStateHolder
 import com.carenest.provider.core.mvi.EffectPublisher
 import com.carenest.provider.core.mvi.StateHolder
+import com.carenest.provider.core.datastore.AuthenticationSessionStore
 import com.carenest.provider.earnings.domain.usecase.GetEarningsSummaryUseCase
 import com.carenest.provider.earnings.domain.usecase.GetServiceEarningsUseCase
+import com.carenest.provider.profile.domain.usecase.GetNurseUseCase
+import com.carenest.provider.profile.domain.usecase.LoadServiceTypesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 @HiltViewModel
 class EarningsViewModel @Inject constructor(
     private val getEarningsSummaryUseCase: GetEarningsSummaryUseCase,
-    private val getServiceEarningsUseCase: GetServiceEarningsUseCase
+    private val getServiceEarningsUseCase: GetServiceEarningsUseCase,
+    private val authenticationSessionStore: AuthenticationSessionStore,
+    private val getNurse: GetNurseUseCase,
+    private val loadServiceTypes: LoadServiceTypesUseCase,
 ) : ViewModel(),
     StateHolder<EarningsUiState> by DefaultStateHolder(EarningsUiState()),
     EffectPublisher<EarningsEffect> by DefaultEffectPublisher() {
 
+    private var serviceImagesById: Map<String, String> = emptyMap()
+
     init {
+        loadProviderAvatar()
+        loadServiceImages()
         loadData()
     }
+
+    private fun loadProviderAvatar() {
+        viewModelScope.launch {
+            val nurseId = authenticationSessionStore.session.first()?.nurseId ?: return@launch
+            getNurse(nurseId).onSuccess { profile ->
+                updateState { copy(providerAvatarUrl = profile.profileImageUrl) }
+            }
+        }
+    }
+
+    private fun loadServiceImages() {
+        viewModelScope.launch {
+            loadServiceTypes().onSuccess { serviceTypes ->
+                serviceImagesById = serviceTypes.mapNotNull { serviceType ->
+                    val imageUrl = serviceType.imageUrl?.takeIf(String::isNotBlank)
+                        ?: return@mapNotNull null
+                    serviceType.id to imageUrl
+                }.toMap()
+                updateState {
+                    copy(
+                        serviceEarnings = serviceEarnings.withResolvedServiceImages(),
+                        filteredEarnings = filteredEarnings.withResolvedServiceImages(),
+                    )
+                }
+            }
+        }
+    }
+
+    private fun List<com.carenest.provider.earnings.domain.model.ServiceEarningItem>.withResolvedServiceImages() =
+        map { item ->
+            item.copy(
+                serviceImageUrl = item.serviceImageUrl?.takeIf(String::isNotBlank)
+                    ?: item.serviceTypeId?.let(serviceImagesById::get),
+            )
+        }
 
     fun onIntent(intent: EarningsIntent) {
         when (intent) {
@@ -45,7 +91,7 @@ class EarningsViewModel @Inject constructor(
 
             if (summaryResult.isSuccess && listResult.isSuccess) {
                 val summary = summaryResult.getOrThrow()
-                val list = listResult.getOrThrow()
+                val list = listResult.getOrThrow().withResolvedServiceImages()
                 updateState {
                     copy(
                         isLoading = false,

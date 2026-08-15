@@ -74,8 +74,11 @@ fun CareNestTopBar(
 
         if (trailingAvatarUrl != null) {
             AsyncImage(
-                model = trailingAvatarUrl,
+                model = trailingAvatarUrl.takeIf(String::isNotBlank),
                 contentDescription = stringResource(R.string.profile_avatar_content_description),
+                placeholder = painterResource(R.drawable.nurse_image),
+                error = painterResource(R.drawable.nurse_image),
+                fallback = painterResource(R.drawable.nurse_image),
                 modifier = Modifier
                     .size(Theme.size.medium)
                     .clip(CircleShape)

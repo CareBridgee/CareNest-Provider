@@ -14,5 +14,7 @@ data class ServiceEarningItem(
     val duration: String,
     val amount: String,
     val status: EarningStatus,
-    val iconRes: Int
+    val iconRes: Int,
+    val serviceTypeId: String? = null,
+    val serviceImageUrl: String? = null,
 )
