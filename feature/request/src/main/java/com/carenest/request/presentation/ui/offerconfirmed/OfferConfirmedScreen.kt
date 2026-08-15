@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -40,6 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carenest.request.domain.model.Offer
 import com.carenest.request.presentation.ui.components.CancelRequestDialog
 import com.carenest.request.presentation.ui.components.SuccessCheckBadge
+import com.carenest.request.presentation.ui.components.OfferConfirmedLoadingSkeleton
 import com.carenest.provider.core.mvi.ObserveEffect
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.request.R
@@ -113,7 +113,7 @@ fun OfferConfirmedContent(
             contentAlignment = Alignment.Center,
         ) {
             when {
-                state.isLoading -> CircularProgressIndicator(color = Theme.colors.primary)
+                state.isLoading -> OfferConfirmedLoadingSkeleton()
                 state.offer != null -> OfferConfirmedBody(
                     contract = state.offer,
                     isCancelling = state.cancelDialog.isSubmitting,

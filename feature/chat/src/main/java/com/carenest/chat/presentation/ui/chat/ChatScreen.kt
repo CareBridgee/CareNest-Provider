@@ -13,14 +13,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -30,6 +28,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carenest.chat.presentation.ui.chat.components.ChatInputBar
 import com.carenest.chat.presentation.ui.chat.components.ChatTopBar
+import com.carenest.chat.presentation.ui.chat.components.ChatLoadingSkeleton
 import com.carenest.chat.presentation.ui.chat.components.DateSeparatorPill
 import com.carenest.chat.presentation.ui.chat.components.MessageBubble
 import com.carenest.chat.R
@@ -118,10 +117,7 @@ private fun ChatScreenContent(
             .background(Theme.colors.backGround),
     ) {
         if (state.isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center),
-                color = Theme.colors.primary,
-            )
+            ChatLoadingSkeleton()
         } else {
             val groupedMessages = remember(state.messages) {
                 state.messages
