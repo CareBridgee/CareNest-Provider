@@ -153,7 +153,7 @@
     <string name="requests_empty_description">Incoming requests from nearby patients will appear here in real-time.</string>
 
     <!-- Patient Summary -->
-    <string name="patient_summary_title">CareConnect</string>
+    <string name="patient_summary_title">Etmaen</string>
     <string name="patient_summary_personal_info">PERSONAL INFORMATION</string>
     <string name="patient_summary_age">Age</string>
     <string name="patient_summary_gender">Gender</string>

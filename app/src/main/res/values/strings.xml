@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">CareNest-Provider</string>
+    <string name="app_name">Etmaen - Provider</string>
     <string name="provider_dashboard_title">Provider Dashboard</string>
     <string name="provider_dashboard_message">The dashboard feature is not included in this project snapshot.</string>
     <string name="contact_support_title">Contact Support</string>

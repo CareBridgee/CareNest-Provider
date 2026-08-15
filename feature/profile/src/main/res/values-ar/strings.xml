@@ -45,7 +45,7 @@
     <string name="replace_action">استبدال</string>
     <string name="remove_action">حذف</string>
     <!-- Top Bar -->
-    <string name="app_name">CareNest</string>
+    <string name="app_name">إطمئن</string>
 
     <!-- Screen -->
     <string name="application_under_review">الطلب قيد المراجعة</string>
@@ -115,7 +115,7 @@
     <string name="step_review">المراجعة</string>
 
     <!-- Authentication -->
-    <string name="app_name_careconnect">CareConnect لمقدمي الرعاية</string>
+    <string name="app_name_careconnect">إطمئن - مقدم الرعاية</string>
     <string name="app_auth_description">مرحبًا بعودتك! يُرجى تسجيل الدخول أو إنشاء حساب.</string>
     <string name="auth_continue_google">المتابعة باستخدام Google</string>
     <string name="auth_continue_phone">المتابعة باستخدام رقم الهاتف</string>
@@ -150,7 +150,7 @@
     <string name="approved">تمت الموافقة</string>
     <string name="congratulations">تهانينا!</string>
     <string name="account_verified">تم التحقق من حسابك.</string>
-    <string name="network_welcome_message">أصبحت الآن جزءًا من شبكة CareConnect. ابدأ بقبول المهام لتنمية مسيرتك المهنية وتقديم الرعاية لمن يحتاجون إليها.</string>
+    <string name="network_welcome_message">أصبحت الآن جزءًا من شبكة إطمئن. ابدأ بقبول المهام لتنمية مسيرتك المهنية وتقديم الرعاية لمن يحتاجون إليها.</string>
     <string name="go_to_home">الانتقال إلى الرئيسية</string>
     <string name="start_your_journey">ابدأ رحلتك</string>
     <string name="review_community_guidelines">راجع إرشادات المجتمع</string>

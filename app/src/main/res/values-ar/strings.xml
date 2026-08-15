@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">CareNest-Provider</string>
+    <string name="app_name">إطمئن - مقدم الرعاية</string>
     <string name="provider_dashboard_title">لوحة مقدم الخدمة</string>
     <string name="provider_dashboard_message">ميزة لوحة التحكم غير مضمنة في نسخة المشروع الحالية.</string>
     <string name="contact_support_title">التواصل مع الدعم</string>
