@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -44,7 +45,10 @@ import androidx.compose.ui.platform.LocalContext
 import com.carenest.provider.auth.presentation.auth.login.google.GoogleSignInHelper
 
 @Composable
-fun AuthLandingScreen(onEvent: (LoginIntent) -> Unit) {
+fun AuthLandingScreen(
+    onEvent: (LoginIntent) -> Unit,
+    isLoading: Boolean = false,
+) {
     val context = LocalContext.current
     val googleSignInHelper = remember(context) { GoogleSignInHelper(context) }
 
@@ -192,6 +196,17 @@ fun AuthLandingScreen(onEvent: (LoginIntent) -> Unit) {
                         )
                     )
                 }
+            }
+        }
+
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Theme.colors.backGround.copy(alpha = 0.6f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(color = Theme.colors.primary)
             }
         }
     }
