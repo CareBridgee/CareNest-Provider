@@ -235,6 +235,40 @@ class DynamicAuthenticationPluginTest {
         client.close()
     }
 
+    @Test
+    fun publicServiceTypesGetDoesNotReceiveBearerHeader() = runBlocking {
+        val store = FakeAuthenticationSessionStore().apply {
+            authenticate("current-access", "current-refresh", "nurse-a")
+        }
+        var authorizationHeader: String? = "not-called"
+        val client = testClient(store) { request ->
+            authorizationHeader = request.headers[HttpHeaders.Authorization]
+            respondJson("[]")
+        }
+
+        client.get("/api/v1/service-types")
+
+        assertNull(authorizationHeader)
+        client.close()
+    }
+
+    @Test
+    fun serviceTypesMutationRemainsAuthenticated() = runBlocking {
+        val store = FakeAuthenticationSessionStore().apply {
+            authenticate("current-access", "current-refresh", "nurse-a")
+        }
+        var authorizationHeader: String? = null
+        val client = testClient(store) { request ->
+            authorizationHeader = request.headers[HttpHeaders.Authorization]
+            respondJson("{}")
+        }
+
+        client.post("/api/v1/service-types")
+
+        assertEquals("Bearer current-access", authorizationHeader)
+        client.close()
+    }
+
     private fun testClient(
         store: AuthenticationSessionStore,
         handler: suspend MockRequestHandleScope.(HttpRequestData) -> HttpResponseData,

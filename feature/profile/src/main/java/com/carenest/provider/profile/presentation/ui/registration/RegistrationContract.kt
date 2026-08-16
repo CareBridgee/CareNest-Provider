@@ -41,7 +41,7 @@ data class VerificationDocumentsUiState(
     val licenseNumber: String = "",
     val nursingLicense: Attachment? = null,
     val professionalCertificate: Attachment? = null,
-    val yearsOfExp: Int = 0,
+    val yearsOfExp: Int? = null,
     val primarySpeciality: String = "",
 )
 

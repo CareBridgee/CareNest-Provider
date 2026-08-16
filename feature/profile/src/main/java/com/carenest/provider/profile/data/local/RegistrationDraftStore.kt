@@ -46,7 +46,7 @@ data class RegistrationDraft(
     val licenseNumber: String = "",
     val nursingLicense: AttachmentDraft? = null,
     val professionalCertificate: AttachmentDraft? = null,
-    val yearsOfExp: Int = 0,
+    val yearsOfExp: Int? = null,
     val primarySpeciality: String = "",
     val selectedServiceIds: List<String> = emptyList(),
     val isCertified: Boolean = false,

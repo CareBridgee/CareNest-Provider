@@ -87,7 +87,12 @@ fun ServicesSelectionComponent(
                     verticalArrangement = Arrangement.spacedBy(Theme.spacing.medium),
                 ) {
                     BasicText(
-                        text = state.errorMessage,
+                        text = when (state.errorMessage) {
+                            "error_services_unavailable" -> stringResource(
+                                com.carenest.provider.profile.R.string.error_services_unavailable
+                            )
+                            else -> state.errorMessage
+                        },
                         style = Theme.typography.body.medium.copy(color = Theme.colors.error),
                     )
                     SecondaryButton(

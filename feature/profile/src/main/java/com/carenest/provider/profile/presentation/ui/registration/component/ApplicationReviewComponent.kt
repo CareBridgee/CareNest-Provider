@@ -136,7 +136,7 @@ fun ApplicationReviewComponent(
                 label = stringResource(com.carenest.provider.profile.R.string.experience_label),
                 value = stringResource(
                     com.carenest.provider.profile.R.string.experience_value_format,
-                    state.verificationDocumentsUiState.yearsOfExp,
+                    state.verificationDocumentsUiState.yearsOfExp ?: 0,
                     state.verificationDocumentsUiState.primarySpeciality
                 )
             )

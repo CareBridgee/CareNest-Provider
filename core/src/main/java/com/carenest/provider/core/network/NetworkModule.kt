@@ -18,6 +18,7 @@ import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.accept
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
 import io.ktor.http.Url
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
@@ -181,7 +182,9 @@ private fun HttpRequestBuilder.isProtectedBackendRequest(backendHost: String): B
     val requestUrl = url.build()
     val isBackendHost = requestUrl.host.isBlank() || requestUrl.host.equals(backendHost, ignoreCase = true)
     val path = requestUrl.encodedPath.normalizedPath()
-    return isBackendHost && path.startsWith("/api/v1/") && path !in PUBLIC_AUTH_PATHS
+    val isPublicRequest = path in PUBLIC_AUTH_PATHS ||
+        (method == HttpMethod.Get && path in PUBLIC_GET_PATHS)
+    return isBackendHost && path.startsWith("/api/v1/") && !isPublicRequest
 }
 
 private fun HttpRequestBuilder.isCurrentSessionIdentityRequest(
@@ -207,6 +210,10 @@ private val PUBLIC_AUTH_PATHS = setOf(
     "/api/v1/auth/refresh",
     "/api/v1/auth/nurse/google",
     "/api/v1/auth/verify-otp",
+)
+
+private val PUBLIC_GET_PATHS = setOf(
+    "/api/v1/service-types",
 )
 
 private val SafeNetworkLogging = createClientPlugin("SafeNetworkLogging") {
