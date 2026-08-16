@@ -43,6 +43,8 @@ import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.designsystem.util.noRippleClickable
 import com.carenest.provider.profile.R
 import com.carenest.provider.profile.presentation.ui.registration.Gender
+import com.carenest.provider.profile.presentation.ui.registration.NationalIdValidationError
+import com.carenest.provider.profile.presentation.ui.registration.PersonalInfoValidation
 import com.carenest.provider.profile.presentation.ui.registration.PersonalInfoState
 
 @Composable
@@ -56,6 +58,23 @@ fun PersonalInfoComponent(
     modifier: Modifier = Modifier,
     scrollState: ScrollState = rememberScrollState()
 ) {
+    val nationalIdError = PersonalInfoValidation
+        .nationalIdValidationError(state.nationalId)
+        .takeIf { state.nationalId.length == PersonalInfoValidation.NATIONAL_ID_LENGTH }
+    val nationalIdErrorMessage = when (nationalIdError) {
+        NationalIdValidationError.INVALID_NATIONAL_ID -> stringResource(R.string.error_invalid_national_id)
+        NationalIdValidationError.INVALID_DATE_OF_BIRTH ->
+            stringResource(R.string.error_national_id_dob_invalid)
+        NationalIdValidationError.FUTURE_DATE_OF_BIRTH -> stringResource(R.string.error_dob_future)
+        else -> null
+    }
+    val dateOfBirthErrorMessage = when (nationalIdError) {
+        NationalIdValidationError.INVALID_DATE_OF_BIRTH ->
+            stringResource(R.string.error_national_id_dob_invalid)
+        NationalIdValidationError.FUTURE_DATE_OF_BIRTH -> stringResource(R.string.error_dob_future)
+        else -> null
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -124,6 +143,8 @@ fun PersonalInfoComponent(
             hint = stringResource(R.string.national_id_hint),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
+            isError = nationalIdErrorMessage != null,
+            errorMessage = nationalIdErrorMessage,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
 
@@ -138,6 +159,8 @@ fun PersonalInfoComponent(
             modifier = Modifier.fillMaxWidth(),
             readOnly = true,
             enabled = false,
+            isError = dateOfBirthErrorMessage != null,
+            errorMessage = dateOfBirthErrorMessage,
             singleLine = true
         )
 

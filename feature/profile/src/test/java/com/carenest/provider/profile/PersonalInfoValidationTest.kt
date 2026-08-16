@@ -1,11 +1,14 @@
 package com.carenest.provider.profile
 
 import com.carenest.provider.profile.presentation.ui.registration.PersonalInfoValidation
+import com.carenest.provider.profile.presentation.ui.registration.NationalIdValidationError
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class PersonalInfoValidationTest {
 
@@ -26,6 +29,36 @@ class PersonalInfoValidationTest {
         assertNull(PersonalInfoValidation.extractDateOfBirth("30302300105222"))
         assertNull(PersonalInfoValidation.extractDateOfBirth("40301010105222"))
         assertNull(PersonalInfoValidation.extractDateOfBirth("3030101010522"))
+    }
+
+    @Test
+    fun reportsTheSpecificNationalIdProblem() {
+        assertEquals(
+            NationalIdValidationError.INVALID_LENGTH,
+            PersonalInfoValidation.nationalIdValidationError("3027417260174"),
+        )
+        assertEquals(
+            NationalIdValidationError.INVALID_DATE_OF_BIRTH,
+            PersonalInfoValidation.nationalIdValidationError("30274172601749"),
+        )
+        assertEquals(
+            NationalIdValidationError.INVALID_NATIONAL_ID,
+            PersonalInfoValidation.nationalIdValidationError("40201012601749"),
+        )
+    }
+
+    @Test
+    fun identifiesAndDoesNotAutoPopulateFutureDateOfBirth() {
+        val referenceDate = SimpleDateFormat("dd/MM/yyyy", Locale.US).parse("11/05/2027")!!
+        val nationalIdWithFutureDate = "32705129999999"
+
+        assertTrue(
+            PersonalInfoValidation.isNationalIdDateOfBirthInFuture(
+                nationalIdWithFutureDate,
+                referenceDate,
+            ),
+        )
+        assertNull(PersonalInfoValidation.extractPastDateOfBirth(nationalIdWithFutureDate, referenceDate))
     }
 
     @Test

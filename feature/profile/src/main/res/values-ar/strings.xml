@@ -92,9 +92,22 @@
     <!-- Validation Messages -->
     <string name="error_fill_all_fields">يرجى ملء جميع الحقول المطلوبة</string>
     <string name="error_name_invalid">يجب أن يتكون الاسم من حرفين إلى 50 حرفًا، ويُسمح فقط بالمسافات والشرطة والفاصلة العليا</string>
+    <string name="error_first_name_required">يرجى إدخال الاسم الأول</string>
+    <string name="error_first_name_invalid">يرجى إدخال اسم أول صحيح من حرفين إلى 50 حرفًا</string>
+    <string name="error_last_name_required">يرجى إدخال اسم العائلة</string>
+    <string name="error_last_name_invalid">يرجى إدخال اسم عائلة صحيح من حرفين إلى 50 حرفًا</string>
+    <string name="error_national_id_required">يرجى إدخال الرقم القومي</string>
+    <string name="error_national_id_length">يجب أن يتكون الرقم القومي من 14 رقمًا بالضبط</string>
     <string name="error_invalid_national_id">أدخل رقمًا قوميًّا صحيحًا من 14 رقمًا يتضمن تاريخ ميلاد صالحًا</string>
+    <string name="error_national_id_dob_invalid">تاريخ الميلاد المسجل داخل الرقم القومي غير صحيح</string>
+    <string name="error_dob_future">لا يمكن أن يكون تاريخ الميلاد في المستقبل</string>
+    <string name="error_gender_required">يرجى اختيار الجنس</string>
+    <string name="error_profile_photo_required">يرجى رفع صورة الملف الشخصي</string>
     <string name="error_nid_dob_mismatch">الرقم القومي لا يتطابق مع تاريخ الميلاد</string>
     <string name="error_upload_all_docs">يرجى تحميل جميع الوثائق وملء تفاصيل الخبرة</string>
+    <string name="error_years_of_exp_range">يجب أن تتراوح سنوات الخبرة بين 0 و70</string>
+    <string name="error_primary_speciality_invalid">يجب أن يتكون التخصص الأساسي من 3 إلى 50 حرفًا صالحًا</string>
+    <string name="error_license_number_invalid">يجب أن يتكون رقم الترخيص من 5 إلى 20 حرفًا أو رقمًا أو شرطة أو شرطة مائلة</string>
     <string name="error_select_service">يرجى اختيار خدمة واحدة على الأقل</string>
     <string name="error_certify_information">يرجى الإقرار بصحة المعلومات</string>
     <string name="error_services_unavailable">تعذر تحميل الخدمات. يرجى إعادة المحاولة.</string>

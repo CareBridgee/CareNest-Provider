@@ -65,7 +65,7 @@ class RegistrationViewmodel @Inject constructor(
                 val normalizedId = PersonalInfoValidation.normalizeNationalId(intent.nationalId)
                 copy(
                     nationalId = normalizedId,
-                    dateOfBirth = PersonalInfoValidation.extractDateOfBirth(normalizedId).orEmpty(),
+                    dateOfBirth = PersonalInfoValidation.extractPastDateOfBirth(normalizedId).orEmpty(),
                 )
             }
             is RegistrationIntent.OnGenderChanged -> updatePersonal { copy(gender = intent.gender) }
@@ -92,7 +92,7 @@ class RegistrationViewmodel @Inject constructor(
                 copy(licenseNumber = intent.licenseNumber)
             }
             is RegistrationIntent.OnYearsOfExpChanged -> updateDocuments {
-                copy(yearsOfExp = intent.years.toIntOrNull() ?: 0)
+                copy(yearsOfExp = intent.years.toIntOrNull())
             }
             is RegistrationIntent.OnPrimarySpecialityChanged -> updateDocuments {
                 copy(primarySpeciality = intent.speciality)
@@ -163,12 +163,12 @@ class RegistrationViewmodel @Inject constructor(
                         )
                     }
                 },
-                onFailure = { error ->
+                onFailure = {
                     updateState {
                         copy(
                             servicesUiState = servicesUiState.copy(
                                 isLoading = false,
-                                errorMessage = error.userMessage(),
+                                errorMessage = "error_services_unavailable",
                             )
                         )
                     }
@@ -244,7 +244,7 @@ class RegistrationViewmodel @Inject constructor(
                 licenseImage = fileReader.readAttachment(requireNotNull(docs.nursingLicense)),
                 professionalCertificate = fileReader.readAttachment(requireNotNull(docs.professionalCertificate)),
                 specialization = docs.primarySpeciality.trim(),
-                yearsOfExperience = docs.yearsOfExp,
+                yearsOfExperience = requireNotNull(docs.yearsOfExp),
             ),
             serviceTypeIds = servicesUiState.selectedServices.map { it.id },
         )
@@ -259,25 +259,40 @@ class RegistrationViewmodel @Inject constructor(
             0 -> {
                 val personal = state.personalInfoState
                 when {
-                    personal.firstName.isBlank() || personal.lastName.isBlank() ||
-                        personal.nationalId.isBlank() ||
-                        personal.gender == Gender.UNKNOWN || personal.profilePhotoUri == null ->
-                        "error_fill_all_fields"
-                    !PersonalInfoValidation.isValidName(personal.firstName) ||
-                        !PersonalInfoValidation.isValidName(personal.lastName) ->
-                        "error_name_invalid"
-                    PersonalInfoValidation.extractDateOfBirth(personal.nationalId) == null ->
-                        "error_invalid_national_id"
+                    personal.firstName.isBlank() -> "error_first_name_required"
+                    !PersonalInfoValidation.isValidName(personal.firstName) -> "error_first_name_invalid"
+                    personal.lastName.isBlank() -> "error_last_name_required"
+                    !PersonalInfoValidation.isValidName(personal.lastName) -> "error_last_name_invalid"
+                    PersonalInfoValidation.nationalIdValidationError(personal.nationalId) != null ->
+                        when (PersonalInfoValidation.nationalIdValidationError(personal.nationalId)) {
+                            NationalIdValidationError.REQUIRED -> "error_national_id_required"
+                            NationalIdValidationError.INVALID_LENGTH -> "error_national_id_length"
+                            NationalIdValidationError.INVALID_NATIONAL_ID -> "error_invalid_national_id"
+                            NationalIdValidationError.INVALID_DATE_OF_BIRTH -> "error_national_id_dob_invalid"
+                            NationalIdValidationError.FUTURE_DATE_OF_BIRTH -> "error_dob_future"
+                            null -> null
+                        }
+                    personal.gender == Gender.UNKNOWN -> "error_gender_required"
+                    personal.profilePhotoUri == null -> "error_profile_photo_required"
                     else -> null
                 }
             }
             1 -> {
                 val docs = state.verificationDocumentsUiState
-                if (docs.nationalIdFront == null || docs.nationalIdBack == null ||
+                when {
+                    docs.nationalIdFront == null || docs.nationalIdBack == null ||
                     docs.licenseNumber.isBlank() || docs.nursingLicense == null ||
-                    docs.professionalCertificate == null || docs.yearsOfExp <= 0 ||
+                    docs.professionalCertificate == null || docs.yearsOfExp == null ||
                     docs.primarySpeciality.isBlank()
-                ) "error_upload_all_docs" else null
+                    -> "error_upload_all_docs"
+                    !VerificationDocumentsValidation.isValidLicenseNumber(docs.licenseNumber) ->
+                        "error_license_number_invalid"
+                    !VerificationDocumentsValidation.isValidYearsOfExperience(docs.yearsOfExp) ->
+                        "error_years_of_exp_range"
+                    !VerificationDocumentsValidation.isValidPrimarySpeciality(docs.primarySpeciality) ->
+                        "error_primary_speciality_invalid"
+                    else -> null
+                }
             }
             2 -> when {
                 state.servicesUiState.isLoading -> "services_loading"
@@ -317,7 +332,7 @@ class RegistrationViewmodel @Inject constructor(
                 personalInfoState = PersonalInfoState(
                     firstName = PersonalInfoValidation.sanitizeName(draft.firstName),
                     lastName = PersonalInfoValidation.sanitizeName(draft.lastName),
-                    dateOfBirth = PersonalInfoValidation.extractDateOfBirth(nationalId).orEmpty(),
+                    dateOfBirth = PersonalInfoValidation.extractPastDateOfBirth(nationalId).orEmpty(),
                     nationalId = nationalId,
                     gender = runCatching { Gender.valueOf(draft.gender) }.getOrDefault(Gender.UNKNOWN),
                     profilePhoto = draft.profilePhoto?.toAttachment(),

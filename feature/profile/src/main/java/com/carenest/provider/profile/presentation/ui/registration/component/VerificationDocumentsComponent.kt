@@ -41,6 +41,7 @@ import com.carenest.provider.designsystem.theme.Theme
 import com.carenest.provider.designsystem.util.noRippleClickable
 import com.carenest.provider.profile.presentation.ui.registration.Attachment
 import com.carenest.provider.profile.presentation.ui.registration.VerificationDocumentsUiState
+import com.carenest.provider.profile.presentation.ui.registration.VerificationDocumentsValidation
 
 @Composable
 fun VerificationDocumentsComponent(
@@ -138,6 +139,15 @@ fun VerificationDocumentsComponent(
             hint = stringResource(com.carenest.provider.profile.R.string.license_number_hint),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
+            isError = state.licenseNumber.isNotBlank() &&
+                !VerificationDocumentsValidation.isValidLicenseNumber(state.licenseNumber),
+            errorMessage = if (state.licenseNumber.isNotBlank() &&
+                !VerificationDocumentsValidation.isValidLicenseNumber(state.licenseNumber)
+            ) {
+                stringResource(com.carenest.provider.profile.R.string.error_license_number_invalid)
+            } else {
+                null
+            },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         )
 
@@ -188,7 +198,7 @@ fun VerificationDocumentsComponent(
         Spacer(modifier = Modifier.height(Theme.spacing.extraLarge))
 
         CustomTextField(
-            text = if (state.yearsOfExp == 0) "" else state.yearsOfExp.toString(),
+            text = state.yearsOfExp?.toString().orEmpty(),
             onTextChange = {
                 if (it.all { char -> char.isDigit() }) {
                     onYearsOfExpChanged(it)
@@ -198,6 +208,14 @@ fun VerificationDocumentsComponent(
             hint = stringResource(com.carenest.provider.profile.R.string.years_of_exp_hint),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
+            isError = state.yearsOfExp?.let {
+                !VerificationDocumentsValidation.isValidYearsOfExperience(it)
+            } == true,
+            errorMessage = state.yearsOfExp?.takeIf {
+                !VerificationDocumentsValidation.isValidYearsOfExperience(it)
+            }?.let {
+                stringResource(com.carenest.provider.profile.R.string.error_years_of_exp_range)
+            },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
 
@@ -210,6 +228,15 @@ fun VerificationDocumentsComponent(
             hint = stringResource(com.carenest.provider.profile.R.string.primary_speciality_hint),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
+            isError = state.primarySpeciality.isNotBlank() &&
+                !VerificationDocumentsValidation.isValidPrimarySpeciality(state.primarySpeciality),
+            errorMessage = if (state.primarySpeciality.isNotBlank() &&
+                !VerificationDocumentsValidation.isValidPrimarySpeciality(state.primarySpeciality)
+            ) {
+                stringResource(com.carenest.provider.profile.R.string.error_primary_speciality_invalid)
+            } else {
+                null
+            },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
         )
 

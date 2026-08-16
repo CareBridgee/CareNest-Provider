@@ -2,7 +2,16 @@ package com.carenest.provider.profile.presentation.ui.registration
 
 import java.text.ParsePosition
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
+
+internal enum class NationalIdValidationError {
+    REQUIRED,
+    INVALID_LENGTH,
+    INVALID_NATIONAL_ID,
+    INVALID_DATE_OF_BIRTH,
+    FUTURE_DATE_OF_BIRTH,
+}
 
 internal object PersonalInfoValidation {
     const val MIN_NAME_LENGTH = 2
@@ -34,6 +43,20 @@ internal object PersonalInfoValidation {
         }
     }
 
+    fun nationalIdValidationError(
+        nationalId: String,
+        currentDate: Date = Date(),
+    ): NationalIdValidationError? = when {
+        nationalId.isBlank() -> NationalIdValidationError.REQUIRED
+        nationalId.length != NATIONAL_ID_LENGTH || nationalId.any { !it.isDigit() } ->
+            NationalIdValidationError.INVALID_LENGTH
+        nationalId.first() !in setOf('2', '3') -> NationalIdValidationError.INVALID_NATIONAL_ID
+        extractDateOfBirth(nationalId) == null -> NationalIdValidationError.INVALID_DATE_OF_BIRTH
+        isNationalIdDateOfBirthInFuture(nationalId, currentDate) ->
+            NationalIdValidationError.FUTURE_DATE_OF_BIRTH
+        else -> null
+    }
+
     /** Returns the date encoded in an Egyptian national ID as DD/MM/YYYY. */
     fun extractDateOfBirth(nationalId: String): String? {
         if (nationalId.length != NATIONAL_ID_LENGTH || nationalId.any { !it.isDigit() }) return null
@@ -52,11 +75,30 @@ internal object PersonalInfoValidation {
         return SimpleDateFormat("dd/MM/yyyy", Locale.US).format(parsedDate)
     }
 
+    fun isNationalIdDateOfBirthInFuture(
+        nationalId: String,
+        currentDate: Date = Date(),
+    ): Boolean {
+        val dateOfBirth = extractDateOfBirth(nationalId) ?: return false
+        return parseDisplayDate(dateOfBirth)?.after(currentDate) == true
+    }
+
+    fun extractPastDateOfBirth(
+        nationalId: String,
+        currentDate: Date = Date(),
+    ): String? = extractDateOfBirth(nationalId)?.takeUnless {
+        parseDisplayDate(it)?.after(currentDate) == true
+    }
+
     fun toBackendDate(displayDate: String): String {
+        val parsedDate = requireNotNull(parseDisplayDate(displayDate)) { "Invalid date of birth" }
+        return SimpleDateFormat("yyyy-MM-dd", Locale.US).format(parsedDate)
+    }
+
+    private fun parseDisplayDate(displayDate: String): Date? {
         val sourceFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US).apply { isLenient = false }
         val position = ParsePosition(0)
-        val parsedDate = sourceFormat.parse(displayDate, position)
-        require(parsedDate != null && position.index == displayDate.length) { "Invalid date of birth" }
-        return SimpleDateFormat("yyyy-MM-dd", Locale.US).format(parsedDate)
+        val parsedDate = sourceFormat.parse(displayDate, position) ?: return null
+        return parsedDate.takeIf { position.index == displayDate.length }
     }
 }

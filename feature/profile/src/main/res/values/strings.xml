@@ -178,9 +178,22 @@ coordination of services.</string>
     <!-- Validation Messages -->
     <string name="error_fill_all_fields">Please fill all required fields</string>
     <string name="error_name_invalid">Names must contain 2–50 letters and may only include spaces, hyphens, or apostrophes</string>
+    <string name="error_first_name_required">First name is required</string>
+    <string name="error_first_name_invalid">Enter a valid first name containing 2–50 letters</string>
+    <string name="error_last_name_required">Last name is required</string>
+    <string name="error_last_name_invalid">Enter a valid last name containing 2–50 letters</string>
+    <string name="error_national_id_required">National ID is required</string>
+    <string name="error_national_id_length">National ID must contain exactly 14 digits</string>
     <string name="error_invalid_national_id">Enter a valid 14-digit National ID containing a valid date of birth</string>
+    <string name="error_national_id_dob_invalid">The date of birth encoded in the National ID is invalid</string>
+    <string name="error_dob_future">Date of birth cannot be in the future</string>
+    <string name="error_gender_required">Please select your gender</string>
+    <string name="error_profile_photo_required">Please upload a profile photo</string>
     <string name="error_nid_dob_mismatch">National ID does not match Date of Birth</string>
     <string name="error_upload_all_docs">Please upload all documents and fill experience details</string>
+    <string name="error_years_of_exp_range">Years of experience must be between 0 and 70</string>
+    <string name="error_primary_speciality_invalid">Primary speciality must be 3–50 letters and may only include spaces, hyphens, apostrophes, ampersands, or slashes</string>
+    <string name="error_license_number_invalid">License number must be 5–20 letters, numbers, hyphens, or slashes</string>
     <string name="error_select_service">Please select at least one service</string>
     <string name="error_certify_information">Please certify that the information is accurate</string>
     <string name="error_services_unavailable">Services could not be loaded. Please retry.</string>
