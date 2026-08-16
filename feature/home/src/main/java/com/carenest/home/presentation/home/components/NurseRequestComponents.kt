@@ -118,9 +118,14 @@ fun OnlineToggleCard(
     isOnline: Boolean,
     onToggle: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     val statusLabel = if (isOnline) stringResource(R.string.online) else stringResource(R.string.offline)
-    val statusColor = if(isOnline) Theme.colors.primary else Theme.colors.hint
+    val statusColor = when {
+        !enabled -> Theme.colors.onDisable
+        isOnline -> Theme.colors.primary
+        else -> Theme.colors.hint
+    }
 
     Card(
         modifier = modifier
@@ -170,12 +175,19 @@ fun OnlineToggleCard(
             Switch(
                 checked = isOnline,
                 onCheckedChange = onToggle,
+                enabled = enabled,
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = androidx.compose.ui.graphics.Color.White,
                     checkedTrackColor = Theme.colors.tint,
                     uncheckedThumbColor = androidx.compose.ui.graphics.Color.White,
                     uncheckedTrackColor = Theme.colors.track,
                     uncheckedBorderColor = androidx.compose.ui.graphics.Color.Transparent,
+                    disabledCheckedThumbColor = Theme.colors.onDisable,
+                    disabledCheckedTrackColor = Theme.colors.disable,
+                    disabledUncheckedThumbColor = Theme.colors.onDisable,
+                    disabledUncheckedTrackColor = Theme.colors.disable,
+                    disabledCheckedBorderColor = androidx.compose.ui.graphics.Color.Transparent,
+                    disabledUncheckedBorderColor = androidx.compose.ui.graphics.Color.Transparent,
                 ),
                 modifier = Modifier.size(width = 48.dp, height = 32.dp),
             )

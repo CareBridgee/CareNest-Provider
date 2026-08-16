@@ -63,9 +63,10 @@ fun NurseRequestCard(
     onEditClick: () -> Unit,
     onMakeOfferClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
 
-    val isInteractive = request.status == RequestStatus.ESTIMATED
+    val isInteractive = enabled && request.status == RequestStatus.ESTIMATED
 
     Card(
         modifier = modifier
@@ -80,11 +81,7 @@ fun NurseRequestCard(
                     stiffness = Spring.StiffnessMediumLow
                 )
             )
-            .then(
-                if (isInteractive) {
-                    Modifier.clickable(onClick = onClick)
-                } else Modifier
-            ),
+            .clickable(enabled = isInteractive, onClick = onClick),
         shape = Theme.shapes.large,
         border = BorderStroke(
             width = 1.dp,
@@ -92,7 +89,13 @@ fun NurseRequestCard(
                 alpha = if (request.status == RequestStatus.ACCEPTED) 0.28f else 0.16f,
             ),
         ),
-        colors = CardDefaults.cardColors(containerColor = Theme.colors.surface),
+        colors = CardDefaults.cardColors(
+            containerColor = if (enabled) {
+                Theme.colors.surface
+            } else {
+                Theme.colors.disable.copy(alpha = 0.30f)
+            },
+        ),
     ) {
 
         Column(
@@ -212,7 +215,7 @@ fun NurseRequestCard(
             }
 
             AnimatedVisibility(
-                visible = isExpanded && isInteractive,
+                visible = isExpanded && request.status == RequestStatus.ESTIMATED,
                 enter = expandVertically() + fadeIn(),
                 exit = shrinkVertically() + fadeOut(),
             ) {
@@ -231,12 +234,14 @@ fun NurseRequestCard(
                             caption = stringResource(R.string.nurse_requests_action_edit),
                             onClick = onEditClick,
                             modifier = Modifier.weight(1f),
+                            isDisabled = !enabled,
                         )
 
                         PrimaryButton(
                             caption = stringResource(R.string.nurse_requests_action_make_offer),
                             onClick = onMakeOfferClick,
                             modifier = Modifier.weight(1f),
+                            isDisabled = !enabled,
                         )
                     }
                 }
@@ -261,6 +266,7 @@ fun NurseRequestCard(
                         currentPrice = request.baseRate,
                         minPrice = 50f,
                         maxPrice = 120f,
+                        enabled = enabled,
                         onCancelClick = onClick,
                         onSaveClick = { updatedPrice ->
                             // Handle saving updated rate here
@@ -283,7 +289,8 @@ fun PriceAdjustmentSection(
     maxPrice: Float = 120f,
     onCancelClick: () -> Unit,
     onSaveClick: (Float) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     var selectedPrice by remember(currentPrice) { mutableFloatStateOf(currentPrice) }
 
@@ -321,6 +328,7 @@ fun PriceAdjustmentSection(
         Slider(
             value = selectedPrice,
             onValueChange = { selectedPrice = it },
+            enabled = enabled,
             valueRange = minPrice..maxPrice,
             colors = SliderDefaults.colors(
                 thumbColor = Theme.colors.primary,
@@ -359,13 +367,15 @@ fun PriceAdjustmentSection(
             SecondaryButton(
                 caption = stringResource(R.string.cancel),
                 onClick = onCancelClick,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                isDisabled = !enabled,
             )
 
             PrimaryButton(
                 caption = stringResource(R.string.save),
                 onClick = { onSaveClick(selectedPrice) },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                isDisabled = !enabled,
             )
         }
     }
