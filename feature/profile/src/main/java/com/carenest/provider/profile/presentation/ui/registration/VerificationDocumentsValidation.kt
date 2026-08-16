@@ -2,7 +2,7 @@ package com.carenest.provider.profile.presentation.ui.registration
 
 internal object VerificationDocumentsValidation {
     const val MIN_YEARS_OF_EXPERIENCE = 0
-    const val MAX_YEARS_OF_EXPERIENCE = 90
+    const val MAX_YEARS_OF_EXPERIENCE = 70
     const val MIN_SPECIALITY_LENGTH = 3
     const val MAX_SPECIALITY_LENGTH = 50
     const val MIN_LICENSE_NUMBER_LENGTH = 5
