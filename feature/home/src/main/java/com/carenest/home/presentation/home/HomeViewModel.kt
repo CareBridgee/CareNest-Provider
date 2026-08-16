@@ -23,8 +23,10 @@ import com.carenest.provider.core.network.socket.model.patientDisplayName
 import com.carenest.provider.core.datastore.AuthenticationSessionStore
 import com.carenest.provider.profile.domain.usecase.GetNurseUseCase
 import com.carenest.provider.profile.domain.usecase.LoadServiceTypesUseCase
+import com.carenest.provider.profile.domain.model.VerificationStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -62,6 +64,7 @@ class HomeViewModel @Inject constructor(
     private var offerEventListenerJob: Job? = null
     private var offerTimerJob: Job? = null
     private var profileJob: Job? = null
+    private var hasResolvedProviderApproval = false
     private var serviceImagesById: Map<String, String> = emptyMap()
 
     val isOnline = getAvailability()
@@ -82,7 +85,10 @@ class HomeViewModel @Inject constructor(
     private fun observeAvailability() {
         viewModelScope.launch {
             isOnline.collect { online ->
-                applyAvailabilityChange(online)
+                when {
+                    currentState.isProviderApproved -> applyAvailabilityChange(online)
+                    !online -> applyAvailabilityChange(false)
+                }
             }
         }
     }
@@ -114,6 +120,8 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onIntent(intent: HomeIntent) {
+        if (intent.requiresProviderApproval && !currentState.isProviderApproved) return
+
         when (intent) {
             is HomeIntent.OnlineToggled -> handleOnlineToggle(intent.isOnline)
             is HomeIntent.CardClicked -> handleCardClick(intent.requestId)
@@ -137,7 +145,11 @@ class HomeViewModel @Inject constructor(
         profileJob = viewModelScope.launch {
             val savedSession = authenticationSessionStore.currentSession
                 ?: authenticationSessionStore.session.first()
-            val nurseId = savedSession?.nurseId ?: return@launch
+            val nurseId = savedSession?.nurseId
+            if (nurseId == null) {
+                applyAvailabilityChange(false)
+                return@launch
+            }
             savedSession.profileImageUrl?.takeIf(String::isNotBlank)?.let { cachedUrl ->
                 updateState { copy(nurseAvatar = cachedUrl) }
             }
@@ -146,6 +158,9 @@ class HomeViewModel @Inject constructor(
                     nurseId = nurseId,
                     profileImageUrl = profile.profileImageUrl,
                 )
+                val isProviderApproved = profile.verificationStatus == VerificationStatus.APPROVED
+                val isFirstApprovalResult = !hasResolvedProviderApproval
+                hasResolvedProviderApproval = true
                 val fullName = listOfNotNull(
                     profile.firstName?.takeIf(String::isNotBlank),
                     profile.lastName?.takeIf(String::isNotBlank),
@@ -154,8 +169,20 @@ class HomeViewModel @Inject constructor(
                     copy(
                         nurseName = fullName,
                         nurseAvatar = profile.profileImageUrl,
+                        isProviderApproved = isProviderApproved,
                     )
                 }
+                if (isProviderApproved) {
+                    if (isFirstApprovalResult) {
+                        applyAvailabilityChange(isOnline.value)
+                    }
+                } else {
+                    applyAvailabilityChange(false)
+                    if (isOnline.value) updateAvailability(false)
+                }
+            }.onFailure { error ->
+                if (error is CancellationException) return@onFailure
+                if (!hasResolvedProviderApproval) applyAvailabilityChange(false)
             }
         }
     }
@@ -400,6 +427,8 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun completeOfferAccepted(requestId: String) {
+        if (!currentState.isProviderApproved) return
+
         offerEventListenerJob?.cancel()
         stopOfferTimer()
         updateState {
@@ -506,3 +535,10 @@ class HomeViewModel @Inject constructor(
         const val SUCCESS_DISPLAY_MS = 1_200L
     }
 }
+
+private val HomeIntent.requiresProviderApproval: Boolean
+    get() = when (this) {
+        HomeIntent.RefreshProfile,
+        HomeIntent.DismissModal -> false
+        else -> true
+    }

@@ -12,6 +12,7 @@ enum class ActiveModal {
 data class HomeUiState(
     val nurseName : String = "",
     val nurseAvatar : String?=null,
+    val isProviderApproved: Boolean = false,
     val isOnline: Boolean = false,
     val isLoading: Boolean = false,
     val requests: List<NurseRequest> = emptyList(),

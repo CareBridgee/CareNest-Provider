@@ -30,6 +30,12 @@ class GoogleSignInHelper(private val context: Context) {
     val client: GoogleSignInClient
         get() = GoogleSignIn.getClient(context, googleSignInOptions)
 
+    fun signOut(onComplete: () -> Unit = {}) {
+        client.signOut().addOnCompleteListener {
+            onComplete()
+        }
+    }
+
     fun parseGoogleAccount(data: Intent?): Result<GoogleAccountPayload> {
         println("GoogleAuthSDK: parseGoogleAccount called with intent=$data")
         val task = GoogleSignIn.getSignedInAccountFromIntent(data)
