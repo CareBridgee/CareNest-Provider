@@ -20,7 +20,12 @@ class ProfileMenuViewModel @Inject constructor(
     private val authenticationSessionStore: AuthenticationSessionStore,
     private val getNurse: GetNurseUseCase,
 ) : ViewModel(),
-    StateHolder<ProfileMenuUiState> by DefaultStateHolder(ProfileMenuUiState()),
+    StateHolder<ProfileMenuUiState> by DefaultStateHolder(
+        ProfileMenuUiState(
+            isLoading = true,
+            avatarUrl = authenticationSessionStore.currentSession?.profileImageUrl,
+        ),
+    ),
     EffectPublisher<ProfileMenuEffect> by DefaultEffectPublisher() {
 
     private var profileJob: Job? = null
@@ -59,13 +64,22 @@ class ProfileMenuViewModel @Inject constructor(
         profileJob?.cancel()
         profileJob = viewModelScope.launch {
             updateState { copy(isLoading = true) }
-            val nurseId = authenticationSessionStore.session.first()?.nurseId
+            val savedSession = authenticationSessionStore.currentSession
+                ?: authenticationSessionStore.session.first()
+            val nurseId = savedSession?.nurseId
             if (nurseId.isNullOrBlank()) {
                 updateState { copy(isLoading = false) }
                 return@launch
             }
+            savedSession.profileImageUrl?.takeIf(String::isNotBlank)?.let { cachedUrl ->
+                updateState { copy(avatarUrl = cachedUrl) }
+            }
             getNurse(nurseId).fold(
                 onSuccess = { profile ->
+                    authenticationSessionStore.updateProfileImageUrl(
+                        nurseId = nurseId,
+                        profileImageUrl = profile.profileImageUrl,
+                    )
                     val fullName = listOfNotNull(
                         profile.firstName?.takeIf(String::isNotBlank),
                         profile.lastName?.takeIf(String::isNotBlank),

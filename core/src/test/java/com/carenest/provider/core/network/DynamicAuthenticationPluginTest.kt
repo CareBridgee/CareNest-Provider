@@ -260,6 +260,8 @@ class DynamicAuthenticationPluginTest {
         private val mutableState = MutableStateFlow(AuthenticationState())
         override val state = mutableState.asStateFlow()
         override val session: Flow<AuthenticationSession?> = MutableStateFlow(null)
+        override val currentSession: AuthenticationSession?
+            get() = mutableState.value.session
         private var generation = 0
 
         fun setState(state: AuthenticationState) {
@@ -307,6 +309,19 @@ class DynamicAuthenticationPluginTest {
                     accessToken = accessToken,
                     refreshToken = refreshToken,
                 ),
+            )
+            return true
+        }
+
+        override suspend fun updateProfileImageUrl(
+            nurseId: String,
+            profileImageUrl: String?,
+        ): Boolean {
+            val current = mutableState.value
+            val currentSession = current.session ?: return false
+            if (currentSession.nurseId != nurseId) return false
+            mutableState.value = current.copy(
+                session = currentSession.copy(profileImageUrl = profileImageUrl),
             )
             return true
         }

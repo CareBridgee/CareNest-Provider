@@ -18,10 +18,11 @@ enum class AuthenticationSessionDestination {
     APPROVED,
 }
 
-data class AuthenticationSession(
+data class AuthenticationSession @JvmOverloads constructor(
     val destination: AuthenticationSessionDestination,
     val nurseId: String? = null,
     val phoneNumber: String? = null,
+    val profileImageUrl: String? = null,
 )
 
 data class AuthenticationCredentials(
@@ -44,6 +45,7 @@ data class AuthenticationState(
 interface AuthenticationSessionStore {
     val state: Flow<AuthenticationState>
     val session: Flow<AuthenticationSession?>
+    val currentSession: AuthenticationSession?
 
     suspend fun beginAuthentication(accessToken: String, refreshToken: String)
 
@@ -58,6 +60,8 @@ interface AuthenticationSessionStore {
         refreshToken: String,
     ): Boolean
 
+    suspend fun updateProfileImageUrl(nurseId: String, profileImageUrl: String?): Boolean
+
     suspend fun clearSession()
 
     suspend fun clearInvalidSession(): Boolean
@@ -69,12 +73,18 @@ class DataStoreAuthenticationSessionStore @Inject constructor(
     @param:AuthDataStore private val dataStore: DataStore<Preferences>,
 ) : AuthenticationSessionStore {
 
+    @Volatile
+    private var latestState: AuthenticationState? = null
+
     override val state: Flow<AuthenticationState> = dataStore.data.map { preferences ->
-        preferences.toAuthenticationState()
+        preferences.toAuthenticationState().also { latestState = it }
     }.distinctUntilChanged()
 
     override val session: Flow<AuthenticationSession?> = state.map { it.session }
         .distinctUntilChanged()
+
+    override val currentSession: AuthenticationSession?
+        get() = latestState?.session
 
     override suspend fun beginAuthentication(accessToken: String, refreshToken: String) {
         require(accessToken.isNotBlank()) { "Access token must not be blank" }
@@ -100,6 +110,9 @@ class DataStoreAuthenticationSessionStore @Inject constructor(
                     ?: preferences.remove(NURSE_ID_KEY)
                 session.phoneNumber?.let { preferences[PHONE_NUMBER_KEY] = it }
                     ?: preferences.remove(PHONE_NUMBER_KEY)
+                session.profileImageUrl?.takeIf(String::isNotBlank)
+                    ?.let { preferences[PROFILE_IMAGE_URL_KEY] = it }
+                    ?: preferences.remove(PROFILE_IMAGE_URL_KEY)
                 completed = true
             }
         }
@@ -122,6 +135,22 @@ class DataStoreAuthenticationSessionStore @Inject constructor(
             }
         }
         return replaced
+    }
+
+    override suspend fun updateProfileImageUrl(
+        nurseId: String,
+        profileImageUrl: String?,
+    ): Boolean {
+        var updated = false
+        dataStore.edit { preferences ->
+            if (nurseId.isNotBlank() && preferences[NURSE_ID_KEY] == nurseId) {
+                profileImageUrl?.trim()?.takeIf(String::isNotEmpty)
+                    ?.let { preferences[PROFILE_IMAGE_URL_KEY] = it }
+                    ?: preferences.remove(PROFILE_IMAGE_URL_KEY)
+                updated = true
+            }
+        }
+        return updated
     }
 
     override suspend fun clearSession() {
@@ -175,6 +204,7 @@ class DataStoreAuthenticationSessionStore @Inject constructor(
                 destination = it,
                 nurseId = this[NURSE_ID_KEY],
                 phoneNumber = this[PHONE_NUMBER_KEY],
+                profileImageUrl = this[PROFILE_IMAGE_URL_KEY],
             )
         }
         return AuthenticationState(
@@ -199,6 +229,7 @@ class DataStoreAuthenticationSessionStore @Inject constructor(
         remove(DESTINATION_KEY)
         remove(NURSE_ID_KEY)
         remove(PHONE_NUMBER_KEY)
+        remove(PROFILE_IMAGE_URL_KEY)
     }
 
     private companion object {
@@ -208,5 +239,6 @@ class DataStoreAuthenticationSessionStore @Inject constructor(
         val DESTINATION_KEY = stringPreferencesKey("authenticated_destination")
         val NURSE_ID_KEY = stringPreferencesKey("authenticated_nurse_id")
         val PHONE_NUMBER_KEY = stringPreferencesKey("authenticated_phone_number")
+        val PROFILE_IMAGE_URL_KEY = stringPreferencesKey("authenticated_profile_image_url")
     }
 }

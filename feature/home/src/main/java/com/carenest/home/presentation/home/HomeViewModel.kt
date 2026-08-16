@@ -50,7 +50,11 @@ class HomeViewModel @Inject constructor(
     private val updateAvailability: UpdateAvailabilityUseCase,
     private val getCurrentLocation: GetCurrentLocationUseCase,
 ) : ViewModel(),
-    StateHolder<HomeUiState> by DefaultStateHolder(HomeUiState()),
+    StateHolder<HomeUiState> by DefaultStateHolder(
+        HomeUiState(
+            nurseAvatar = authenticationSessionStore.currentSession?.profileImageUrl,
+        ),
+    ),
     EffectPublisher<HomeEffect> by DefaultEffectPublisher() {
 
     private var fetchJob: Job? = null
@@ -131,8 +135,17 @@ class HomeViewModel @Inject constructor(
     private fun getNurseData(){
         profileJob?.cancel()
         profileJob = viewModelScope.launch {
-            val nurseId = authenticationSessionStore.session.first()?.nurseId ?: return@launch
+            val savedSession = authenticationSessionStore.currentSession
+                ?: authenticationSessionStore.session.first()
+            val nurseId = savedSession?.nurseId ?: return@launch
+            savedSession.profileImageUrl?.takeIf(String::isNotBlank)?.let { cachedUrl ->
+                updateState { copy(nurseAvatar = cachedUrl) }
+            }
             getNurse(nurseId).onSuccess { profile ->
+                authenticationSessionStore.updateProfileImageUrl(
+                    nurseId = nurseId,
+                    profileImageUrl = profile.profileImageUrl,
+                )
                 val fullName = listOfNotNull(
                     profile.firstName?.takeIf(String::isNotBlank),
                     profile.lastName?.takeIf(String::isNotBlank),

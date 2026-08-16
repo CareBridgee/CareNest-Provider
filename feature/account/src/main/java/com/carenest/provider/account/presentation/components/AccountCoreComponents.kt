@@ -1,6 +1,5 @@
 package com.carenest.provider.account.presentation.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,8 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.carenest.provider.account.R
 import com.carenest.provider.designsystem.R as DesignSystemR
 import com.carenest.provider.designsystem.theme.Theme
-import coil3.compose.AsyncImage
-import androidx.compose.ui.layout.ContentScale
+import com.carenest.provider.designsystem.components.avatar.ProfileAvatar
 
 @Composable
 fun ProviderAccountTopBar(
@@ -64,16 +62,10 @@ fun ProviderAccountTopBar(
             )
             Spacer(Modifier.width(Theme.spacing.medium))
         }
-        AsyncImage(
-            model = avatarUrl?.takeIf(String::isNotBlank),
+        ProfileAvatar(
+            imageUrl = avatarUrl,
             contentDescription = stringResource(R.string.account_profile_photo),
-            placeholder = painterResource(DesignSystemR.drawable.nurse_image),
-            error = painterResource(DesignSystemR.drawable.nurse_image),
-            fallback = painterResource(DesignSystemR.drawable.nurse_image),
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape),
-            contentScale = ContentScale.Crop,
+            modifier = Modifier.size(40.dp),
         )
         Spacer(Modifier.width(Theme.spacing.medium))
         BasicText(
