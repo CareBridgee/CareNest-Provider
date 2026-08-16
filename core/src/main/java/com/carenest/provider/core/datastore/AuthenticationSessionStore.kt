@@ -18,7 +18,7 @@ enum class AuthenticationSessionDestination {
     APPROVED,
 }
 
-data class AuthenticationSession @JvmOverloads constructor(
+data class AuthenticationSession(
     val destination: AuthenticationSessionDestination,
     val nurseId: String? = null,
     val phoneNumber: String? = null,
