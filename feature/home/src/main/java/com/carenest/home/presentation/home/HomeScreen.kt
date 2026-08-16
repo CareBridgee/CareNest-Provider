@@ -70,14 +70,16 @@ fun HomeScreen(
     }
 
     ObserveEffect(viewModel.effect) { effect ->
-        when (effect) {
-            HomeEffect.NavigateToRequestList -> onNavigateToRequests()
-            is HomeEffect.StartActiveReservationService -> {
-                ActiveReservationService.startService(context, effect.requestId)
-            }
-            is HomeEffect.NavigateToOfferConfirmed -> {
-                ActiveReservationService.startService(context, effect.requestId)
-                onOfferConfirmed(effect.requestId)
+        if (state.isProviderApproved) {
+            when (effect) {
+                HomeEffect.NavigateToRequestList -> onNavigateToRequests()
+                is HomeEffect.StartActiveReservationService -> {
+                    ActiveReservationService.startService(context, effect.requestId)
+                }
+                is HomeEffect.NavigateToOfferConfirmed -> {
+                    ActiveReservationService.startService(context, effect.requestId)
+                    onOfferConfirmed(effect.requestId)
+                }
             }
         }
     }
@@ -102,18 +104,20 @@ fun HomeContent(
     var showLocationRationale by remember { mutableStateOf(false) }
 
     val handleToggleOnline: (Boolean) -> Unit = { isOnline ->
-        if (isOnline) {
-            requestNotificationPermission = true
-        } else {
-            requestNotificationPermission = false
-            showNotificationRationale = false
-            requestLocationPermission = false
-            showLocationRationale = false
-            onIntent(HomeIntent.OnlineToggled(false))
+        if (state.isProviderApproved) {
+            if (isOnline) {
+                requestNotificationPermission = true
+            } else {
+                requestNotificationPermission = false
+                showNotificationRationale = false
+                requestLocationPermission = false
+                showLocationRationale = false
+                onIntent(HomeIntent.OnlineToggled(false))
+            }
         }
     }
 
-    if (requestNotificationPermission) {
+    if (state.isProviderApproved && requestNotificationPermission) {
         NotificationPermissionHandler(
             onPermissionGranted = {
                 requestNotificationPermission = false
@@ -132,7 +136,7 @@ fun HomeContent(
         )
     }
 
-    if (requestLocationPermission) {
+    if (state.isProviderApproved && requestLocationPermission) {
         LocationPermissionHandler(
             onPermissionGranted = {
                 requestLocationPermission = false
@@ -188,6 +192,7 @@ fun HomeContent(
                     OnlineToggleCard(
                         isOnline = state.isOnline,
                         onToggle = handleToggleOnline,
+                        enabled = state.isProviderApproved,
                     )
                 }
 
@@ -235,6 +240,7 @@ fun HomeContent(
                             ) {
                                 AvailableRequestsHeader(
                                     onViewAllClick = { onIntent(HomeIntent.ViewAllRequestsClicked) },
+                                    enabled = state.isProviderApproved,
                                     modifier = Modifier.padding(
                                         top = Theme.spacing.extraSmall,
                                         bottom = Theme.spacing.small,
@@ -248,6 +254,7 @@ fun HomeContent(
                             ) {
                                 AvailableRequestsHeader(
                                     onViewAllClick = { onIntent(HomeIntent.ViewAllRequestsClicked) },
+                                    enabled = state.isProviderApproved,
                                     modifier = Modifier.padding(
                                         top = Theme.spacing.extraSmall,
                                         bottom = Theme.spacing.small,
@@ -266,6 +273,7 @@ fun HomeContent(
                         NurseRequestCard(
                             request = request,
                             isExpanded = state.selectedCardId == request.id,
+                            enabled = state.isProviderApproved,
                             onClick = { onIntent(HomeIntent.CardClicked(request.id)) },
                             onEditClick = { onIntent(HomeIntent.EditRateClicked(request.id)) },
                             onMakeOfferClick = {
@@ -277,7 +285,7 @@ fun HomeContent(
             }
         }
 
-        if (state.activeModal == ActiveModal.EditRate) {
+        if (state.isProviderApproved && state.activeModal == ActiveModal.EditRate) {
             EditRateBottomSheet(
                 currentRate = state.editRateDraft,
                 minRate = 25f,
@@ -288,7 +296,10 @@ fun HomeContent(
             )
         }
 
-        if (state.activeModal == ActiveModal.MakeOffer || state.activeModal == ActiveModal.OfferSuccess) {
+        if (
+            state.isProviderApproved &&
+            (state.activeModal == ActiveModal.MakeOffer || state.activeModal == ActiveModal.OfferSuccess)
+        ) {
             MakeOfferDialog(
                 countdownSeconds = state.offerCountdown ?: 0,
                 isSuccess = state.activeModal == ActiveModal.OfferSuccess,
@@ -311,7 +322,11 @@ fun HomeContent(
 private fun HomeOfflinePreview() {
     SpTheme(isDarkTheme = false) {
         HomeContent(
-            state = HomeUiState(isOnline = false, nurseName = "Hend"),
+            state = HomeUiState(
+                isProviderApproved = true,
+                isOnline = false,
+                nurseName = "Hend",
+            ),
             onIntent = {},
         )
     }
@@ -322,7 +337,12 @@ private fun HomeOfflinePreview() {
 private fun HomeLoadingPreview() {
     SpTheme(isDarkTheme = false) {
         HomeContent(
-            state = HomeUiState(isOnline = true, isLoading = true, nurseName = "Hend"),
+            state = HomeUiState(
+                isProviderApproved = true,
+                isOnline = true,
+                isLoading = true,
+                nurseName = "Hend",
+            ),
             onIntent = {},
         )
     }
