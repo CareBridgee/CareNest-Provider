@@ -174,6 +174,8 @@ private class FakeAuthenticationSessionStore : AuthenticationSessionStore {
 
     override val state: Flow<AuthenticationState> = authenticationState
     override val session: Flow<AuthenticationSession?> = MutableStateFlow(null)
+    override val currentSession: AuthenticationSession?
+        get() = authenticationState.value.session
 
     override suspend fun beginAuthentication(accessToken: String, refreshToken: String) = Unit
 
@@ -187,6 +189,19 @@ private class FakeAuthenticationSessionStore : AuthenticationSessionStore {
         accessToken: String,
         refreshToken: String,
     ): Boolean = true
+
+    override suspend fun updateProfileImageUrl(
+        nurseId: String,
+        profileImageUrl: String?,
+    ): Boolean {
+        val current = authenticationState.value
+        val savedSession = current.session ?: return false
+        if (savedSession.nurseId != nurseId) return false
+        authenticationState.value = current.copy(
+            session = savedSession.copy(profileImageUrl = profileImageUrl),
+        )
+        return true
+    }
 
     override suspend fun clearSession() = Unit
 
