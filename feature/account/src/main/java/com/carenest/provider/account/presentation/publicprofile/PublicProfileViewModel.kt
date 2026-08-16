@@ -30,7 +30,11 @@ class PublicProfileViewModel @Inject constructor(
     private val updateNurse: UpdateNurseUseCase,
     private val fileReader: ContentUriFileReader,
 ) : ViewModel(),
-    StateHolder<PublicProfileUiState> by DefaultStateHolder(PublicProfileUiState()),
+    StateHolder<PublicProfileUiState> by DefaultStateHolder(
+        PublicProfileUiState(
+            cachedProfileImageUrl = authenticationSessionStore.currentSession?.profileImageUrl,
+        ),
+    ),
     EffectPublisher<PublicProfileEffect> by DefaultEffectPublisher() {
 
     private var nurseId: String? = null
@@ -68,7 +72,15 @@ class PublicProfileViewModel @Inject constructor(
         if (currentState.isLoading) return
         viewModelScope.launch {
             updateState { copy(isLoading = true, errorMessage = null) }
-            val resolvedNurseId = resolveNurseId()
+            val savedSession = authenticationSessionStore.currentSession
+                ?: authenticationSessionStore.session.first()
+            updateState {
+                copy(
+                    cachedProfileImageUrl = savedSession?.profileImageUrl
+                        ?: cachedProfileImageUrl,
+                )
+            }
+            val resolvedNurseId = resolveNurseId(savedSession)
             if (resolvedNurseId.isNullOrBlank()) {
                 updateState { copy(isLoading = false, errorMessage = "profile_error_missing_session") }
                 sendEffect(PublicProfileEffect.ShowMessage("profile_error_missing_session"))
@@ -83,6 +95,7 @@ class PublicProfileViewModel @Inject constructor(
                         copy(
                             isLoading = false,
                             profile = profile,
+                            cachedProfileImageUrl = profile.profileImageUrl,
                             errorMessage = null,
                         )
                     }
@@ -142,6 +155,7 @@ class PublicProfileViewModel @Inject constructor(
                             isSavingProfile = false,
                             isEditBioSheetVisible = false,
                             profile = profile,
+                            cachedProfileImageUrl = profile.profileImageUrl,
                             errorMessage = null,
                         )
                     }
@@ -184,6 +198,7 @@ class PublicProfileViewModel @Inject constructor(
                         copy(
                             isUploadingProfileImage = false,
                             profile = profile,
+                            cachedProfileImageUrl = profile.profileImageUrl,
                             errorMessage = null,
                         )
                     }
@@ -198,9 +213,9 @@ class PublicProfileViewModel @Inject constructor(
         }
     }
 
-    private suspend fun resolveNurseId(): String? {
+    private fun resolveNurseId(savedSession: AuthenticationSession?): String? {
         nurseId?.takeIf(String::isNotBlank)?.let { return it }
-        val sessionNurseId = authenticationSessionStore.session.first()?.nurseId
+        val sessionNurseId = savedSession?.nurseId
         nurseId = sessionNurseId
         return sessionNurseId
     }
@@ -215,6 +230,7 @@ class PublicProfileViewModel @Inject constructor(
                 destination = profile.verificationStatus.toSessionDestination(),
                 nurseId = profile.id,
                 phoneNumber = session.phoneNumber,
+                profileImageUrl = profile.profileImageUrl,
             ),
         )
     }

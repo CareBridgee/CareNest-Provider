@@ -24,7 +24,11 @@ class EarningsViewModel @Inject constructor(
     private val getNurse: GetNurseUseCase,
     private val loadServiceTypes: LoadServiceTypesUseCase,
 ) : ViewModel(),
-    StateHolder<EarningsUiState> by DefaultStateHolder(EarningsUiState()),
+    StateHolder<EarningsUiState> by DefaultStateHolder(
+        EarningsUiState(
+            providerAvatarUrl = authenticationSessionStore.currentSession?.profileImageUrl,
+        ),
+    ),
     EffectPublisher<EarningsEffect> by DefaultEffectPublisher() {
 
     private var serviceImagesById: Map<String, String> = emptyMap()
@@ -37,8 +41,17 @@ class EarningsViewModel @Inject constructor(
 
     private fun loadProviderAvatar() {
         viewModelScope.launch {
-            val nurseId = authenticationSessionStore.session.first()?.nurseId ?: return@launch
+            val savedSession = authenticationSessionStore.currentSession
+                ?: authenticationSessionStore.session.first()
+            val nurseId = savedSession?.nurseId ?: return@launch
+            savedSession.profileImageUrl?.takeIf(String::isNotBlank)?.let { cachedUrl ->
+                updateState { copy(providerAvatarUrl = cachedUrl) }
+            }
             getNurse(nurseId).onSuccess { profile ->
+                authenticationSessionStore.updateProfileImageUrl(
+                    nurseId = nurseId,
+                    profileImageUrl = profile.profileImageUrl,
+                )
                 updateState { copy(providerAvatarUrl = profile.profileImageUrl) }
             }
         }

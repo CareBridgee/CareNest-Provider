@@ -15,15 +15,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
-import coil3.compose.AsyncImage
 import com.carenest.provider.designsystem.R
+import com.carenest.provider.designsystem.components.avatar.ProfileAvatar
 import com.carenest.provider.designsystem.theme.Theme
 
 sealed interface TopBarLeading {
@@ -73,17 +71,12 @@ fun CareNestTopBar(
         )
 
         if (trailingAvatarUrl != null) {
-            AsyncImage(
-                model = trailingAvatarUrl.takeIf(String::isNotBlank),
+            ProfileAvatar(
+                imageUrl = trailingAvatarUrl,
                 contentDescription = stringResource(R.string.profile_avatar_content_description),
-                placeholder = painterResource(R.drawable.nurse_image),
-                error = painterResource(R.drawable.nurse_image),
-                fallback = painterResource(R.drawable.nurse_image),
                 modifier = Modifier
                     .size(Theme.size.medium)
-                    .clip(CircleShape)
                     .border(Theme.spacing.extraSmall / 4, Theme.colors.onDisable, CircleShape),
-                contentScale = ContentScale.Crop
             )
         }
         }

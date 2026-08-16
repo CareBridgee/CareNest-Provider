@@ -10,6 +10,7 @@ data class PublicProfileUiState(
     val isSavingProfile: Boolean = false,
     val isUploadingProfileImage: Boolean = false,
     val profile: NurseProfile? = null,
+    val cachedProfileImageUrl: String? = null,
     val errorMessage: String? = null,
     val isEditBioSheetVisible: Boolean = false,
     val bioDraft: String = "",
@@ -39,7 +40,7 @@ data class PublicProfileUiState(
             .filter(String::isNotBlank)
 
     val profileImageUrl: String?
-        get() = profile?.profileImageUrl
+        get() = profile?.profileImageUrl ?: cachedProfileImageUrl
 
     val ratingText: String
         get() = profile?.ratingAvg?.let { rating ->

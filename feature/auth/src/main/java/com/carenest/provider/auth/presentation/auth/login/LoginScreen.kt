@@ -50,7 +50,10 @@ internal fun LoginScreenContent(
     onEvent: (LoginIntent) -> Unit
 ) {
     when (state.currentStep) {
-        LoginStep.LANDING -> AuthLandingScreen(onEvent)
+        LoginStep.LANDING -> AuthLandingScreen(
+            onEvent = onEvent,
+            isLoading = state.isLoading,
+        )
         LoginStep.PHONE_INPUT -> PhoneInputScreen(state, onEvent)
     }
 

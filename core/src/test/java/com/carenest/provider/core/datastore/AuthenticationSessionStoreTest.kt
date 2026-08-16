@@ -121,6 +121,34 @@ class AuthenticationSessionStoreTest {
     }
 
     @Test
+    fun profileImageUrlIsAvailableSynchronouslyAndCanBeUpdated() = runBlocking {
+        store.beginAuthentication("access-a", "refresh-a")
+        val credentials = requireNotNull(store.state.first().credentials)
+        store.completeAuthentication(
+            expectedCredentials = credentials,
+            session = AuthenticationSession(
+                destination = AuthenticationSessionDestination.APPROVED,
+                nurseId = "nurse-a",
+                profileImageUrl = "https://example.com/avatar-old.jpg",
+            ),
+        )
+
+        store.state.first()
+        assertEquals("https://example.com/avatar-old.jpg", store.currentSession?.profileImageUrl)
+        assertTrue(
+            store.updateProfileImageUrl(
+                nurseId = "nurse-a",
+                profileImageUrl = "https://example.com/avatar-new.jpg",
+            ),
+        )
+
+        store.state.first { state ->
+            state.session?.profileImageUrl == "https://example.com/avatar-new.jpg"
+        }
+        assertEquals("https://example.com/avatar-new.jpg", store.currentSession?.profileImageUrl)
+    }
+
+    @Test
     fun invalidLegacyStateWithMissingRefreshTokenIsRemoved() = runBlocking {
         dataStore.edit { preferences ->
             preferences[stringPreferencesKey("access_token")] = "orphan-access"

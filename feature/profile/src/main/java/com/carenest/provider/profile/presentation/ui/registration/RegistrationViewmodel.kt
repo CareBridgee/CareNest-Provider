@@ -379,6 +379,7 @@ private fun com.carenest.provider.profile.domain.model.NurseProfile.toSavedSessi
         },
         nurseId = id,
         phoneNumber = phoneNumber,
+        profileImageUrl = profileImageUrl,
     )
 
 private fun Throwable.userMessage(): String = message?.takeIf(String::isNotBlank) ?: "error_unknown"

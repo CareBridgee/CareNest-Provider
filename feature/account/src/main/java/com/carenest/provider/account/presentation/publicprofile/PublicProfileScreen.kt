@@ -3,7 +3,6 @@ package com.carenest.provider.account.presentation.publicprofile
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -39,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -52,13 +50,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import com.carenest.provider.account.R
 import com.carenest.provider.account.presentation.components.ProviderAccountTopBar
 import com.carenest.provider.account.presentation.components.ProviderStatisticCard
 import com.carenest.provider.account.presentation.components.PublicProfileLoadingSkeleton
 import com.carenest.provider.core.mvi.ObserveEffect
 import com.carenest.provider.designsystem.components.bottomsheet.BaseBottomSheet
+import com.carenest.provider.designsystem.components.avatar.ProfileAvatar
 import com.carenest.provider.designsystem.components.button.PrimaryButton
 import com.carenest.provider.designsystem.components.button.SecondaryButton
 import com.carenest.provider.designsystem.components.textfield.CustomTextField
@@ -212,27 +210,13 @@ private fun PublicProfileHero(
                 .clickable(onClick = onProfileImageClick),
             contentAlignment = Alignment.Center,
         ) {
-            if (state.profileImageUrl.isNullOrBlank()) {
-                Image(
-                    painter = painterResource(DesignSystemR.drawable.nurse_image),
-                    contentDescription = stringResource(R.string.account_profile_photo),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(CircleShape)
-                        .border(5.dp, Theme.colors.surface, CircleShape),
-                    contentScale = ContentScale.Crop,
-                )
-            } else {
-                AsyncImage(
-                    model = state.profileImageUrl,
-                    contentDescription = stringResource(R.string.account_profile_photo),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(CircleShape)
-                        .border(5.dp, Theme.colors.surface, CircleShape),
-                    contentScale = ContentScale.Crop,
-                )
-            }
+            ProfileAvatar(
+                imageUrl = state.profileImageUrl,
+                contentDescription = stringResource(R.string.account_profile_photo),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .border(5.dp, Theme.colors.surface, CircleShape),
+            )
             if (state.isUploadingProfileImage) {
                 Box(
                     modifier = Modifier
