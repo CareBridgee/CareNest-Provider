@@ -20,6 +20,7 @@ import com.carenest.provider.designsystem.theme.Theme
 fun AvailableRequestsHeader(
     onViewAllClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -36,10 +37,10 @@ fun AvailableRequestsHeader(
         Text(
             text = stringResource(R.string.view_all),
             style = Theme.typography.body.small.copy(
-                color = Theme.colors.primary,
+                color = if (enabled) Theme.colors.primary else Theme.colors.onDisable,
                 fontWeight = FontWeight.SemiBold,
             ),
-            modifier = Modifier.clickable(onClick = onViewAllClick),
+            modifier = Modifier.clickable(enabled = enabled, onClick = onViewAllClick),
         )
     }
 }
