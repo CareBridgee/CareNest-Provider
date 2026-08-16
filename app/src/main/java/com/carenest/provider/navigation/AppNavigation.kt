@@ -74,6 +74,7 @@ import com.carenest.provider.profile.navigation.profileCompletionNavigationSeria
 import com.carenest.provider.profile.navigation.providerProfileCompletionEntries
 import com.carenest.provider.profile.navigation.providerProfileCompletionStartRoute
 import com.carenest.provider.profile.navigation.providerProfileReviewRoute
+import com.carenest.provider.auth.presentation.auth.login.google.GoogleSignInHelper
 import com.carenest.request.navigation.RequestRoutes
 import com.carenest.request.navigation.providerRequestEntries
 import com.carenest.request.navigation.requestSerializers
@@ -253,7 +254,9 @@ fun AppNavigation(
                 )
             },
             onLogout = {
-                backStack.replaceWith(providerAuthStartRoute())
+                GoogleSignInHelper(context).signOut {
+                    backStack.replaceWith(providerAuthStartRoute())
+                }
             },
             onNavigateBack = {
                 backStack.goBack()

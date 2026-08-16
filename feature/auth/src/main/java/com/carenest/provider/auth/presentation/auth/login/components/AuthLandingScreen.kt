@@ -77,9 +77,11 @@ fun AuthLandingScreen(onEvent: (LoginIntent) -> Unit) {
         println("GoogleAuthUI: Google Sign-In button clicked")
         Log.i("GoogleAuthUI", "Google Sign-In button clicked. Launching GMS Sign-In intent...")
         try {
-            val intent = googleSignInHelper.client.signInIntent
-            println("GoogleAuthUI: Launching Google Sign-In intent=$intent")
-            googleSignInLauncher.launch(intent)
+            googleSignInHelper.signOut {
+                val intent = googleSignInHelper.client.signInIntent
+                println("GoogleAuthUI: Launching Google Sign-In intent=$intent")
+                googleSignInLauncher.launch(intent)
+            }
         } catch (e: Throwable) {
             println("GoogleAuthUI: Error launching Google Sign-In intent: ${e.message}")
             Log.e("GoogleAuthUI", "Failed to launch Google Sign-In intent: ${e.message}", e)
