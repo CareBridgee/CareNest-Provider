@@ -235,7 +235,10 @@ class HomeViewModel @Inject constructor(
         if (isOnline) {
             nurseSocketClient.connect()
             viewModelScope.launch {
+                val TAG = "HomeViewModel"
                 val location = getCurrentLocation()
+                Log.d(TAG, "applyAvailabilityChange: ${location?.latitude}, ${location?.longitude}")
+
                 nurseSocketClient.updateAvailability(
                     available = true,
                     lat = location?.latitude,

@@ -12,12 +12,16 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
+import com.carenest.provider.core.datastore.AppPreferences
+import com.carenest.provider.profile.data.local.RegistrationDraftStore
 import kotlinx.coroutines.launch
 import com.carenest.provider.profile.domain.usecase.GetNurseUseCase
 
 @HiltViewModel
 class ProfileMenuViewModel @Inject constructor(
     private val authenticationSessionStore: AuthenticationSessionStore,
+    private val appPreferences: AppPreferences,
+    private val registrationDraftStore: RegistrationDraftStore,
     private val getNurse: GetNurseUseCase,
 ) : ViewModel(),
     StateHolder<ProfileMenuUiState> by DefaultStateHolder(
@@ -44,6 +48,8 @@ class ProfileMenuViewModel @Inject constructor(
             ProfileMenuIntent.WalletClicked -> sendEffect(ProfileMenuEffect.OpenWallet)
             ProfileMenuIntent.LogoutClicked -> viewModelScope.launch {
                 authenticationSessionStore.clearSession()
+                appPreferences.clear()
+                registrationDraftStore.clear()
                 sendEffect(ProfileMenuEffect.Logout)
             }
             ProfileMenuIntent.RefreshProfile -> loadProfile()
