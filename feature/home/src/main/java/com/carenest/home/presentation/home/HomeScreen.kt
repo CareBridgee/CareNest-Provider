@@ -103,6 +103,12 @@ fun HomeContent(
     var requestLocationPermission by remember { mutableStateOf(false) }
     var showLocationRationale by remember { mutableStateOf(false) }
 
+    androidx.compose.runtime.LaunchedEffect(state.isProviderApproved, state.isOnline) {
+        if (state.isProviderApproved && state.isOnline) {
+            requestNotificationPermission = true
+        }
+    }
+
     val handleToggleOnline: (Boolean) -> Unit = { isOnline ->
         if (state.isProviderApproved) {
             if (isOnline) {

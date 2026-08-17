@@ -45,48 +45,58 @@ class DefaultLocationTracker @Inject constructor(
         val isGpsEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
         val isNetworkEnabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
-        if (!isGpsEnabled && !isNetworkEnabled) {
-            return getLastKnownLocation(lm)
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val provider = when {
-                isGpsEnabled -> LocationManager.GPS_PROVIDER
-                isNetworkEnabled -> LocationManager.NETWORK_PROVIDER
-                else -> LocationManager.PASSIVE_PROVIDER
-            }
-            val location = suspendCancellableCoroutine<Location?> { continuation ->
-                val cancellationSignal = CancellationSignal()
-                continuation.invokeOnCancellation {
-                    cancellationSignal.cancel()
-                }
-                try {
-                    lm.getCurrentLocation(
-                        provider,
-                        cancellationSignal,
-                        context.mainExecutor
-                    ) { loc ->
-                        if (continuation.isActive) {
-                            continuation.resume(loc)
-                        }
-                    }
-                } catch (_: Exception) {
-                    if (continuation.isActive) {
-                        continuation.resume(null)
-                    }
-                }
-            }
-            if (location != null) {
-                return LocationData(location.latitude, location.longitude)
-            }
-        }
-
         val lastKnown = getLastKnownLocation(lm)
-        if (lastKnown != null) {
+
+        if (!isGpsEnabled && !isNetworkEnabled) {
             return lastKnown
         }
 
-        return requestSingleLocationUpdate(lm, isGpsEnabled, isNetworkEnabled)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val providersToTry = mutableListOf<String>()
+            if (isGpsEnabled) providersToTry.add(LocationManager.GPS_PROVIDER)
+            if (isNetworkEnabled) providersToTry.add(LocationManager.NETWORK_PROVIDER)
+            providersToTry.add(LocationManager.PASSIVE_PROVIDER)
+
+            for (provider in providersToTry) {
+                val location = fetchCurrentLocationForProvider(lm, provider)
+                if (location != null) {
+                    return LocationData(location.latitude, location.longitude)
+                }
+            }
+        }
+
+        val singleUpdateLocation = requestSingleLocationUpdate(lm, isNetworkEnabled, isGpsEnabled)
+        if (singleUpdateLocation != null) {
+            return singleUpdateLocation
+        }
+
+        return lastKnown
+    }
+
+    @androidx.annotation.RequiresApi(Build.VERSION_CODES.R)
+    private suspend fun fetchCurrentLocationForProvider(
+        lm: LocationManager,
+        provider: String,
+    ): Location? = suspendCancellableCoroutine { continuation ->
+        val cancellationSignal = CancellationSignal()
+        continuation.invokeOnCancellation {
+            cancellationSignal.cancel()
+        }
+        try {
+            lm.getCurrentLocation(
+                provider,
+                cancellationSignal,
+                context.mainExecutor
+            ) { loc ->
+                if (continuation.isActive) {
+                    continuation.resume(loc)
+                }
+            }
+        } catch (_: Exception) {
+            if (continuation.isActive) {
+                continuation.resume(null)
+            }
+        }
     }
 
     private fun getLastKnownLocation(lm: LocationManager): LocationData? {
@@ -109,52 +119,55 @@ class DefaultLocationTracker @Inject constructor(
 
     private suspend fun requestSingleLocationUpdate(
         lm: LocationManager,
+        isNetworkEnabled: Boolean,
         isGpsEnabled: Boolean,
-        isNetworkEnabled: Boolean
     ): LocationData? {
-        val provider = when {
-            isGpsEnabled -> LocationManager.GPS_PROVIDER
-            isNetworkEnabled -> LocationManager.NETWORK_PROVIDER
-            else -> return null
-        }
+        val providers = mutableListOf<String>()
+        if (isNetworkEnabled) providers.add(LocationManager.NETWORK_PROVIDER)
+        if (isGpsEnabled) providers.add(LocationManager.GPS_PROVIDER)
+        if (providers.isEmpty()) return null
 
-        return suspendCancellableCoroutine { continuation ->
-            val listener = object : LocationListener {
-                override fun onLocationChanged(location: Location) {
-                    try {
-                        lm.removeUpdates(this)
-                    } catch (_: SecurityException) { }
-                    if (continuation.isActive) {
-                        continuation.resume(LocationData(location.latitude, location.longitude))
+        for (provider in providers) {
+            val result = suspendCancellableCoroutine<LocationData?> { continuation ->
+                val listener = object : LocationListener {
+                    override fun onLocationChanged(location: Location) {
+                        try {
+                            lm.removeUpdates(this)
+                        } catch (_: SecurityException) { }
+                        if (continuation.isActive) {
+                            continuation.resume(LocationData(location.latitude, location.longitude))
+                        }
+                    }
+
+                    @Deprecated("Deprecated in API 29")
+                    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
+                    override fun onProviderEnabled(provider: String) {}
+                    override fun onProviderDisabled(provider: String) {
+                        try {
+                            lm.removeUpdates(this)
+                        } catch (_: SecurityException) { }
+                        if (continuation.isActive) {
+                            continuation.resume(null)
+                        }
                     }
                 }
 
-                @Deprecated("Deprecated in API 29")
-                override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
-                override fun onProviderEnabled(provider: String) {}
-                override fun onProviderDisabled(provider: String) {
+                continuation.invokeOnCancellation {
                     try {
-                        lm.removeUpdates(this)
+                        lm.removeUpdates(listener)
                     } catch (_: SecurityException) { }
+                }
+
+                try {
+                    lm.requestSingleUpdate(provider, listener, null)
+                } catch (_: Exception) {
                     if (continuation.isActive) {
                         continuation.resume(null)
                     }
                 }
             }
-
-            continuation.invokeOnCancellation {
-                try {
-                    lm.removeUpdates(listener)
-                } catch (_: SecurityException) { }
-            }
-
-            try {
-                lm.requestSingleUpdate(provider, listener, null)
-            } catch (_: Exception) {
-                if (continuation.isActive) {
-                    continuation.resume(null)
-                }
-            }
+            if (result != null) return result
         }
+        return null
     }
 }

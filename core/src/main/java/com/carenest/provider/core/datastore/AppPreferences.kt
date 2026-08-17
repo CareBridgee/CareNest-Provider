@@ -39,6 +39,8 @@ interface AppPreferences {
     suspend fun setLanguageCode(languageCode: String)
 
     suspend fun setOnline(isOnline: Boolean)
+
+    suspend fun clear()
 }
 
 class DataStoreAppPreferences @Inject constructor(
@@ -78,6 +80,12 @@ class DataStoreAppPreferences @Inject constructor(
     override suspend fun setOnline(isOnline: Boolean) {
         dataStore.edit { preferences ->
             preferences[Keys.IS_ONLINE] = isOnline
+        }
+    }
+
+    override suspend fun clear() {
+        dataStore.edit { preferences ->
+            preferences.clear()
         }
     }
 

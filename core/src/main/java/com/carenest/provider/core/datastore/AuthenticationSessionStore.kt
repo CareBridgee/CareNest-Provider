@@ -71,6 +71,7 @@ interface AuthenticationSessionStore {
 
 class DataStoreAuthenticationSessionStore @Inject constructor(
     @param:AuthDataStore private val dataStore: DataStore<Preferences>,
+    private val appPreferences: AppPreferences? = null,
 ) : AuthenticationSessionStore {
 
     @Volatile
@@ -155,6 +156,7 @@ class DataStoreAuthenticationSessionStore @Inject constructor(
 
     override suspend fun clearSession() {
         dataStore.edit { preferences -> preferences.removeAuthenticationState() }
+        appPreferences?.clear()
     }
 
     override suspend fun clearInvalidSession(): Boolean {
@@ -166,6 +168,9 @@ class DataStoreAuthenticationSessionStore @Inject constructor(
                 preferences.removeAuthenticationState()
                 cleared = true
             }
+        }
+        if (cleared) {
+            appPreferences?.clear()
         }
         return cleared
     }
@@ -179,6 +184,9 @@ class DataStoreAuthenticationSessionStore @Inject constructor(
                 preferences.removeAuthenticationState()
                 cleared = true
             }
+        }
+        if (cleared) {
+            appPreferences?.clear()
         }
         return cleared
     }

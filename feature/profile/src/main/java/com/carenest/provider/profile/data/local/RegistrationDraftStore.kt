@@ -81,7 +81,7 @@ class DataStoreRegistrationDraftStore @Inject constructor(
     }
 
     override suspend fun clear() {
-        dataStore.edit { preferences -> preferences.remove(DRAFT_KEY) }
+        dataStore.edit { preferences -> preferences.clear() }
     }
 
     private companion object {
