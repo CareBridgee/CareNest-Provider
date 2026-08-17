@@ -11,7 +11,6 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class PersonalInfoValidationTest {
-
     @Test
     fun extractsDateOfBirthFromNationalIdInDayMonthYearOrder() {
         assertEquals(
@@ -51,7 +50,6 @@ class PersonalInfoValidationTest {
     fun identifiesAndDoesNotAutoPopulateFutureDateOfBirth() {
         val referenceDate = SimpleDateFormat("dd/MM/yyyy", Locale.US).parse("11/05/2027")!!
         val nationalIdWithFutureDate = "32705129999999"
-
         assertTrue(
             PersonalInfoValidation.isNationalIdDateOfBirthInFuture(
                 nationalIdWithFutureDate,
@@ -59,6 +57,18 @@ class PersonalInfoValidationTest {
             ),
         )
         assertNull(PersonalInfoValidation.extractPastDateOfBirth(nationalIdWithFutureDate, referenceDate))
+    }
+
+    @Test
+    fun rejectsDateOfBirthEqualToCurrentDateBecauseBackendRequiresStrictPastDate() {
+        val referenceDate = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.US).parse("17/08/2026 09:37")!!
+        val nationalIdWithTodaysDate = "32608179999999"
+
+        assertEquals(
+            NationalIdValidationError.FUTURE_DATE_OF_BIRTH,
+            PersonalInfoValidation.nationalIdValidationError(nationalIdWithTodaysDate, referenceDate),
+        )
+        assertNull(PersonalInfoValidation.extractPastDateOfBirth(nationalIdWithTodaysDate, referenceDate))
     }
 
     @Test

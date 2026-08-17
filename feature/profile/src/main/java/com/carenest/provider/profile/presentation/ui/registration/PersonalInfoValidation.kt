@@ -2,6 +2,7 @@ package com.carenest.provider.profile.presentation.ui.registration
 
 import java.text.ParsePosition
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -52,7 +53,7 @@ internal object PersonalInfoValidation {
             NationalIdValidationError.INVALID_LENGTH
         nationalId.first() !in setOf('2', '3') -> NationalIdValidationError.INVALID_NATIONAL_ID
         extractDateOfBirth(nationalId) == null -> NationalIdValidationError.INVALID_DATE_OF_BIRTH
-        isNationalIdDateOfBirthInFuture(nationalId, currentDate) ->
+        isNationalIdDateOfBirthNotInPast(nationalId, currentDate) ->
             NationalIdValidationError.FUTURE_DATE_OF_BIRTH
         else -> null
     }
@@ -83,17 +84,38 @@ internal object PersonalInfoValidation {
         return parseDisplayDate(dateOfBirth)?.after(currentDate) == true
     }
 
+    private fun isNationalIdDateOfBirthNotInPast(
+        nationalId: String,
+        currentDate: Date,
+    ): Boolean {
+        val dateOfBirth = extractDateOfBirth(nationalId) ?: return false
+        return isDateNotInPast(dateOfBirth, currentDate)
+    }
+
     fun extractPastDateOfBirth(
         nationalId: String,
         currentDate: Date = Date(),
     ): String? = extractDateOfBirth(nationalId)?.takeUnless {
-        parseDisplayDate(it)?.after(currentDate) == true
+        isDateNotInPast(it, currentDate)
     }
 
     fun toBackendDate(displayDate: String): String {
         val parsedDate = requireNotNull(parseDisplayDate(displayDate)) { "Invalid date of birth" }
         return SimpleDateFormat("yyyy-MM-dd", Locale.US).format(parsedDate)
     }
+
+    private fun isDateNotInPast(displayDate: String, currentDate: Date): Boolean {
+        val dateOfBirth = parseDisplayDate(displayDate) ?: return false
+        return !dateOfBirth.before(startOfDay(currentDate))
+    }
+
+    private fun startOfDay(date: Date): Date = Calendar.getInstance().apply {
+        time = date
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+    }.time
 
     private fun parseDisplayDate(displayDate: String): Date? {
         val sourceFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US).apply { isLenient = false }

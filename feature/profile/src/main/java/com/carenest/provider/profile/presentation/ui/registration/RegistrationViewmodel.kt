@@ -269,7 +269,7 @@ class RegistrationViewmodel @Inject constructor(
                             NationalIdValidationError.INVALID_LENGTH -> "error_national_id_length"
                             NationalIdValidationError.INVALID_NATIONAL_ID -> "error_invalid_national_id"
                             NationalIdValidationError.INVALID_DATE_OF_BIRTH -> "error_national_id_dob_invalid"
-                            NationalIdValidationError.FUTURE_DATE_OF_BIRTH -> "error_dob_future"
+                            NationalIdValidationError.FUTURE_DATE_OF_BIRTH -> "error_dob_must_be_past"
                             null -> null
                         }
                     personal.gender == Gender.UNKNOWN -> "error_gender_required"
@@ -397,4 +397,16 @@ private fun com.carenest.provider.profile.domain.model.NurseProfile.toSavedSessi
         profileImageUrl = profileImageUrl,
     )
 
-private fun Throwable.userMessage(): String = message?.takeIf(String::isNotBlank) ?: "error_unknown"
+private fun Throwable.userMessage(): String {
+    val rawMessage = message?.trim().orEmpty()
+    return when {
+        rawMessage.isBlank() -> "error_unknown"
+        rawMessage.contains("\"dateOfBirth\"", ignoreCase = true) &&
+            rawMessage.contains("must be a past date", ignoreCase = true) ->
+            "error_dob_must_be_past"
+        rawMessage.contains("VALIDATION_FAILED", ignoreCase = true) ||
+            rawMessage.trimStart().startsWith("{") ->
+            "error_unknown"
+        else -> rawMessage
+    }
+}
