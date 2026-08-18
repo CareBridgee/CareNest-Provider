@@ -43,6 +43,7 @@ import com.carenest.home.presentation.home.components.OfflineEmptyState
 import com.carenest.home.presentation.home.components.OnlineToggleCard
 import com.carenest.provider.core.mvi.ObserveEffect
 import com.carenest.provider.core.network.socket.service.ActiveReservationService
+import com.carenest.provider.designsystem.components.dialog.CareNestDialog
 import com.carenest.provider.designsystem.components.request.EditRateBottomSheet
 import com.carenest.provider.designsystem.components.request.MakeOfferDialog
 import com.carenest.provider.designsystem.components.request.NurseRequestsLoadingSkeleton
@@ -163,7 +164,7 @@ fun HomeContent(
 
     val bottomNavigationContentPadding = LocalBottomNavigationContentPadding.current
     val filteredRequests = remember(state.requests) {
-        state.requests.filter { it.status != RequestStatus.ACCEPTED }
+        state.requests.filter { it.status != RequestStatus.ACCEPTED && it.status != RequestStatus.CANCELED }
     }
 
     Scaffold(
@@ -309,6 +310,17 @@ fun HomeContent(
             MakeOfferDialog(
                 countdownSeconds = state.offerCountdown ?: 0,
                 isSuccess = state.activeModal == ActiveModal.OfferSuccess,
+                onDismiss = { onIntent(HomeIntent.DismissModal) },
+            )
+        }
+
+        if (state.isProviderApproved && state.activeModal == ActiveModal.RequestCancelled) {
+            CareNestDialog(
+                title = stringResource(R.string.cancellation_dialog_title),
+                message = stringResource(R.string.cancellation_dialog_message),
+                confirmText = stringResource(R.string.cancellation_dialog_ok),
+                dismissText = null,
+                onConfirm = { onIntent(HomeIntent.DismissModal) },
                 onDismiss = { onIntent(HomeIntent.DismissModal) },
             )
         }

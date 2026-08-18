@@ -79,6 +79,7 @@ class HomeViewModel @Inject constructor(
         loadServiceImages()
         observeSocketErrors()
         observeNotifications()
+        observeReservationEvents()
         observeAvailability()
     }
 
@@ -110,10 +111,36 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             nurseSocketClient.notifications.collect { notification ->
                 val reqId = notification.relatedEntityId
-                if (!reqId.isNullOrEmpty() &&
-                    (notification.title.contains("Accepted", ignoreCase = true) || notification.message.contains("accepted", ignoreCase = true))
-                ) {
-                    completeOfferAccepted(reqId)
+                if (!reqId.isNullOrEmpty()) {
+                    if (notification.title.contains("Accepted", ignoreCase = true) || notification.message.contains("accepted", ignoreCase = true)) {
+                        completeOfferAccepted(reqId)
+                    } else if (notification.title.contains("Cancel", ignoreCase = true) || notification.message.contains("cancel", ignoreCase = true)) {
+                        handleRequestCancelledByPatient(reqId)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun observeReservationEvents() {
+        viewModelScope.launch {
+            nurseSocketClient.reservationEvents.collect { event ->
+                val resId = event.effectiveReservationId
+                when (event.eventType) {
+                    ReservationEventType.REQUEST_CANCELLED,
+                    ReservationEventType.OFFER_REJECTED -> {
+                        if (!resId.isNullOrEmpty()) {
+                            handleRequestCancelledByPatient(resId)
+                        } else if (currentState.offerRequestId != null) {
+                            handleRequestCancelledByPatient(currentState.offerRequestId!!)
+                        }
+                    }
+                    ReservationEventType.OFFER_ACCEPTED -> {
+                        if (!resId.isNullOrEmpty()) {
+                            completeOfferAccepted(resId)
+                        }
+                    }
+                    else -> {}
                 }
             }
         }
@@ -399,8 +426,7 @@ class HomeViewModel @Inject constructor(
                         }
                     }
                     ReservationEventType.OFFER_REJECTED, ReservationEventType.REQUEST_CANCELLED -> {
-                        stopOfferTimer()
-                        completeOfferTimeout(requestId)
+                        handleRequestCancelledByPatient(requestId)
                     }
                     else -> { }
                 }
@@ -456,18 +482,27 @@ class HomeViewModel @Inject constructor(
         sendEffect(HomeEffect.NavigateToOfferConfirmed(requestId))
     }
 
+    private fun handleRequestCancelledByPatient(requestId: String) {
+        offerEventListenerJob?.cancel()
+        stopOfferTimer()
+        updateState {
+            copy(
+                requests = requests.filterNot { it.id == requestId },
+                activeModal = ActiveModal.RequestCancelled,
+                offerRequestId = if (offerRequestId == requestId) null else offerRequestId,
+                offerCountdown = if (offerRequestId == requestId) null else offerCountdown,
+                editingRequestId = if (editingRequestId == requestId) null else editingRequestId,
+                selectedCardId = if (selectedCardId == requestId) null else selectedCardId,
+            )
+        }
+    }
+
     private fun completeOfferTimeout(requestId: String) {
         offerEventListenerJob?.cancel()
         stopOfferTimer()
         updateState {
             copy(
-                requests = requests.map { request ->
-                    if (request.id == requestId) {
-                        request.copy(status = RequestStatus.CANCELED)
-                    } else {
-                        request
-                    }
-                },
+                requests = requests.filterNot { it.id == requestId },
                 activeModal = ActiveModal.None,
                 offerRequestId = null,
                 offerCountdown = null,

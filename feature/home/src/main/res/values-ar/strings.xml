@@ -62,4 +62,7 @@
     <string name="notification_permission_allow">سماح</string>
     <string name="notification_permission_deny">رفض</string>
     <string name="home_user_avatar_content_description">الصورة الشخصية للمستخدم</string>
+    <string name="cancellation_dialog_title">تم إلغاء طلب الخدمة</string>
+    <string name="cancellation_dialog_message">تم إلغاء طلب الخدمة هذا بواسطة المريض.</string>
+    <string name="cancellation_dialog_ok">حسناً</string>
 </resources>

@@ -58,4 +58,7 @@
     <string name="notification_permission_allow">Allow</string>
     <string name="notification_permission_deny">Deny</string>
     <string name="home_user_avatar_content_description">User avatar</string>
+    <string name="cancellation_dialog_title">Service Request Cancelled</string>
+    <string name="cancellation_dialog_message">This service request has been cancelled by the patient.</string>
+    <string name="cancellation_dialog_ok">OK</string>
 </resources>
