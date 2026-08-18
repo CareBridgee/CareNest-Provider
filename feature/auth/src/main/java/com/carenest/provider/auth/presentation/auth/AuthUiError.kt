@@ -35,23 +35,24 @@ fun AuthUiError?.localizedMessage(): String? = when (this) {
 }
 
 fun Throwable.toAuthUiError(default: AuthUiError): AuthUiError = when (this) {
-    is AuthException -> when (failure) {
-        AuthFailure.Network -> AuthUiError.NetworkUnavailable
-        AuthFailure.InvalidPhone -> AuthUiError.InvalidPhone
-        AuthFailure.InvalidOtp -> AuthUiError.InvalidOtp
-        AuthFailure.ExpiredOtp -> AuthUiError.ExpiredOtp
-        AuthFailure.TooManyRequests -> AuthUiError.TooManyRequests
-        AuthFailure.Server -> AuthUiError.ServiceUnavailable
-        AuthFailure.Unknown -> {
-            val msg = message
-            if (!msg.isNullOrBlank() && msg != "technical backend message" && msg != "Authentication request failed") {
-                AuthUiError.Custom(msg)
-            } else {
-                default
-            }
+    is AuthException -> {
+        val customMsg = message?.takeIf {
+            it.isNotBlank() &&
+                !it.startsWith("HTTP ") &&
+                it != "technical backend message" &&
+                it != "Authentication request failed"
+        }
+        when (failure) {
+            AuthFailure.Network -> AuthUiError.NetworkUnavailable
+            AuthFailure.InvalidPhone -> customMsg?.let { AuthUiError.Custom(it) } ?: AuthUiError.InvalidPhone
+            AuthFailure.InvalidOtp -> customMsg?.let { AuthUiError.Custom(it) } ?: AuthUiError.InvalidOtp
+            AuthFailure.ExpiredOtp -> customMsg?.let { AuthUiError.Custom(it) } ?: AuthUiError.ExpiredOtp
+            AuthFailure.TooManyRequests -> AuthUiError.TooManyRequests
+            AuthFailure.Server -> customMsg?.let { AuthUiError.Custom(it) } ?: AuthUiError.ServiceUnavailable
+            AuthFailure.Unknown -> customMsg?.let { AuthUiError.Custom(it) } ?: default
         }
     }
 
     is IOException -> AuthUiError.NetworkUnavailable
-    else -> this.message?.takeIf { it.isNotBlank() }?.let { AuthUiError.Custom(it) } ?: default
+    else -> this.message?.takeIf { it.isNotBlank() && !it.startsWith("HTTP ") }?.let { AuthUiError.Custom(it) } ?: default
 }

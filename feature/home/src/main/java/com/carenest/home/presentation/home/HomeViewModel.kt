@@ -242,6 +242,10 @@ class HomeViewModel @Inject constructor(
 
     private fun handleOnlineToggle(isOnline: Boolean) {
         if (isOnline) {
+            if (currentState.determinedLocation != null) {
+                updateState { copy(showLocationDialog = true) }
+                return
+            }
             if (currentState.isGettingLocation) {
                 updateState { copy(showLocationDialog = true) }
                 return
@@ -344,7 +348,7 @@ class HomeViewModel @Inject constructor(
             nurseSocketClient.connect()
             viewModelScope.launch {
                 val TAG = "HomeViewModel"
-                val location = getCurrentLocation()
+                val location = currentState.determinedLocation ?: getCurrentLocation()
                 Log.d(TAG, "applyAvailabilityChange: ${location?.latitude}, ${location?.longitude}")
 
                 if (location == null) {
@@ -359,6 +363,7 @@ class HomeViewModel @Inject constructor(
                         )
                     }
                 } else {
+                    updateState { copy(determinedLocation = location) }
                     nurseSocketClient.updateAvailability(
                         available = true,
                         lat = location.latitude,

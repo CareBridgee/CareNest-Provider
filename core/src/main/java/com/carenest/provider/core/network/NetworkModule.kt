@@ -58,7 +58,10 @@ object NetworkModule {
         install(Auth) {
             bearer {
                 loadTokens {
-                    val credentials = authenticationSessionStore.state.first().credentials
+                    val state = kotlinx.coroutines.withTimeoutOrNull(2000) {
+                        authenticationSessionStore.state.first { it.credentials?.isComplete == true }
+                    } ?: authenticationSessionStore.state.first()
+                    val credentials = state.credentials
                     val accessToken = credentials?.accessToken?.takeIf(String::isNotBlank)
                     val refreshToken = credentials?.refreshToken?.takeIf(String::isNotBlank)
                     if (accessToken != null && refreshToken != null) {
