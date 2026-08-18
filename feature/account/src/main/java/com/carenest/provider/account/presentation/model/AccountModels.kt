@@ -16,10 +16,7 @@ enum class MenuItemId {
     Documents,
     Settings,
     Reviews,
-    Earnings,
-    Payouts,
-    Wallet,
-    Support,
+    Earnings
 }
 
 enum class DocumentStatus {

@@ -51,10 +51,28 @@ class PublicProfileViewModel @Inject constructor(
             PublicProfileIntent.DismissEditBio -> updateState { copy(isEditBioSheetVisible = false) }
             is PublicProfileIntent.BioChanged -> updateState { copy(bioDraft = intent.bio) }
             is PublicProfileIntent.SpecializationChanged -> updateState {
-                copy(specializationDraft = intent.specialization)
+                val error = when {
+                    intent.specialization.length < 3 -> "Specialization name must be at least 3 characters"
+                    !intent.specialization.all { it.isLetter() || it.isWhitespace() } -> "Specialization name should contain only letters"
+                    else -> null
+                }
+                copy(
+                    specializationDraft = intent.specialization,
+                    specializationError = error,
+                )
             }
             is PublicProfileIntent.YearsOfExperienceChanged -> updateState {
-                copy(yearsOfExperienceDraft = intent.yearsOfExperience.filter(Char::isDigit))
+                val digits = intent.yearsOfExperience.filter(Char::isDigit)
+                val years = digits.toIntOrNull()
+                val error = when {
+                    digits.isBlank() -> "Experience is required"
+                    years == null || years < 0 || years > 50 -> "Experience must be between 0 and 50 years"
+                    else -> null
+                }
+                copy(
+                    yearsOfExperienceDraft = digits,
+                    yearsOfExperienceError = error,
+                )
             }
             PublicProfileIntent.SaveBioClicked -> saveProfileDetails()
             PublicProfileIntent.ProfileImageClicked -> {
@@ -63,7 +81,19 @@ class PublicProfileViewModel @Inject constructor(
                 }
             }
             is PublicProfileIntent.ProfileImagePicked -> updateProfileImage(intent.image)
-            PublicProfileIntent.ShareProfileClicked -> sendEffect(PublicProfileEffect.ShareProfile)
+            PublicProfileIntent.ShareProfileClicked -> {
+                val snapshot = currentState
+                val currentNurseId = nurseId ?: snapshot.profile?.id
+                if (!currentNurseId.isNullOrBlank()) {
+                    sendEffect(
+                        PublicProfileEffect.ShareProfile(
+                            nurseId = currentNurseId,
+                            name = snapshot.fullName,
+                            specialization = snapshot.specialization,
+                        ),
+                    )
+                }
+            }
             PublicProfileIntent.SettingsClicked -> sendEffect(PublicProfileEffect.OpenSettings)
         }
     }
@@ -126,20 +156,27 @@ class PublicProfileViewModel @Inject constructor(
         if (snapshot.isSavingProfile) return
         val resolvedNurseId = nurseId ?: snapshot.profile?.id ?: return
         val specialization = snapshot.specializationDraft.trim()
-        val years = snapshot.yearsOfExperienceDraft.toIntOrNull()
-        when {
-            specialization.isBlank() -> {
-                sendEffect(PublicProfileEffect.ShowMessage("profile_error_specialization_required"))
-                return
-            }
-            years == null -> {
-                sendEffect(PublicProfileEffect.ShowMessage("profile_error_invalid_years"))
-                return
-            }
+        val yearsText = snapshot.yearsOfExperienceDraft
+        val years = yearsText.toIntOrNull()
+
+        var hasError = false
+        if (specialization.length < 3) {
+            updateState { copy(specializationError = "Specialization name must be at least 3 characters") }
+            hasError = true
+        } else if (!specialization.all { it.isLetter() || it.isWhitespace() }) {
+            updateState { copy(specializationError = "Specialization name should contain only letters") }
+            hasError = true
         }
 
+        if (years == null || years < 0 || years > 50) {
+            updateState { copy(yearsOfExperienceError = "Experience must be between 0 and 50 years") }
+            hasError = true
+        }
+
+        if (hasError) return
+
         viewModelScope.launch {
-            updateState { copy(isSavingProfile = true, errorMessage = null) }
+            updateState { copy(isSavingProfile = true, specializationError = null, yearsOfExperienceError = null, errorMessage = null) }
             updateNurse(
                 resolvedNurseId,
                 NurseUpdate(

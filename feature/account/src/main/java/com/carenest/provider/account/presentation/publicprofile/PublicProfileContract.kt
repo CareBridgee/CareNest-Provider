@@ -16,6 +16,8 @@ data class PublicProfileUiState(
     val bioDraft: String = "",
     val specializationDraft: String = "",
     val yearsOfExperienceDraft: String = "",
+    val specializationError: String? = null,
+    val yearsOfExperienceError: String? = null,
 ) {
     val isVerified: Boolean
         get() = profile?.verificationStatus == VerificationStatus.APPROVED
@@ -82,7 +84,7 @@ sealed interface PublicProfileIntent {
 sealed interface PublicProfileEffect {
     data object NavigateBack : PublicProfileEffect
     data object OpenProfileImagePicker : PublicProfileEffect
-    data object ShareProfile : PublicProfileEffect
+    data class ShareProfile(val nurseId: String, val name: String, val specialization: String) : PublicProfileEffect
     data object OpenSettings : PublicProfileEffect
     data class ShowMessage(
         val message: String,

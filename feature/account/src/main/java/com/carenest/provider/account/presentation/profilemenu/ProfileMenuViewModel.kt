@@ -59,9 +59,6 @@ class ProfileMenuViewModel @Inject constructor(
                 MenuItemId.Settings -> sendEffect(ProfileMenuEffect.OpenSettings)
                 MenuItemId.Reviews -> sendEffect(ProfileMenuEffect.OpenRatingsAndReviews)
                 MenuItemId.Earnings -> sendEffect(ProfileMenuEffect.OpenEarnings)
-                MenuItemId.Payouts -> sendEffect(ProfileMenuEffect.OpenPayouts)
-                MenuItemId.Wallet -> sendEffect(ProfileMenuEffect.OpenWallet)
-                MenuItemId.Support -> sendEffect(ProfileMenuEffect.OpenSupport)
             }
         }
     }
