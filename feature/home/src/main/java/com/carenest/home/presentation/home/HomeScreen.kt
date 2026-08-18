@@ -18,10 +18,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -43,12 +45,15 @@ import com.carenest.home.presentation.home.components.OfflineEmptyState
 import com.carenest.home.presentation.home.components.OnlineToggleCard
 import com.carenest.provider.core.mvi.ObserveEffect
 import com.carenest.provider.core.network.socket.service.ActiveReservationService
+import com.carenest.provider.designsystem.components.dialog.CareNestDialog
 import com.carenest.provider.designsystem.components.request.EditRateBottomSheet
 import com.carenest.provider.designsystem.components.request.MakeOfferDialog
 import com.carenest.provider.designsystem.components.request.NurseRequestsLoadingSkeleton
 import com.carenest.provider.designsystem.components.bottomnav.LocalBottomNavigationContentPadding
+import com.carenest.provider.designsystem.components.toast.showSnack
 import com.carenest.provider.designsystem.theme.SpTheme
 import com.carenest.provider.designsystem.theme.Theme
+import kotlinx.coroutines.launch
 
 private enum class ContentPhase {
     Offline, Loading, Empty, List,
@@ -63,6 +68,8 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
     LifecycleResumeEffect(viewModel) {
         viewModel.onIntent(HomeIntent.RefreshProfile)
@@ -80,6 +87,22 @@ fun HomeScreen(
                     ActiveReservationService.startService(context, effect.requestId)
                     onOfferConfirmed(effect.requestId)
                 }
+                is HomeEffect.ShowSnackbarRes -> {
+                    coroutineScope.launch {
+                        snackbarHostState.showSnack(
+                            message = context.getString(effect.messageRes),
+                            type = effect.type,
+                        )
+                    }
+                }
+                is HomeEffect.ShowSnackbarString -> {
+                    coroutineScope.launch {
+                        snackbarHostState.showSnack(
+                            message = effect.message,
+                            type = effect.type,
+                        )
+                    }
+                }
             }
         }
     }
@@ -87,6 +110,7 @@ fun HomeScreen(
     HomeContent(
         state = state,
         onIntent = viewModel::onIntent,
+        snackbarHostState = snackbarHostState,
         modifier = modifier,
     )
 }
@@ -96,6 +120,7 @@ fun HomeContent(
     state: HomeUiState,
     onIntent: (HomeIntent) -> Unit,
     modifier: Modifier = Modifier,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
     var requestNotificationPermission by remember { mutableStateOf(false) }
     var showNotificationRationale by remember { mutableStateOf(false) }
@@ -112,7 +137,11 @@ fun HomeContent(
     val handleToggleOnline: (Boolean) -> Unit = { isOnline ->
         if (state.isProviderApproved) {
             if (isOnline) {
-                requestNotificationPermission = true
+                if (state.isGettingLocation) {
+                    onIntent(HomeIntent.OnlineToggled(true))
+                } else {
+                    requestNotificationPermission = true
+                }
             } else {
                 requestNotificationPermission = false
                 showNotificationRationale = false
@@ -163,12 +192,15 @@ fun HomeContent(
 
     val bottomNavigationContentPadding = LocalBottomNavigationContentPadding.current
     val filteredRequests = remember(state.requests) {
-        state.requests.filter { it.status != RequestStatus.ACCEPTED }
+        state.requests.filter { it.status != RequestStatus.ACCEPTED && it.status != RequestStatus.CANCELED }
     }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = Theme.colors.backGround,
+        snackbarHost = {
+            com.carenest.provider.designsystem.components.toast.SnackbarHost(hostState = snackbarHostState)
+        },
         topBar = {
             HomeGreetingBar(
                 name = state.nurseName,
@@ -310,6 +342,27 @@ fun HomeContent(
                 countdownSeconds = state.offerCountdown ?: 0,
                 isSuccess = state.activeModal == ActiveModal.OfferSuccess,
                 onDismiss = { onIntent(HomeIntent.DismissModal) },
+            )
+        }
+
+        if (state.isProviderApproved && state.activeModal == ActiveModal.RequestCancelled) {
+            CareNestDialog(
+                title = stringResource(R.string.cancellation_dialog_title),
+                message = stringResource(R.string.cancellation_dialog_message),
+                confirmText = stringResource(R.string.cancellation_dialog_ok),
+                dismissText = null,
+                onConfirm = { onIntent(HomeIntent.DismissModal) },
+                onDismiss = { onIntent(HomeIntent.DismissModal) },
+            )
+        }
+
+        if (state.showLocationDialog) {
+            com.carenest.home.presentation.home.components.LocationStatusDialog(
+                isGettingLocation = state.isGettingLocation,
+                determinedLocation = state.determinedLocation,
+                locationError = state.locationError,
+                onConfirmOnline = { onIntent(HomeIntent.ConfirmLocationOnline) },
+                onDismiss = { onIntent(HomeIntent.DismissLocationDialog) },
             )
         }
 

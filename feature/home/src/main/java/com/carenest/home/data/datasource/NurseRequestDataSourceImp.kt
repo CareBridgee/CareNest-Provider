@@ -66,7 +66,7 @@ class NurseRequestsDataSourceImpl @Inject constructor(
 
     override fun listenReservationEvents(reservationId: String): Flow<ReservationEvent> {
         return nurseSocketClient.reservationEvents.filter { event ->
-            event.reservationId == reservationId || event.reservationId.isNullOrEmpty()
+            event.effectiveReservationId == reservationId || event.effectiveReservationId.isNullOrEmpty()
         }
     }
 

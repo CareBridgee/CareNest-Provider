@@ -24,6 +24,8 @@ import com.carenest.provider.core.datastore.AuthenticationSessionStore
 import com.carenest.provider.profile.domain.usecase.GetNurseUseCase
 import com.carenest.provider.profile.domain.usecase.LoadServiceTypesUseCase
 import com.carenest.provider.profile.domain.model.VerificationStatus
+import com.carenest.home.R
+import com.carenest.provider.designsystem.components.toast.ToastType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
@@ -64,6 +66,7 @@ class HomeViewModel @Inject constructor(
     private var offerEventListenerJob: Job? = null
     private var offerTimerJob: Job? = null
     private var profileJob: Job? = null
+    private var locationJob: Job? = null
     private var hasResolvedProviderApproval = false
     private var serviceImagesById: Map<String, String> = emptyMap()
 
@@ -79,6 +82,7 @@ class HomeViewModel @Inject constructor(
         loadServiceImages()
         observeSocketErrors()
         observeNotifications()
+        observeReservationEvents()
         observeAvailability()
     }
 
@@ -110,10 +114,36 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             nurseSocketClient.notifications.collect { notification ->
                 val reqId = notification.relatedEntityId
-                if (!reqId.isNullOrEmpty() &&
-                    (notification.title.contains("Accepted", ignoreCase = true) || notification.message.contains("accepted", ignoreCase = true))
-                ) {
-                    completeOfferAccepted(reqId)
+                if (!reqId.isNullOrEmpty()) {
+                    if (notification.title.contains("Accepted", ignoreCase = true) || notification.message.contains("accepted", ignoreCase = true)) {
+                        completeOfferAccepted(reqId)
+                    } else if (notification.title.contains("Cancel", ignoreCase = true) || notification.message.contains("cancel", ignoreCase = true)) {
+                        handleRequestCancelledByPatient(reqId)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun observeReservationEvents() {
+        viewModelScope.launch {
+            nurseSocketClient.reservationEvents.collect { event ->
+                val resId = event.effectiveReservationId
+                when (event.eventType) {
+                    ReservationEventType.REQUEST_CANCELLED,
+                    ReservationEventType.OFFER_REJECTED -> {
+                        if (!resId.isNullOrEmpty()) {
+                            handleRequestCancelledByPatient(resId)
+                        } else if (currentState.offerRequestId != null) {
+                            handleRequestCancelledByPatient(currentState.offerRequestId!!)
+                        }
+                    }
+                    ReservationEventType.OFFER_ACCEPTED -> {
+                        if (!resId.isNullOrEmpty()) {
+                            completeOfferAccepted(resId)
+                        }
+                    }
+                    else -> {}
                 }
             }
         }
@@ -137,6 +167,8 @@ class HomeViewModel @Inject constructor(
             HomeIntent.DismissModal -> dismissModal()
             HomeIntent.ViewAllRequestsClicked -> sendEffect(HomeEffect.NavigateToRequestList)
             HomeIntent.RefreshProfile -> getNurseData()
+            HomeIntent.ConfirmLocationOnline -> confirmLocationOnline()
+            HomeIntent.DismissLocationDialog -> dismissLocationDialog()
         }
     }
 
@@ -209,8 +241,84 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun handleOnlineToggle(isOnline: Boolean) {
+        if (isOnline) {
+            if (currentState.isGettingLocation) {
+                updateState { copy(showLocationDialog = true) }
+                return
+            }
+
+            locationJob?.cancel()
+            updateState {
+                copy(
+                    isGettingLocation = true,
+                    showLocationDialog = true,
+                    determinedLocation = null,
+                    locationError = null,
+                )
+            }
+
+            locationJob = viewModelScope.launch {
+                val location = getCurrentLocation()
+                Log.d("HomeViewModel", "handleOnlineToggle location result: ${location?.latitude}, ${location?.longitude}")
+                if (location != null) {
+                    updateState {
+                        copy(
+                            isGettingLocation = false,
+                            determinedLocation = location,
+                            locationError = null,
+                        )
+                    }
+                } else {
+                    updateState {
+                        copy(
+                            isGettingLocation = false,
+                            determinedLocation = null,
+                            locationError = null,
+                            isOnline = false,
+                            showLocationDialog = true,
+                        )
+                    }
+                    updateAvailability(false)
+                }
+            }
+        } else {
+            locationJob?.cancel()
+            updateState {
+                copy(
+                    isGettingLocation = false,
+                    showLocationDialog = false,
+                    determinedLocation = null,
+                    locationError = null,
+                )
+            }
+            viewModelScope.launch {
+                updateAvailability(false)
+            }
+        }
+    }
+
+    private fun confirmLocationOnline() {
+        val location = currentState.determinedLocation ?: return
+        updateState {
+            copy(
+                showLocationDialog = false,
+                isGettingLocation = false,
+            )
+        }
         viewModelScope.launch {
-            updateAvailability(isOnline)
+            updateAvailability(true)
+        }
+    }
+
+    private fun dismissLocationDialog() {
+        locationJob?.cancel()
+        updateState {
+            copy(
+                showLocationDialog = false,
+                isGettingLocation = false,
+                determinedLocation = null,
+                locationError = null,
+            )
         }
     }
 
@@ -239,11 +347,24 @@ class HomeViewModel @Inject constructor(
                 val location = getCurrentLocation()
                 Log.d(TAG, "applyAvailabilityChange: ${location?.latitude}, ${location?.longitude}")
 
-                nurseSocketClient.updateAvailability(
-                    available = true,
-                    lat = location?.latitude,
-                    lng = location?.longitude
-                )
+                if (location == null) {
+                    updateAvailability(false)
+                    updateState {
+                        copy(
+                            showLocationDialog = true,
+                            isGettingLocation = false,
+                            determinedLocation = null,
+                            locationError = null,
+                            isOnline = false,
+                        )
+                    }
+                } else {
+                    nurseSocketClient.updateAvailability(
+                        available = true,
+                        lat = location.latitude,
+                        lng = location.longitude
+                    )
+                }
             }
 
             // Stream real-time socket requests
@@ -399,8 +520,7 @@ class HomeViewModel @Inject constructor(
                         }
                     }
                     ReservationEventType.OFFER_REJECTED, ReservationEventType.REQUEST_CANCELLED -> {
-                        stopOfferTimer()
-                        completeOfferTimeout(requestId)
+                        handleRequestCancelledByPatient(requestId)
                     }
                     else -> { }
                 }
@@ -456,18 +576,27 @@ class HomeViewModel @Inject constructor(
         sendEffect(HomeEffect.NavigateToOfferConfirmed(requestId))
     }
 
+    private fun handleRequestCancelledByPatient(requestId: String) {
+        offerEventListenerJob?.cancel()
+        stopOfferTimer()
+        updateState {
+            copy(
+                requests = requests.filterNot { it.id == requestId },
+                activeModal = ActiveModal.RequestCancelled,
+                offerRequestId = if (offerRequestId == requestId) null else offerRequestId,
+                offerCountdown = if (offerRequestId == requestId) null else offerCountdown,
+                editingRequestId = if (editingRequestId == requestId) null else editingRequestId,
+                selectedCardId = if (selectedCardId == requestId) null else selectedCardId,
+            )
+        }
+    }
+
     private fun completeOfferTimeout(requestId: String) {
         offerEventListenerJob?.cancel()
         stopOfferTimer()
         updateState {
             copy(
-                requests = requests.map { request ->
-                    if (request.id == requestId) {
-                        request.copy(status = RequestStatus.CANCELED)
-                    } else {
-                        request
-                    }
-                },
+                requests = requests.filterNot { it.id == requestId },
                 activeModal = ActiveModal.None,
                 offerRequestId = null,
                 offerCountdown = null,
@@ -526,6 +655,7 @@ class HomeViewModel @Inject constructor(
         }
     }
     override fun onCleared() {
+        locationJob?.cancel()
         fetchJob?.cancel()
         socketJob?.cancel()
         offerEventListenerJob?.cancel()
@@ -542,6 +672,8 @@ class HomeViewModel @Inject constructor(
 private val HomeIntent.requiresProviderApproval: Boolean
     get() = when (this) {
         HomeIntent.RefreshProfile,
-        HomeIntent.DismissModal -> false
+        HomeIntent.DismissModal,
+        HomeIntent.DismissLocationDialog,
+        HomeIntent.ConfirmLocationOnline -> false
         else -> true
     }

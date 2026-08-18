@@ -62,4 +62,16 @@
     <string name="notification_permission_allow">سماح</string>
     <string name="notification_permission_deny">رفض</string>
     <string name="home_user_avatar_content_description">الصورة الشخصية للمستخدم</string>
+    <string name="cancellation_dialog_title">تم إلغاء طلب الخدمة</string>
+    <string name="cancellation_dialog_message">تم إلغاء طلب الخدمة هذا بواسطة المريض.</string>
+    <string name="cancellation_dialog_ok">حسناً</string>
+    <string name="getting_location_to_go_online">جاري الحصول على موقعك للاتصال بالإنترنت…</string>
+    <string name="unable_to_get_location">تعذر الحصول على موقعك. لا يمكنك الاتصال بالإنترنت بدون تحديد موقعك.</string>
+    <string name="location_unknown_making_offline">الموقع غير معروف، لذلك تم تحويل حالتك إلى غير متصل الآن.</string>
+    <string name="getting_location_title">جاري تحديد موقعك</string>
+    <string name="getting_location_message">يرجى الانتظار بينما نحدد موقعك للاتصال بالإنترنت…</string>
+    <string name="location_determined_title">تم تحديد الموقع</string>
+    <string name="location_determined_message">الموقع الحالي:\nخط العرض: %1$.4f، خط الطول: %2$.4f</string>
+    <string name="location_unknown_title">الموقع غير معروف</string>
+    <string name="go_online">الاتصال بالإنترنت</string>
 </resources>

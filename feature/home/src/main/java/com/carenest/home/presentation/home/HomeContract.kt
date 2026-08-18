@@ -1,12 +1,17 @@
 package com.carenest.home.presentation.home
 
+import androidx.annotation.StringRes
 import com.carenest.home.domain.model.NurseRequest
+import com.carenest.provider.designsystem.components.toast.ToastType
+
+import com.carenest.provider.core.location.LocationData
 
 enum class ActiveModal {
     None,
     EditRate,
     MakeOffer,
     OfferSuccess,
+    RequestCancelled,
 }
 
 data class HomeUiState(
@@ -14,6 +19,10 @@ data class HomeUiState(
     val nurseAvatar : String?=null,
     val isProviderApproved: Boolean = false,
     val isOnline: Boolean = false,
+    val isGettingLocation: Boolean = false,
+    val determinedLocation: LocationData? = null,
+    val locationError: String? = null,
+    val showLocationDialog: Boolean = false,
     val isLoading: Boolean = false,
     val requests: List<NurseRequest> = emptyList(),
     val selectedCardId: String? = null,
@@ -44,10 +53,21 @@ sealed interface HomeIntent {
     data object RefreshProfile : HomeIntent
     data object SaveRateClicked : HomeIntent
     data object DismissModal : HomeIntent
+    data object ConfirmLocationOnline : HomeIntent
+    data object DismissLocationDialog : HomeIntent
 }
 
 sealed interface HomeEffect {
     data object NavigateToRequestList : HomeEffect
     data class NavigateToOfferConfirmed(val requestId: String) : HomeEffect
     data class StartActiveReservationService(val requestId: String) : HomeEffect
+    data class ShowSnackbarRes(
+        @param:StringRes val messageRes: Int,
+        val type: ToastType = ToastType.Info,
+    ) : HomeEffect
+    data class ShowSnackbarString(
+        val message: String,
+        val type: ToastType = ToastType.Info,
+    ) : HomeEffect
 }
+
