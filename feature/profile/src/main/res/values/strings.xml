@@ -176,29 +176,29 @@ coordination of services.</string>
     <string name="select_gender">Select Gender</string>
 
     <!-- Validation Messages -->
-    <string name="error_fill_all_fields">Please fill all required fields</string>
-    <string name="error_name_invalid">Names must contain 2–50 letters and may only include spaces, hyphens, or apostrophes</string>
-    <string name="error_first_name_required">First name is required</string>
-    <string name="error_first_name_invalid">Enter a valid first name containing 2–50 letters</string>
-    <string name="error_last_name_required">Last name is required</string>
-    <string name="error_last_name_invalid">Enter a valid last name containing 2–50 letters</string>
-    <string name="error_national_id_required">National ID is required</string>
-    <string name="error_national_id_length">National ID must contain exactly 14 digits</string>
-    <string name="error_invalid_national_id">Enter a valid 14-digit National ID containing a valid date of birth</string>
-    <string name="error_national_id_dob_invalid">The date of birth encoded in the National ID is invalid</string>
-    <string name="error_dob_future">Date of birth cannot be in the future</string>
-    <string name="error_gender_required">Please select your gender</string>
-    <string name="error_profile_photo_required">Please upload a profile photo</string>
-    <string name="error_nid_dob_mismatch">National ID does not match Date of Birth</string>
-    <string name="error_upload_all_docs">Please upload all documents and fill experience details</string>
-    <string name="error_years_of_exp_range">Years of experience must be between 0 and 70</string>
-    <string name="error_primary_speciality_invalid">Primary speciality must be 3–50 letters and may only include spaces, hyphens, apostrophes, ampersands, or slashes</string>
-    <string name="error_license_number_invalid">License number must be 5–20 letters, numbers, hyphens, or slashes</string>
-    <string name="error_select_service">Please select at least one service</string>
-    <string name="error_certify_information">Please certify that the information is accurate</string>
-    <string name="error_services_unavailable">Services could not be loaded. Please retry.</string>
-    <string name="services_loading">Services are still loading</string>
-    <string name="retry">Retry</string>
+    <string name="error_fill_all_fields">Please fill in all the required fields to continue.</string>
+    <string name="error_name_invalid">Please enter a valid name using only letters.</string>
+    <string name="error_first_name_required">Please enter your first name.</string>
+    <string name="error_first_name_invalid">First name should contain 2–50 letters.</string>
+    <string name="error_last_name_required">Please enter your last name.</string>
+    <string name="error_last_name_invalid">Last name should contain 2–50 letters.</string>
+    <string name="error_national_id_required">Please enter your 14-digit National ID.</string>
+    <string name="error_national_id_length">National ID must be exactly 14 digits.</string>
+    <string name="error_invalid_national_id">This National ID doesn\'t look right. Please check the digits.</string>
+    <string name="error_national_id_dob_invalid">The birth date in this National ID is not valid.</string>
+    <string name="error_dob_future">Birth date cannot be in the future.</string>
+    <string name="error_gender_required">Please select your gender identity.</string>
+    <string name="error_profile_photo_required">Please upload a clear profile photo of yourself.</string>
+    <string name="error_nid_dob_mismatch">The National ID provided doesn\'t match the date of birth.</string>
+    <string name="error_upload_all_docs">Please make sure all documents are uploaded and experience details are filled.</string>
+    <string name="error_years_of_exp_range">Experience should be between 0 and 50 years.</string>
+    <string name="error_primary_speciality_invalid">Please enter a valid primary speciality (3–50 letters).</string>
+    <string name="error_license_number_invalid">Please enter a valid license number.</string>
+    <string name="error_select_service">Please select at least one service you provide.</string>
+    <string name="error_certify_information">Please confirm that all your information is accurate.</string>
+    <string name="error_services_unavailable">We\'re having trouble loading services. Please tap retry.</string>
+    <string name="services_loading">Loading available services…</string>
+    <string name="retry">Try Again</string>
     <string name="profile_status_load_failed">Could not refresh your verification status</string>
     <string name="unsupported_rejected_document">The rejected item cannot be mapped to a supported document field.</string>
     <string name="upload_failed">Document upload failed</string>
@@ -206,6 +206,10 @@ coordination of services.</string>
     <string name="error_file_open">The selected file could not be opened</string>
     <string name="error_file_empty">The selected file is empty</string>
     <string name="error_unknown">Something went wrong. Please try again.</string>
+    <string name="error_network">Please check your internet connection and try again.</string>
+    <string name="error_server_unavailable">We couldn\'t reach the server right now. Please try again later.</string>
+    <string name="error_missing_session">Something went wrong while setting up your account. Please try signing in again.</string>
+    <string name="error_dob_must_be_past">Please enter a valid past date for your birth date.</string>
 
     <!-- Step Titles -->
     <string name="step_personal_info">Personal Info</string>

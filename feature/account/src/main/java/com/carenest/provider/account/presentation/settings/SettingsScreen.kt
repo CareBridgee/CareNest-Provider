@@ -30,11 +30,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carenest.provider.account.R
@@ -52,11 +54,12 @@ import com.carenest.provider.designsystem.R as DesignSystemR
 fun SettingsRoute(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
-    onOpenPrivacyPolicy: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var showLanguageSelector by rememberSaveable { mutableStateOf(false) }
+    var showPrivacyPolicy by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
     val resolvedDarkTheme = Theme.isDarkTheme
 
     LaunchedEffect(resolvedDarkTheme) {
@@ -67,7 +70,7 @@ fun SettingsRoute(
         when (effect) {
             SettingsEffect.NavigateBack -> onNavigateBack()
             SettingsEffect.OpenLanguage -> showLanguageSelector = true
-            SettingsEffect.OpenPrivacyPolicy -> onOpenPrivacyPolicy()
+            SettingsEffect.OpenPrivacyPolicy -> showPrivacyPolicy = true
         }
     }
     SettingsContent(state, viewModel::onIntent, modifier)
@@ -80,6 +83,12 @@ fun SettingsRoute(
                 showLanguageSelector = false
             },
             onDismiss = { showLanguageSelector = false },
+        )
+    }
+
+    if (showPrivacyPolicy) {
+        PrivacyPolicySheet(
+            onDismiss = { showPrivacyPolicy = false }
         )
     }
 }
@@ -160,6 +169,47 @@ fun SettingsContent(
             }
             item { Spacer(Modifier.height(Theme.spacing.extraLarge)) }
             }
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun PrivacyPolicySheet(
+    onDismiss: () -> Unit,
+) {
+    BaseBottomSheet(
+        title = stringResource(R.string.settings_privacy_policy),
+        onDismissRequest = onDismiss,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Theme.spacing.medium),
+            verticalArrangement = Arrangement.spacedBy(Theme.spacing.medium)
+        ) {
+            BasicText(
+                text = stringResource(R.string.privacy_policy_part_1),
+                style = Theme.typography.body.small.copy(
+                    color = Theme.colors.secondaryFont,
+                    lineHeight = 20.sp
+                )
+            )
+            BasicText(
+                text = stringResource(R.string.privacy_policy_part_2),
+                style = Theme.typography.body.small.copy(
+                    color = Theme.colors.secondaryFont,
+                    lineHeight = 20.sp
+                )
+            )
+            BasicText(
+                text = stringResource(R.string.privacy_policy_part_3),
+                style = Theme.typography.body.small.copy(
+                    color = Theme.colors.secondaryFont,
+                    lineHeight = 20.sp
+                )
+            )
+            Spacer(Modifier.height(Theme.spacing.medium))
         }
     }
 }

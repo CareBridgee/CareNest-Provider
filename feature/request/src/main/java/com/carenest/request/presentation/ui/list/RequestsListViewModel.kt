@@ -48,9 +48,14 @@ class RequestsListViewModel @Inject constructor(
     private fun observeSocketErrors() {
         viewModelScope.launch {
             nurseSocketClient.socketErrors.collect { errorPayload ->
+                val friendlyMessage = when {
+                    errorPayload.code == "CONNECTION_ERROR" -> "We're having trouble connecting. Please check your internet."
+                    errorPayload.code == "UNAUTHORIZED" -> "Your session has expired. Please sign in again."
+                    else -> "Connection issue detected. We're working to restore it."
+                }
                 updateState {
                     copy(
-                        socketErrorMessage = errorPayload.message,
+                        socketErrorMessage = friendlyMessage,
                         socketErrorCode = errorPayload.code
                     )
                 }

@@ -39,3 +39,13 @@ internal fun resolveMessage(context: Context, message: String): String {
     val resId = context.resources.getIdentifier(message, "string", context.packageName)
     return if (resId != 0) context.getString(resId) else message
 }
+
+internal fun shareProfile(context: Context, nurseId: String, name: String, specialization: String) {
+    val profileUrl = "https://carenest.com/nurse/$nurseId"
+    val shareMessage = "Check out $name ($specialization) on CareNest!\n\nView profile: $profileUrl"
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_TEXT, shareMessage)
+    }
+    context.startActivity(Intent.createChooser(intent, "Share Profile"))
+}

@@ -78,14 +78,12 @@ class PayoutsViewModel @Inject constructor(
                     )
                 }
             } else {
-                val errorMsg = summaryResult.exceptionOrNull()?.message
-                    ?: historyResult.exceptionOrNull()?.message
-                    ?: "Failed to load payouts data."
+                val error = summaryResult.exceptionOrNull() ?: historyResult.exceptionOrNull()
                 updateState {
                     copy(
                         isLoading = false,
                         isError = true,
-                        errorMessage = errorMsg
+                        errorMessage = error?.userMessage() ?: "Failed to load payouts data."
                     )
                 }
             }
@@ -100,8 +98,16 @@ class PayoutsViewModel @Inject constructor(
                 sendEffect(PayoutsEffect.ShowToast("Withdrawal request submitted successfully!"))
                 loadData()
             } else {
-                sendEffect(PayoutsEffect.ShowToast("Withdrawal failed. Please try again."))
+                val message = result.exceptionOrNull()?.userMessage() ?: "Withdrawal failed. Please try again."
+                sendEffect(PayoutsEffect.ShowToast(message))
             }
+        }
+    }
+
+    private fun Throwable.userMessage(): String {
+        return when (this) {
+            is java.net.UnknownHostException, is java.net.ConnectException -> "Please check your internet connection and try again."
+            else -> "Something went wrong. Please try again."
         }
     }
 }

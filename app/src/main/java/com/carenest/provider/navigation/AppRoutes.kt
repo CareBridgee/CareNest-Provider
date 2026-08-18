@@ -13,4 +13,5 @@ internal data class ProviderInfoRoute(val destination: ProviderInfoDestination) 
 internal enum class ProviderInfoDestination {
     CONTACT_SUPPORT,
     COMMUNITY_GUIDELINES,
+    PRIVACY_POLICY,
 }

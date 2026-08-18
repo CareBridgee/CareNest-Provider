@@ -137,9 +137,12 @@
     <string name="auth_error_otp_incomplete">أدخل رمز التحقق كاملًا والمكوّن من 6 أرقام.</string>
     <string name="auth_error_invalid_otp">رمز التحقق غير صحيح. تحقق من الرمز وحاول مرة أخرى.</string>
     <string name="auth_error_expired_otp">انتهت صلاحية رمز التحقق. اطلب رمزًا جديدًا.</string>
-    <string name="auth_error_network">لا يوجد اتصال بالإنترنت. تحقق من اتصالك وحاول مرة أخرى.</string>
+    <string name="auth_error_network">يُرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.</string>
     <string name="auth_error_too_many_requests">محاولات كثيرة جدًا. انتظر قليلًا قبل المحاولة مرة أخرى.</string>
-    <string name="auth_error_service_unavailable">خدمة تسجيل الدخول غير متاحة مؤقتًا. حاول مرة أخرى بعد قليل.</string>
+    <string name="auth_error_service_unavailable">لا يمكننا الوصول إلى الخادم حالياً. يرجى المحاولة مرة أخرى لاحقاً.</string>
+    <string name="error_session_expired">انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى.</string>
+    <string name="error_connection_issue">تم اكتشاف مشكلة في الاتصال. نحن نعمل على استعادتها.</string>
+    <string name="error_connection_trouble">نواجه مشكلة في الاتصال. يرجى التحقق من الإنترنت الخاص بك.</string>
     <string name="auth_error_send_code">تعذر إرسال رمز التحقق. حاول مرة أخرى.</string>
     <string name="auth_error_resend_code">تعذرت إعادة إرسال رمز التحقق. حاول مرة أخرى.</string>
     <string name="auth_error_verification">تعذر التحقق من الرمز. حاول مرة أخرى.</string>

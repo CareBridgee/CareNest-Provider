@@ -6,4 +6,6 @@
     <string name="contact_support_message">Contact support is not included in this project snapshot.</string>
     <string name="community_guidelines_title">Community Guidelines</string>
     <string name="community_guidelines_message">Community guidelines are not included in this project snapshot.</string>
+    <string name="privacy_policy_title">Privacy Policy</string>
+    <string name="privacy_policy_content">Your privacy is important to us. Etmaen - Provider collects and uses your professional data only to facilitate care requests and ensure platform safety. We do not sell your personal information to third parties.</string>
 </resources>

@@ -122,15 +122,13 @@ fun ProfileMenuContent(
             items(state.menuItems, key = { it.id }) { item ->
                 ProfileMenuCard(
                     title = stringResource(item.titleRes),
-                    subtitle = stringResource(item.subtitleRes),
+                    subtitle = item.subtitle ?: stringResource(item.subtitleRes),
                     iconRes = item.iconRes,
                     showVerifiedDot = item.showVerifiedDot,
                     onClick = {
                         onIntent(
                             when (item.id) {
                                 MenuItemId.Earnings -> ProfileMenuIntent.EarningsClicked
-                                MenuItemId.Payouts -> ProfileMenuIntent.PayoutsClicked
-                                MenuItemId.Wallet -> ProfileMenuIntent.WalletClicked
                                 MenuItemId.Settings -> ProfileMenuIntent.SettingsClicked
                                 else -> ProfileMenuIntent.MenuItemClicked(item.id)
                             },

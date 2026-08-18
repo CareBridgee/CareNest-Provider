@@ -293,6 +293,10 @@ fun AppNavigation(
                 ProviderInfoDestination.COMMUNITY_GUIDELINES -> {
                     stringResource(R.string.community_guidelines_title)
                 }
+
+                ProviderInfoDestination.PRIVACY_POLICY -> {
+                    stringResource(R.string.privacy_policy_title)
+                }
             }
             val message = when (route.destination) {
                 ProviderInfoDestination.CONTACT_SUPPORT -> {
@@ -301,6 +305,10 @@ fun AppNavigation(
 
                 ProviderInfoDestination.COMMUNITY_GUIDELINES -> {
                     stringResource(R.string.community_guidelines_message)
+                }
+
+                ProviderInfoDestination.PRIVACY_POLICY -> {
+                    stringResource(R.string.privacy_policy_content)
                 }
             }
 

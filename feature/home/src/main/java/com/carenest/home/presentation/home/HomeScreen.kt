@@ -239,7 +239,8 @@ fun HomeContent(
                         earnings = "$" + state.earnings.toString(),
                         changePercent = state.changePercent.toString() + "%",
                         jobsToday = state.jobsToday,
-                        rating = state.rating.toString()
+                        rating = state.rating.toString(),
+                        reviewCount = state.reviewCount
                     )
                 }
 

@@ -7,4 +7,6 @@
     <string name="contact_support_message">ميزة التواصل مع الدعم غير مضمنة في نسخة المشروع الحالية.</string>
     <string name="community_guidelines_title">إرشادات المجتمع</string>
     <string name="community_guidelines_message">إرشادات المجتمع غير مضمنة في نسخة المشروع الحالية.</string>
+    <string name="privacy_policy_title">سياسة الخصوصية</string>
+    <string name="privacy_policy_content">خصوصيتك تهمنا. يقوم إطمئن - مقدم الرعاية بجمع واستخدام بياناتك المهنية فقط لتسهيل طلبات الرعاية وضمان سلامة المنصة. نحن لا نبيع معلوماتك الشخصية لأطراف ثالثة.</string>
 </resources>

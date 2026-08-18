@@ -100,9 +100,14 @@ class HomeViewModel @Inject constructor(
     private fun observeSocketErrors() {
         viewModelScope.launch {
             nurseSocketClient.socketErrors.collect { errorPayload ->
+                val friendlyMessage = when {
+                    errorPayload.code == "CONNECTION_ERROR" -> "We're having trouble connecting to the service. Please check your internet."
+                    errorPayload.code == "UNAUTHORIZED" -> "Session expired. Please sign in again."
+                    else -> "Connection issue detected. We're working to restore it."
+                }
                 updateState {
                     copy(
-                        socketErrorMessage = errorPayload.message,
+                        socketErrorMessage = friendlyMessage,
                         socketErrorCode = errorPayload.code
                     )
                 }
@@ -202,6 +207,8 @@ class HomeViewModel @Inject constructor(
                         nurseName = fullName,
                         nurseAvatar = profile.profileImageUrl,
                         isProviderApproved = isProviderApproved,
+                        rating = profile.ratingAvg ?: rating,
+                        reviewCount = profile.totalReviews ?: reviewCount,
                     )
                 }
                 if (isProviderApproved) {
@@ -405,7 +412,6 @@ class HomeViewModel @Inject constructor(
             }
 
             fetchJob = viewModelScope.launch {
-                Log.d("HomeViewModel", "Fetching initial requests via REST...")
                 coroutineScope {
                     val requestsDeferred = async { getIncomingRequests() }
                     val earningsDeferred = async { getEarningsSummary() }
@@ -418,7 +424,6 @@ class HomeViewModel @Inject constructor(
                             ?: request.serviceTypeId?.let(serviceImagesById::get)
                         request.copy(serviceImage = resolvedImage.orEmpty())
                     }
-                    Log.d("HomeViewModel", "REST fetch completed. Found ${fetchedRequests.size} requests.")
 
                     updateState {
                         copy(
@@ -428,6 +433,7 @@ class HomeViewModel @Inject constructor(
                             changePercent = earningsSummary?.changePercent ?: changePercent,
                             jobsToday = earningsSummary?.jobsToday ?: jobsToday,
                             rating = earningsSummary?.rating ?: rating,
+                            reviewCount = earningsSummary?.reviewCount ?: reviewCount,
                         )
                     }
                     fetchedRequests.forEach { enrichPatientPreview(it.id) }

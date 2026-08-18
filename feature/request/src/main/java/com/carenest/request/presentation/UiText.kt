@@ -14,7 +14,10 @@ fun UiText.asString(context: Context): String = when (this) {
     is UiText.StringResource -> context.getString(resId)
 }
 
-fun Throwable.toUiText(): UiText = message
-    ?.takeIf(String::isNotBlank)
-    ?.let(UiText::DynamicString)
-    ?: UiText.StringResource(R.string.generic_error_message)
+fun Throwable.toUiText(): UiText = when (this) {
+    is java.net.UnknownHostException, is java.net.ConnectException ->
+        UiText.DynamicString("Please check your internet connection and try again.")
+    is io.ktor.client.plugins.ResponseException ->
+        UiText.DynamicString("We couldn't reach the server right now. Please try again later.")
+    else -> UiText.StringResource(R.string.generic_error_message)
+}

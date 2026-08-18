@@ -102,7 +102,10 @@ fun PublicProfileRoute(
         when (effect) {
             PublicProfileEffect.NavigateBack -> onNavigateBack()
             PublicProfileEffect.OpenProfileImagePicker -> profileImagePicker.launch(arrayOf("image/*"))
-            PublicProfileEffect.ShareProfile -> onShareProfile()
+            is PublicProfileEffect.ShareProfile -> {
+                shareProfile(context, effect.nurseId, effect.name, effect.specialization)
+                onShareProfile()
+            }
             PublicProfileEffect.OpenSettings -> onOpenSettings()
             is PublicProfileEffect.ShowMessage -> {
                 toastState.show(
@@ -451,6 +454,8 @@ private fun EditBioBottomSheet(
                 onTextChange = { onIntent(PublicProfileIntent.SpecializationChanged(it)) },
                 title = stringResource(R.string.public_profile_specialization_label),
                 hint = stringResource(R.string.public_profile_specialization_hint),
+                isError = state.specializationError != null,
+                errorMessage = state.specializationError,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -459,6 +464,8 @@ private fun EditBioBottomSheet(
                 onTextChange = { onIntent(PublicProfileIntent.YearsOfExperienceChanged(it)) },
                 title = stringResource(R.string.public_profile_years_label),
                 hint = stringResource(R.string.public_profile_years_hint),
+                isError = state.yearsOfExperienceError != null,
+                errorMessage = state.yearsOfExperienceError,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -468,6 +475,8 @@ private fun EditBioBottomSheet(
                 onTextChange = { onIntent(PublicProfileIntent.BioChanged(it)) },
                 title = stringResource(R.string.public_profile_bio_label),
                 hint = stringResource(R.string.public_profile_bio_hint),
+                isError = state.bioError != null,
+                errorMessage = state.bioError,
                 minLines = 4,
                 maxLines = 6,
                 fieldHeight = 140.dp,
