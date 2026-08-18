@@ -167,6 +167,8 @@ class HomeViewModel @Inject constructor(
             HomeIntent.DismissModal -> dismissModal()
             HomeIntent.ViewAllRequestsClicked -> sendEffect(HomeEffect.NavigateToRequestList)
             HomeIntent.RefreshProfile -> getNurseData()
+            HomeIntent.ConfirmLocationOnline -> confirmLocationOnline()
+            HomeIntent.DismissLocationDialog -> dismissLocationDialog()
         }
     }
 
@@ -241,47 +243,82 @@ class HomeViewModel @Inject constructor(
     private fun handleOnlineToggle(isOnline: Boolean) {
         if (isOnline) {
             if (currentState.isGettingLocation) {
-                sendEffect(
-                    HomeEffect.ShowSnackbarRes(
-                        R.string.getting_location_to_go_online,
-                        ToastType.Info
-                    )
-                )
+                updateState { copy(showLocationDialog = true) }
                 return
             }
 
             locationJob?.cancel()
-            updateState { copy(isGettingLocation = true) }
-            sendEffect(
-                HomeEffect.ShowSnackbarRes(
-                    R.string.getting_location_to_go_online,
-                    ToastType.Info
+            updateState {
+                copy(
+                    isGettingLocation = true,
+                    showLocationDialog = true,
+                    determinedLocation = null,
+                    locationError = null,
                 )
-            )
+            }
 
             locationJob = viewModelScope.launch {
                 val location = getCurrentLocation()
                 Log.d("HomeViewModel", "handleOnlineToggle location result: ${location?.latitude}, ${location?.longitude}")
                 if (location != null) {
-                    updateState { copy(isGettingLocation = false) }
-                    updateAvailability(true)
-                } else {
-                    updateState { copy(isGettingLocation = false, isOnline = false) }
-                    updateAvailability(false)
-                    sendEffect(
-                        HomeEffect.ShowSnackbarRes(
-                            R.string.unable_to_get_location,
-                            ToastType.Error
+                    updateState {
+                        copy(
+                            isGettingLocation = false,
+                            determinedLocation = location,
+                            locationError = null,
                         )
-                    )
+                    }
+                } else {
+                    updateState {
+                        copy(
+                            isGettingLocation = false,
+                            determinedLocation = null,
+                            locationError = null,
+                            isOnline = false,
+                            showLocationDialog = true,
+                        )
+                    }
+                    updateAvailability(false)
                 }
             }
         } else {
             locationJob?.cancel()
-            updateState { copy(isGettingLocation = false) }
+            updateState {
+                copy(
+                    isGettingLocation = false,
+                    showLocationDialog = false,
+                    determinedLocation = null,
+                    locationError = null,
+                )
+            }
             viewModelScope.launch {
                 updateAvailability(false)
             }
+        }
+    }
+
+    private fun confirmLocationOnline() {
+        val location = currentState.determinedLocation ?: return
+        updateState {
+            copy(
+                showLocationDialog = false,
+                isGettingLocation = false,
+            )
+        }
+        viewModelScope.launch {
+            updateAvailability(true)
+        }
+    }
+
+    private fun dismissLocationDialog() {
+        locationJob?.cancel()
+        updateState {
+            copy(
+                showLocationDialog = false,
+                isGettingLocation = false,
+                determinedLocation = null,
+                locationError = null,
+            )
         }
     }
 
@@ -312,12 +349,15 @@ class HomeViewModel @Inject constructor(
 
                 if (location == null) {
                     updateAvailability(false)
-                    sendEffect(
-                        HomeEffect.ShowSnackbarRes(
-                            R.string.location_unknown_making_offline,
-                            ToastType.Error
+                    updateState {
+                        copy(
+                            showLocationDialog = true,
+                            isGettingLocation = false,
+                            determinedLocation = null,
+                            locationError = null,
+                            isOnline = false,
                         )
-                    )
+                    }
                 } else {
                     nurseSocketClient.updateAvailability(
                         available = true,
@@ -632,6 +672,8 @@ class HomeViewModel @Inject constructor(
 private val HomeIntent.requiresProviderApproval: Boolean
     get() = when (this) {
         HomeIntent.RefreshProfile,
-        HomeIntent.DismissModal -> false
+        HomeIntent.DismissModal,
+        HomeIntent.DismissLocationDialog,
+        HomeIntent.ConfirmLocationOnline -> false
         else -> true
     }

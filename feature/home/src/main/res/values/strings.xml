@@ -64,4 +64,10 @@
     <string name="getting_location_to_go_online">We\'re getting your location to go online…</string>
     <string name="unable_to_get_location">We can\'t get your location. You cannot go online without location.</string>
     <string name="location_unknown_making_offline">Location is unknown, so we\'re making you offline now.</string>
+    <string name="getting_location_title">Getting Your Location</string>
+    <string name="getting_location_message">Please wait while we determine your location to go online…</string>
+    <string name="location_determined_title">Location Determined</string>
+    <string name="location_determined_message">Current Location:\nLatitude: %1$.4f, Longitude: %2$.4f</string>
+    <string name="location_unknown_title">Location Unknown</string>
+    <string name="go_online">Go Online</string>
 </resources>

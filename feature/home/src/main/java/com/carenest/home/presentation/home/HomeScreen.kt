@@ -356,6 +356,16 @@ fun HomeContent(
             )
         }
 
+        if (state.showLocationDialog) {
+            com.carenest.home.presentation.home.components.LocationStatusDialog(
+                isGettingLocation = state.isGettingLocation,
+                determinedLocation = state.determinedLocation,
+                locationError = state.locationError,
+                onConfirmOnline = { onIntent(HomeIntent.ConfirmLocationOnline) },
+                onDismiss = { onIntent(HomeIntent.DismissLocationDialog) },
+            )
+        }
+
         if (state.socketErrorMessage != null) {
             com.carenest.provider.designsystem.components.request.SocketErrorDialog(
                 errorMessage = state.socketErrorMessage,
