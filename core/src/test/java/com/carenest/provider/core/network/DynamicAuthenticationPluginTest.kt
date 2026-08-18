@@ -9,10 +9,14 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.MockRequestHandleScope
 import io.ktor.client.engine.mock.respond
+import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.providers.BearerTokens
+import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.get
 import io.ktor.client.request.HttpRequestData
+import kotlinx.coroutines.flow.first
 import io.ktor.client.request.post
 import io.ktor.client.request.HttpResponseData
 import io.ktor.http.ContentType
@@ -200,21 +204,27 @@ class DynamicAuthenticationPluginTest {
     }
 
     @Test
-    fun everyProtectedRequestReadsTheLatestAccountToken() = runBlocking {
+    fun subsequentRequestsUseRefreshedTokenFromBearerPlugin() = runBlocking {
         val store = FakeAuthenticationSessionStore().apply {
-            authenticate("access-a", "refresh-a", "nurse-a")
+            authenticate("old-access", "old-refresh", "nurse-a")
         }
         val authorizationHeaders = mutableListOf<String?>()
         val client = testClient(store) { request ->
-            authorizationHeaders += request.headers[HttpHeaders.Authorization]
-            respondJson("{}")
+            when (request.url.encodedPath) {
+                "/api/v1/auth/refresh" -> respondJson("""{"accessToken":"new-access","refreshToken":"new-refresh"}""")
+                "/api/v1/users/me" -> {
+                    val auth = request.headers[HttpHeaders.Authorization]
+                    authorizationHeaders += auth
+                    if (auth == "Bearer new-access") respondJson("{}") else respond("", HttpStatusCode.Unauthorized)
+                }
+                else -> error("Unexpected path ${request.url.encodedPath}")
+            }
         }
 
         client.get("/api/v1/users/me")
-        store.authenticate("access-b", "refresh-b", "nurse-b")
         client.get("/api/v1/users/me")
 
-        assertEquals(listOf("Bearer access-a", "Bearer access-b"), authorizationHeaders)
+        assertEquals(listOf("Bearer old-access", "Bearer new-access", "Bearer new-access"), authorizationHeaders)
         client.close()
     }
 
@@ -276,9 +286,51 @@ class DynamicAuthenticationPluginTest {
         install(ContentNegotiation) {
             json(Json { ignoreUnknownKeys = true })
         }
-        install(DynamicAuthenticationPlugin) {
+        install(Auth) {
+            bearer {
+                loadTokens {
+                    val credentials = store.state.first().credentials
+                    val accessToken = credentials?.accessToken?.takeIf(String::isNotBlank)
+                    val refreshToken = credentials?.refreshToken?.takeIf(String::isNotBlank)
+                    if (accessToken != null && refreshToken != null) {
+                        BearerTokens(accessToken, refreshToken)
+                    } else {
+                        null
+                    }
+                }
+                refreshTokens {
+                    val failedCredentials = store.state.first().credentials
+                        ?: return@refreshTokens null
+                    val refreshCoordinator = AuthenticationRefreshCoordinator(store)
+                    val recoveryResult = refreshCoordinator.recover(failedCredentials) { refreshToken ->
+                        client.requestTokenRefresh(refreshToken)
+                    }
+                    when (recoveryResult) {
+                        AuthenticationRecoveryResult.RECOVERED,
+                        AuthenticationRecoveryResult.SESSION_CHANGED -> {
+                            val latestCredentials = store.state.first().credentials
+                            val newAccess = latestCredentials?.accessToken?.takeIf(String::isNotBlank)
+                            val newRefresh = latestCredentials?.refreshToken?.takeIf(String::isNotBlank)
+                            if (newAccess != null && newRefresh != null) {
+                                BearerTokens(newAccess, newRefresh)
+                            } else {
+                                null
+                            }
+                        }
+                        AuthenticationRecoveryResult.REJECTED -> {
+                            store.clearSessionIfCurrent(failedCredentials)
+                            null
+                        }
+                        AuthenticationRecoveryResult.TEMPORARILY_UNAVAILABLE -> null
+                    }
+                }
+                sendWithoutRequest { request ->
+                    request.isProtectedBackendRequest(TEST_BASE_URL)
+                }
+            }
+        }
+        install(ForbiddenIdentityPlugin) {
             sessionStore = store
-            refreshCoordinator = AuthenticationRefreshCoordinator(store)
             baseUrl = TEST_BASE_URL
         }
         defaultRequest { url(TEST_BASE_URL) }

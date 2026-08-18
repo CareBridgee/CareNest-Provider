@@ -9,11 +9,14 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.api.Send
 import io.ktor.client.plugins.api.createClientPlugin
+import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.providers.BearerTokens
+import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.websocket.WebSockets
+import io.ktor.client.request.HttpRequestData
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.accept
 import io.ktor.http.ContentType
@@ -22,9 +25,7 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.Url
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
-import io.ktor.util.AttributeKey
 import kotlinx.coroutines.flow.first
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import javax.inject.Singleton
 
@@ -54,9 +55,57 @@ object NetworkModule {
             json(json)
         }
 
-        install(DynamicAuthenticationPlugin) {
+        install(Auth) {
+            bearer {
+                loadTokens {
+                    val credentials = authenticationSessionStore.state.first().credentials
+                    val accessToken = credentials?.accessToken?.takeIf(String::isNotBlank)
+                    val refreshToken = credentials?.refreshToken?.takeIf(String::isNotBlank)
+                    if (accessToken != null && refreshToken != null) {
+                        BearerTokens(accessToken, refreshToken)
+                    } else {
+                        null
+                    }
+                }
+
+                refreshTokens {
+                    val failedCredentials = authenticationSessionStore.state.first().credentials
+                        ?: return@refreshTokens null
+
+                    val recoveryResult = authenticationRefreshCoordinator.recover(failedCredentials) { refreshToken ->
+                        client.requestTokenRefresh(refreshToken)
+                    }
+
+                    when (recoveryResult) {
+                        AuthenticationRecoveryResult.RECOVERED,
+                        AuthenticationRecoveryResult.SESSION_CHANGED -> {
+                            val latestCredentials = authenticationSessionStore.state.first().credentials
+                            val newAccess = latestCredentials?.accessToken?.takeIf(String::isNotBlank)
+                            val newRefresh = latestCredentials?.refreshToken?.takeIf(String::isNotBlank)
+                            if (newAccess != null && newRefresh != null) {
+                                BearerTokens(newAccess, newRefresh)
+                            } else {
+                                null
+                            }
+                        }
+
+                        AuthenticationRecoveryResult.REJECTED -> {
+                            authenticationSessionStore.clearSessionIfCurrent(failedCredentials)
+                            null
+                        }
+
+                        AuthenticationRecoveryResult.TEMPORARILY_UNAVAILABLE -> null
+                    }
+                }
+
+                sendWithoutRequest { request ->
+                    request.isProtectedBackendRequest(BASE_URL)
+                }
+            }
+        }
+
+        install(ForbiddenIdentityPlugin) {
             sessionStore = authenticationSessionStore
-            refreshCoordinator = authenticationRefreshCoordinator
             baseUrl = BASE_URL
         }
 
@@ -73,130 +122,76 @@ object NetworkModule {
     }
 }
 
-internal class DynamicAuthenticationPluginConfig {
+internal class ForbiddenIdentityPluginConfig {
     lateinit var sessionStore: AuthenticationSessionStore
-    lateinit var refreshCoordinator: AuthenticationRefreshCoordinator
     lateinit var baseUrl: String
 }
 
-internal val DynamicAuthenticationPlugin = createClientPlugin(
-    name = "DynamicAuthenticationPlugin",
-    createConfiguration = ::DynamicAuthenticationPluginConfig,
+internal val ForbiddenIdentityPlugin = createClientPlugin(
+    name = "ForbiddenIdentityPlugin",
+    createConfiguration = ::ForbiddenIdentityPluginConfig,
 ) {
     val sessionStore = pluginConfig.sessionStore
-    val refreshCoordinator = pluginConfig.refreshCoordinator
     val backendHost = Url(pluginConfig.baseUrl).host
 
-    onRequest { request, _ ->
-        if (!request.isProtectedBackendRequest(backendHost)) return@onRequest
-
-        request.headers.remove(HttpHeaders.Authorization)
-        val credentials = sessionStore.state.first().credentials
-        credentials?.accessToken?.takeIf(String::isNotBlank)?.let { accessToken ->
-            request.headers.append(HttpHeaders.Authorization, "Bearer $accessToken")
-            request.attributes.put(
-                RequestAuthenticationKey,
-                RequestAuthentication(
-                    accessToken = accessToken,
-                    sessionId = credentials.sessionId,
-                ),
-            )
-        }
-    }
-
-    on(Send) { request ->
-        val originalCall = proceed(request)
-        val responseStatus = originalCall.response.status.value
-        val requestAuthentication = request.attributes.getOrNull(RequestAuthenticationKey)
-
-        if (responseStatus == 403 && request.isCurrentSessionIdentityRequest(
-                backendHost = backendHost,
-                nurseId = sessionStore.state.first().session?.nurseId,
-            )
-        ) {
-            val currentCredentials = sessionStore.state.first().credentials
-            if (
-                currentCredentials != null &&
-                currentCredentials.sessionId == requestAuthentication?.sessionId
+    onResponse { response ->
+        if (response.status.value == 403) {
+            val request = response.call.request
+            if (request.isCurrentSessionIdentityRequest(
+                    backendHost = backendHost,
+                    nurseId = sessionStore.state.first().session?.nurseId,
+                )
             ) {
-                sessionStore.clearSessionIfCurrent(currentCredentials)
-            } else {
-                sessionStore.clearInvalidSession()
+                val currentCredentials = sessionStore.state.first().credentials
+                if (currentCredentials != null) {
+                    sessionStore.clearSessionIfCurrent(currentCredentials)
+                } else {
+                    sessionStore.clearInvalidSession()
+                }
             }
-            return@on originalCall
         }
-
-        val shouldRecover = responseStatus == 401 &&
-            request.isProtectedBackendRequest(backendHost) &&
-            request.attributes.getOrNull(AuthenticationRetryKey) != true
-
-        if (!shouldRecover) return@on originalCall
-
-        if (requestAuthentication == null) {
-            sessionStore.clearInvalidSession()
-            return@on originalCall
-        }
-
-        val currentCredentials = sessionStore.state.first().credentials
-        val failedCredentials = currentCredentials?.copy(
-            accessToken = requestAuthentication.accessToken,
-        )
-        val canRetry = if (
-            failedCredentials != null &&
-            failedCredentials.sessionId == requestAuthentication.sessionId
-        ) {
-            refreshCoordinator.recover(failedCredentials) { refreshToken ->
-                client.requestTokenRefresh(refreshToken)
-            } == AuthenticationRecoveryResult.RECOVERED
-        } else {
-            false
-        }
-
-        if (!canRetry) return@on originalCall
-
-        val latestCredentials = sessionStore.state.first().credentials
-        val latestAccessToken = latestCredentials?.accessToken?.takeIf(String::isNotBlank)
-        if (latestCredentials?.sessionId != requestAuthentication.sessionId || latestAccessToken == null) {
-            return@on originalCall
-        }
-
-        request.attributes.put(AuthenticationRetryKey, true)
-        request.headers.remove(HttpHeaders.Authorization)
-        request.headers.append(HttpHeaders.Authorization, "Bearer $latestAccessToken")
-        proceed(request)
     }
-
 }
 
-private data class RequestAuthentication(
-    val accessToken: String,
-    val sessionId: String?,
-)
-
-private val RequestAuthenticationKey =
-    AttributeKey<RequestAuthentication>("CareNestProviderRequestAuthentication")
-private val AuthenticationRetryKey =
-    AttributeKey<Boolean>("CareNestProviderAuthenticationRetry")
-
-private fun HttpRequestBuilder.isProtectedBackendRequest(backendHost: String): Boolean {
-    val requestUrl = url.build()
-    val isBackendHost = requestUrl.host.isBlank() || requestUrl.host.equals(backendHost, ignoreCase = true)
-    val path = requestUrl.encodedPath.normalizedPath()
+internal fun isProtectedBackendUrl(url: Url, method: HttpMethod, backendHost: String): Boolean {
+    val isBackendHost = url.host.isBlank() || url.host.equals(backendHost, ignoreCase = true)
+    val path = url.encodedPath.normalizedPath()
     val isPublicRequest = path in PUBLIC_AUTH_PATHS ||
         (method == HttpMethod.Get && path in PUBLIC_GET_PATHS)
     return isBackendHost && path.startsWith("/api/v1/") && !isPublicRequest
 }
 
-private fun HttpRequestBuilder.isCurrentSessionIdentityRequest(
+internal fun HttpRequestBuilder.isProtectedBackendRequest(baseUrl: String): Boolean {
+    val backendHost = Url(baseUrl).host
+    return isProtectedBackendUrl(url.build(), method, backendHost)
+}
+
+internal fun HttpRequestData.isProtectedBackendRequest(baseUrl: String): Boolean {
+    val backendHost = Url(baseUrl).host
+    return isProtectedBackendUrl(url, method, backendHost)
+}
+
+internal fun isCurrentSessionIdentityUrl(
+    url: Url,
+    method: HttpMethod,
     backendHost: String,
     nurseId: String?,
 ): Boolean {
-    if (!isProtectedBackendRequest(backendHost)) return false
-
-    val path = url.build().encodedPath.normalizedPath()
+    if (!isProtectedBackendUrl(url, method, backendHost)) return false
+    val path = url.encodedPath.normalizedPath()
     return path == "/api/v1/users/me" ||
         (!nurseId.isNullOrBlank() && path == "/api/v1/nurses/$nurseId")
 }
+
+internal fun io.ktor.client.request.HttpRequest.isCurrentSessionIdentityRequest(
+    backendHost: String,
+    nurseId: String?,
+): Boolean = isCurrentSessionIdentityUrl(url, method, backendHost, nurseId)
+
+internal fun HttpRequestData.isCurrentSessionIdentityRequest(
+    backendHost: String,
+    nurseId: String?,
+): Boolean = isCurrentSessionIdentityUrl(url, method, backendHost, nurseId)
 
 private fun String.normalizedPath(): String {
     val withLeadingSlash = if (startsWith('/')) this else "/$this"
@@ -226,9 +221,10 @@ private val SafeNetworkLogging = createClientPlugin("SafeNetworkLogging") {
         Log.d(
             NETWORK_LOG_TAG,
             "response method=${request.method.value} path=${request.url.encodedPath} " +
-                    "status=${response.status.value}",
+                "status=${response.status.value}",
         )
     }
 }
 
 private const val NETWORK_LOG_TAG = "CareNestHttp"
+
