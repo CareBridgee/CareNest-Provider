@@ -49,11 +49,22 @@ class PublicProfileViewModel @Inject constructor(
             PublicProfileIntent.RetryClicked -> loadProfile()
             PublicProfileIntent.EditBioClicked -> openEditBio()
             PublicProfileIntent.DismissEditBio -> updateState { copy(isEditBioSheetVisible = false) }
-            is PublicProfileIntent.BioChanged -> updateState { copy(bioDraft = intent.bio) }
+            is PublicProfileIntent.BioChanged -> updateState {
+                val error = when {
+                    intent.bio.length < 20 -> "Please share a bit more about your experience (minimum 20 characters)"
+                    intent.bio.length > 500 -> "Bio is a bit too long, please keep it under 500 characters"
+                    else -> null
+                }
+                copy(
+                    bioDraft = intent.bio,
+                    bioError = error,
+                )
+            }
             is PublicProfileIntent.SpecializationChanged -> updateState {
                 val error = when {
-                    intent.specialization.length < 3 -> "Specialization name must be at least 3 characters"
-                    !intent.specialization.all { it.isLetter() || it.isWhitespace() } -> "Specialization name should contain only letters"
+                    intent.specialization.length < 3 -> "Please enter a valid specialization (at least 3 letters)"
+                    intent.specialization.length > 50 -> "Specialization name is too long"
+                    !intent.specialization.all { it.isLetter() || it.isWhitespace() } -> "Specialization should only contain letters"
                     else -> null
                 }
                 copy(
@@ -65,8 +76,8 @@ class PublicProfileViewModel @Inject constructor(
                 val digits = intent.yearsOfExperience.filter(Char::isDigit)
                 val years = digits.toIntOrNull()
                 val error = when {
-                    digits.isBlank() -> "Experience is required"
-                    years == null || years < 0 || years > 50 -> "Experience must be between 0 and 50 years"
+                    digits.isBlank() -> "Please enter your years of experience"
+                    years == null || years < 0 || years > 50 -> "Please enter a valid number of years between 0 and 50"
                     else -> null
                 }
                 copy(
@@ -147,6 +158,9 @@ class PublicProfileViewModel @Inject constructor(
                 bioDraft = profile.bio.orEmpty(),
                 specializationDraft = profile.specialization.orEmpty(),
                 yearsOfExperienceDraft = profile.yearsOfExperience?.toString().orEmpty(),
+                specializationError = null,
+                yearsOfExperienceError = null,
+                bioError = null,
             )
         }
     }
@@ -161,22 +175,31 @@ class PublicProfileViewModel @Inject constructor(
 
         var hasError = false
         if (specialization.length < 3) {
-            updateState { copy(specializationError = "Specialization name must be at least 3 characters") }
+            updateState { copy(specializationError = "Please enter a valid specialization (at least 3 letters)") }
             hasError = true
         } else if (!specialization.all { it.isLetter() || it.isWhitespace() }) {
-            updateState { copy(specializationError = "Specialization name should contain only letters") }
+            updateState { copy(specializationError = "Specialization should only contain letters") }
             hasError = true
         }
 
         if (years == null || years < 0 || years > 50) {
-            updateState { copy(yearsOfExperienceError = "Experience must be between 0 and 50 years") }
+            updateState { copy(yearsOfExperienceError = "Please enter a valid number of years between 0 and 50") }
+            hasError = true
+        }
+
+        if (snapshot.bioDraft.length < 20 || snapshot.bioDraft.length > 500) {
+            updateState {
+                val bioError = if (snapshot.bioDraft.length < 20) "Please share a bit more about your experience (minimum 20 characters)"
+                               else "Bio is a bit too long, please keep it under 500 characters"
+                copy(bioError = bioError)
+            }
             hasError = true
         }
 
         if (hasError) return
 
         viewModelScope.launch {
-            updateState { copy(isSavingProfile = true, specializationError = null, yearsOfExperienceError = null, errorMessage = null) }
+            updateState { copy(isSavingProfile = true, specializationError = null, yearsOfExperienceError = null, bioError = null, errorMessage = null) }
             updateNurse(
                 resolvedNurseId,
                 NurseUpdate(
@@ -279,4 +302,8 @@ class PublicProfileViewModel @Inject constructor(
     }
 }
 
-private fun Throwable.userMessage(): String = message?.takeIf(String::isNotBlank) ?: "error_unknown"
+private fun Throwable.userMessage(): String = when (this) {
+    is java.net.UnknownHostException, is java.net.ConnectException -> "Please check your internet connection and try again."
+    is io.ktor.client.plugins.ResponseException -> "We couldn't reach the server right now. Please try again later."
+    else -> "Something went wrong while updating your profile. Please try again."
+}

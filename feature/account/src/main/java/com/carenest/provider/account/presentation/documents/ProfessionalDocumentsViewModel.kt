@@ -203,4 +203,8 @@ private fun List<com.carenest.provider.account.presentation.model.ProfessionalDo
     )
 }
 
-private fun Throwable.userMessage(): String = message?.takeIf(String::isNotBlank) ?: "error_unknown"
+private fun Throwable.userMessage(): String = when (this) {
+    is java.net.UnknownHostException, is java.net.ConnectException -> "Please check your internet connection and try again."
+    is io.ktor.client.plugins.ResponseException -> "We couldn't reach the server right now. Please try again later."
+    else -> "Something went wrong while managing your documents. Please try again."
+}

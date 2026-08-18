@@ -5,4 +5,5 @@ data class EarningsSummary(
     val changePercent: Double,
     val jobsToday: Int,
     val rating: Double,
+    val reviewCount: Int = 0,
 )

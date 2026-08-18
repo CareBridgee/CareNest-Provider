@@ -34,8 +34,13 @@ class ScanQrViewModel @Inject constructor(
                     sendEffect(ScanQrEffect.NavigateToSuccess)
                 }
                 .onFailure { error ->
-                    updateState { copy(isLoading = false, error = error.message) }
-                    sendEffect(ScanQrEffect.ShowError(error.message ?: "Verification failed"))
+                    val message = when (error) {
+                        is java.net.UnknownHostException, is java.net.ConnectException -> "Check your internet connection and try again."
+                        is io.ktor.client.plugins.ResponseException -> "Unable to verify the code right now. Please try again."
+                        else -> "Verification failed. Please ensure you've scanned the correct QR code."
+                    }
+                    updateState { copy(isLoading = false, error = message) }
+                    sendEffect(ScanQrEffect.ShowError(message))
                 }
         }
     }

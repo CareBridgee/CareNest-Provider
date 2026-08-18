@@ -90,8 +90,13 @@
     <string name="documents_pending_question">Why is my document pending?</string>
     <string name="documents_pending_answer">Our clinical review team typically verifies documents within 24–48 business hours. You’ll receive a notification once the status changes.</string>
     <string name="profile_error_missing_session">We could not find your provider session. Please sign in again.</string>
-    <string name="profile_error_specialization_required">Specialization is required.</string>
-    <string name="profile_error_invalid_years">Enter valid years of experience.</string>
+    <string name="profile_error_specialization_required">Please enter a valid specialization (at least 3 letters).</string>
+    <string name="profile_error_specialization_too_long">Specialization name is too long.</string>
+    <string name="profile_error_specialization_invalid_chars">Specialization should only contain letters.</string>
+    <string name="profile_error_years_required">Please enter your years of experience.</string>
+    <string name="profile_error_years_invalid">Please enter a valid number of years between 0 and 50.</string>
+    <string name="profile_error_bio_too_short">Please share a bit more about your experience (minimum 20 characters).</string>
+    <string name="profile_error_bio_too_long">Bio is a bit too long, please keep it under 500 characters.</string>
     <string name="profile_error_invalid_image">Choose a valid image file.</string>
     <string name="profile_saved">Profile updated.</string>
     <string name="profile_photo_updated">Profile photo updated.</string>
@@ -107,6 +112,9 @@
     <string name="settings_dark_mode">Dark Mode</string>
     <string name="settings_security_privacy">Security &amp; Privacy</string>
     <string name="settings_privacy_policy">Privacy Policy</string>
+    <string name="privacy_policy_part_1">At Etmaen, your privacy is our priority. We collect and process your professional information, location, and credentials solely to facilitate care services and ensure safety on our platform.</string>
+    <string name="privacy_policy_part_2">We implement industry-standard security measures to protect your data from unauthorized access. Your information is never sold to third parties and is shared only with patients for the purpose of active care coordination.</string>
+    <string name="privacy_policy_part_3">By using the app, you consent to our data collection practices as outlined in our full privacy documentation.</string>
 
     <string name="reviews_title">Ratings &amp; Reviews</string>
     <plurals name="reviews_count">

@@ -15,6 +15,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
+import kotlin.text.isNotBlank
 
 @HiltViewModel
 class EarningsViewModel @Inject constructor(
@@ -115,17 +116,25 @@ class EarningsViewModel @Inject constructor(
                     )
                 }
             } else {
-                val errorMsg = summaryResult.exceptionOrNull()?.message
-                    ?: listResult.exceptionOrNull()?.message
-                    ?: "Failed to load service earnings."
+                val error = summaryResult.exceptionOrNull() ?: listResult.exceptionOrNull()
                 updateState {
                     copy(
                         isLoading = false,
                         isError = true,
-                        errorMessage = errorMsg
+                        errorMessage = error?.userMessage() ?: "Failed to load service earnings."
                     )
                 }
             }
+        }
+    }
+
+    private fun Throwable.userMessage(): String {
+        return when {
+            this is java.net.UnknownHostException || this is java.net.ConnectException -> 
+                "Please check your internet connection and try again."
+            this.message?.contains("401") == true || this.message?.contains("403") == true ->
+                "Your session has expired. Please sign in again."
+            else -> "We couldn't load your earnings right now. Please try again later."
         }
     }
 

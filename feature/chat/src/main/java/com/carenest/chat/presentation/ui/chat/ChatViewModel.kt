@@ -74,9 +74,18 @@ class ChatViewModel @Inject constructor(
                     sendEffect(ChatEffect.ScrollToBottom)
                 }
                 .onFailure { throwable ->
-                    updateState { copy(isLoading = false, errorMessage = throwable.message) }
-                    sendEffect(ChatEffect.ShowError(throwable.message.orEmpty()))
+                    val message = throwable.userMessage()
+                    updateState { copy(isLoading = false, errorMessage = message) }
+                    sendEffect(ChatEffect.ShowError(message))
                 }
+        }
+    }
+
+    private fun Throwable.userMessage(): String {
+        return when (this) {
+            is java.net.UnknownHostException, is java.net.ConnectException -> "Check your internet connection to see messages."
+            is io.ktor.client.plugins.ResponseException -> "Unable to load chat history. Please try again later."
+            else -> "Something went wrong. Please try again."
         }
     }
 
@@ -211,7 +220,7 @@ class ChatViewModel @Inject constructor(
                         }
                         copy(messages = updated)
                     }
-                    sendEffect(ChatEffect.ShowError(throwable.message.orEmpty()))
+                    sendEffect(ChatEffect.ShowError("Message failed to send. Please check your connection."))
                 }
         }
     }

@@ -120,6 +120,10 @@
     <string name="error_file_open">تعذر فتح الملف المحدد</string>
     <string name="error_file_empty">الملف المحدد فارغ</string>
     <string name="error_unknown">حدث خطأ ما. يرجى إعادة المحاولة.</string>
+    <string name="error_network">يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.</string>
+    <string name="error_server_unavailable">لا يمكننا الوصول إلى الخادم حالياً. يرجى المحاولة مرة أخرى لاحقاً.</string>
+    <string name="error_missing_session">حدث خطأ ما أثناء إعداد حسابك. يرجى محاولة تسجيل الدخول مرة أخرى.</string>
+    <string name="error_dob_must_be_past">يرجى إدخال تاريخ ميلاد صحيح في الماضي.</string>
 
     <!-- Step Titles -->
     <string name="step_personal_info">المعلومات الشخصية</string>

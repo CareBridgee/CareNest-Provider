@@ -94,6 +94,13 @@ class ProfileMenuViewModel @Inject constructor(
                             avatarUrl = profile.profileImageUrl,
                             specialty = profile.specialization.orEmpty(),
                             rating = profile.ratingAvg?.let { "%.1f".format(it) } ?: "0",
+                            reviewCount = profile.totalReviews ?: 0,
+                            menuItems = menuItems.map { item ->
+                                if (item.id == MenuItemId.Reviews) {
+                                    val count = profile.totalReviews ?: 0
+                                    item.copy(subtitle = "$count patient testimonials")
+                                } else item
+                            }
                         )
                     }
                 },

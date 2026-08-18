@@ -11,6 +11,7 @@ data class ProfileMenuUiState(
     val avatarUrl: String? = null,
     val specialty: String = "",
     val rating: String = "0",
+    val reviewCount: Int = 0,
     val menuItems: List<MenuItemUiModel> = sampleProfileMenuItems,
 )
 

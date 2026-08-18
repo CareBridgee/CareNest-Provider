@@ -197,7 +197,7 @@ class RegistrationViewmodel @Inject constructor(
                     val credentials = authenticationState.credentials
                     if (credentials == null) {
                         authenticationSessionStore.clearSession()
-                        val message = "Unable to initialize the authenticated session"
+                        val message = "Something went wrong while setting up your account. Please try signing in again."
                         updateState { copy(isSubmitting = false, errorMessage = message) }
                         sendEffect(RegistrationEffect.ShowMessage(message))
                         return@fold
@@ -208,7 +208,7 @@ class RegistrationViewmodel @Inject constructor(
                     )
                     if (!completed) {
                         authenticationSessionStore.clearSession()
-                        val message = "Unable to initialize the authenticated session"
+                        val message = "Something went wrong while setting up your account. Please try signing in again."
                         updateState { copy(isSubmitting = false, errorMessage = message) }
                         sendEffect(RegistrationEffect.ShowMessage(message))
                         return@fold
@@ -259,21 +259,21 @@ class RegistrationViewmodel @Inject constructor(
             0 -> {
                 val personal = state.personalInfoState
                 when {
-                    personal.firstName.isBlank() -> "error_first_name_required"
-                    !PersonalInfoValidation.isValidName(personal.firstName) -> "error_first_name_invalid"
-                    personal.lastName.isBlank() -> "error_last_name_required"
-                    !PersonalInfoValidation.isValidName(personal.lastName) -> "error_last_name_invalid"
+                    personal.firstName.isBlank() -> "Please enter your first name."
+                    !PersonalInfoValidation.isValidName(personal.firstName) -> "First name should contain 2–50 letters."
+                    personal.lastName.isBlank() -> "Please enter your last name."
+                    !PersonalInfoValidation.isValidName(personal.lastName) -> "Last name should contain 2–50 letters."
                     PersonalInfoValidation.nationalIdValidationError(personal.nationalId) != null ->
                         when (PersonalInfoValidation.nationalIdValidationError(personal.nationalId)) {
-                            NationalIdValidationError.REQUIRED -> "error_national_id_required"
-                            NationalIdValidationError.INVALID_LENGTH -> "error_national_id_length"
-                            NationalIdValidationError.INVALID_NATIONAL_ID -> "error_invalid_national_id"
-                            NationalIdValidationError.INVALID_DATE_OF_BIRTH -> "error_national_id_dob_invalid"
-                            NationalIdValidationError.FUTURE_DATE_OF_BIRTH -> "error_dob_must_be_past"
+                            NationalIdValidationError.REQUIRED -> "Please enter your 14-digit National ID."
+                            NationalIdValidationError.INVALID_LENGTH -> "National ID must be exactly 14 digits."
+                            NationalIdValidationError.INVALID_NATIONAL_ID -> "This National ID doesn't look right. Please check the digits."
+                            NationalIdValidationError.INVALID_DATE_OF_BIRTH -> "The birth date in this National ID is not valid."
+                            NationalIdValidationError.FUTURE_DATE_OF_BIRTH -> "Birth date cannot be in the future."
                             null -> null
                         }
-                    personal.gender == Gender.UNKNOWN -> "error_gender_required"
-                    personal.profilePhotoUri == null -> "error_profile_photo_required"
+                    personal.gender == Gender.UNKNOWN -> "Please select your gender identity."
+                    personal.profilePhotoUri == null -> "Please upload a clear profile photo of yourself."
                     else -> null
                 }
             }
@@ -284,23 +284,23 @@ class RegistrationViewmodel @Inject constructor(
                     docs.licenseNumber.isBlank() || docs.nursingLicense == null ||
                     docs.professionalCertificate == null || docs.yearsOfExp == null ||
                     docs.primarySpeciality.isBlank()
-                    -> "error_upload_all_docs"
+                    -> "Please make sure all documents are uploaded and experience details are filled."
                     !VerificationDocumentsValidation.isValidLicenseNumber(docs.licenseNumber) ->
-                        "error_license_number_invalid"
+                        "Please enter a valid license number."
                     !VerificationDocumentsValidation.isValidYearsOfExperience(docs.yearsOfExp) ->
-                        "error_years_of_exp_range"
+                        "Experience should be between 0 and 50 years."
                     !VerificationDocumentsValidation.isValidPrimarySpeciality(docs.primarySpeciality) ->
-                        "error_primary_speciality_invalid"
+                        "Please enter a valid primary speciality (3–50 letters)."
                     else -> null
                 }
             }
             2 -> when {
-                state.servicesUiState.isLoading -> "services_loading"
-                state.servicesUiState.errorMessage != null -> "error_services_unavailable"
-                state.servicesUiState.selectedServices.isEmpty() -> "error_select_service"
+                state.servicesUiState.isLoading -> "Loading available services…"
+                state.servicesUiState.errorMessage != null -> "We're having trouble loading services. Please tap retry."
+                state.servicesUiState.selectedServices.isEmpty() -> "Please select at least one service you provide."
                 else -> null
             }
-            3 -> if (!state.applicationReviewUiState.isCertified) "error_certify_information" else null
+            3 -> if (!state.applicationReviewUiState.isCertified) "Please confirm that all your information is accurate." else null
             else -> null
         }
         if (message != null) sendEffect(RegistrationEffect.ShowMessage(message, ToastType.Error))
@@ -398,15 +398,17 @@ private fun com.carenest.provider.profile.domain.model.NurseProfile.toSavedSessi
     )
 
 private fun Throwable.userMessage(): String {
-    val rawMessage = message?.trim().orEmpty()
-    return when {
-        rawMessage.isBlank() -> "error_unknown"
-        rawMessage.contains("\"dateOfBirth\"", ignoreCase = true) &&
-            rawMessage.contains("must be a past date", ignoreCase = true) ->
-            "error_dob_must_be_past"
-        rawMessage.contains("VALIDATION_FAILED", ignoreCase = true) ||
-            rawMessage.trimStart().startsWith("{") ->
-            "error_unknown"
-        else -> rawMessage
+    return when (this) {
+        is java.net.UnknownHostException, is java.net.ConnectException -> "Please check your internet connection and try again."
+        is io.ktor.client.plugins.ResponseException -> "We couldn't reach the server right now. Please try again later."
+        else -> {
+            val rawMessage = message?.trim().orEmpty()
+            when {
+                rawMessage.contains("\"dateOfBirth\"", ignoreCase = true) &&
+                    rawMessage.contains("must be a past date", ignoreCase = true) ->
+                    "Please enter a valid past date for your birth date."
+                else -> "Something went wrong with your registration. Please try again."
+            }
+        }
     }
 }

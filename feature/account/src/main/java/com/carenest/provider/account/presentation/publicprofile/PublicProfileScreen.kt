@@ -475,6 +475,8 @@ private fun EditBioBottomSheet(
                 onTextChange = { onIntent(PublicProfileIntent.BioChanged(it)) },
                 title = stringResource(R.string.public_profile_bio_label),
                 hint = stringResource(R.string.public_profile_bio_hint),
+                isError = state.bioError != null,
+                errorMessage = state.bioError,
                 minLines = 4,
                 maxLines = 6,
                 fieldHeight = 140.dp,

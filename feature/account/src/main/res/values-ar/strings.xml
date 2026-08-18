@@ -94,8 +94,13 @@
     <string name="documents_pending_question">لماذا مستندي قيد المراجعة؟</string>
     <string name="documents_pending_answer">يتحقق فريق المراجعة السريرية عادةً من المستندات خلال ٢٤–٤٨ ساعة عمل. ستصلك إشعار عند تغير الحالة.</string>
     <string name="profile_error_missing_session">تعذر العثور على جلسة مقدم الرعاية. يرجى تسجيل الدخول مرة أخرى.</string>
-    <string name="profile_error_specialization_required">التخصص مطلوب.</string>
-    <string name="profile_error_invalid_years">أدخل عدد سنوات خبرة صالحًا.</string>
+    <string name="profile_error_specialization_required">يُرجى إدخال تخصص صالح (٣ أحرف على الأقل).</string>
+    <string name="profile_error_specialization_too_long">اسم التخصص طويل جداً.</string>
+    <string name="profile_error_specialization_invalid_chars">يجب أن يحتوي التخصص على أحرف فقط.</string>
+    <string name="profile_error_years_required">يُرجى إدخال سنوات الخبرة الخاصة بك.</string>
+    <string name="profile_error_years_invalid">يُرجى إدخال عدد سنوات صالح بين ٠ و ٥٠.</string>
+    <string name="profile_error_bio_too_short">يُرجى مشاركة المزيد عن خبرتك (٢٠ حرفاً على الأقل).</string>
+    <string name="profile_error_bio_too_long">النبذة طويلة جداً، يُرجى إبقاؤها أقل من ٥٠٠ حرف.</string>
     <string name="profile_error_invalid_image">اختر ملف صورة صالحًا.</string>
     <string name="profile_saved">تم تحديث الملف.</string>
     <string name="profile_photo_updated">تم تحديث صورة الملف.</string>
@@ -111,6 +116,9 @@
     <string name="settings_dark_mode">الوضع الداكن</string>
     <string name="settings_security_privacy">الأمان والخصوصية</string>
     <string name="settings_privacy_policy">سياسة الخصوصية</string>
+    <string name="privacy_policy_part_1">في إطمئن، خصوصيتك هي أولويتنا. نحن نجمع ونعالج معلوماتك المهنية وموقعك ومؤهلاتك فقط لتسهيل خدمات الرعاية وضمان السلامة على منصتنا.</string>
+    <string name="privacy_policy_part_2">نحن نطبق تدابير أمنية قياسية في الصناعة لحماية بياناتك من الوصول غير المصرح به. لا يتم بيع معلوماتك أبدًا لأطراف ثالثة ويتم مشاركتها فقط مع المرضى لغرض تنسيق الرعاية النشطة.</string>
+    <string name="privacy_policy_part_3">باستخدام التطبيق، فإنك توافق على ممارسات جمع البيانات لدينا كما هو موضح في وثائق الخصوصية الكاملة الخاصة بنا.</string>
 
     <string name="reviews_title">التقييمات والمراجعات</string>
     <plurals name="reviews_count">

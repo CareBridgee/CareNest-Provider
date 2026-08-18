@@ -33,7 +33,11 @@ import com.carenest.provider.designsystem.theme.Theme
 
 @Composable
 fun EarningsSection(
-    earnings: String, changePercent: String, jobsToday: Int, rating: String
+    earnings: String,
+    changePercent: String,
+    jobsToday: Int,
+    rating: String,
+    reviewCount: Int
 ) {
     Column(
         modifier = Modifier.padding(vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -121,20 +125,28 @@ fun EarningsSection(
             StatCard(
                 modifier = Modifier.weight(1f), label = stringResource(R.string.rating)
             ) {
-                Row(verticalAlignment = Alignment.Bottom) {
-                    Text(
-                        text = rating,
-                        color = Theme.colors.primary,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                Column {
+                    Row(verticalAlignment = Alignment.Bottom) {
+                        Text(
+                            text = rating,
+                            color = Theme.colors.primary,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
 
-                    Spacer(Modifier.width(4.dp))
+                        Spacer(Modifier.width(4.dp))
 
+                        Text(
+                            text = "★",
+                            color = Theme.colors.primary,
+                            fontSize = 20.sp,
+                        )
+                    }
                     Text(
-                        text = "★",
-                        color = Theme.colors.primary,
-                        fontSize = 20.sp,
+                        text = "$reviewCount Reviews",
+                        color = Theme.colors.secondaryFont,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Normal
                     )
                 }
             }
@@ -163,7 +175,11 @@ private fun StatCard(
 private fun Preview() {
     SpTheme {
         EarningsSection(
-            earnings = "$240.00", changePercent = "12%", jobsToday = 3, rating = "4.9"
+            earnings = "$240.00",
+            changePercent = "12%",
+            jobsToday = 3,
+            rating = "4.9",
+            reviewCount = 124
         )
     }
 }

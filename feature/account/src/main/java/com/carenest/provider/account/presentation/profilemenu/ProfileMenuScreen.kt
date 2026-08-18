@@ -122,7 +122,7 @@ fun ProfileMenuContent(
             items(state.menuItems, key = { it.id }) { item ->
                 ProfileMenuCard(
                     title = stringResource(item.titleRes),
-                    subtitle = stringResource(item.subtitleRes),
+                    subtitle = item.subtitle ?: stringResource(item.subtitleRes),
                     iconRes = item.iconRes,
                     showVerifiedDot = item.showVerifiedDot,
                     onClick = {

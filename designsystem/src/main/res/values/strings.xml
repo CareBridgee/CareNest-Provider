@@ -134,9 +134,12 @@ coordination of services.</string>
     <string name="auth_error_otp_incomplete">Enter the complete 6-digit verification code.</string>
     <string name="auth_error_invalid_otp">The verification code is incorrect. Check the code and try again.</string>
     <string name="auth_error_expired_otp">This verification code has expired. Request a new code.</string>
-    <string name="auth_error_network">No internet connection. Check your connection and try again.</string>
+    <string name="auth_error_network">Please check your internet connection and try again.</string>
     <string name="auth_error_too_many_requests">Too many attempts. Please wait a moment before trying again.</string>
-    <string name="auth_error_service_unavailable">The authentication service is temporarily unavailable. Please try again shortly.</string>
+    <string name="auth_error_service_unavailable">We couldn\'t reach the server right now. Please try again later.</string>
+    <string name="error_session_expired">Your session has expired. Please sign in again.</string>
+    <string name="error_connection_issue">Connection issue detected. We\'re working to restore it.</string>
+    <string name="error_connection_trouble">We\'re having trouble connecting. Please check your internet.</string>
     <string name="auth_error_send_code">We couldn\'t send the verification code. Please try again.</string>
     <string name="auth_error_resend_code">We couldn\'t resend the verification code. Please try again.</string>
     <string name="auth_error_verification">We couldn\'t verify the code. Please try again.</string>

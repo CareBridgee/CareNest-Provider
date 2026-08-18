@@ -9,6 +9,7 @@ data class MenuItemUiModel(
     @param:StringRes val subtitleRes: Int,
     @param:DrawableRes val iconRes: Int,
     val showVerifiedDot: Boolean = false,
+    val subtitle: String? = null,
 )
 
 enum class MenuItemId {

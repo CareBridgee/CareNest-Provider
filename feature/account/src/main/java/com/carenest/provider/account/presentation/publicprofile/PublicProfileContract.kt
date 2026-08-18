@@ -18,6 +18,7 @@ data class PublicProfileUiState(
     val yearsOfExperienceDraft: String = "",
     val specializationError: String? = null,
     val yearsOfExperienceError: String? = null,
+    val bioError: String? = null,
 ) {
     val isVerified: Boolean
         get() = profile?.verificationStatus == VerificationStatus.APPROVED
