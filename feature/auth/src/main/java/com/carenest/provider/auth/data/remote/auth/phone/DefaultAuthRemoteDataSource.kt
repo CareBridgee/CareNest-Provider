@@ -29,11 +29,7 @@ class DefaultAuthRemoteDataSource @Inject constructor(
         phoneNumber: String,
         otp: String,
         pendingToken: String?,
-    ): HttpResponse = if (pendingToken != null) {
-        googleAuthApi.verifyOtp(phoneNumber, otp, pendingToken)
-    } else {
-        defaultAuthApi.verifyOtp(phoneNumber, otp)
-    }
+    ): HttpResponse = defaultAuthApi.verifyOtp(phoneNumber, otp, pendingToken)
 
     override suspend fun getCurrentUser(): HttpResponse =
         defaultAuthApi.getCurrentUser()

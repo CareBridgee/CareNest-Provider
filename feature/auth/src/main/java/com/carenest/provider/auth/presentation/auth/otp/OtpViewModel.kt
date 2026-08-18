@@ -129,7 +129,10 @@ class OtpViewModel @Inject constructor(
             result.fold(
                 onSuccess = { nurse ->
                     verifiedNurse = nurse
-                    verifiedCredentials = authenticationSessionStore.state.first().credentials
+                    val sessionState = kotlinx.coroutines.withTimeoutOrNull(2000) {
+                        authenticationSessionStore.state.first { it.credentials?.isComplete == true }
+                    } ?: authenticationSessionStore.state.first()
+                    verifiedCredentials = sessionState.credentials
                     resolveAuthenticatedDestination(nurse)
                 },
                 onFailure = { error ->
@@ -188,12 +191,6 @@ class OtpViewModel @Inject constructor(
                     }
                     return@fold
                 }
-                Log.d(
-                    "AuthRouting",
-                    "nurseStatus=${nurse?.verificationStatus}, " +
-                        "serverDestination=${serverDestination::class.simpleName}, " +
-                        "destination=${destination::class.simpleName}",
-                )
                 updateState {
                     copy(
                         isLoading = false,

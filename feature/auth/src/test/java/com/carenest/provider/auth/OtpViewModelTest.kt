@@ -3,6 +3,7 @@ package com.carenest.provider.auth
 import com.carenest.provider.auth.domain.model.AuthenticatedNurse
 import com.carenest.provider.auth.domain.model.AuthenticatedUser
 import com.carenest.provider.auth.domain.model.GoogleLoginResult
+import com.carenest.provider.auth.domain.model.NurseVerificationStatus
 import com.carenest.provider.auth.domain.repository.AuthRepository
 import com.carenest.provider.auth.domain.usecase.AuthenticationDestinationResolver
 import com.carenest.provider.auth.domain.usecase.DevLoginUseCase
@@ -126,6 +127,67 @@ class OtpViewModelTest {
         advanceUntilIdle()
     }
 
+    @Test
+    fun successfulOtpVerificationTransitionsToSuccessState() = runTest(dispatcher) {
+        val sessionStore = FakeAuthenticationSessionStore()
+        authRepository.verifyOtpResult = Result.success(
+            AuthenticatedNurse(
+                id = "nurse-123",
+                verificationStatus = NurseVerificationStatus.APPROVED,
+                hasSubmittedApplication = true,
+            )
+        )
+        val viewModel = OtpViewModel(
+            verifyOtpUseCase = VerifyOtpUseCase(authRepository),
+            devLoginUseCase = DevLoginUseCase(authRepository),
+            resolveDestination = ResolveAuthenticationDestinationUseCase(
+                authRepository,
+                AuthenticationDestinationResolver(),
+            ),
+            authenticationSessionStore = sessionStore,
+        )
+        sessionStore.beginAuthentication("access-123", "refresh-123")
+
+        viewModel.onEvent(OtpIntent.PhoneNumberChanged("+201027642749"))
+        viewModel.onEvent(OtpIntent.OtpCodeChanged("123456"))
+        viewModel.onEvent(OtpIntent.VerifyOtpClicked)
+        advanceUntilIdle()
+
+        assertEquals("+201027642749", authRepository.lastVerifiedPhone)
+        assertEquals("123456", authRepository.lastVerifiedOtp)
+        assertTrue(viewModel.state.value.isSuccess)
+        assertFalse(viewModel.state.value.isLoading)
+    }
+
+    @Test
+    fun failedOtpVerificationDisplaysError() = runTest(dispatcher) {
+        val sessionStore = FakeAuthenticationSessionStore()
+        authRepository.verifyOtpResult = Result.failure(
+            com.carenest.provider.auth.domain.model.AuthException(
+                failure = com.carenest.provider.auth.domain.model.AuthFailure.InvalidOtp,
+                message = "Invalid code",
+            )
+        )
+        val viewModel = OtpViewModel(
+            verifyOtpUseCase = VerifyOtpUseCase(authRepository),
+            devLoginUseCase = DevLoginUseCase(authRepository),
+            resolveDestination = ResolveAuthenticationDestinationUseCase(
+                authRepository,
+                AuthenticationDestinationResolver(),
+            ),
+            authenticationSessionStore = sessionStore,
+        )
+
+        viewModel.onEvent(OtpIntent.PhoneNumberChanged("+201027642749"))
+        viewModel.onEvent(OtpIntent.OtpCodeChanged("000000"))
+        viewModel.onEvent(OtpIntent.VerifyOtpClicked)
+        advanceUntilIdle()
+
+        assertFalse(viewModel.state.value.isSuccess)
+        assertFalse(viewModel.state.value.isLoading)
+        assertNotNull(viewModel.state.value.errorMessage)
+    }
+
     private fun viewModel() = OtpViewModel(
         verifyOtpUseCase = VerifyOtpUseCase(authRepository),
         devLoginUseCase = DevLoginUseCase(authRepository),
@@ -139,8 +201,12 @@ class OtpViewModelTest {
 
 private class FakeOtpAuthRepository : AuthRepository {
     var otpResult: Result<String> = Result.success("123456")
+    var verifyOtpResult: Result<AuthenticatedNurse?> = Result.success(null)
     var requestCount: Int = 0
     var lastRequestedPhone: String? = null
+    var lastVerifiedPhone: String? = null
+    var lastVerifiedOtp: String? = null
+    var lastVerifiedPendingToken: String? = null
 
     override suspend fun login(phoneNumber: String): Result<Unit> = Result.success(Unit)
 
@@ -163,7 +229,12 @@ private class FakeOtpAuthRepository : AuthRepository {
         phoneNumber: String,
         otp: String,
         pendingToken: String?,
-    ): Result<AuthenticatedNurse?> = Result.failure(UnsupportedOperationException())
+    ): Result<AuthenticatedNurse?> {
+        lastVerifiedPhone = phoneNumber
+        lastVerifiedOtp = otp
+        lastVerifiedPendingToken = pendingToken
+        return verifyOtpResult
+    }
 
     override suspend fun getCurrentUser(): Result<AuthenticatedUser> =
         Result.success(AuthenticatedUser(profileCompleted = false))
@@ -177,7 +248,11 @@ private class FakeAuthenticationSessionStore : AuthenticationSessionStore {
     override val currentSession: AuthenticationSession?
         get() = authenticationState.value.session
 
-    override suspend fun beginAuthentication(accessToken: String, refreshToken: String) = Unit
+    override suspend fun beginAuthentication(accessToken: String, refreshToken: String) {
+        authenticationState.value = AuthenticationState(
+            credentials = AuthenticationCredentials(accessToken, refreshToken, "session-1")
+        )
+    }
 
     override suspend fun completeAuthentication(
         expectedCredentials: AuthenticationCredentials,

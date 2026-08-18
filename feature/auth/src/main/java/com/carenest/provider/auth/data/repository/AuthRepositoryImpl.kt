@@ -263,6 +263,8 @@ private fun authException(
         .joinToString(" ")
         .lowercase()
 
+    val hasCustomMessage = message.isNotBlank() && !message.startsWith("HTTP ")
+
     val failure = when {
         cause is IOException ||
             searchableMessage.contains("timeout") ||
@@ -275,13 +277,15 @@ private fun authException(
         operation == AuthOperation.VERIFY_OTP &&
             (searchableMessage.contains("invalid otp") ||
                 searchableMessage.contains("incorrect code") ||
-                searchableMessage.contains("invalid code")) -> AuthFailure.InvalidOtp
+                searchableMessage.contains("invalid code") ||
+                searchableMessage.contains("wrong code") ||
+                searchableMessage.contains("code mismatch")) -> AuthFailure.InvalidOtp
         statusCode == 408 -> AuthFailure.Network
         statusCode == 429 -> AuthFailure.TooManyRequests
         statusCode != null && statusCode >= 500 -> AuthFailure.Server
-        operation == AuthOperation.VERIFY_OTP && statusCode in setOf(400, 401, 403, 404, 409, 422) ->
+        operation == AuthOperation.VERIFY_OTP && (statusCode in setOf(400, 401, 422)) && !hasCustomMessage ->
             AuthFailure.InvalidOtp
-        operation == AuthOperation.REQUEST_OTP && statusCode in setOf(400, 404, 422) ->
+        operation == AuthOperation.REQUEST_OTP && (statusCode in setOf(400, 404, 422)) && !hasCustomMessage ->
             AuthFailure.InvalidPhone
         else -> AuthFailure.Unknown
     }
