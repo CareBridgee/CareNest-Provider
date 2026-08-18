@@ -64,27 +64,9 @@ private val sampleProfileMenuItems = listOf(
         DesignSystemR.drawable.ic_account_reviews,
     ),
     MenuItemUiModel(
-        MenuItemId.Wallet,
-        R.string.profile_menu_wallet,
-        R.string.profile_menu_wallet_subtitle,
-        DesignSystemR.drawable.ic_account_wallet,
-    ),
-    MenuItemUiModel(
         MenuItemId.Earnings,
         R.string.profile_menu_earnings,
         R.string.profile_menu_earnings_subtitle,
         DesignSystemR.drawable.ic_wallet,
-    ),
-    MenuItemUiModel(
-        MenuItemId.Payouts,
-        R.string.profile_menu_payouts,
-        R.string.profile_menu_payouts_subtitle,
-        DesignSystemR.drawable.ic_document_text,
-    ),
-    MenuItemUiModel(
-        MenuItemId.Support,
-        R.string.profile_menu_support,
-        R.string.profile_menu_support_subtitle,
-        DesignSystemR.drawable.ic_account_support_chat,
     ),
 )

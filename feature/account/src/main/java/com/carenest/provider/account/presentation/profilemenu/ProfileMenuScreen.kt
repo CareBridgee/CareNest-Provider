@@ -129,8 +129,6 @@ fun ProfileMenuContent(
                         onIntent(
                             when (item.id) {
                                 MenuItemId.Earnings -> ProfileMenuIntent.EarningsClicked
-                                MenuItemId.Payouts -> ProfileMenuIntent.PayoutsClicked
-                                MenuItemId.Wallet -> ProfileMenuIntent.WalletClicked
                                 MenuItemId.Settings -> ProfileMenuIntent.SettingsClicked
                                 else -> ProfileMenuIntent.MenuItemClicked(item.id)
                             },
