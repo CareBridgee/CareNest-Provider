@@ -61,4 +61,7 @@
     <string name="cancellation_dialog_title">Service Request Cancelled</string>
     <string name="cancellation_dialog_message">This service request has been cancelled by the patient.</string>
     <string name="cancellation_dialog_ok">OK</string>
+    <string name="getting_location_to_go_online">We\'re getting your location to go online…</string>
+    <string name="unable_to_get_location">We can\'t get your location. You cannot go online without location.</string>
+    <string name="location_unknown_making_offline">Location is unknown, so we\'re making you offline now.</string>
 </resources>

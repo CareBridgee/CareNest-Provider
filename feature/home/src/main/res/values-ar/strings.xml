@@ -65,4 +65,7 @@
     <string name="cancellation_dialog_title">تم إلغاء طلب الخدمة</string>
     <string name="cancellation_dialog_message">تم إلغاء طلب الخدمة هذا بواسطة المريض.</string>
     <string name="cancellation_dialog_ok">حسناً</string>
+    <string name="getting_location_to_go_online">جاري الحصول على موقعك للاتصال بالإنترنت…</string>
+    <string name="unable_to_get_location">تعذر الحصول على موقعك. لا يمكنك الاتصال بالإنترنت بدون تحديد موقعك.</string>
+    <string name="location_unknown_making_offline">الموقع غير معروف، لذلك تم تحويل حالتك إلى غير متصل الآن.</string>
 </resources>

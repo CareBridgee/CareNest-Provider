@@ -1,6 +1,8 @@
 package com.carenest.home.presentation.home
 
+import androidx.annotation.StringRes
 import com.carenest.home.domain.model.NurseRequest
+import com.carenest.provider.designsystem.components.toast.ToastType
 
 enum class ActiveModal {
     None,
@@ -15,6 +17,7 @@ data class HomeUiState(
     val nurseAvatar : String?=null,
     val isProviderApproved: Boolean = false,
     val isOnline: Boolean = false,
+    val isGettingLocation: Boolean = false,
     val isLoading: Boolean = false,
     val requests: List<NurseRequest> = emptyList(),
     val selectedCardId: String? = null,
@@ -51,4 +54,13 @@ sealed interface HomeEffect {
     data object NavigateToRequestList : HomeEffect
     data class NavigateToOfferConfirmed(val requestId: String) : HomeEffect
     data class StartActiveReservationService(val requestId: String) : HomeEffect
+    data class ShowSnackbarRes(
+        @param:StringRes val messageRes: Int,
+        val type: ToastType = ToastType.Info,
+    ) : HomeEffect
+    data class ShowSnackbarString(
+        val message: String,
+        val type: ToastType = ToastType.Info,
+    ) : HomeEffect
 }
+

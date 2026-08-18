@@ -24,6 +24,8 @@ import com.carenest.provider.core.datastore.AuthenticationSessionStore
 import com.carenest.provider.profile.domain.usecase.GetNurseUseCase
 import com.carenest.provider.profile.domain.usecase.LoadServiceTypesUseCase
 import com.carenest.provider.profile.domain.model.VerificationStatus
+import com.carenest.home.R
+import com.carenest.provider.designsystem.components.toast.ToastType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
@@ -64,6 +66,7 @@ class HomeViewModel @Inject constructor(
     private var offerEventListenerJob: Job? = null
     private var offerTimerJob: Job? = null
     private var profileJob: Job? = null
+    private var locationJob: Job? = null
     private var hasResolvedProviderApproval = false
     private var serviceImagesById: Map<String, String> = emptyMap()
 
@@ -236,8 +239,49 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun handleOnlineToggle(isOnline: Boolean) {
-        viewModelScope.launch {
-            updateAvailability(isOnline)
+        if (isOnline) {
+            if (currentState.isGettingLocation) {
+                sendEffect(
+                    HomeEffect.ShowSnackbarRes(
+                        R.string.getting_location_to_go_online,
+                        ToastType.Info
+                    )
+                )
+                return
+            }
+
+            locationJob?.cancel()
+            updateState { copy(isGettingLocation = true) }
+            sendEffect(
+                HomeEffect.ShowSnackbarRes(
+                    R.string.getting_location_to_go_online,
+                    ToastType.Info
+                )
+            )
+
+            locationJob = viewModelScope.launch {
+                val location = getCurrentLocation()
+                Log.d("HomeViewModel", "handleOnlineToggle location result: ${location?.latitude}, ${location?.longitude}")
+                if (location != null) {
+                    updateState { copy(isGettingLocation = false) }
+                    updateAvailability(true)
+                } else {
+                    updateState { copy(isGettingLocation = false, isOnline = false) }
+                    updateAvailability(false)
+                    sendEffect(
+                        HomeEffect.ShowSnackbarRes(
+                            R.string.unable_to_get_location,
+                            ToastType.Error
+                        )
+                    )
+                }
+            }
+        } else {
+            locationJob?.cancel()
+            updateState { copy(isGettingLocation = false) }
+            viewModelScope.launch {
+                updateAvailability(false)
+            }
         }
     }
 
@@ -266,11 +310,21 @@ class HomeViewModel @Inject constructor(
                 val location = getCurrentLocation()
                 Log.d(TAG, "applyAvailabilityChange: ${location?.latitude}, ${location?.longitude}")
 
-                nurseSocketClient.updateAvailability(
-                    available = true,
-                    lat = location?.latitude,
-                    lng = location?.longitude
-                )
+                if (location == null) {
+                    updateAvailability(false)
+                    sendEffect(
+                        HomeEffect.ShowSnackbarRes(
+                            R.string.location_unknown_making_offline,
+                            ToastType.Error
+                        )
+                    )
+                } else {
+                    nurseSocketClient.updateAvailability(
+                        available = true,
+                        lat = location.latitude,
+                        lng = location.longitude
+                    )
+                }
             }
 
             // Stream real-time socket requests
@@ -561,6 +615,7 @@ class HomeViewModel @Inject constructor(
         }
     }
     override fun onCleared() {
+        locationJob?.cancel()
         fetchJob?.cancel()
         socketJob?.cancel()
         offerEventListenerJob?.cancel()
