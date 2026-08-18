@@ -48,6 +48,7 @@ fun CareNestDialog(
     dismissText: String? = "Cancel",
     icon: Painter? = null,
     confirmColor: Color = Theme.colors.primary,
+    customHeader: (@Composable () -> Unit)? = null,
 ) {
     Dialog(onDismissRequest = onDismiss) {
         Column(
@@ -58,7 +59,10 @@ fun CareNestDialog(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if (icon != null) {
+            if (customHeader != null) {
+                customHeader()
+                Spacer(Modifier.height(20.dp))
+            } else if (icon != null) {
                 Box(
                     modifier = Modifier
                         .size(72.dp)
