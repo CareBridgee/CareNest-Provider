@@ -506,6 +506,9 @@ class HomeViewModel @Inject constructor(
         offerEventListenerJob = viewModelScope.launch {
             listenReservationEvents(requestId).collect { event ->
                 when (event.eventType) {
+                    ReservationEventType.OFFER_CREATED -> {
+                        nurseSocketClient.subscribeToReservationAfterOffer(requestId)
+                    }
                     ReservationEventType.OFFER_ACCEPTED -> {
                         stopOfferTimer()
                         updateState { copy(activeModal = ActiveModal.OfferSuccess) }
@@ -584,6 +587,7 @@ class HomeViewModel @Inject constructor(
     private fun handleRequestCancelledByPatient(requestId: String) {
         offerEventListenerJob?.cancel()
         stopOfferTimer()
+        viewModelScope.launch { nurseSocketClient.unsubscribeFromReservation(requestId) }
         updateState {
             copy(
                 requests = requests.filterNot { it.id == requestId },
@@ -599,6 +603,7 @@ class HomeViewModel @Inject constructor(
     private fun completeOfferTimeout(requestId: String) {
         offerEventListenerJob?.cancel()
         stopOfferTimer()
+        viewModelScope.launch { nurseSocketClient.unsubscribeFromReservation(requestId) }
         updateState {
             copy(
                 requests = requests.filterNot { it.id == requestId },

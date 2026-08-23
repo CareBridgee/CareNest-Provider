@@ -88,12 +88,14 @@ class NurseRequestsDataSourceImpl @Inject constructor(
     }
 
     override suspend fun createOffer(requestId: String, proposedPrice: Double, message: String?) {
+        val currentDate = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
+        val currentTime = java.text.SimpleDateFormat("HH:mm", java.util.Locale.US).format(java.util.Date())
         nurseSocketClient.connect()
         nurseSocketClient.createOffer(
             serviceRequestId = requestId,
             proposedPrice = proposedPrice,
-            proposedDate = "2026-08-15",
-            proposedTime = "10:00",
+            proposedDate = currentDate,
+            proposedTime = currentTime,
             message = message ?: "Offer submitted by nurse"
         )
     }
