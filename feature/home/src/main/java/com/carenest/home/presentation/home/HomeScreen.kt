@@ -59,6 +59,20 @@ private enum class ContentPhase {
     Offline, Loading, Empty, List,
 }
 
+/**
+ * The permission chain ends here, so duplicate auto-confirmed callbacks (already
+ * granted permissions advance instantly) must not re-trigger the online flow
+ * while it is already running or live.
+ */
+private fun dispatchOnlineToggleIfNeeded(
+    state: HomeUiState,
+    onIntent: (HomeIntent) -> Unit,
+) {
+    if (!state.isOnline && !state.isGettingLocation && !state.showLocationDialog) {
+        onIntent(HomeIntent.OnlineToggled(true))
+    }
+}
+
 @Composable
 fun HomeScreen(
     onNavigateToRequests: () -> Unit,
@@ -128,8 +142,13 @@ fun HomeContent(
     var requestLocationPermission by remember { mutableStateOf(false) }
     var showLocationRationale by remember { mutableStateOf(false) }
 
+    var requestedOnlinePermissions by remember { mutableStateOf(false) }
     androidx.compose.runtime.LaunchedEffect(state.isProviderApproved, state.isOnline) {
-        if (state.isProviderApproved && state.isOnline) {
+        // Ask once per composition lifetime, not on every isOnline flip - otherwise
+        // the (already-granted) permission chain auto-confirms and re-dispatches
+        // OnlineToggled(true), reopening the location dialog right after going live.
+        if (state.isProviderApproved && state.isOnline && !requestedOnlinePermissions) {
+            requestedOnlinePermissions = true
             requestNotificationPermission = true
         }
     }
@@ -176,7 +195,7 @@ fun HomeContent(
             onPermissionGranted = {
                 requestLocationPermission = false
                 showLocationRationale = false
-                onIntent(HomeIntent.OnlineToggled(true))
+                dispatchOnlineToggleIfNeeded(state, onIntent)
             },
             onPermissionDenied = {
                 showLocationRationale = true
@@ -185,7 +204,7 @@ fun HomeContent(
             onRationaleDismissed = {
                 showLocationRationale = false
                 requestLocationPermission = false
-                onIntent(HomeIntent.OnlineToggled(true))
+                dispatchOnlineToggleIfNeeded(state, onIntent)
             }
         )
     }

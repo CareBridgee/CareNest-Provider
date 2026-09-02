@@ -55,6 +55,7 @@ class NurseRequestsDataSourceImpl @Inject constructor(
         proposedTime: String,
         message: String?
     ) {
+        nurseSocketClient.connect()
         nurseSocketClient.createOffer(
             serviceRequestId = serviceRequestId,
             proposedPrice = proposedPrice,

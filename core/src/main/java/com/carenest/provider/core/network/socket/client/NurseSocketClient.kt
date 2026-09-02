@@ -49,6 +49,7 @@ interface NurseSocketClient {
     suspend fun sendChatMessage(reservationId: String, content: String)
 
     suspend fun subscribeToReservation(reservationId: String)
+    suspend fun subscribeToReservationAfterOffer(reservationId: String)
     suspend fun unsubscribeFromReservation(reservationId: String)
 
     suspend fun subscribeToChat(reservationId: String)

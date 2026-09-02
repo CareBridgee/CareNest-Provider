@@ -150,7 +150,17 @@ class OtpViewModel @Inject constructor(
 
     private fun retryDestinationResolution() {
         if (currentState.isLoading) return
-        verifyOtp()
+        // The OTP was already consumed by the first verify; re-resolving only
+        // avoids burning a second code and keeps the freshly minted tokens.
+        val nurse = verifiedNurse
+        if (nurse != null && verifiedCredentials != null) {
+            viewModelScope.launch {
+                updateState { copy(isLoading = true) }
+                resolveAuthenticatedDestination(nurse)
+            }
+        } else {
+            verifyOtp()
+        }
     }
 
     private suspend fun resolveAuthenticatedDestination(nurse: AuthenticatedNurse?) {
@@ -163,8 +173,8 @@ class OtpViewModel @Inject constructor(
                     phoneNumber = phoneNumber,
                 )
                 val expectedCredentials = verifiedCredentials
+                    ?: authenticationSessionStore.state.first().credentials
                 if (expectedCredentials == null) {
-                    authenticationSessionStore.clearSession()
                     updateState {
                         copy(
                             isLoading = false,
@@ -179,7 +189,9 @@ class OtpViewModel @Inject constructor(
                     session = destination.toSavedSession(phoneNumber),
                 )
                 if (!completed) {
-                    authenticationSessionStore.clearSession()
+                    // The stored credentials moved underneath us (concurrent login);
+                    // only retire the pair this flow owns, never the live session.
+                    authenticationSessionStore.clearSessionIfCurrent(expectedCredentials)
                     verifiedNurse = null
                     verifiedCredentials = null
                     updateState {
@@ -201,9 +213,9 @@ class OtpViewModel @Inject constructor(
                 sendEffect(OtpEffect.AuthenticationSucceeded(destination))
             },
             onFailure = { error ->
-                authenticationSessionStore.clearSession()
-                verifiedNurse = null
-                verifiedCredentials = null
+                // Keep the freshly minted tokens: a failed destination lookup
+                // (timeout, 5xx) says nothing about credential validity, and the
+                // retry path re-resolves without consuming another OTP.
                 updateState {
                     copy(
                         isLoading = false,

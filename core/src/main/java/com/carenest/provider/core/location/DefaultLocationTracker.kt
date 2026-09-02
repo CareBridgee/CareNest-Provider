@@ -12,6 +12,7 @@ import android.os.CancellationSignal
 import androidx.core.content.ContextCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
@@ -25,7 +26,7 @@ class DefaultLocationTracker @Inject constructor(
         context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
     }
 
-    override suspend fun getCurrentLocation(): LocationData? {
+    override suspend fun getCurrentLocation(): LocationResult {
         val hasFineLocation = ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.ACCESS_FINE_LOCATION
@@ -37,40 +38,48 @@ class DefaultLocationTracker @Inject constructor(
         ) == PackageManager.PERMISSION_GRANTED
 
         if (!hasFineLocation && !hasCoarseLocation) {
-            return null
+            return LocationResult.Failure(LocationResult.Reason.PERMISSION_DENIED)
         }
 
-        val lm = locationManager ?: return null
+        val lm = locationManager ?: return LocationResult.Failure(LocationResult.Reason.NO_FIX)
 
         val isGpsEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
         val isNetworkEnabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-
         val lastKnown = getLastKnownLocation(lm)
 
         if (!isGpsEnabled && !isNetworkEnabled) {
             return lastKnown
+                ?.let { LocationResult.Success(it) }
+                ?: LocationResult.Failure(LocationResult.Reason.PROVIDERS_DISABLED)
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val providersToTry = mutableListOf<String>()
             if (isGpsEnabled) providersToTry.add(LocationManager.GPS_PROVIDER)
             if (isNetworkEnabled) providersToTry.add(LocationManager.NETWORK_PROVIDER)
-            providersToTry.add(LocationManager.PASSIVE_PROVIDER)
 
             for (provider in providersToTry) {
-                val location = fetchCurrentLocationForProvider(lm, provider)
+                val location = withTimeoutOrNull(CURRENT_LOCATION_TIMEOUT_MS) {
+                    fetchCurrentLocationForProvider(lm, provider)
+                }
                 if (location != null) {
-                    return LocationData(location.latitude, location.longitude)
+                    return LocationResult.Success(
+                        LocationData(location.latitude, location.longitude, location.time)
+                    )
                 }
             }
         }
 
-        val singleUpdateLocation = requestSingleLocationUpdate(lm, isNetworkEnabled, isGpsEnabled)
+        val singleUpdateLocation = withTimeoutOrNull(SINGLE_UPDATE_TIMEOUT_MS) {
+            requestSingleLocationUpdate(lm, isNetworkEnabled, isGpsEnabled)
+        }
         if (singleUpdateLocation != null) {
-            return singleUpdateLocation
+            return LocationResult.Success(singleUpdateLocation)
         }
 
         return lastKnown
+            ?.let { LocationResult.Success(it) }
+            ?: LocationResult.Failure(LocationResult.Reason.NO_FIX)
     }
 
     @androidx.annotation.RequiresApi(Build.VERSION_CODES.R)
@@ -114,7 +123,9 @@ class DefaultLocationTracker @Inject constructor(
                 }
             } catch (_: SecurityException) { }
         }
-        return bestLocation?.let { LocationData(it.latitude, it.longitude) }
+        return bestLocation?.let {
+            LocationData(it.latitude, it.longitude, it.time)
+        }
     }
 
     private suspend fun requestSingleLocationUpdate(
@@ -135,7 +146,9 @@ class DefaultLocationTracker @Inject constructor(
                             lm.removeUpdates(this)
                         } catch (_: SecurityException) { }
                         if (continuation.isActive) {
-                            continuation.resume(LocationData(location.latitude, location.longitude))
+                            continuation.resume(
+                                LocationData(location.latitude, location.longitude, location.time)
+                            )
                         }
                     }
 
@@ -169,5 +182,10 @@ class DefaultLocationTracker @Inject constructor(
             if (result != null) return result
         }
         return null
+    }
+
+    private companion object {
+        const val CURRENT_LOCATION_TIMEOUT_MS = 10_000L
+        const val SINGLE_UPDATE_TIMEOUT_MS = 15_000L
     }
 }

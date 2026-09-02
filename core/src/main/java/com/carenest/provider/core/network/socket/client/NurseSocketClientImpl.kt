@@ -132,7 +132,7 @@ class NurseSocketClientImpl @Inject constructor(
         val wsUrl = resolveWebSocketUrl(BuildConfig.BASE_URL)
 
         while (!isExplicitlyDisconnected) {
-            val credentials = tokenManager.state.first().credentials
+            var credentials = tokenManager.state.first().credentials
             val token = credentials?.accessToken.orEmpty()
             if (token.isBlank()) {
                 Log.w("NurseSocketClient", "No access token available, waiting...")
@@ -147,10 +147,14 @@ class NurseSocketClientImpl @Inject constructor(
             if (latestCredentials != credentials) {
                 if (latestCredentials?.sessionId != credentials?.sessionId) {
                     clearSessionBoundSocketState()
+                    activeSocketCredentials = null
+                    stompClient.disconnect()
+                    continue
                 }
-                activeSocketCredentials = null
-                stompClient.disconnect()
-                continue
+                // Same-account rotation while connecting: keep the established
+                // socket and adopt the latest credentials instead of bouncing it.
+                credentials = latestCredentials
+                activeSocketCredentials = latestCredentials
             }
 
             when (connectResult) {
@@ -243,10 +247,14 @@ class NurseSocketClientImpl @Inject constructor(
                     val accountChanged = currentCredentials?.sessionId != socketCredentials.sessionId
                     if (currentCredentials == null || accountChanged) {
                         clearSessionBoundSocketState()
+                        Log.i("NurseSocketClient", "Account changed; reconnecting socket")
+                        stompClient.disconnect()
+                        return@collect
                     }
 
-                    Log.i("NurseSocketClient", "Authentication changed; reconnecting socket")
-                    stompClient.disconnect()
+                    // Routine same-account token rotation: adopt the new credentials
+                    // silently - a live STOMP connection survives access-token rotation.
+                    activeSocketCredentials = currentCredentials
                 }
         }
     }
@@ -364,7 +372,10 @@ class NurseSocketClientImpl @Inject constructor(
                                     ReservationEventType.OFFER_UPDATED,
                                     ReservationEventType.OFFER_COUNTERED,
                                     ReservationEventType.OFFER_ACCEPTED -> {
-                                        activeReservationSubscriptions.add(resId)
+                                        if (activeReservationSubscriptions.add(resId)) {
+                                            Log.d("NurseSocketClient", "Confirmed active offer event received; subscribing to topic: $resId")
+                                            runCatching { stompClient.subscribe("$DEST_TOPIC_RESERVATION_PREFIX/$resId") }
+                                        }
                                     }
                                     ReservationEventType.OFFER_WITHDRAWN,
                                     ReservationEventType.OFFER_REJECTED,
@@ -399,6 +410,15 @@ class NurseSocketClientImpl @Inject constructor(
         stompClient.send(DEST_APP_HEARTBEAT)
     }
 
+    private suspend fun ensureConnected(): Boolean {
+        if (stompClient.connectionState.value != SocketConnectionState.Connected) {
+            kotlinx.coroutines.withTimeoutOrNull(5000.milliseconds) {
+                stompClient.connectionState.first { it == SocketConnectionState.Connected }
+            }
+        }
+        return stompClient.connectionState.value == SocketConnectionState.Connected
+    }
+
     override suspend fun updateAvailability(available: Boolean, lat: Double?, lng: Double?) {
         if (available && (lat == null || lng == null)) {
             Log.w("NurseSocketClient", "Cannot set availability to true without location coordinates (lat=$lat, lng=$lng)")
@@ -408,21 +428,17 @@ class NurseSocketClientImpl @Inject constructor(
         lastKnownLat = lat
         lastKnownLng = lng
 
-        if (stompClient.connectionState.value != SocketConnectionState.Connected) {
-            kotlinx.coroutines.withTimeoutOrNull(5000.milliseconds) {
-                stompClient.connectionState.first { it == SocketConnectionState.Connected }
-            }
-        }
-
-        if (stompClient.connectionState.value == SocketConnectionState.Connected) {
+        if (ensureConnected()) {
             val payload = json.encodeToString(AvailabilityRequest(available, lat, lng))
             stompClient.send(DEST_APP_AVAILABILITY, payload)
         }
     }
 
     override suspend fun updateLocation(lat: Double, lng: Double) {
-        val payload = json.encodeToString(LocationUpdateRequest(lat, lng))
-        stompClient.send(DEST_APP_LOCATION, payload)
+        if (ensureConnected()) {
+            val payload = json.encodeToString(LocationUpdateRequest(lat, lng))
+            stompClient.send(DEST_APP_LOCATION, payload)
+        }
     }
 
     override suspend fun createOffer(
@@ -432,8 +448,13 @@ class NurseSocketClientImpl @Inject constructor(
         proposedTime: String,
         message: String?
     ) {
-        val req = CreateOfferRequest(serviceRequestId, proposedPrice, proposedDate, proposedTime, message)
-        stompClient.send(DEST_APP_OFFER_CREATE, json.encodeToString(req))
+        if (ensureConnected()) {
+            Log.d("NurseSocketClient", "Sending createOffer for $serviceRequestId, price=$proposedPrice, date=$proposedDate, time=$proposedTime")
+            val req = CreateOfferRequest(serviceRequestId, proposedPrice, proposedDate, proposedTime, message)
+            stompClient.send(DEST_APP_OFFER_CREATE, json.encodeToString(req))
+        } else {
+            Log.e("NurseSocketClient", "Failed to send createOffer for $serviceRequestId: Socket not connected")
+        }
     }
 
     override suspend fun updateOffer(
@@ -443,36 +464,48 @@ class NurseSocketClientImpl @Inject constructor(
         proposedTime: String?,
         message: String?
     ) {
-        val req = UpdateOfferRequest(offerId, proposedPrice, proposedDate, proposedTime, message)
-        stompClient.send(DEST_APP_OFFER_UPDATE, json.encodeToString(req))
+        if (ensureConnected()) {
+            val req = UpdateOfferRequest(offerId, proposedPrice, proposedDate, proposedTime, message)
+            stompClient.send(DEST_APP_OFFER_UPDATE, json.encodeToString(req))
+        }
     }
 
     override suspend fun acceptOffer(offerId: String) {
-        val req = AcceptOfferRequest(offerId)
-        stompClient.send(DEST_APP_OFFER_ACCEPT, json.encodeToString(req))
+        if (ensureConnected()) {
+            val req = AcceptOfferRequest(offerId)
+            stompClient.send(DEST_APP_OFFER_ACCEPT, json.encodeToString(req))
+        }
     }
 
     override suspend fun withdrawOffer(offerId: String) {
-        val req = WithdrawOfferRequest(offerId)
-        stompClient.send(DEST_APP_OFFER_WITHDRAW, json.encodeToString(req))
+        if (ensureConnected()) {
+            val req = WithdrawOfferRequest(offerId)
+            stompClient.send(DEST_APP_OFFER_WITHDRAW, json.encodeToString(req))
+        }
     }
 
     override suspend fun cancelReservation(serviceRequestId: String) {
         activeReservationSubscriptions.remove(serviceRequestId)
         activeChatSubscriptions.remove(serviceRequestId)
-        val req = CancelReservationRequest(serviceRequestId)
-        stompClient.send(DEST_APP_CANCEL, json.encodeToString(req))
+        if (ensureConnected()) {
+            val req = CancelReservationRequest(serviceRequestId)
+            stompClient.send(DEST_APP_CANCEL, json.encodeToString(req))
+        }
     }
 
     override suspend fun requestOffersList(serviceRequestId: String) {
-        val req = ListOffersRequest(serviceRequestId)
-        stompClient.send(DEST_APP_OFFERS_LIST, json.encodeToString(req))
+        if (ensureConnected()) {
+            val req = ListOffersRequest(serviceRequestId)
+            stompClient.send(DEST_APP_OFFERS_LIST, json.encodeToString(req))
+        }
     }
 
     override suspend fun sendChatMessage(reservationId: String, content: String) {
-        val req = SendChatMessageRequest(content)
-        val dest = "$DEST_APP_CHAT_PREFIX/$reservationId/send"
-        stompClient.send(dest, json.encodeToString(req))
+        if (ensureConnected()) {
+            val req = SendChatMessageRequest(content)
+            val dest = "$DEST_APP_CHAT_PREFIX/$reservationId/send"
+            stompClient.send(dest, json.encodeToString(req))
+        }
     }
 
     override suspend fun subscribeToReservation(reservationId: String) {
@@ -480,6 +513,11 @@ class NurseSocketClientImpl @Inject constructor(
         if (connectionState.value == SocketConnectionState.Connected) {
             stompClient.subscribe("$DEST_TOPIC_RESERVATION_PREFIX/$reservationId")
         }
+    }
+
+    override suspend fun subscribeToReservationAfterOffer(reservationId: String) {
+        Log.d("NurseSocketClient", "Subscribing to reservation topic after offer confirmed: $reservationId")
+        subscribeToReservation(reservationId)
     }
 
     override suspend fun unsubscribeFromReservation(reservationId: String) {

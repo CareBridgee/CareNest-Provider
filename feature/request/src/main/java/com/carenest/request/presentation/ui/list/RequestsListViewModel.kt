@@ -198,6 +198,9 @@ class RequestsListViewModel @Inject constructor(
         eventListenerJob = viewModelScope.launch {
             listenReservationEvents(requestId).collect { event ->
                 when (event.eventType) {
+                    ReservationEventType.OFFER_CREATED -> {
+                        nurseSocketClient.subscribeToReservationAfterOffer(requestId)
+                    }
                     ReservationEventType.OFFER_ACCEPTED -> {
                         handleOfferAccepted(requestId)
                     }
@@ -241,6 +244,7 @@ class RequestsListViewModel @Inject constructor(
     private fun handleOfferTimeout(requestId: String) {
         stopActiveOfferJobs()
         performWithdrawal(requestId)
+        viewModelScope.launch { nurseSocketClient.unsubscribeFromReservation(requestId) }
         updateRequestsStatus(requestId, RequestStatus.CANCELED)
         clearOfferState()
     }

@@ -79,18 +79,24 @@ class DynamicAuthenticationPluginTest {
     }
 
     @Test
-    fun currentProviderForbiddenResponseClearsSessionWithoutRefresh() = runBlocking {
+    fun identityForbiddenStillForbiddenAfterRefreshClearsFreshSession() = runBlocking {
         val store = FakeAuthenticationSessionStore().apply {
-            authenticate("old-access", "old-refresh", "nurse-a")
+            authenticate("expired-access", "valid-refresh", "nurse-a")
         }
         val refreshCalls = AtomicInteger(0)
+        val identityAuthorizationHeaders = mutableListOf<String?>()
         val client = testClient(store) { request ->
             when (request.url.encodedPath) {
                 "/api/v1/auth/refresh" -> {
                     refreshCalls.incrementAndGet()
-                    respondJson("{}")
+                    respondJson(
+                        """{"accessToken":"new-access","refreshToken":"new-refresh"}""",
+                    )
                 }
-                "/api/v1/nurses/nurse-a" -> respond("", HttpStatusCode.Forbidden)
+                "/api/v1/nurses/nurse-a" -> {
+                    identityAuthorizationHeaders += request.headers[HttpHeaders.Authorization]
+                    respond("", HttpStatusCode.Forbidden)
+                }
                 else -> error("Unexpected path ${request.url.encodedPath}")
             }
         }
@@ -98,10 +104,154 @@ class DynamicAuthenticationPluginTest {
         val response = client.get("/api/v1/nurses/nurse-a")
 
         assertEquals(HttpStatusCode.Forbidden, response.status)
-        assertEquals(0, refreshCalls.get())
+        assertEquals(1, refreshCalls.get())
+        assertEquals(listOf("Bearer expired-access", "Bearer new-access"), identityAuthorizationHeaders)
         assertFalse(store.state.value.isAuthenticated)
         assertNull(store.state.value.credentials)
         assertNull(store.state.value.session)
+        client.close()
+    }
+
+    @Test
+    fun identityForbiddenRecoversWhenReplaySucceeds() = runBlocking {
+        val store = FakeAuthenticationSessionStore().apply {
+            authenticate("expired-access", "valid-refresh", "nurse-a")
+        }
+        val refreshCalls = AtomicInteger(0)
+        val identityAuthorizationHeaders = mutableListOf<String?>()
+        val client = testClient(store) { request ->
+            when (request.url.encodedPath) {
+                "/api/v1/auth/refresh" -> {
+                    refreshCalls.incrementAndGet()
+                    respondJson(
+                        """{"accessToken":"new-access","refreshToken":"new-refresh"}""",
+                    )
+                }
+                "/api/v1/users/me" -> {
+                    val authorization = request.headers[HttpHeaders.Authorization]
+                    identityAuthorizationHeaders += authorization
+                    if (authorization == "Bearer new-access") {
+                        respondJson("{}")
+                    } else {
+                        respond("", HttpStatusCode.Forbidden)
+                    }
+                }
+                else -> error("Unexpected path ${request.url.encodedPath}")
+            }
+        }
+
+        val response = client.get("/api/v1/users/me")
+
+        assertEquals(HttpStatusCode.Forbidden, response.status)
+        assertEquals(1, refreshCalls.get())
+        assertEquals(listOf("Bearer expired-access", "Bearer new-access"), identityAuthorizationHeaders)
+        assertTrue(store.state.value.isAuthenticated)
+        assertEquals("new-access", store.state.value.credentials?.accessToken)
+        assertEquals("new-refresh", store.state.value.credentials?.refreshToken)
+        client.close()
+    }
+
+    @Test
+    fun identityForbiddenWithRejectedRefreshClearsSession() = runBlocking {
+        val store = FakeAuthenticationSessionStore().apply {
+            authenticate("expired-access", "dead-refresh", "nurse-a")
+        }
+        val refreshCalls = AtomicInteger(0)
+        val identityAuthorizationHeaders = mutableListOf<String?>()
+        val client = testClient(store) { request ->
+            when (request.url.encodedPath) {
+                "/api/v1/auth/refresh" -> {
+                    refreshCalls.incrementAndGet()
+                    respond("", HttpStatusCode.Unauthorized)
+                }
+                "/api/v1/users/me" -> {
+                    identityAuthorizationHeaders += request.headers[HttpHeaders.Authorization]
+                    respond("", HttpStatusCode.Forbidden)
+                }
+                else -> error("Unexpected path ${request.url.encodedPath}")
+            }
+        }
+
+        val response = client.get("/api/v1/users/me")
+
+        assertEquals(HttpStatusCode.Forbidden, response.status)
+        // Rejection is confirmed with a second refresh attempt before the session dies.
+        assertEquals(2, refreshCalls.get())
+        assertEquals(listOf("Bearer expired-access"), identityAuthorizationHeaders)
+        assertFalse(store.state.value.isAuthenticated)
+        assertNull(store.state.value.credentials)
+        client.close()
+    }
+
+    @Test
+    fun identityForbiddenWithUnavailableRefreshKeepsSession() = runBlocking {
+        val store = FakeAuthenticationSessionStore().apply {
+            authenticate("expired-access", "valid-refresh", "nurse-a")
+        }
+        val refreshCalls = AtomicInteger(0)
+        val identityAuthorizationHeaders = mutableListOf<String?>()
+        val client = testClient(store) { request ->
+            when (request.url.encodedPath) {
+                "/api/v1/auth/refresh" -> {
+                    refreshCalls.incrementAndGet()
+                    respond("", HttpStatusCode.InternalServerError)
+                }
+                "/api/v1/users/me" -> {
+                    identityAuthorizationHeaders += request.headers[HttpHeaders.Authorization]
+                    respond("", HttpStatusCode.Forbidden)
+                }
+                else -> error("Unexpected path ${request.url.encodedPath}")
+            }
+        }
+
+        val response = client.get("/api/v1/users/me")
+
+        assertEquals(HttpStatusCode.Forbidden, response.status)
+        assertEquals(1, refreshCalls.get())
+        assertEquals(listOf("Bearer expired-access"), identityAuthorizationHeaders)
+        assertTrue(store.state.value.isAuthenticated)
+        assertEquals("expired-access", store.state.value.credentials?.accessToken)
+        assertEquals("valid-refresh", store.state.value.credentials?.refreshToken)
+        client.close()
+    }
+
+    @Test
+    fun identityForbiddenOnStaleTokenReplaysWithoutExtraRefresh() = runBlocking {
+        val store = FakeAuthenticationSessionStore().apply {
+            authenticate("stale-access", "stale-refresh", "nurse-a")
+        }
+        val refreshCalls = AtomicInteger(0)
+        val identityAuthorizationHeaders = mutableListOf<String?>()
+        val client = testClient(store) { request ->
+            when (request.url.encodedPath) {
+                "/api/v1/auth/refresh" -> {
+                    refreshCalls.incrementAndGet()
+                    respondJson(
+                        """{"accessToken":"rotated-access","refreshToken":"rotated-refresh"}""",
+                    )
+                }
+                "/api/v1/users/me" -> {
+                    val authorization = request.headers[HttpHeaders.Authorization]
+                    identityAuthorizationHeaders += authorization
+                    if (authorization == "Bearer rotated-access") {
+                        respondJson("{}")
+                    } else {
+                        // Simulate a concurrent rotation completing while this request is in flight.
+                        val current = requireNotNull(store.state.first().credentials)
+                        store.replaceCredentials(current, "rotated-access", "rotated-refresh")
+                        respond("", HttpStatusCode.Forbidden)
+                    }
+                }
+                else -> error("Unexpected path ${request.url.encodedPath}")
+            }
+        }
+
+        val response = client.get("/api/v1/users/me")
+
+        assertEquals(HttpStatusCode.Forbidden, response.status)
+        assertEquals(0, refreshCalls.get())
+        assertEquals(listOf("Bearer stale-access", "Bearer rotated-access"), identityAuthorizationHeaders)
+        assertTrue(store.state.value.isAuthenticated)
         client.close()
     }
 
@@ -282,7 +432,9 @@ class DynamicAuthenticationPluginTest {
     private fun testClient(
         store: AuthenticationSessionStore,
         handler: suspend MockRequestHandleScope.(HttpRequestData) -> HttpResponseData,
-    ): HttpClient = HttpClient(MockEngine { request -> handler(request) }) {
+    ): HttpClient {
+        val refreshCoordinator = AuthenticationRefreshCoordinator(store)
+        return HttpClient(MockEngine { request -> handler(request) }) {
         install(ContentNegotiation) {
             json(Json { ignoreUnknownKeys = true })
         }
@@ -299,9 +451,18 @@ class DynamicAuthenticationPluginTest {
                     }
                 }
                 refreshTokens {
-                    val failedCredentials = store.state.first().credentials
+                    val storedCredentials = store.state.first().credentials
                         ?: return@refreshTokens null
-                    val refreshCoordinator = AuthenticationRefreshCoordinator(store)
+                    val failedCredentials = oldTokens?.accessToken
+                        ?.takeIf(String::isNotBlank)
+                        ?.let { failedAccessToken ->
+                            if (storedCredentials.accessToken == failedAccessToken) {
+                                storedCredentials
+                            } else {
+                                storedCredentials.copy(accessToken = failedAccessToken)
+                            }
+                        }
+                        ?: storedCredentials
                     val recoveryResult = refreshCoordinator.recover(failedCredentials) { refreshToken ->
                         client.requestTokenRefresh(refreshToken)
                     }
@@ -332,10 +493,11 @@ class DynamicAuthenticationPluginTest {
         install(ForbiddenIdentityPlugin) {
             sessionStore = store
             baseUrl = TEST_BASE_URL
+            this.refreshCoordinator = refreshCoordinator
         }
         defaultRequest { url(TEST_BASE_URL) }
+        }
     }
-
     private fun MockRequestHandleScope.respondJson(body: String) = respond(
         content = body,
         status = HttpStatusCode.OK,
