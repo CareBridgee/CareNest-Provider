@@ -11,6 +11,8 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.api.createClientPlugin
 import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.authProvider
+import io.ktor.client.plugins.auth.providers.BearerAuthProvider
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -19,12 +21,16 @@ import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.request.HttpRequestData
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.accept
+import io.ktor.client.request.request
+import io.ktor.client.request.takeFrom
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.Url
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.util.AttributeKey
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json
 import javax.inject.Singleton
@@ -72,8 +78,22 @@ object NetworkModule {
                 }
 
                 refreshTokens {
-                    val failedCredentials = authenticationSessionStore.state.first().credentials
+                    val storedCredentials = authenticationSessionStore.state.first().credentials
                         ?: return@refreshTokens null
+
+                    // Key recovery off the token that actually failed rather than
+                    // whatever the store holds now, so a stale 401 can never refresh
+                    // (or clear) a session this request never belonged to.
+                    val failedCredentials = oldTokens?.accessToken
+                        ?.takeIf(String::isNotBlank)
+                        ?.let { failedAccessToken ->
+                            if (storedCredentials.accessToken == failedAccessToken) {
+                                storedCredentials
+                            } else {
+                                storedCredentials.copy(accessToken = failedAccessToken)
+                            }
+                        }
+                        ?: storedCredentials
 
                     val recoveryResult = authenticationRefreshCoordinator.recover(failedCredentials) { refreshToken ->
                         client.requestTokenRefresh(refreshToken)
@@ -92,10 +112,8 @@ object NetworkModule {
                             }
                         }
 
-                        AuthenticationRecoveryResult.REJECTED -> {
-                            authenticationSessionStore.clearSessionIfCurrent(failedCredentials)
-                            null
-                        }
+                        // The coordinator performs the guarded session clear on rejection.
+                        AuthenticationRecoveryResult.REJECTED -> null
 
                         AuthenticationRecoveryResult.TEMPORARILY_UNAVAILABLE -> null
                     }
@@ -110,6 +128,7 @@ object NetworkModule {
         install(ForbiddenIdentityPlugin) {
             sessionStore = authenticationSessionStore
             baseUrl = BASE_URL
+            refreshCoordinator = authenticationRefreshCoordinator
         }
 
         if (BuildConfig.DEBUG) {
@@ -128,33 +147,77 @@ object NetworkModule {
 internal class ForbiddenIdentityPluginConfig {
     lateinit var sessionStore: AuthenticationSessionStore
     lateinit var baseUrl: String
+    lateinit var refreshCoordinator: AuthenticationRefreshCoordinator
 }
+
+private val IdentityRecoveryAttempted = AttributeKey<Unit>("CareNestIdentityRecoveryAttempted")
 
 internal val ForbiddenIdentityPlugin = createClientPlugin(
     name = "ForbiddenIdentityPlugin",
     createConfiguration = ::ForbiddenIdentityPluginConfig,
 ) {
     val sessionStore = pluginConfig.sessionStore
+    val refreshCoordinator = pluginConfig.refreshCoordinator
     val backendHost = Url(pluginConfig.baseUrl).host
 
     onResponse { response ->
-        if (response.status.value == 403) {
-            val request = response.call.request
-            if (request.isCurrentSessionIdentityRequest(
-                    backendHost = backendHost,
-                    nurseId = sessionStore.state.first().session?.nurseId,
-                )
-            ) {
-                val currentCredentials = sessionStore.state.first().credentials
-                if (currentCredentials != null) {
-                    sessionStore.clearSessionIfCurrent(currentCredentials)
-                } else {
-                    sessionStore.clearInvalidSession()
+        if (response.status != HttpStatusCode.Forbidden) return@onResponse
+        // The plugin scope disallows calling `client` implicitly here.
+        val httpClient = response.call.client
+
+        val request = response.call.request
+        val nurseId = sessionStore.state.first().session?.nurseId
+        if (!request.isCurrentSessionIdentityRequest(backendHost, nurseId)) return@onResponse
+
+        val requestAccessToken = request.headers[HttpHeaders.Authorization].toBearerAccessToken()
+
+        // This 403 came from a request replayed with freshly loaded credentials,
+        // so the server is deliberately denying a live session.
+        if (request.attributes.contains(IdentityRecoveryAttempted)) {
+            val currentCredentials = sessionStore.state.first().credentials ?: return@onResponse
+            if (currentCredentials.accessToken == requestAccessToken) {
+                sessionStore.clearSessionIfCurrent(currentCredentials)
+            }
+            return@onResponse
+        }
+
+        val currentCredentials = sessionStore.state.first().credentials ?: run {
+            sessionStore.clearInvalidSession()
+            return@onResponse
+        }
+
+        // Some backends answer 403 for expired or denied credentials instead of 401,
+        // so give the refresh token one chance before treating this as rejection.
+        val recoveryResult =
+            if (currentCredentials.accessToken == requestAccessToken || requestAccessToken == null) {
+                refreshCoordinator.recover(currentCredentials) { refreshToken ->
+                    httpClient.requestTokenRefresh(refreshToken)
+                }
+            } else {
+                // The store rotated past the token this request carried; another
+                // caller owns recovery - replay with the latest credentials only.
+                AuthenticationRecoveryResult.RECOVERED
+            }
+
+        when (recoveryResult) {
+            AuthenticationRecoveryResult.REJECTED -> Unit // coordinator cleared dead tokens
+            AuthenticationRecoveryResult.TEMPORARILY_UNAVAILABLE -> Unit // keep session, surface the 403
+            AuthenticationRecoveryResult.RECOVERED,
+            AuthenticationRecoveryResult.SESSION_CHANGED -> {
+                // The bearer provider caches its loaded token, so drop the cache and
+                // let it re-load from the store when it attaches headers on the replay.
+                httpClient.authProvider<BearerAuthProvider>()?.clearToken()
+                httpClient.request {
+                    takeFrom(request)
+                    attributes.put(IdentityRecoveryAttempted, Unit)
                 }
             }
         }
     }
 }
+
+private fun String?.toBearerAccessToken(): String? =
+    this?.split(' ', limit = 2)?.getOrNull(1)?.trim()?.takeIf(String::isNotBlank)
 
 internal fun isProtectedBackendUrl(url: Url, method: HttpMethod, backendHost: String): Boolean {
     val isBackendHost = url.host.isBlank() || url.host.equals(backendHost, ignoreCase = true)

@@ -74,4 +74,8 @@
     <string name="location_determined_message">الموقع الحالي:\nخط العرض: %1$.4f، خط الطول: %2$.4f</string>
     <string name="location_unknown_title">الموقع غير معروف</string>
     <string name="go_online">الاتصال بالإنترنت</string>
+    <string name="location_permission_denied">يلزم الإذن بالموقع للاتصال بالإنترنت. يرجى منح الإذن من الإعدادات.</string>
+    <string name="location_providers_disabled">خدمات الموقع متوقفة. يرجى تفعيل GPS أو تحديد الموقع عبر الشبكة.</string>
+    <string name="location_last_known_title">استخدام آخر موقع معروف؟</string>
+    <string name="location_last_known_message">%1$s\n\nهل تريد الاتصال بالإنترنت باستخدام آخر موقع معروف منذ %2$d دقيقة؟\nخط العرض: %3$.4f، خط الطول: %4$.4f</string>
 </resources>

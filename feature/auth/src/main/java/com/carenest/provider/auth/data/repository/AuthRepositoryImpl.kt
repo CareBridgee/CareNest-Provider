@@ -20,6 +20,7 @@ import io.ktor.http.isSuccess
 import android.util.Log
 import java.io.IOException
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 
 
 class AuthRepositoryImpl @Inject constructor(
@@ -63,6 +64,7 @@ class AuthRepositoryImpl @Inject constructor(
         email: String?,
         profileImageUrl: String?,
     ): Result<GoogleLoginResult> {
+        var beganAuthentication = false
         return try {
             Log.i("AuthRepo", "Executing POST /api/v1/auth/nurse/google with Google ID token")
             val response = dataSource.googleLogin(
@@ -90,6 +92,7 @@ class AuthRepositoryImpl @Inject constructor(
                             accessToken = accessToken,
                             refreshToken = refreshToken,
                         )
+                        beganAuthentication = true
 
                         val nurse = authResponse.nurseUser?.nurse?.toDomain()
                             ?: authResponse.user?.nurse?.toDomain()
@@ -120,9 +123,15 @@ class AuthRepositoryImpl @Inject constructor(
                 Log.e("AuthRepo", "Google login HTTP response failed with status code ${response.status.value}")
                 handleErrorResponse(response, AuthOperation.GOOGLE_LOGIN)
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e("AuthRepo", "Google login exception: ${e.message}", e)
-            authenticationSessionStore.clearSession()
+            // Only clean up credentials this call wrote; a transport failure must
+            // never destroy a session that already existed.
+            if (beganAuthentication) {
+                authenticationSessionStore.clearSession()
+            }
             Result.failure(e.toAuthException(AuthOperation.GOOGLE_LOGIN))
         }
     }
@@ -132,6 +141,7 @@ class AuthRepositoryImpl @Inject constructor(
         otp: String,
         pendingToken: String?,
     ): Result<AuthenticatedNurse?> {
+        var beganAuthentication = false
         return try {
             val response = dataSource.verifyOtp(
                 phoneNumber = phoneNumber,
@@ -154,6 +164,7 @@ class AuthRepositoryImpl @Inject constructor(
                     accessToken = accessToken,
                     refreshToken = refreshToken,
                 )
+                beganAuthentication = true
 
                 val nurse = authResponse.nurseUser?.nurse?.toDomain()
                     ?: authResponse.user?.nurse?.toDomain()
@@ -161,8 +172,13 @@ class AuthRepositoryImpl @Inject constructor(
             } else {
                 handleErrorResponse(response, AuthOperation.VERIFY_OTP)
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            authenticationSessionStore.clearSession()
+            Log.e("AuthRepo", "verifyOtp exception: ${e.message}", e)
+            if (beganAuthentication) {
+                authenticationSessionStore.clearSession()
+            }
             Result.failure(e.toAuthException(AuthOperation.VERIFY_OTP))
         }
     }
@@ -252,6 +268,14 @@ private fun Throwable.toAuthException(operation: AuthOperation): AuthException {
     )
 }
 
+/**
+ * Maps auth-operation failures to user-facing [AuthFailure] labels only.
+ *
+ * This classifier decides NOTHING about session fate - it never clears
+ * credentials. Whether a server response proves credentials are dead is owned
+ * by `CredentialRejection` in `:core` (consumed by the REST refresh path and
+ * the WebSocket handshake), so backend semantic changes land in one place.
+ */
 private fun authException(
     operation: AuthOperation,
     message: String,

@@ -1,6 +1,5 @@
 package com.carenest.home.presentation.home
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.carenest.home.domain.model.RequestStatus
@@ -21,6 +20,8 @@ import com.carenest.provider.core.network.socket.client.NurseSocketClient
 import com.carenest.provider.core.network.socket.model.ReservationEventType
 import com.carenest.provider.core.network.socket.model.patientDisplayName
 import com.carenest.provider.core.datastore.AuthenticationSessionStore
+import com.carenest.provider.core.location.LocationData
+import com.carenest.provider.core.location.LocationResult
 import com.carenest.provider.profile.domain.usecase.GetNurseUseCase
 import com.carenest.provider.profile.domain.usecase.LoadServiceTypesUseCase
 import com.carenest.provider.profile.domain.model.VerificationStatus
@@ -69,8 +70,9 @@ class HomeViewModel @Inject constructor(
     private var locationJob: Job? = null
     private var hasResolvedProviderApproval = false
     private var serviceImagesById: Map<String, String> = emptyMap()
+    private var activeOfferId: String? = null
 
-    val isOnline = getAvailability()
+    val availabilityFlow = getAvailability()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -88,7 +90,7 @@ class HomeViewModel @Inject constructor(
 
     private fun observeAvailability() {
         viewModelScope.launch {
-            isOnline.collect { online ->
+            availabilityFlow.collect { online ->
                 when {
                     currentState.isProviderApproved -> applyAvailabilityChange(online)
                     !online -> applyAvailabilityChange(false)
@@ -206,11 +208,11 @@ class HomeViewModel @Inject constructor(
                 }
                 if (isProviderApproved) {
                     if (isFirstApprovalResult) {
-                        applyAvailabilityChange(isOnline.value)
+                        applyAvailabilityChange(availabilityFlow.value)
                     }
                 } else {
                     applyAvailabilityChange(false)
-                    if (isOnline.value) updateAvailability(false)
+                    if (availabilityFlow.value) updateAvailability(false)
                 }
             }.onFailure { error ->
                 if (error is CancellationException) return@onFailure
@@ -242,14 +244,16 @@ class HomeViewModel @Inject constructor(
 
     private fun handleOnlineToggle(isOnline: Boolean) {
         if (isOnline) {
-            if (currentState.determinedLocation != null) {
+            // Already live (duplicate dispatch): there is nothing left to determine.
+            if (currentState.isOnline) return
+
+            if (currentState.hasFreshDeterminedLocation() || currentState.isGettingLocation) {
                 updateState { copy(showLocationDialog = true) }
                 return
             }
-            if (currentState.isGettingLocation) {
-                updateState { copy(showLocationDialog = true) }
-                return
-            }
+
+            val staleLocation = currentState.determinedLocation
+                ?.takeIf { it.ageMillis() > MAX_LOCATION_AGE_MS }
 
             locationJob?.cancel()
             updateState {
@@ -258,31 +262,31 @@ class HomeViewModel @Inject constructor(
                     showLocationDialog = true,
                     determinedLocation = null,
                     locationError = null,
+                    allowStaleLocation = false,
                 )
             }
 
             locationJob = viewModelScope.launch {
-                val location = getCurrentLocation()
-                Log.d("HomeViewModel", "handleOnlineToggle location result: ${location?.latitude}, ${location?.longitude}")
-                if (location != null) {
-                    updateState {
+                when (val result = getCurrentLocation()) {
+                    is LocationResult.Success -> updateState {
                         copy(
                             isGettingLocation = false,
-                            determinedLocation = location,
+                            determinedLocation = result.data,
                             locationError = null,
                         )
                     }
-                } else {
-                    updateState {
-                        copy(
-                            isGettingLocation = false,
-                            determinedLocation = null,
-                            locationError = null,
-                            isOnline = false,
-                            showLocationDialog = true,
-                        )
+                    is LocationResult.Failure -> {
+                        updateState {
+                            copy(
+                                isGettingLocation = false,
+                                determinedLocation = staleLocation,
+                                locationError = result.reason,
+                                isOnline = false,
+                                showLocationDialog = true,
+                            )
+                        }
+                        updateAvailability(false)
                     }
-                    updateAvailability(false)
                 }
             }
         } else {
@@ -293,6 +297,7 @@ class HomeViewModel @Inject constructor(
                     showLocationDialog = false,
                     determinedLocation = null,
                     locationError = null,
+                    allowStaleLocation = false,
                 )
             }
             viewModelScope.launch {
@@ -303,10 +308,13 @@ class HomeViewModel @Inject constructor(
 
     private fun confirmLocationOnline() {
         val location = currentState.determinedLocation ?: return
+        val allowStale = currentState.locationError != null
         updateState {
             copy(
                 showLocationDialog = false,
                 isGettingLocation = false,
+                allowStaleLocation = allowStale,
+                locationError = null,
             )
         }
         viewModelScope.launch {
@@ -322,9 +330,13 @@ class HomeViewModel @Inject constructor(
                 isGettingLocation = false,
                 determinedLocation = null,
                 locationError = null,
+                allowStaleLocation = false,
             )
         }
     }
+
+    private fun HomeUiState.hasFreshDeterminedLocation(): Boolean =
+        determinedLocation?.let { it.ageMillis() <= MAX_LOCATION_AGE_MS } == true
 
     private fun applyAvailabilityChange(isOnline: Boolean) {
         fetchJob?.cancel()
@@ -347,28 +359,70 @@ class HomeViewModel @Inject constructor(
         if (isOnline) {
             nurseSocketClient.connect()
             viewModelScope.launch {
-                val TAG = "HomeViewModel"
-                val location = currentState.determinedLocation ?: getCurrentLocation()
-                Log.d(TAG, "applyAvailabilityChange: ${location?.latitude}, ${location?.longitude}")
+                val cached = currentState.determinedLocation
+                val useCachedDirectly = cached != null &&
+                    (cached.ageMillis() <= MAX_LOCATION_AGE_MS || currentState.allowStaleLocation)
 
-                if (location == null) {
-                    updateAvailability(false)
-                    updateState {
-                        copy(
-                            showLocationDialog = true,
-                            isGettingLocation = false,
-                            determinedLocation = null,
-                            locationError = null,
-                            isOnline = false,
+                var location: LocationData? = null
+                var failureReason: LocationResult.Reason? = null
+
+                if (useCachedDirectly) {
+                    location = cached
+                    updateState { copy(isGettingLocation = false) }
+                } else {
+                    // Visible to the UI so duplicate online dispatches can be
+                    // suppressed while this restore-time determination runs.
+                    updateState { copy(isGettingLocation = true) }
+                    when (val result = getCurrentLocation()) {
+                        is LocationResult.Success -> location = result.data
+                        is LocationResult.Failure -> {
+                            failureReason = result.reason
+                            location = cached
+                        }
+                    }
+                }
+
+                when {
+                    location == null -> {
+                        updateAvailability(false)
+                        updateState {
+                            copy(
+                                showLocationDialog = true,
+                                isGettingLocation = false,
+                                determinedLocation = null,
+                                locationError = failureReason ?: LocationResult.Reason.NO_FIX,
+                                allowStaleLocation = false,
+                                isOnline = false,
+                            )
+                        }
+                    }
+                    failureReason != null -> {
+                        updateAvailability(false)
+                        updateState {
+                            copy(
+                                isOnline = false,
+                                showLocationDialog = true,
+                                isGettingLocation = false,
+                                determinedLocation = location,
+                                locationError = failureReason,
+                                allowStaleLocation = false,
+                            )
+                        }
+                    }
+                    else -> {
+                        updateState {
+                            copy(
+                                determinedLocation = location,
+                                locationError = null,
+                                allowStaleLocation = false,
+                            )
+                        }
+                        nurseSocketClient.updateAvailability(
+                            available = true,
+                            lat = location.latitude,
+                            lng = location.longitude
                         )
                     }
-                } else {
-                    updateState { copy(determinedLocation = location) }
-                    nurseSocketClient.updateAvailability(
-                        available = true,
-                        lat = location.latitude,
-                        lng = location.longitude
-                    )
                 }
             }
 
@@ -405,7 +459,6 @@ class HomeViewModel @Inject constructor(
             }
 
             fetchJob = viewModelScope.launch {
-                Log.d("HomeViewModel", "Fetching initial requests via REST...")
                 coroutineScope {
                     val requestsDeferred = async { getIncomingRequests() }
                     val earningsDeferred = async { getEarningsSummary() }
@@ -418,7 +471,6 @@ class HomeViewModel @Inject constructor(
                             ?: request.serviceTypeId?.let(serviceImagesById::get)
                         request.copy(serviceImage = resolvedImage.orEmpty())
                     }
-                    Log.d("HomeViewModel", "REST fetch completed. Found ${fetchedRequests.size} requests.")
 
                     updateState {
                         copy(
@@ -481,6 +533,7 @@ class HomeViewModel @Inject constructor(
         val request = currentState.requests.find { it.id == requestId }
         val price = (request?.baseRate ?: currentState.editRateDraft).toDouble()
 
+        activeOfferId = null
         updateState {
             copy(
                 activeModal = ActiveModal.MakeOffer,
@@ -507,6 +560,7 @@ class HomeViewModel @Inject constructor(
             listenReservationEvents(requestId).collect { event ->
                 when (event.eventType) {
                     ReservationEventType.OFFER_CREATED -> {
+                        activeOfferId = event.asOfferResponse()?.id ?: event.extractOfferId()
                         nurseSocketClient.subscribeToReservationAfterOffer(requestId)
                     }
                     ReservationEventType.OFFER_ACCEPTED -> {
@@ -557,11 +611,29 @@ class HomeViewModel @Inject constructor(
         offerTimerJob = null
     }
 
+    /**
+     * Tells the server the pending offer is no longer wanted. Without this the
+     * offer stays PENDING after the countdown or dismissal: patients can still
+     * accept it, and any retry gets rejected with "already has a pending offer".
+     */
+    private fun withdrawActiveOffer() {
+        val offerId = activeOfferId
+        activeOfferId = null
+        if (offerId == null) return
+        viewModelScope.launch {
+            try {
+                nurseSocketClient.withdrawOffer(offerId)
+            } catch (_: Exception) {
+            }
+        }
+    }
+
     private fun completeOfferAccepted(requestId: String) {
         if (!currentState.isProviderApproved) return
 
         offerEventListenerJob?.cancel()
         stopOfferTimer()
+        activeOfferId = null
         updateState {
             copy(
                 requests = requests.map { request ->
@@ -587,6 +659,8 @@ class HomeViewModel @Inject constructor(
     private fun handleRequestCancelledByPatient(requestId: String) {
         offerEventListenerJob?.cancel()
         stopOfferTimer()
+        // The server originated this cancellation and already retired the offer.
+        activeOfferId = null
         viewModelScope.launch { nurseSocketClient.unsubscribeFromReservation(requestId) }
         updateState {
             copy(
@@ -603,6 +677,7 @@ class HomeViewModel @Inject constructor(
     private fun completeOfferTimeout(requestId: String) {
         offerEventListenerJob?.cancel()
         stopOfferTimer()
+        withdrawActiveOffer()
         viewModelScope.launch { nurseSocketClient.unsubscribeFromReservation(requestId) }
         updateState {
             copy(
@@ -619,6 +694,7 @@ class HomeViewModel @Inject constructor(
         stopOfferTimer()
         if (currentState.activeModal == ActiveModal.MakeOffer) {
             offerEventListenerJob?.cancel()
+            withdrawActiveOffer()
         }
         updateState {
             copy(
@@ -670,12 +746,25 @@ class HomeViewModel @Inject constructor(
         socketJob?.cancel()
         offerEventListenerJob?.cancel()
         stopOfferTimer()
+        // viewModelScope is being torn down; the withdrawal must outlive it or the
+        // server keeps a PENDING offer nobody will ever resolve.
+        val offerId = activeOfferId
+        if (offerId != null) {
+            activeOfferId = null
+            kotlinx.coroutines.GlobalScope.launch {
+                try {
+                    nurseSocketClient.withdrawOffer(offerId)
+                } catch (_: Exception) {
+                }
+            }
+        }
         super.onCleared()
     }
 
     private companion object {
         const val OFFER_TIMEOUT_SECONDS = 20
         const val SUCCESS_DISPLAY_MS = 1_200L
+        const val MAX_LOCATION_AGE_MS = 5 * 60 * 1000L
     }
 }
 

@@ -5,6 +5,7 @@ import com.carenest.home.domain.model.NurseRequest
 import com.carenest.provider.designsystem.components.toast.ToastType
 
 import com.carenest.provider.core.location.LocationData
+import com.carenest.provider.core.location.LocationResult
 
 enum class ActiveModal {
     None,
@@ -21,7 +22,8 @@ data class HomeUiState(
     val isOnline: Boolean = false,
     val isGettingLocation: Boolean = false,
     val determinedLocation: LocationData? = null,
-    val locationError: String? = null,
+    val locationError: LocationResult.Reason? = null,
+    val allowStaleLocation: Boolean = false,
     val showLocationDialog: Boolean = false,
     val isLoading: Boolean = false,
     val requests: List<NurseRequest> = emptyList(),

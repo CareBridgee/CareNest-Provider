@@ -1,6 +1,7 @@
 package com.carenest.provider.core.network.socket.stomp
 
 import android.util.Log
+import com.carenest.provider.core.network.CredentialRejection
 import com.carenest.provider.core.network.socket.model.SocketConnectionState
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
@@ -35,23 +36,8 @@ internal enum class StompConnectResult {
     FAILED,
 }
 
-internal fun String?.indicatesSocketAuthenticationFailure(): Boolean {
-    val value = this?.lowercase().orEmpty()
-    return SOCKET_AUTHENTICATION_MARKERS.any(value::contains)
-}
-
-private val SOCKET_AUTHENTICATION_MARKERS = listOf(
-    "401",
-    "403",
-    "unauthorized",
-    "forbidden",
-    "authentication",
-    "access denied",
-    "invalid token",
-    "expired token",
-    "invalid jwt",
-    "expired jwt",
-)
+internal fun String?.indicatesSocketAuthenticationFailure(): Boolean =
+    CredentialRejection.matchesText(this)
 
 @Singleton
 class StompClient @Inject constructor(

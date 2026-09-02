@@ -14,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.carenest.home.R
 import com.carenest.provider.core.location.LocationData
+import com.carenest.provider.core.location.LocationResult
 import com.carenest.provider.designsystem.components.dialog.CareNestDialog
 import com.carenest.provider.designsystem.theme.Theme
 
@@ -21,25 +22,45 @@ import com.carenest.provider.designsystem.theme.Theme
 fun LocationStatusDialog(
     isGettingLocation: Boolean,
     determinedLocation: LocationData?,
-    locationError: String?,
+    locationError: LocationResult.Reason?,
     onConfirmOnline: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val isStaleConfirm = !isGettingLocation &&
+        determinedLocation != null &&
+        locationError != null
+
     val title = when {
         isGettingLocation -> stringResource(R.string.getting_location_title)
+        isStaleConfirm -> stringResource(R.string.location_last_known_title)
         determinedLocation != null -> stringResource(R.string.location_determined_title)
         else -> stringResource(R.string.location_unknown_title)
     }
 
+    val failureText = when (locationError) {
+        LocationResult.Reason.PERMISSION_DENIED ->
+            stringResource(R.string.location_permission_denied)
+        LocationResult.Reason.PROVIDERS_DISABLED ->
+            stringResource(R.string.location_providers_disabled)
+        else -> stringResource(R.string.unable_to_get_location)
+    }
+
     val message = when {
         isGettingLocation -> stringResource(R.string.getting_location_message)
+        isStaleConfirm -> stringResource(
+            R.string.location_last_known_message,
+            failureText,
+            ((determinedLocation.ageMillis() + 59_999L) / 60_000L).toInt(),
+            determinedLocation.latitude,
+            determinedLocation.longitude
+        )
         determinedLocation != null -> stringResource(
             R.string.location_determined_message,
             determinedLocation.latitude,
             determinedLocation.longitude
         )
-        else -> locationError ?: stringResource(R.string.unable_to_get_location)
+        else -> failureText
     }
 
     if (isGettingLocation) {
@@ -65,6 +86,17 @@ fun LocationStatusDialog(
                     )
                 }
             }
+        )
+    } else if (isStaleConfirm) {
+        CareNestDialog(
+            title = title,
+            message = message,
+            confirmText = stringResource(R.string.go_online),
+            onConfirm = onConfirmOnline,
+            dismissText = stringResource(R.string.cancel),
+            onDismiss = onDismiss,
+            icon = painterResource(com.carenest.provider.designsystem.R.drawable.ic_location),
+            confirmColor = Theme.colors.warning,
         )
     } else if (determinedLocation != null) {
         CareNestDialog(

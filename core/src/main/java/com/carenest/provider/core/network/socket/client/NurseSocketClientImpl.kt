@@ -132,7 +132,7 @@ class NurseSocketClientImpl @Inject constructor(
         val wsUrl = resolveWebSocketUrl(BuildConfig.BASE_URL)
 
         while (!isExplicitlyDisconnected) {
-            val credentials = tokenManager.state.first().credentials
+            var credentials = tokenManager.state.first().credentials
             val token = credentials?.accessToken.orEmpty()
             if (token.isBlank()) {
                 Log.w("NurseSocketClient", "No access token available, waiting...")
@@ -147,10 +147,14 @@ class NurseSocketClientImpl @Inject constructor(
             if (latestCredentials != credentials) {
                 if (latestCredentials?.sessionId != credentials?.sessionId) {
                     clearSessionBoundSocketState()
+                    activeSocketCredentials = null
+                    stompClient.disconnect()
+                    continue
                 }
-                activeSocketCredentials = null
-                stompClient.disconnect()
-                continue
+                // Same-account rotation while connecting: keep the established
+                // socket and adopt the latest credentials instead of bouncing it.
+                credentials = latestCredentials
+                activeSocketCredentials = latestCredentials
             }
 
             when (connectResult) {
@@ -243,10 +247,14 @@ class NurseSocketClientImpl @Inject constructor(
                     val accountChanged = currentCredentials?.sessionId != socketCredentials.sessionId
                     if (currentCredentials == null || accountChanged) {
                         clearSessionBoundSocketState()
+                        Log.i("NurseSocketClient", "Account changed; reconnecting socket")
+                        stompClient.disconnect()
+                        return@collect
                     }
 
-                    Log.i("NurseSocketClient", "Authentication changed; reconnecting socket")
-                    stompClient.disconnect()
+                    // Routine same-account token rotation: adopt the new credentials
+                    // silently - a live STOMP connection survives access-token rotation.
+                    activeSocketCredentials = currentCredentials
                 }
         }
     }
